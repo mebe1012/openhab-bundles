@@ -60,6 +60,7 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
         return null;
     }
 
+    @Reference
     protected void setDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
         this.discoveryServiceRegistry = discoveryServiceRegistry;
     }

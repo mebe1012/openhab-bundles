@@ -26,7 +26,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.U
 
 public class AmbilightService implements PhilipsTvService {
 
-    public static final String AMBILIGHT_HUE_NODE_ID = "2131230774";
+    private static final int AMBILIGHT_HUE_NODE_ID = 2131230774;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

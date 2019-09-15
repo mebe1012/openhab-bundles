@@ -60,17 +60,13 @@ public class PhilipsTvPairing {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static String authTimestamp;
+    private static String authTimestamp;
 
-    public static String authKey;
+    private static String authKey;
 
-    public static String deviceId;
+    private static String deviceId;
 
     private final String pairingBasePath = BASE_PATH + "pair" + SLASH;
-
-    private final String requestPairingCodePath = pairingBasePath + "request";
-
-    private final String grantPairingCodePath = pairingBasePath + "grant";
 
     public void requestPairingCode(HttpHost target)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -87,6 +83,7 @@ public class PhilipsTvPairing {
 
         CloseableHttpClient httpClient = ConnectionManagerUtil.createSharedHttpClient(target, "", "");
         ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
+        String requestPairingCodePath = pairingBasePath + "request";
         String jsonContent = connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson.toString());
 
         JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
@@ -113,6 +110,7 @@ public class PhilipsTvPairing {
         try (CloseableHttpClient client = ConnectionManagerUtil.createSharedHttpClient(target, deviceId, authKey);) {
             logger.debug("{} and device id: {} and auth_key: {}", grantPairingJson, deviceId, authKey);
 
+            String grantPairingCodePath = pairingBasePath + "grant";
             HttpPost httpPost = new HttpPost(grantPairingCodePath);
             httpPost.setHeader("Content-type", "application/json");
             httpPost.setEntity(new StringEntity(grantPairingJson.toString()));
