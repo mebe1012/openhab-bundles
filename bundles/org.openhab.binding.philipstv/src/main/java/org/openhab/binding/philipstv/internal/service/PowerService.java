@@ -41,7 +41,11 @@ public class PowerService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public PowerService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -77,7 +81,7 @@ public class PowerService implements PhilipsTvService {
     }
 
     private String getPowerState() throws IOException, ParseException, JsonSyntaxException {
-        String jsonContent = connectionService.doHttpsGet(TV_POWERSTATE_PATH);
+        String jsonContent = connectionManager.doHttpsGet(TV_POWERSTATE_PATH);
         JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
         String powerState = jsonObject.get("powerstate").getAsString();
         return powerState.equalsIgnoreCase(POWER_ON) ? POWER_ON : POWER_OFF;
@@ -90,6 +94,6 @@ public class PowerService implements PhilipsTvService {
         } else { // OFF
             powerStateJson.addProperty("powerstate", KEY_STANDBY.toString());
         }
-        connectionService.doHttpsPost(TV_POWERSTATE_PATH, powerStateJson.toString());
+        connectionManager.doHttpsPost(TV_POWERSTATE_PATH, powerStateJson.toString());
     }
 }

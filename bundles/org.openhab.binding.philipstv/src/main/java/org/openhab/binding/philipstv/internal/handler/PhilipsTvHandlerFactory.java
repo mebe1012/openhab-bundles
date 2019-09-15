@@ -38,11 +38,6 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    /**
-     * shared instance of HTTP client for asynchronous calls
-     */
-    private HttpClient httpClient;
-
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_PHILIPS_TV);
 
     private DiscoveryServiceRegistry discoveryServiceRegistry;
@@ -59,19 +54,10 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_PHILIPS_TV.equals(thingTypeUID)) {
-            return new PhilipsTvHandler(thing, httpClient, discoveryServiceRegistry, stateDescriptionProvider);
+            return new PhilipsTvHandler(thing, discoveryServiceRegistry, stateDescriptionProvider);
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = httpClientFactory.createHttpClient("philipstv");
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = null;
     }
 
     protected void setDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {

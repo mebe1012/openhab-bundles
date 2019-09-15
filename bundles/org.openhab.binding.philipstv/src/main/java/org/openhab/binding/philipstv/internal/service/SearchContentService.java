@@ -22,7 +22,11 @@ public class SearchContentService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public SearchContentService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -58,7 +62,7 @@ public class SearchContentService implements PhilipsTvService {
         searchContentLaunch.add("intent", intent);
 
         logger.debug("Search Content Launch json: {}", searchContentLaunch);
-        connectionService.doHttpsPost(LAUNCH_APP_PATH, searchContentLaunch.toString());
+        connectionManager.doHttpsPost(LAUNCH_APP_PATH, searchContentLaunch.toString());
     }
 
 }

@@ -58,7 +58,11 @@ public class AppService implements PhilipsTvService {
 
     private String currentPackageName = "";
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public AppService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -134,11 +138,11 @@ public class AppService implements PhilipsTvService {
         appLaunch.add("intent", intent);
 
         logger.debug("App Launch json: {}", appLaunch);
-        connectionService.doHttpsPost(LAUNCH_APP_PATH, appLaunch.toString());
+        connectionManager.doHttpsPost(LAUNCH_APP_PATH, appLaunch.toString());
     }
 
     private String getCurrentApp() throws IOException, ParseException, JsonSyntaxException {
-        String jsonContent = connectionService.doHttpsGet(GET_CURRENT_APP_PATH);
+        String jsonContent = connectionManager.doHttpsGet(GET_CURRENT_APP_PATH);
         JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
         JsonObject componentJson = jsonObject.get("component").getAsJsonObject();
         return componentJson.get("packageName").getAsString();
@@ -146,7 +150,7 @@ public class AppService implements PhilipsTvService {
 
     private RawType getIconForApp(String packageName, String className) throws IOException {
         String pathForIcon = String.format("%s%s-%s%sicon", SLASH, className, packageName, SLASH);
-        byte[] icon = connectionService.doHttpsGetForImage(
+        byte[] icon = connectionManager.doHttpsGetForImage(
                 String.format("%s%s", GET_AVAILABLE_APP_LIST_PATH, pathForIcon));
         if ((icon != null) && (icon.length > 0)) {
             return new RawType(icon, "image/png");
@@ -158,7 +162,7 @@ public class AppService implements PhilipsTvService {
     private Map<String, Map.Entry<String, String>> getAvailableAppListFromTv() throws IOException {
         JsonArray applicationsJsonArray;
 
-        String jsonContent = connectionService.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH);
+        String jsonContent = connectionManager.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH);
         applicationsJsonArray = (JsonArray) new JsonParser().parse(jsonContent).getAsJsonObject().get("applications");
 
         Map<String, Map.Entry<String, String>> appsMap = new ConcurrentHashMap<>();

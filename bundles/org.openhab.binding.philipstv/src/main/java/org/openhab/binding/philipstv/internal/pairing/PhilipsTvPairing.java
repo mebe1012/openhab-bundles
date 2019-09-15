@@ -24,9 +24,9 @@ import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.openhab.binding.philipstv.internal.ConnectionUtil;
-import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
+import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +72,6 @@ public class PhilipsTvPairing {
 
     private final String grantPairingCodePath = pairingBasePath + "grant";
 
-    private final ConnectionManager connectionService = new ConnectionManager();
-
     public void requestPairingCode(HttpHost target)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
@@ -87,8 +85,9 @@ public class PhilipsTvPairing {
         requestCodeJson.add("scope", scopeJson);
         requestCodeJson.add("device", createDeviceSpecification());
 
-        ConnectionUtil.initSharedHttpClient(target, "", "");
-        String jsonContent = connectionService.doHttpsPost(requestPairingCodePath, requestCodeJson.toString());
+        CloseableHttpClient httpClient = ConnectionManagerUtil.createSharedHttpClient(target, "", "");
+        ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
+        String jsonContent = connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson.toString());
 
         JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
         authTimestamp = jsonObject.get("timestamp").getAsString();
@@ -111,8 +110,7 @@ public class PhilipsTvPairing {
         grantPairingJson.add("device", createDeviceSpecification());
         grantPairingJson.add("auth", authJson);
 
-        ConnectionUtil.initSharedHttpClient(target, deviceId, authKey);
-        try (CloseableHttpClient client = ConnectionUtil.getSharedHttpClient()) {
+        try (CloseableHttpClient client = ConnectionManagerUtil.createSharedHttpClient(target, deviceId, authKey);) {
             logger.debug("{} and device id: {} and auth_key: {}", grantPairingJson, deviceId, authKey);
 
             HttpPost httpPost = new HttpPost(grantPairingCodePath);

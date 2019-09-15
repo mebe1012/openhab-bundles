@@ -34,7 +34,11 @@ public class TvChannelService implements PhilipsTvService {
     // Name , Entry<ccid,preset> of TV Channel
     private Map<String, String> availableTvChannels;
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public TvChannelService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -81,7 +85,7 @@ public class TvChannelService implements PhilipsTvService {
     private Map<String, String> getAvailableTvChannelListFromTv() throws IOException {
         JsonArray tvChannelsJsonArray;
 
-        String jsonContent = connectionService.doHttpsGet(GET_AVAILABLE_TV_CHANNEL_LIST_PATH);
+        String jsonContent = connectionManager.doHttpsGet(GET_AVAILABLE_TV_CHANNEL_LIST_PATH);
         tvChannelsJsonArray = (JsonArray) new JsonParser().parse(jsonContent).getAsJsonObject().get("Channel");
 
         Map<String, String> tvChannelsMap = new ConcurrentHashMap<>();
@@ -102,7 +106,7 @@ public class TvChannelService implements PhilipsTvService {
     }
 
     private String getCurrentTvChannel() throws IOException {
-        String jsonContent = connectionService.doHttpsGet(TV_CHANNEL_PATH);
+        String jsonContent = connectionManager.doHttpsGet(TV_CHANNEL_PATH);
         if ("{}".equals(jsonContent)) {
             return "NA";
         }
@@ -126,7 +130,7 @@ public class TvChannelService implements PhilipsTvService {
         switchTvChannel.add("channelList", channelList);
 
         logger.debug("Switch TV Channel json: {}", switchTvChannel);
-        connectionService.doHttpsPost(TV_CHANNEL_PATH, switchTvChannel.toString());
+        connectionManager.doHttpsPost(TV_CHANNEL_PATH, switchTvChannel.toString());
     }
 
     public void clearAvailableTvChannelList() {

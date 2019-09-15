@@ -42,7 +42,11 @@ public class VolumeService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public VolumeService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -93,7 +97,7 @@ public class VolumeService implements PhilipsTvService {
     }
 
     private VolumeDetails getVolume() throws IOException {
-        String jsonContent = connectionService.doHttpsGet(VOLUME_PATH);
+        String jsonContent = connectionManager.doHttpsGet(VOLUME_PATH);
         JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
         return VolumeDetails.ofCurrentVolumeAndMuted(jsonObject.get("current").getAsString(),
                 jsonObject.get("muted").getAsBoolean());
@@ -104,7 +108,7 @@ public class VolumeService implements PhilipsTvService {
         volumeJson.addProperty("muted", "false");
         volumeJson.addProperty("current", command.toString());
         logger.debug("Set json volume: {}", volumeJson);
-        connectionService.doHttpsPost(VOLUME_PATH, volumeJson.toString());
+        connectionManager.doHttpsPost(VOLUME_PATH, volumeJson.toString());
     }
 
     private void setMute() throws IOException {
@@ -112,6 +116,6 @@ public class VolumeService implements PhilipsTvService {
         JsonObject muteJson = new JsonObject();
         muteJson.addProperty("key", KEY_MUTE.toString());
         logger.debug("Set json mute state: {}", muteJson);
-        connectionService.doHttpsPost(KEY_CODE_PATH, muteJson.toString());
+        connectionManager.doHttpsPost(KEY_CODE_PATH, muteJson.toString());
     }
 }

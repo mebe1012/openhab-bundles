@@ -38,7 +38,11 @@ public class KeyCodeService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public KeyCodeService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -93,6 +97,6 @@ public class KeyCodeService implements PhilipsTvService {
         JsonObject keyCodeJson = new JsonObject();
         keyCodeJson.addProperty("key", key.toString());
         logger.debug("KeyCode Json sent: {}", keyCodeJson);
-        connectionService.doHttpsPost(KEY_CODE_PATH, keyCodeJson.toString());
+        connectionManager.doHttpsPost(KEY_CODE_PATH, keyCodeJson.toString());
     }
 }

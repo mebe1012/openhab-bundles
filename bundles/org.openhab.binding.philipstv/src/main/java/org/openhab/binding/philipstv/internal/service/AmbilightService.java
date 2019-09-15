@@ -30,7 +30,11 @@ public class AmbilightService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionManager connectionService = new ConnectionManager();
+    private final ConnectionManager connectionManager;
+
+    public AmbilightService(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
@@ -64,7 +68,7 @@ public class AmbilightService implements PhilipsTvService {
         } else { // OFF
             powerStateJson.addProperty("power", POWER_OFF);
         }
-        connectionService.doHttpsPost(AMBILIGHT_POWERSTATE_PATH, powerStateJson.toString());
+        connectionManager.doHttpsPost(AMBILIGHT_POWERSTATE_PATH, powerStateJson.toString());
     }
 
     private void setAmbilightHuePowerState(Command command) throws IOException {
@@ -85,6 +89,6 @@ public class AmbilightService implements PhilipsTvService {
         valueJson.add("value", valueContent);
         jsonArray.add(valueJson);
         values.add("values", jsonArray);
-        connectionService.doHttpsPost(UPDATE_SETTINGS_PATH, values.toString());
+        connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, values.toString());
     }
 }
