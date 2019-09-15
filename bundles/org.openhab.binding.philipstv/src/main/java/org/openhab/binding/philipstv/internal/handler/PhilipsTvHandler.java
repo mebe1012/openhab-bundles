@@ -8,6 +8,11 @@
 package org.openhab.binding.philipstv.internal.handler;
 
 import org.apache.http.HttpHost;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.BytesContentProvider;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.MetaData;
 import org.eclipse.smarthome.config.discovery.DiscoveryListener;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
@@ -24,15 +29,18 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.StateOption;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionUtil;
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
 import org.openhab.binding.philipstv.internal.config.*;
 import org.openhab.binding.philipstv.internal.pairing.*;
 import org.openhab.binding.philipstv.internal.service.*;
+import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -43,8 +51,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
@@ -60,6 +70,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.VOLUME_PATH;
 
 /**
  * The {@link PhilipsTvHandler} is responsible for handling commands, which are sent to one of the
@@ -70,6 +81,8 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.T
 public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListener {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private HttpClient httpClient;
 
     private DiscoveryServiceRegistry discoveryServiceRegistry;
 
@@ -84,7 +97,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     /* Philips TV services */
     private final Map<String, PhilipsTvService> channelServices;
 
-    public PhilipsTvHandler(Thing thing, DiscoveryServiceRegistry discoveryServiceRegistry,
+    public PhilipsTvHandler(Thing thing, HttpClient httpClient, DiscoveryServiceRegistry discoveryServiceRegistry,
             PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
         super(thing);
 
@@ -98,6 +111,11 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         if (stateDescriptionProvider != null) {
             logger.debug("State description was initialized.");
             this.stateDescriptionProvider = stateDescriptionProvider;
+        }
+
+        if (httpClient != null) {
+            logger.debug("HttpClient was created from HttpClientFactory.");
+            this.httpClient = httpClient;
         }
 
         Map<String, PhilipsTvService> services = new HashMap<>();
@@ -171,14 +189,13 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         }
 
         HttpHost target = new HttpHost(config.host, config.port, HTTPS);
-        ConnectionService.HTTP_HOST = target;
+        ConnectionManager.HTTP_HOST = target;
 
         if ((config.pairingCode == null) && (config.username == null) && (config.password == null)) {
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing is not configured yet, trying to present a Pairing Code on TV.");
             try {
-                initPairingCodeRetrieval(
-                        target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
+                initPairingCodeRetrieval(target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
             } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Error occurred while trying to present a Pairing Code on TV.");
@@ -197,7 +214,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         try {
             ConnectionUtil.initSharedHttpClient(target, config.username, config.password);
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            ConnectionUtil.initSharedJettyHttpClient(httpClient, target, config.username, config.password);
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException | URISyntaxException e) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     String.format("Error occurred during creation of http client: %s", e.getMessage()));
             return;
@@ -205,6 +223,17 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         if (discoveryServiceRegistry != null) {
             discoveryServiceRegistry.addDiscoveryListener(this);
+        }
+
+        try {
+            ContentResponse contentResponse = httpClient.newRequest(target.toURI())
+            .path(VOLUME_PATH)
+            .method(HttpMethod.GET).accept("application/json")
+            .send();
+
+            logger.info("TEST TEST " + contentResponse.getContentAsString());
+        } catch (Exception e) {
+            logger.error("Fehler: " + e.getMessage());
         }
 
         // Thing is initialized, check powerstate and available communication of the TV and set ONLINE or OFFLINE
@@ -351,6 +380,14 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         if ((refreshHandler != null) && !refreshHandler.isCancelled()) {
             refreshHandler.cancel(true);
             refreshHandler = null;
+        }
+
+        if (httpClient.isStarted()) {
+            try {
+                httpClient.stop();
+            } catch (Exception e) {
+                throw new RuntimeException("Jetty http client exception: " + e.getMessage());
+            }
         }
     }
 

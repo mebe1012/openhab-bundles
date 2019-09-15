@@ -15,7 +15,9 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
+import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.openhab.binding.philipstv.internal.service.model.VolumeDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,7 @@ public class VolumeService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ConnectionService connectionService = new ConnectionService();
+    private final ConnectionManager connectionService = new ConnectionManager();
 
     @Override
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {

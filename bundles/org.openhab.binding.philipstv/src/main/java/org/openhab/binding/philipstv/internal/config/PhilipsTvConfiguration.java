@@ -9,7 +9,7 @@
 package org.openhab.binding.philipstv.internal.config;
 
 /**
- * The {@link PhilipsTvConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link PhilipsTvConfiguration} class contains fields for mapping thing configuration parameters.
  *
  * @author Benjamin Meyer - Initial contribution
  */

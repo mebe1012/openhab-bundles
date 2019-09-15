@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.philipstv.internal.service;
+package org.openhab.binding.philipstv.internal;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -16,7 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.openhab.binding.philipstv.internal.ConnectionUtil;
+import org.eclipse.jetty.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 /**
- * The {@link ConnectionService} is responsible for handling https GETs and POSTs to the Philips
+ * The {@link ConnectionManager} is responsible for handling https GETs and POSTs to the Philips
  * TVs.
  *
  * @author Benjamin Meyer - Initial contribution
  */
-public class ConnectionService {
+public class ConnectionManager {
 
     public static final String TARGET_URI_MSG = "Target Uri is: {}";
 

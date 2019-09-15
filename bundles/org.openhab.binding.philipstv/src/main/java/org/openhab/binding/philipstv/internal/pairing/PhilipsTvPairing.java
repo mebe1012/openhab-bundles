@@ -26,7 +26,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.openhab.binding.philipstv.internal.ConnectionUtil;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
-import org.openhab.binding.philipstv.internal.service.ConnectionService;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class PhilipsTvPairing {
 
     private final String grantPairingCodePath = pairingBasePath + "grant";
 
-    private final ConnectionService connectionService = new ConnectionService();
+    private final ConnectionManager connectionService = new ConnectionManager();
 
     public void requestPairingCode(HttpHost target)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {

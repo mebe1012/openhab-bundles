@@ -59,7 +59,7 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_PHILIPS_TV.equals(thingTypeUID)) {
-            return new PhilipsTvHandler(thing, discoveryServiceRegistry, stateDescriptionProvider);
+            return new PhilipsTvHandler(thing, httpClient, discoveryServiceRegistry, stateDescriptionProvider);
         }
 
         return null;
