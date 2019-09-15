@@ -8,7 +8,6 @@
 package org.openhab.binding.philipstv.internal.service;
 
 import com.google.gson.JsonObject;
-import org.apache.http.HttpHost;
 import org.eclipse.smarthome.core.library.types.NextPreviousType;
 import org.eclipse.smarthome.core.library.types.PlayPauseType;
 import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
@@ -18,7 +17,6 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
-import org.openhab.binding.philipstv.internal.service.model.CredentialDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,67 +32,68 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.T
 /**
  * The {@link KeyCodeService} is responsible for handling key code commands, which emulate a button
  * press on a remote control.
+ *
  * @author Benjamin Meyer - Initial contribution
  */
 public class KeyCodeService implements PhilipsTvService {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  private final ConnectionService connectionService = new ConnectionService();
+    private final ConnectionService connectionService = new ConnectionService();
 
-  @Override
-  public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
-    KeyCode keyCode = null;
-    if (isSupportedCommand(command)) {
-      // Three approaches to resolve the KEY_CODE
-      try {
-        keyCode = KeyCode.valueOf(command.toString().toUpperCase());
-      } catch (IllegalArgumentException e) {
-        try {
-          keyCode = KeyCode.valueOf("KEY_" + command.toString().toUpperCase());
-        } catch (IllegalArgumentException e2) {
-          try {
-            keyCode = KeyCode.getKeyCodeForValue(command.toString());
-          } catch (IllegalArgumentException e3) {
-            // do nothing, error message is logged later
-          }
+    @Override
+    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+        KeyCode keyCode = null;
+        if (isSupportedCommand(command)) {
+            // Three approaches to resolve the KEY_CODE
+            try {
+                keyCode = KeyCode.valueOf(command.toString().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                try {
+                    keyCode = KeyCode.valueOf("KEY_" + command.toString().toUpperCase());
+                } catch (IllegalArgumentException e2) {
+                    try {
+                        keyCode = KeyCode.getKeyCodeForValue(command.toString());
+                    } catch (IllegalArgumentException e3) {
+                        // do nothing, error message is logged later
+                    }
+                }
+            }
+
+            if (keyCode != null) {
+                try {
+                    sendKeyCode(keyCode);
+                } catch (Exception e) {
+                    if (isTvOfflineException(e)) {
+                        logger.warn("Could not execute command for key code, the TV is offline.");
+                        handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
+                    } else if (isTvNotListeningException(e)) {
+                        handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                                TV_NOT_LISTENING_MSG);
+                    } else {
+                        logger.warn("Unknown error occurred while sending keyCode code {}: {}", keyCode, e.getMessage(),
+                                e);
+                    }
+                }
+            } else {
+                logger.warn("Command '{}' not a supported keyCode code.", command);
+            }
+        } else {
+            if (!(command instanceof RefreshType)) { // RefreshType is valid but ignored
+                logger.warn("Not a supported command: {}", command);
+            }
         }
-      }
-
-      if (keyCode != null) {
-        try {
-          sendKeyCode(handler.credentials, keyCode, handler.target);
-        } catch (Exception e) {
-          if (isTvOfflineException(e)) {
-            logger.warn("Could not execute command for key code, the TV is offline.");
-            handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
-          } else if (isTvNotListeningException(e)) {
-            handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, TV_NOT_LISTENING_MSG);
-          } else {
-            logger.warn("Unknown error occurred while sending keyCode code {}: {}", keyCode,
-                e.getMessage(), e);
-          }
-        }
-      } else {
-        logger.warn("Command '{}' not a supported keyCode code.", command);
-      }
-    } else {
-      if (!(command instanceof RefreshType)) { // RefreshType is valid but ignored
-        logger.warn("Not a supported command: {}", command);
-      }
     }
-  }
 
-  private static boolean isSupportedCommand(Command command) {
-    return (command instanceof StringType) || (command instanceof NextPreviousType)
-        || (command instanceof PlayPauseType) || (command instanceof RewindFastforwardType);
-  }
+    private static boolean isSupportedCommand(Command command) {
+        return (command instanceof StringType) || (command instanceof NextPreviousType) ||
+                (command instanceof PlayPauseType) || (command instanceof RewindFastforwardType);
+    }
 
-  private void sendKeyCode(CredentialDetails credentials, KeyCode key,
-      HttpHost target) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    JsonObject keyCodeJson = new JsonObject();
-    keyCodeJson.addProperty("key", key.toString());
-    logger.debug("KeyCode Json sent: {}", keyCodeJson);
-    connectionService.doHttpsPost(credentials, target, KEY_CODE_PATH, keyCodeJson.toString());
-  }
+    private void sendKeyCode(KeyCode key) throws IOException {
+        JsonObject keyCodeJson = new JsonObject();
+        keyCodeJson.addProperty("key", key.toString());
+        logger.debug("KeyCode Json sent: {}", keyCodeJson);
+        connectionService.doHttpsPost(KEY_CODE_PATH, keyCodeJson.toString());
+    }
 }

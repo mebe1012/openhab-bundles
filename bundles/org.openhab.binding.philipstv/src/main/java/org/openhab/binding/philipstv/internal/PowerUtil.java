@@ -4,7 +4,8 @@
  * All rights reserved. This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- */
+ *//*
+
 package org.openhab.binding.philipstv.internal;
 
 import java.io.IOException;
@@ -13,10 +14,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.regex.Pattern;
 
+*/
 /**
  * The {@link PowerUtil} is offering methods for powering on TVs via Wake-On-LAN.
  * @author Benjamin Meyer - Initial contribution
- */
+ *//*
+
 public final class PowerUtil {
 
   private static final int WOL_PORT = 9;
@@ -65,3 +68,4 @@ public final class PowerUtil {
   }
 
 }
+*/

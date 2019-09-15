@@ -4,7 +4,8 @@
  * All rights reserved. This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- */
+ *//*
+
 package org.openhab.binding.philipstv.internal.config;
 
 import com.google.gson.JsonArray;
@@ -25,10 +26,12 @@ import java.security.NoSuchAlgorithmException;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
 
+*/
 /**
  * Service class which only purpose is to deliver network details of the PhilipsTV.
  * @author Benjamin Meyer
- */
+ *//*
+
 public class NetworkDetailsService {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -48,3 +51,4 @@ public class NetworkDetailsService {
   }
 
 }
+*/
