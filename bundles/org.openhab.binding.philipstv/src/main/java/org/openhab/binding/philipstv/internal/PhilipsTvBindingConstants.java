@@ -47,6 +47,8 @@ public final class PhilipsTvBindingConstants {
 
   public static final String CHANNEL_AMBILIGHT_HUE_POWER = "ambilightHuePower";
 
+  public static final String CHANNEL_AMBILIGHT_STYLE = "ambilightStyle";
+
   // Config Parameters
   public static final String HOST = "host";
 
@@ -100,6 +102,8 @@ public final class PhilipsTvBindingConstants {
   public static final String AMBILIGHT_BASE_PATH = BASE_PATH + "ambilight" + SLASH;
 
   public static final String AMBILIGHT_POWERSTATE_PATH = AMBILIGHT_BASE_PATH + "power";
+
+  public static final String AMBILIGHT_CONFIG_PATH = AMBILIGHT_BASE_PATH + "currentconfiguration";
 
   public static final String UPDATE_SETTINGS_PATH = BASE_PATH + "menuitems" + SLASH + "settings" + SLASH + "update";
 

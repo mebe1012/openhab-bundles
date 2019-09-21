@@ -1,6 +1,5 @@
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonObject;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
@@ -9,11 +8,15 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.ExtrasDto;
+import org.openhab.binding.philipstv.internal.service.model.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.LaunchAppDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.LAUNCH_APP_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
@@ -50,19 +53,21 @@ public class SearchContentService implements PhilipsTvService {
     }
 
     private void searchForContentOnTv(String searchContent) throws IOException {
-        // Build up search content launch json in format:
-        // {"intent":{"action":"android.search.action.GLOBAL_SEARCH","extras":{"query":"Iron Man"}}}
-        JsonObject searchContentLaunch = new JsonObject();
-        JsonObject intent = new JsonObject();
-        intent.addProperty("action", "android.search.action.GLOBAL_SEARCH");
+        LaunchAppDto launchAppDto = new LaunchAppDto();
 
-        JsonObject extras = new JsonObject();
-        extras.addProperty("query", searchContent);
-        intent.add("extras", extras);
-        searchContentLaunch.add("intent", intent);
+        IntentDto intentDto = new IntentDto();
+        intentDto.setAction("android.search.action.GLOBAL_SEARCH");
+
+        ExtrasDto extrasDto = new ExtrasDto();
+        extrasDto.setQuery(searchContent);
+
+        intentDto.setExtras(extrasDto);
+        launchAppDto.setIntent(intentDto);
+
+        String searchContentLaunch = OBJECT_MAPPER.writeValueAsString(launchAppDto);
 
         logger.debug("Search Content Launch json: {}", searchContentLaunch);
-        connectionManager.doHttpsPost(LAUNCH_APP_PATH, searchContentLaunch.toString());
+        connectionManager.doHttpsPost(LAUNCH_APP_PATH, searchContentLaunch);
     }
 
 }

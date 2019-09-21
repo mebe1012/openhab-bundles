@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_KEY_CODE;
@@ -165,7 +166,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         } else if ((config.pairingCode != null) && ((config.username == null) || (config.password == null))) {
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing Code is available, but credentials missing. Trying to retrieve them.");
-            boolean hasFailed = initCredentialsRetrieval(target);
+            boolean hasFailed = initCredentialsRetrieval(target); // TODO hier fehlt authTimeStamp falls zu lange Zeit vergangen ist - man MUSS von vorne anfangen
             if (hasFailed) {
                 postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                         "Error occurred during retrieval of credentials.");
@@ -201,6 +202,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         PhilipsTvService ambilightService = new AmbilightService(connectionManager);
         services.put(CHANNEL_AMBILIGHT_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_HUE_POWER, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_STYLE, ambilightService);
 
         services.put(CHANNEL_TV_CHANNEL, new TvChannelService(connectionManager));
         services.put(CHANNEL_POWER, new PowerService(connectionManager));
@@ -266,9 +268,11 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
                     refreshHandler.cancel(true);
                     refreshHandler = null;
                 }
-                // Reset app list for new retrieval during next startup
-                ((AppService) channelServices.get(CHANNEL_APP_NAME)).clearAvailableAppList();
-                ((TvChannelService) channelServices.get(CHANNEL_TV_CHANNEL)).clearAvailableTvChannelList();
+                // Reset app and channel list (if existing) for new retrieval during next startup
+                if(channelServices != null) {
+                    ((AppService) channelServices.get(CHANNEL_APP_NAME)).clearAvailableAppList();
+                    ((TvChannelService) channelServices.get(CHANNEL_TV_CHANNEL)).clearAvailableTvChannelList();
+                }
             }
         }
         updateStatus(status, statusDetail, msg);
@@ -292,7 +296,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         if (getThing().getStatus() == ThingStatus.OFFLINE) { // handles case if tv temporarily does not accept commands
             channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH, this);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
-                return; // tv is still not accepting comands
+                return; // tv is still not accepting commands
             }
         }
 
@@ -302,6 +306,10 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         if (isLinked(CHANNEL_APP_NAME)) {
             channelServices.get(CHANNEL_APP_NAME).handleCommand(CHANNEL_APP_NAME, RefreshType.REFRESH, this);
+        }
+
+        if(isLinked(CHANNEL_TV_CHANNEL)) {
+            channelServices.get(CHANNEL_TV_CHANNEL).handleCommand(CHANNEL_TV_CHANNEL, RefreshType.REFRESH, this);
         }
     }
 

@@ -2,7 +2,9 @@ package org.openhab.binding.philipstv.internal.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
@@ -15,9 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CONFIG_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_POWERSTATE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_OFF;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
@@ -43,6 +47,8 @@ public class AmbilightService implements PhilipsTvService {
                 setAmbilightPowerState(command);
             } else if (CHANNEL_AMBILIGHT_HUE_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightHuePowerState(command);
+            } else if (CHANNEL_AMBILIGHT_STYLE.equals(channel) && (command instanceof StringType)) {
+                setAmbilightStyle(command);
             } else {
                 if (!(command instanceof RefreshType)) {
                     logger.warn("Unknown command: {} for Channel {}", command, channel);
@@ -91,4 +97,19 @@ public class AmbilightService implements PhilipsTvService {
         values.add("values", jsonArray);
         connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, values.toString());
     }
+
+    private void setAmbilightStyle(Command command) throws IOException {
+        JsonObject ambilightConfigJson = getAmbilightConfig();
+        ambilightConfigJson.addProperty("styleName", command.toString());
+        if(ambilightConfigJson.get("menuSetting") == null) { // property is missing for style OFF
+            ambilightConfigJson.addProperty("menuSetting", "STANDARD");
+        }
+        connectionManager.doHttpsPost(AMBILIGHT_CONFIG_PATH, ambilightConfigJson.toString());
+    }
+
+    private JsonObject getAmbilightConfig() throws IOException {
+        String jsonContent = connectionManager.doHttpsGet(AMBILIGHT_CONFIG_PATH);
+        return new JsonParser().parse(jsonContent).getAsJsonObject();
+    }
+
 }

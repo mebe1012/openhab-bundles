@@ -7,6 +7,8 @@
  */
 package org.openhab.binding.philipstv.internal;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -35,6 +37,8 @@ public class ConnectionManager {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug https://github.com/eclipse/jetty.project/issues/1555
     private CloseableHttpClient httpClient;
 
@@ -43,6 +47,7 @@ public class ConnectionManager {
     public ConnectionManager(CloseableHttpClient httpClient, HttpHost httpHost) {
         this.httpClient = httpClient;
         this.httpHost = httpHost;
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public String doHttpsGet(String path) throws IOException {

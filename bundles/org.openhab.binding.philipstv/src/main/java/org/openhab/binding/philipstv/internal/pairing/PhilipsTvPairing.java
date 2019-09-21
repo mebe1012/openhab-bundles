@@ -10,11 +10,7 @@ package org.openhab.binding.philipstv.internal.pairing;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.MalformedChallengeException;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -94,8 +90,8 @@ public class PhilipsTvPairing {
     }
 
     public void finishPairingWithTv(PhilipsTvHandler handler, HttpHost target)
-            throws NoSuchAlgorithmException, InvalidKeyException, IOException, MalformedChallengeException,
-            KeyStoreException, KeyManagementException, AuthenticationException {
+            throws NoSuchAlgorithmException, InvalidKeyException, IOException, KeyStoreException,
+            KeyManagementException {
         String pairingCode = handler.config.pairingCode;
         JsonObject grantPairingJson = new JsonObject();
 
@@ -127,24 +123,12 @@ public class PhilipsTvPairing {
             localContext.setAuthCache(authCache);
 
             try (CloseableHttpResponse response = client.execute(target, httpPost, localContext)) {
-                digestAuth.processChallenge(response.getFirstHeader("WWW-Authenticate"));
                 String jsonContent = EntityUtils.toString(response.getEntity());
                 logger.debug("----------------------------------------");
                 logger.debug("{}", response.getStatusLine());
                 logger.debug("{}", jsonContent);
             }
 
-            Header authenticate = digestAuth.authenticate(new UsernamePasswordCredentials(deviceId, authKey), httpPost,
-                    localContext);
-            httpPost.addHeader(authenticate);
-
-            String jsonContent = "";
-            try (CloseableHttpResponse response = client.execute(target, httpPost, localContext)) {
-                jsonContent = EntityUtils.toString(response.getEntity());
-            }
-
-            JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-            logger.debug("Json fetched as result: {}", jsonObject);
             handler.config.username = deviceId;
             handler.getThing().getConfiguration().put(USERNAME, deviceId);
             handler.config.password = authKey;

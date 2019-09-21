@@ -7,10 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.http.ParseException;
 import org.eclipse.smarthome.core.library.types.RawType;
@@ -23,6 +19,12 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.ApplicationsDto;
+import org.openhab.binding.philipstv.internal.service.model.AvailableAppsDto;
+import org.openhab.binding.philipstv.internal.service.model.ComponentDto;
+import org.openhab.binding.philipstv.internal.service.model.CurrentAppDto;
+import org.openhab.binding.philipstv.internal.service.model.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.LaunchAppDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +32,11 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_APP_LIST_PATH;
@@ -54,7 +57,7 @@ public class AppService implements PhilipsTvService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     // Label , Entry<PackageName,ClassName> of App
-    private Map<String, Map.Entry<String, String>> availableApps;
+    private Map<String, AbstractMap.SimpleEntry<String, String>> availableApps;
 
     private String currentPackageName = "";
 
@@ -82,10 +85,10 @@ public class AppService implements PhilipsTvService {
                 } else {
                     currentPackageName = packageName;
                 }
-                Optional<Map.Entry<String, Map.Entry<String, String>>> app = availableApps.entrySet().stream().filter(
-                        e -> e.getValue().getKey().equalsIgnoreCase(packageName)).findFirst();
+                Optional<Map.Entry<String, AbstractMap.SimpleEntry<String, String>>> app = availableApps.entrySet()
+                        .stream().filter(e -> e.getValue().getKey().equalsIgnoreCase(packageName)).findFirst();
                 if (app.isPresent()) {
-                    Map.Entry<String, Map.Entry<String, String>> appEntry = app.get();
+                    Map.Entry<String, AbstractMap.SimpleEntry<String, String>> appEntry = app.get();
                     handler.postUpdateChannel(CHANNEL_APP_NAME, new StringType(appEntry.getKey()));
                     // Get icon for current App
                     RawType image = getIconForApp(appEntry.getValue().getKey(), appEntry.getValue().getValue());
@@ -98,7 +101,7 @@ public class AppService implements PhilipsTvService {
                 if (availableApps.containsKey(command.toString())) {
                     launchApp(command);
                 } else {
-                    logger.warn("The given App with Name: {} couldnt be found in the local App List from the tv.",
+                    logger.warn("The given App with Name: {} couldn't be found in the local App List from the tv.",
                             command);
                 }
             } else {
@@ -123,29 +126,27 @@ public class AppService implements PhilipsTvService {
 
     private void launchApp(Command command) throws IOException {
         Map.Entry<String, String> app = availableApps.get(command.toString());
+        LaunchAppDto launchAppDto = new LaunchAppDto();
 
-        // Build up app launch json in format:
-        // { "intent": { "action": "empty", "component": { "className": "com.spotify.tv.android.SpotifyTVActivity",
-        // "packageName": "com.spotify.tv.android" }} }
-        JsonObject appLaunch = new JsonObject();
-        JsonObject intent = new JsonObject();
-        intent.addProperty("action", "empty");
+        ComponentDto componentDto = new ComponentDto();
+        componentDto.setPackageName(app.getKey());
+        componentDto.setClassName(app.getValue());
 
-        JsonObject component = new JsonObject();
-        component.addProperty("packageName", app.getKey());
-        component.addProperty("className", app.getValue());
-        intent.add("component", component);
-        appLaunch.add("intent", intent);
+        IntentDto intentDto = new IntentDto();
+        intentDto.setComponent(componentDto);
+        intentDto.setAction("empty");
 
-        logger.debug("App Launch json: {}", appLaunch);
-        connectionManager.doHttpsPost(LAUNCH_APP_PATH, appLaunch.toString());
+        launchAppDto.setIntent(intentDto);
+        String appLaunchJson = OBJECT_MAPPER.writeValueAsString(launchAppDto);
+
+        logger.debug("App Launch json: {}", appLaunchJson);
+        connectionManager.doHttpsPost(LAUNCH_APP_PATH, appLaunchJson);
     }
 
     private String getCurrentApp() throws IOException, ParseException, JsonSyntaxException {
-        String jsonContent = connectionManager.doHttpsGet(GET_CURRENT_APP_PATH);
-        JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-        JsonObject componentJson = jsonObject.get("component").getAsJsonObject();
-        return componentJson.get("packageName").getAsString();
+        CurrentAppDto currentAppDto = OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(GET_CURRENT_APP_PATH),
+                CurrentAppDto.class);
+        return currentAppDto.getComponent().getPackageName();
     }
 
     private RawType getIconForApp(String packageName, String className) throws IOException {
@@ -159,25 +160,14 @@ public class AppService implements PhilipsTvService {
         }
     }
 
-    private Map<String, Map.Entry<String, String>> getAvailableAppListFromTv() throws IOException {
-        JsonArray applicationsJsonArray;
+    private Map<String, AbstractMap.SimpleEntry<String, String>> getAvailableAppListFromTv() throws IOException {
+        AvailableAppsDto availableAppsDto = OBJECT_MAPPER.readValue(
+                connectionManager.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH), AvailableAppsDto.class);
 
-        String jsonContent = connectionManager.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH);
-        applicationsJsonArray = (JsonArray) new JsonParser().parse(jsonContent).getAsJsonObject().get("applications");
-
-        Map<String, Map.Entry<String, String>> appsMap = new ConcurrentHashMap<>();
-
-        for (JsonElement jsonElement : applicationsJsonArray) {
-            JsonObject app = jsonElement.getAsJsonObject();
-            JsonObject intentJson = app.getAsJsonObject("intent");
-            JsonObject componentJson = intentJson.getAsJsonObject("component");
-
-            String label = app.get("label").getAsString();
-            String packageName = componentJson.get("packageName").getAsString();
-            String className = componentJson.get("className").getAsString();
-
-            appsMap.put(label, new AbstractMap.SimpleEntry<String, String>(packageName, className));
-        }
+        ConcurrentMap<String, AbstractMap.SimpleEntry<String, String>> appsMap = availableAppsDto.getApplications()
+                .stream().collect(Collectors.toConcurrentMap(ApplicationsDto::getLabel,
+                        a -> new AbstractMap.SimpleEntry<>(a.getIntent().getComponent().getPackageName(),
+                                a.getIntent().getComponent().getClassName()), (a1, a2) -> a1));
 
         logger.debug("Apps added: {}", appsMap.size());
         if (logger.isTraceEnabled()) {

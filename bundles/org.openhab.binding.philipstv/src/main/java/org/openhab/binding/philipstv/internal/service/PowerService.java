@@ -7,8 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.http.ParseException;
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -19,12 +17,13 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.PowerStateDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_OFF;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
@@ -51,10 +50,10 @@ public class PowerService implements PhilipsTvService {
     public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
         try {
             if (command instanceof RefreshType) {
-                String powerState = getPowerState();
-                if (powerState.equals(POWER_ON)) {
+                PowerStateDto powerStateDto = getPowerState();
+                if (powerStateDto.isPoweredOn()) {
                     handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, "");
-                } else if (powerState.equals(POWER_OFF)) {
+                } else {
                     handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "");
                 }
             } else if (command instanceof OnOffType) {
@@ -80,20 +79,19 @@ public class PowerService implements PhilipsTvService {
         }
     }
 
-    private String getPowerState() throws IOException, ParseException, JsonSyntaxException {
-        String jsonContent = connectionManager.doHttpsGet(TV_POWERSTATE_PATH);
-        JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-        String powerState = jsonObject.get("powerstate").getAsString();
-        return powerState.equalsIgnoreCase(POWER_ON) ? POWER_ON : POWER_OFF;
+    private PowerStateDto getPowerState() throws IOException, ParseException, JsonSyntaxException {
+        return OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(TV_POWERSTATE_PATH), PowerStateDto.class);
     }
 
     private void setPowerState(Command command) throws IOException {
-        JsonObject powerStateJson = new JsonObject();
+        PowerStateDto powerStateDto = new PowerStateDto();
         if (command.equals(OnOffType.ON)) {
-            powerStateJson.addProperty("powerstate", POWER_ON);
+            powerStateDto.setPowerState(POWER_ON);
         } else { // OFF
-            powerStateJson.addProperty("powerstate", KEY_STANDBY.toString());
+            powerStateDto.setPowerState(KEY_STANDBY.toString());
         }
-        connectionManager.doHttpsPost(TV_POWERSTATE_PATH, powerStateJson.toString());
+        String powerStateJson = OBJECT_MAPPER.writeValueAsString(powerStateDto);
+        logger.debug("PowerState Json sent: {}", powerStateJson);
+        connectionManager.doHttpsPost(TV_POWERSTATE_PATH, powerStateJson);
     }
 }

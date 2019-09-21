@@ -7,6 +7,8 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Arrays;
 
 /**
@@ -82,6 +84,7 @@ public enum KeyCode {
         .orElseThrow(() -> new IllegalArgumentException("Key code could not be recognized: " + value));
   }
 
+  @JsonValue
   @Override
   public String toString() {
     return this.value;

@@ -21,6 +21,7 @@
             <channel id="searchContent" typeId="searchContent"/>
             <channel id="ambilightPower" typeId="ambilightPower"/>
             <channel id="ambilightHuePower" typeId="ambilightHuePower"/>
+            <channel id="ambilightStyle" typeId="ambilightStyle"/>
         </channels>
 
         <config-description-ref uri="thing-type:philipstv:tv" />
@@ -130,7 +131,7 @@
     </channel-type>
 
     <channel-type id="searchContent" advanced="true">
-        <item-type>Search Content</item-type>
+        <item-type>String</item-type>
         <label>Search Content</label>
         <description>Keyword(s) to search for on TV via Google Assistant</description>
     </channel-type>
@@ -145,6 +146,12 @@
         <item-type>Switch</item-type>
         <label>Ambilight + Hue Power</label>
         <description>Ambilight + Hue power. Turns ambilight with connected Philips Hue Lamps on or off.</description>
+    </channel-type>
+
+    <channel-type id="ambilightStyle">
+        <item-type>String</item-type>
+        <label>Ambilight Style</label>
+        <description>Current ambilight style. Changing this to a value from the List, switches the ambilight style.</description>
     </channel-type>
 
 </thing:thing-descriptions>

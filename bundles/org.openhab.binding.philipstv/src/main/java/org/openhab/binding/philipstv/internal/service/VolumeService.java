@@ -8,7 +8,6 @@
 package org.openhab.binding.philipstv.internal.service;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -18,12 +17,14 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.VolumeDetails;
+import org.openhab.binding.philipstv.internal.service.model.KeyCodeDto;
+import org.openhab.binding.philipstv.internal.service.model.VolumeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_MUTE;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.KEY_CODE_PATH;
@@ -53,9 +54,9 @@ public class VolumeService implements PhilipsTvService {
         if (command instanceof RefreshType) {
             if (CHANNEL_VOLUME.equals(channel)) {
                 try {
-                    VolumeDetails volumeDetails = getVolume();
-                    handler.postUpdateChannel(CHANNEL_VOLUME, new DecimalType(volumeDetails.getCurrentVolume()));
-                    handler.postUpdateChannel(CHANNEL_MUTE, volumeDetails.isMuted() ? OnOffType.ON : OnOffType.OFF);
+                    VolumeDto volumeDto = getVolume();
+                    handler.postUpdateChannel(CHANNEL_VOLUME, new DecimalType(volumeDto.getCurrentVolume()));
+                    handler.postUpdateChannel(CHANNEL_MUTE, volumeDto.isMuted() ? OnOffType.ON : OnOffType.OFF);
                 } catch (Exception e) {
                     if (isTvOfflineException(e)) {
                         logger.warn("Could not refresh TV volume: TV is offline.");
@@ -96,26 +97,26 @@ public class VolumeService implements PhilipsTvService {
         }
     }
 
-    private VolumeDetails getVolume() throws IOException {
+    private VolumeDto getVolume() throws IOException {
         String jsonContent = connectionManager.doHttpsGet(VOLUME_PATH);
-        JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-        return VolumeDetails.ofCurrentVolumeAndMuted(jsonObject.get("current").getAsString(),
-                jsonObject.get("muted").getAsBoolean());
+        return OBJECT_MAPPER.readValue(jsonContent, VolumeDto.class);
     }
 
     private void setVolume(Command command) throws IOException {
-        JsonObject volumeJson = new JsonObject();
-        volumeJson.addProperty("muted", "false");
-        volumeJson.addProperty("current", command.toString());
+        VolumeDto volumeDto = new VolumeDto();
+        volumeDto.setMuted(false);
+        volumeDto.setCurrentVolume(command.toString());
+        String volumeJson = OBJECT_MAPPER.writeValueAsString(volumeDto);
         logger.debug("Set json volume: {}", volumeJson);
-        connectionManager.doHttpsPost(VOLUME_PATH, volumeJson.toString());
+        connectionManager.doHttpsPost(VOLUME_PATH, volumeJson);
     }
 
     private void setMute() throws IOException {
         // We just sent the KEY_MUTE and dont bother what was actually requested
-        JsonObject muteJson = new JsonObject();
-        muteJson.addProperty("key", KEY_MUTE.toString());
+        KeyCodeDto keyCodeDto = new KeyCodeDto();
+        keyCodeDto.setKey(KEY_MUTE);
+        String muteJson = OBJECT_MAPPER.writeValueAsString(keyCodeDto);
         logger.debug("Set json mute state: {}", muteJson);
-        connectionManager.doHttpsPost(KEY_CODE_PATH, muteJson.toString());
+        connectionManager.doHttpsPost(KEY_CODE_PATH, muteJson);
     }
 }

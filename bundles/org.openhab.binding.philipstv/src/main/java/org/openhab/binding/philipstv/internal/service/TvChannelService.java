@@ -1,9 +1,5 @@
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
@@ -12,15 +8,21 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.AvailableTvChannelsDto;
+import org.openhab.binding.philipstv.internal.service.model.ChannelDto;
+import org.openhab.binding.philipstv.internal.service.model.ChannelListDto;
+import org.openhab.binding.philipstv.internal.service.model.TvChannelDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_TV_CHANNEL_LIST_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_CHANNEL_PATH;
@@ -31,7 +33,7 @@ public class TvChannelService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    // Name , Entry<ccid,preset> of TV Channel
+    // Name , ccid of TV Channel
     private Map<String, String> availableTvChannels;
 
     private final ConnectionManager connectionManager;
@@ -59,7 +61,7 @@ public class TvChannelService implements PhilipsTvService {
                     switchTvChannel(command);
                 } else {
                     logger.warn(
-                            "The given TV Channel with Name: {} couldnt be found in the local Channel List from the TV.",
+                            "The given TV Channel with Name: {} couldn't be found in the local Channel List from the TV.",
                             command);
                 }
             } else {
@@ -83,20 +85,11 @@ public class TvChannelService implements PhilipsTvService {
     }
 
     private Map<String, String> getAvailableTvChannelListFromTv() throws IOException {
-        JsonArray tvChannelsJsonArray;
+        AvailableTvChannelsDto availableTvChannelsDto = OBJECT_MAPPER.readValue(
+                connectionManager.doHttpsGet(GET_AVAILABLE_TV_CHANNEL_LIST_PATH), AvailableTvChannelsDto.class);
 
-        String jsonContent = connectionManager.doHttpsGet(GET_AVAILABLE_TV_CHANNEL_LIST_PATH);
-        tvChannelsJsonArray = (JsonArray) new JsonParser().parse(jsonContent).getAsJsonObject().get("Channel");
-
-        Map<String, String> tvChannelsMap = new ConcurrentHashMap<>();
-
-        for (JsonElement jsonElement : tvChannelsJsonArray) {
-            JsonObject tvChannel = jsonElement.getAsJsonObject();
-            String name = tvChannel.get("name").getAsString();
-            String ccid = tvChannel.get("ccid").getAsString();
-
-            tvChannelsMap.put(name, ccid);
-        }
+        ConcurrentMap<String, String> tvChannelsMap = availableTvChannelsDto.getChannel().stream().collect(
+                Collectors.toConcurrentMap(ChannelDto::getName, ChannelDto::getCcid, (c1, c2) -> c1));
 
         logger.debug("TV Channels added: {}", tvChannelsMap.size());
         if (logger.isTraceEnabled()) {
@@ -106,31 +99,27 @@ public class TvChannelService implements PhilipsTvService {
     }
 
     private String getCurrentTvChannel() throws IOException {
-        String jsonContent = connectionManager.doHttpsGet(TV_CHANNEL_PATH);
-        if ("{}".equals(jsonContent)) {
-            return "NA";
-        }
-        JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-        JsonObject componentJson = jsonObject.get("ccid").getAsJsonObject();
-        return componentJson.get("").getAsString();
+        TvChannelDto tvChannelDto = OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(TV_CHANNEL_PATH),
+                TvChannelDto.class);
+        return Optional.ofNullable(tvChannelDto.getChannel()).map(ChannelDto::getCcid).map(availableTvChannels::get)
+                .orElse("NA");
     }
 
     private void switchTvChannel(Command command) throws IOException {
-        // Build up app launch json in format:
-        // 'activities/tv', {'channel':{'ccid':'ccid'},'channelList':{'id':'allter','version':'30'}}
-        JsonObject switchTvChannel = new JsonObject();
-        JsonObject channel = new JsonObject();
-        channel.addProperty("ccid", availableTvChannels.get(command.toString()));
+        TvChannelDto tvChannelDto = new TvChannelDto();
 
-        JsonObject channelList = new JsonObject();
-        channelList.addProperty("id", "allter");
-        channelList.addProperty("version", "30");
+        ChannelDto channelDto = new ChannelDto();
+        channelDto.setCcid(availableTvChannels.get(command.toString()));
+        tvChannelDto.setChannel(channelDto);
 
-        switchTvChannel.add("channel", channel);
-        switchTvChannel.add("channelList", channelList);
+        ChannelListDto channelListDto = new ChannelListDto();
+        channelListDto.setId("allter");
+        channelListDto.setVersion("30");
+        tvChannelDto.setChannelList(channelListDto);
 
-        logger.debug("Switch TV Channel json: {}", switchTvChannel);
-        connectionManager.doHttpsPost(TV_CHANNEL_PATH, switchTvChannel.toString());
+        String switchTvChannelJson = OBJECT_MAPPER.writeValueAsString(tvChannelDto);
+        logger.debug("Switch TV Channel json: {}", switchTvChannelJson);
+        connectionManager.doHttpsPost(TV_CHANNEL_PATH, switchTvChannelJson);
     }
 
     public void clearAvailableTvChannelList() {

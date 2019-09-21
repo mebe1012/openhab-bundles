@@ -19,11 +19,13 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.KeyCodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.KEY_CODE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
@@ -94,9 +96,10 @@ public class KeyCodeService implements PhilipsTvService {
     }
 
     private void sendKeyCode(KeyCode key) throws IOException {
-        JsonObject keyCodeJson = new JsonObject();
-        keyCodeJson.addProperty("key", key.toString());
+        KeyCodeDto keyCodeDto = new KeyCodeDto();
+        keyCodeDto.setKey(key);
+        String keyCodeJson = OBJECT_MAPPER.writeValueAsString(keyCodeDto);
         logger.debug("KeyCode Json sent: {}", keyCodeJson);
-        connectionManager.doHttpsPost(KEY_CODE_PATH, keyCodeJson.toString());
+        connectionManager.doHttpsPost(KEY_CODE_PATH, keyCodeJson);
     }
 }
