@@ -1,6 +1,9 @@
 package org.openhab.binding.philipstv.internal.service.model.Ambilight;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 
 /**
  * The {@link AmbilightPowerDto} class defines the Data Transfer Object (POJO)
@@ -19,5 +22,10 @@ public class AmbilightPowerDto {
 
     public void setPower(String power) {
         this.power = power;
+    }
+
+    @JsonIgnore
+    public boolean isPoweredOn() {
+        return power.equalsIgnoreCase(POWER_ON);
     }
 }

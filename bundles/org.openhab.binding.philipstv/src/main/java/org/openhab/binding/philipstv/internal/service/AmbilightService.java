@@ -53,6 +53,10 @@ public class AmbilightService implements PhilipsTvService {
         try {
             if (CHANNEL_AMBILIGHT_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightPowerState(command);
+            } else if (CHANNEL_AMBILIGHT_POWER.equals(channel) && (command instanceof RefreshType)) {
+                AmbilightPowerDto ambilightPowerDto = getAmbilightPowerState();
+                handler.postUpdateChannel(CHANNEL_AMBILIGHT_POWER,
+                        ambilightPowerDto.isPoweredOn() ? OnOffType.ON : OnOffType.OFF);
             } else if (CHANNEL_AMBILIGHT_HUE_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightHuePowerState(command);
             } else if (CHANNEL_AMBILIGHT_STYLE.equals(channel) && (command instanceof StringType)) {
@@ -73,6 +77,11 @@ public class AmbilightService implements PhilipsTvService {
                         e.getMessage(), e);
             }
         }
+    }
+
+    private AmbilightPowerDto getAmbilightPowerState() throws IOException {
+        return OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(AMBILIGHT_POWERSTATE_PATH),
+                AmbilightPowerDto.class);
     }
 
     private void setAmbilightPowerState(Command command) throws IOException {
