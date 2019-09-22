@@ -7,7 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonObject;
 import org.eclipse.smarthome.core.library.types.NextPreviousType;
 import org.eclipse.smarthome.core.library.types.PlayPauseType;
 import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
@@ -19,7 +18,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.KeyCodeDto;
+import org.openhab.binding.philipstv.internal.service.model.KeyCode.KeyCodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

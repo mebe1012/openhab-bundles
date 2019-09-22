@@ -7,7 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonSyntaxException;
 import org.apache.http.ParseException;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -17,7 +16,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.PowerStateDto;
+import org.openhab.binding.philipstv.internal.service.model.TvPower.PowerStateDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,17 +78,14 @@ public class PowerService implements PhilipsTvService {
         }
     }
 
-    private PowerStateDto getPowerState() throws IOException, ParseException, JsonSyntaxException {
+    private PowerStateDto getPowerState() throws IOException, ParseException {
         return OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(TV_POWERSTATE_PATH), PowerStateDto.class);
     }
 
     private void setPowerState(Command command) throws IOException {
         PowerStateDto powerStateDto = new PowerStateDto();
-        if (command.equals(OnOffType.ON)) {
-            powerStateDto.setPowerState(POWER_ON);
-        } else { // OFF
-            powerStateDto.setPowerState(KEY_STANDBY.toString());
-        }
+        powerStateDto.setPowerState(command.equals(OnOffType.ON) ? POWER_ON : KEY_STANDBY.toString());
+
         String powerStateJson = OBJECT_MAPPER.writeValueAsString(powerStateDto);
         logger.debug("PowerState Json sent: {}", powerStateJson);
         connectionManager.doHttpsPost(TV_POWERSTATE_PATH, powerStateJson);

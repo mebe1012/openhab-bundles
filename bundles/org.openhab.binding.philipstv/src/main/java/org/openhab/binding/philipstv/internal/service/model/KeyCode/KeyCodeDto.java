@@ -1,4 +1,4 @@
-package org.openhab.binding.philipstv.internal.service.model;
+package org.openhab.binding.philipstv.internal.service.model.KeyCode;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.openhab.binding.philipstv.internal.service.KeyCode;

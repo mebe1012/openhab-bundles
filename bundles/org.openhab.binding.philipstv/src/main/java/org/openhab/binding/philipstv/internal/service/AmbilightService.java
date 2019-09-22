@@ -1,8 +1,5 @@
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -12,11 +9,19 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightConfigDto;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightHuePowerDto;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightPowerDto;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.DataDto;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.ValueDto;
+import org.openhab.binding.philipstv.internal.service.model.Ambilight.ValuesDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CONFIG_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_POWERSTATE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
@@ -68,48 +73,48 @@ public class AmbilightService implements PhilipsTvService {
     }
 
     private void setAmbilightPowerState(Command command) throws IOException {
-        JsonObject powerStateJson = new JsonObject();
-        if (command.equals(OnOffType.ON)) {
-            powerStateJson.addProperty("power", POWER_ON);
-        } else { // OFF
-            powerStateJson.addProperty("power", POWER_OFF);
-        }
-        connectionManager.doHttpsPost(AMBILIGHT_POWERSTATE_PATH, powerStateJson.toString());
+        AmbilightPowerDto ambilightPowerDto = new AmbilightPowerDto();
+        ambilightPowerDto.setPower(command.equals(OnOffType.ON) ? POWER_ON : POWER_OFF);
+
+        String powerStateJson = OBJECT_MAPPER.writeValueAsString(ambilightPowerDto);
+        logger.debug("Post Ambilight power state json: {}", powerStateJson);
+        connectionManager.doHttpsPost(AMBILIGHT_POWERSTATE_PATH, powerStateJson);
     }
 
     private void setAmbilightHuePowerState(Command command) throws IOException {
-        JsonObject values = new JsonObject();
-        JsonArray jsonArray = new JsonArray();
-        JsonObject valueJson = new JsonObject();
-        JsonObject valueContent = new JsonObject();
-        valueContent.addProperty("Nodeid", AMBILIGHT_HUE_NODE_ID);
-        valueContent.addProperty("Controllable", "true");
-        valueContent.addProperty("Available", "true");
-        JsonObject data = new JsonObject();
-        if (command.equals(OnOffType.ON)) {
-            data.addProperty("value", "true");
-        } else { // OFF
-            data.addProperty("value", "false");
-        }
-        valueContent.add("data", data);
-        valueJson.add("value", valueContent);
-        jsonArray.add(valueJson);
-        values.add("values", jsonArray);
-        connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, values.toString());
+        AmbilightHuePowerDto ambilightHuePowerDto = new AmbilightHuePowerDto();
+        ValuesDto valuesDto = new ValuesDto();
+
+        ValueDto valueDto = new ValueDto();
+        valueDto.setNodeid(AMBILIGHT_HUE_NODE_ID);
+        valueDto.setAvailable("true");
+        valueDto.setControllable("true");
+
+        DataDto dataDto = new DataDto();
+        dataDto.setValue(command.equals(OnOffType.ON) ? "true" : "false");
+
+        valueDto.setData(dataDto);
+        valuesDto.setValue(valueDto);
+        ambilightHuePowerDto.setValues(Collections.singletonList(valuesDto));
+
+        String ambilightHuePowerJson = OBJECT_MAPPER.writeValueAsString(ambilightHuePowerDto);
+        logger.debug("Post Ambilight hue power state json: {}", ambilightHuePowerJson);
+        connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, ambilightHuePowerJson);
     }
 
     private void setAmbilightStyle(Command command) throws IOException {
-        JsonObject ambilightConfigJson = getAmbilightConfig();
-        ambilightConfigJson.addProperty("styleName", command.toString());
-        if(ambilightConfigJson.get("menuSetting") == null) { // property is missing for style OFF
-            ambilightConfigJson.addProperty("menuSetting", "STANDARD");
+        AmbilightConfigDto ambilightConfigDto = getAmbilightConfig();
+        ambilightConfigDto.setStyleName(command.toString());
+        if (ambilightConfigDto.getMenuSetting() == null) { // property is missing for style OFF
+            ambilightConfigDto.setMenuSetting("STANDARD");
         }
-        connectionManager.doHttpsPost(AMBILIGHT_CONFIG_PATH, ambilightConfigJson.toString());
+        String ambilightConfigJson = OBJECT_MAPPER.writeValueAsString(ambilightConfigDto);
+        logger.debug("Post config for Ambilight style json: {}", ambilightConfigJson);
+        connectionManager.doHttpsPost(AMBILIGHT_CONFIG_PATH, ambilightConfigJson);
     }
 
-    private JsonObject getAmbilightConfig() throws IOException {
-        String jsonContent = connectionManager.doHttpsGet(AMBILIGHT_CONFIG_PATH);
-        return new JsonParser().parse(jsonContent).getAsJsonObject();
+    private AmbilightConfigDto getAmbilightConfig() throws IOException {
+        return OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(AMBILIGHT_CONFIG_PATH), AmbilightConfigDto.class);
     }
 
 }

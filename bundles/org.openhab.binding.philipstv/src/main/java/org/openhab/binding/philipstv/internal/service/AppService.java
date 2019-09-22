@@ -7,7 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.google.gson.JsonSyntaxException;
 import org.apache.http.ParseException;
 import org.eclipse.smarthome.core.library.types.RawType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -19,12 +18,12 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.ApplicationsDto;
-import org.openhab.binding.philipstv.internal.service.model.AvailableAppsDto;
-import org.openhab.binding.philipstv.internal.service.model.ComponentDto;
-import org.openhab.binding.philipstv.internal.service.model.CurrentAppDto;
-import org.openhab.binding.philipstv.internal.service.model.IntentDto;
-import org.openhab.binding.philipstv.internal.service.model.LaunchAppDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.ApplicationsDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.AvailableAppsDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.ComponentDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.CurrentAppDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.Application.LaunchAppDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +142,7 @@ public class AppService implements PhilipsTvService {
         connectionManager.doHttpsPost(LAUNCH_APP_PATH, appLaunchJson);
     }
 
-    private String getCurrentApp() throws IOException, ParseException, JsonSyntaxException {
+    private String getCurrentApp() throws IOException, ParseException {
         CurrentAppDto currentAppDto = OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(GET_CURRENT_APP_PATH),
                 CurrentAppDto.class);
         return currentAppDto.getComponent().getPackageName();
