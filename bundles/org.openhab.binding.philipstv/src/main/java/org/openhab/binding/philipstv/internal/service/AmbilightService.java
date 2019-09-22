@@ -39,14 +39,17 @@ public class AmbilightService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public AmbilightService(ConnectionManager connectionManager) {
+    public AmbilightService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         try {
             if (CHANNEL_AMBILIGHT_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightPowerState(command);

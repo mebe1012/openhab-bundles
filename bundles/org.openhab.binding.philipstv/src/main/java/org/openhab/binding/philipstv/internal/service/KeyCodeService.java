@@ -39,14 +39,17 @@ public class KeyCodeService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public KeyCodeService(ConnectionManager connectionManager) {
+    public KeyCodeService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         KeyCode keyCode = null;
         if (isSupportedCommand(command)) {
             // Three approaches to resolve the KEY_CODE

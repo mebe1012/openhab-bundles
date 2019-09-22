@@ -42,14 +42,17 @@ public class VolumeService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public VolumeService(ConnectionManager connectionManager) {
+    public VolumeService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         if (command instanceof RefreshType) {
             if (CHANNEL_VOLUME.equals(channel)) {
                 try {

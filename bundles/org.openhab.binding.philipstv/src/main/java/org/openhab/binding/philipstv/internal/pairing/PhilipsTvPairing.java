@@ -7,9 +7,6 @@
  */
 package org.openhab.binding.philipstv.internal.pairing;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.http.HttpHost;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,6 +20,11 @@ import org.apache.http.util.EntityUtils;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
+import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
+import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
+import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.PairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.RequestCodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Formatter;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PASSWORD;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
@@ -64,44 +69,42 @@ public class PhilipsTvPairing {
 
     private final String pairingBasePath = BASE_PATH + "pair" + SLASH;
 
-    public void requestPairingCode(HttpHost target)
+    public void requestPairingPin(HttpHost target)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
-        JsonObject requestCodeJson = new JsonObject();
-
-        JsonArray scopeJson = new JsonArray();
-        scopeJson.add("read");
-        scopeJson.add("write");
-        scopeJson.add("control");
-
-        requestCodeJson.add("scope", scopeJson);
-        requestCodeJson.add("device", createDeviceSpecification());
+        RequestCodeDto requestCodeDto = new RequestCodeDto();
+        requestCodeDto.setScope(Stream.of("read", "write", "control").collect(Collectors.toList()));
+        requestCodeDto.setDevice(createDeviceSpecification());
 
         CloseableHttpClient httpClient = ConnectionManagerUtil.createSharedHttpClient(target, "", "");
         ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
+        String requestCodeJson = OBJECT_MAPPER.writeValueAsString(requestCodeDto);
         String requestPairingCodePath = pairingBasePath + "request";
-        String jsonContent = connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson.toString());
+        logger.debug("Request pairing code with json: {}", requestCodeJson);
+        PairingDto pairingDto = OBJECT_MAPPER.readValue(
+                connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson), PairingDto.class);
 
-        JsonObject jsonObject = new JsonParser().parse(jsonContent).getAsJsonObject();
-        authTimestamp = jsonObject.get("timestamp").getAsString();
-        authKey = jsonObject.get("auth_key").getAsString();
+        authTimestamp = pairingDto.getTimestamp();
+        authKey = pairingDto.getAuthKey();
 
-        logger.info("The pairing code is valid for {} seconds.", jsonObject.get("timeout").getAsString());
+        logger.info("The pairing code is valid for {} seconds.", pairingDto.getTimeout());
     }
 
     public void finishPairingWithTv(PhilipsTvHandler handler, HttpHost target)
             throws NoSuchAlgorithmException, InvalidKeyException, IOException, KeyStoreException,
             KeyManagementException {
         String pairingCode = handler.config.pairingCode;
-        JsonObject grantPairingJson = new JsonObject();
+        FinishPairingDto finishPairingDto = new FinishPairingDto();
+        finishPairingDto.setDevice(createDeviceSpecification());
 
-        JsonObject authJson = new JsonObject();
-        authJson.addProperty("auth_signature", calculateRFC2104HMAC(authTimestamp + pairingCode));
-        authJson.addProperty("auth_AppId", "1");
-        authJson.addProperty("auth_timestamp", Integer.valueOf(authTimestamp));
-        authJson.addProperty("pin", pairingCode);
-        grantPairingJson.add("device", createDeviceSpecification());
-        grantPairingJson.add("auth", authJson);
+        AuthDto authDto = new AuthDto();
+        authDto.setAuthAppId("1");
+        authDto.setAuthSignature(calculateRFC2104HMAC(authTimestamp + pairingCode));
+        authDto.setAuthTimestamp(authTimestamp);
+        authDto.setPin(pairingCode);
+
+        finishPairingDto.setAuth(authDto);
+        String grantPairingJson = OBJECT_MAPPER.writeValueAsString(finishPairingDto);
 
         try (CloseableHttpClient client = ConnectionManagerUtil.createSharedHttpClient(target, deviceId, authKey);) {
             logger.debug("{} and device id: {} and auth_key: {}", grantPairingJson, deviceId, authKey);
@@ -146,18 +149,18 @@ public class PhilipsTvPairing {
         return deviceIdBuilder.toString();
     }
 
-    private JsonObject createDeviceSpecification() {
-        JsonObject deviceJson = new JsonObject();
-        deviceJson.addProperty("app_name", "ApplicationName");
-        deviceJson.addProperty("app_id", "app.id");
-        deviceJson.addProperty("device_name", "heliotrope");
-        deviceJson.addProperty("device_os", "Android");
-        deviceJson.addProperty("type", "native");
+    private DeviceDto createDeviceSpecification() {
+        DeviceDto deviceDto = new DeviceDto();
+        deviceDto.setAppName("ApplicationName");
+        deviceDto.setAppId("app.id");
+        deviceDto.setDeviceName("heliotrope");
+        deviceDto.setDeviceOs("Android");
+        deviceDto.setType("native");
         if (deviceId == null) {
             deviceId = createDeviceId();
         }
-        deviceJson.addProperty("id", deviceId);
-        return deviceJson;
+        deviceDto.setId(deviceId);
+        return deviceDto;
     }
 
     private String toHexString(byte[] bytes) {

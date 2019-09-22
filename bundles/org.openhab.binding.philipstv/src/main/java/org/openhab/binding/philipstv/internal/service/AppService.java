@@ -60,14 +60,17 @@ public class AppService implements PhilipsTvService {
 
     private String currentPackageName = "";
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public AppService(ConnectionManager connectionManager) {
+    public AppService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         try {
             synchronized (this) { // TODO: avoids multiple inits at startup
                 if (isAvailableAppListEmpty()) {

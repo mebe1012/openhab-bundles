@@ -36,14 +36,17 @@ public class TvChannelService implements PhilipsTvService {
     // Name , ccid of TV Channel
     private Map<String, String> availableTvChannels;
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public TvChannelService(ConnectionManager connectionManager) {
+    public TvChannelService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         try {
             synchronized (this) {
                 if (isTvChannelListEmpty()) { // TODO: avoids multiple inits at startup

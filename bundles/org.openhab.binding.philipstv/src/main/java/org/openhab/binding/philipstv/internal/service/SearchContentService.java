@@ -25,14 +25,17 @@ public class SearchContentService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public SearchContentService(ConnectionManager connectionManager) {
+    public SearchContentService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         if (command instanceof StringType) {
             try {
                 searchForContentOnTv(command.toString());

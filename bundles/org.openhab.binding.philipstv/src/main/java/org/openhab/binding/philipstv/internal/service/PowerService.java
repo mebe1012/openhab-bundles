@@ -39,14 +39,17 @@ public class PowerService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final PhilipsTvHandler handler;
+
     private final ConnectionManager connectionManager;
 
-    public PowerService(ConnectionManager connectionManager) {
+    public PowerService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
+        this.handler = handler;
         this.connectionManager = connectionManager;
     }
 
     @Override
-    public void handleCommand(String channel, Command command, PhilipsTvHandler handler) {
+    public void handleCommand(String channel, Command command) {
         try {
             if (command instanceof RefreshType) {
                 PowerStateDto powerStateDto = getPowerState();

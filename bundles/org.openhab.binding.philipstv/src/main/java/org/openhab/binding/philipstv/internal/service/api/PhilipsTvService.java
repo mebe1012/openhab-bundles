@@ -28,7 +28,7 @@ public interface PhilipsTvService {
      * @param channel the channel to which the command applies
      * @param command the command to be handled
      */
-    void handleCommand(String channel, Command command, PhilipsTvHandler handler);
+    void handleCommand(String channel, Command command);
 
     default boolean isTvOfflineException(Exception exception) {
         if((exception instanceof NoRouteToHostException) && exception.getMessage().contains("Host unreachable")) {

@@ -28,9 +28,15 @@ import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
-import org.openhab.binding.philipstv.internal.config.*;
-import org.openhab.binding.philipstv.internal.pairing.*;
-import org.openhab.binding.philipstv.internal.service.*;
+import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
+import org.openhab.binding.philipstv.internal.pairing.PhilipsTvPairing;
+import org.openhab.binding.philipstv.internal.service.AmbilightService;
+import org.openhab.binding.philipstv.internal.service.AppService;
+import org.openhab.binding.philipstv.internal.service.KeyCodeService;
+import org.openhab.binding.philipstv.internal.service.PowerService;
+import org.openhab.binding.philipstv.internal.service.SearchContentService;
+import org.openhab.binding.philipstv.internal.service.TvChannelService;
+import org.openhab.binding.philipstv.internal.service.VolumeService;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +121,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER))) {
             // Check if tv turned on meanwhile
-            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH, this);
+            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
                 // still offline
                 logger.info(
@@ -135,7 +141,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             return;
         }
 
-        philipsTvService.handleCommand(channel, command, this);
+        philipsTvService.handleCommand(channel, command);
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         logger.trace("The command {} took : {} nanoseconds", command.toFullString(), elapsedTime);
@@ -157,7 +163,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing is not configured yet, trying to present a Pairing Code on TV.");
             try {
-                initPairingCodeRetrieval(target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
+                initPairingCodeRetrieval(
+                        target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
             } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Error occurred while trying to present a Pairing Code on TV.");
@@ -166,7 +173,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         } else if ((config.pairingCode != null) && ((config.username == null) || (config.password == null))) {
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing Code is available, but credentials missing. Trying to retrieve them.");
-            boolean hasFailed = initCredentialsRetrieval(target); // TODO hier fehlt authTimeStamp falls zu lange Zeit vergangen ist - man MUSS von vorne anfangen
+            boolean hasFailed = initCredentialsRetrieval(
+                    target); // TODO hier fehlt authTimeStamp falls zu lange Zeit vergangen ist - man MUSS von vorne anfangen
             if (hasFailed) {
                 postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                         "Error occurred during retrieval of credentials.");
@@ -187,26 +195,26 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
         Map<String, PhilipsTvService> services = new HashMap<>();
 
-        PhilipsTvService volumeService = new VolumeService(connectionManager);
+        PhilipsTvService volumeService = new VolumeService(this, connectionManager);
         services.put(CHANNEL_VOLUME, volumeService);
         services.put(CHANNEL_MUTE, volumeService);
 
-        PhilipsTvService keyCodeService = new KeyCodeService(connectionManager);
+        PhilipsTvService keyCodeService = new KeyCodeService(this, connectionManager);
         services.put(CHANNEL_KEY_CODE, keyCodeService);
         services.put(CHANNEL_PLAYER, keyCodeService);
 
-        PhilipsTvService appService = new AppService(connectionManager);
+        PhilipsTvService appService = new AppService(this, connectionManager);
         services.put(CHANNEL_APP_NAME, appService);
         services.put(CHANNEL_APP_ICON, appService);
 
-        PhilipsTvService ambilightService = new AmbilightService(connectionManager);
+        PhilipsTvService ambilightService = new AmbilightService(this, connectionManager);
         services.put(CHANNEL_AMBILIGHT_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_HUE_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_STYLE, ambilightService);
 
-        services.put(CHANNEL_TV_CHANNEL, new TvChannelService(connectionManager));
-        services.put(CHANNEL_POWER, new PowerService(connectionManager));
-        services.put(CHANNEL_SEARCH_CONTENT, new SearchContentService(connectionManager));
+        services.put(CHANNEL_TV_CHANNEL, new TvChannelService(this, connectionManager));
+        services.put(CHANNEL_POWER, new PowerService(this, connectionManager));
+        services.put(CHANNEL_SEARCH_CONTENT, new SearchContentService(this, connectionManager));
         channelServices = Collections.unmodifiableMap(services);
 
         if (discoveryServiceRegistry != null) {
@@ -214,7 +222,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         }
 
         // Thing is initialized, check powerstate and available communication of the TV and set ONLINE or OFFLINE
-        channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH, this);
+        channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
     }
 
     /**
@@ -225,7 +233,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         logger.info("Pairing code for tv authentication is missing. " +
                 "Starting initial pairing process. Please provide manually the pairing code shown on the tv at the configuration of the tv thing.");
         PhilipsTvPairing pairing = new PhilipsTvPairing();
-        pairing.requestPairingCode(target);
+        pairing.requestPairingPin(target);
     }
 
     private boolean initCredentialsRetrieval(HttpHost target) {
@@ -269,7 +277,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
                     refreshHandler = null;
                 }
                 // Reset app and channel list (if existing) for new retrieval during next startup
-                if(channelServices != null) {
+                if (channelServices != null) {
                     ((AppService) channelServices.get(CHANNEL_APP_NAME)).clearAvailableAppList();
                     ((TvChannelService) channelServices.get(CHANNEL_TV_CHANNEL)).clearAvailableTvChannelList();
                 }
@@ -294,22 +302,22 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private void refreshTvProperties() {
         if (getThing().getStatus() == ThingStatus.OFFLINE) { // handles case if tv temporarily does not accept commands
-            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH, this);
+            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
                 return; // tv is still not accepting commands
             }
         }
 
         if (isLinked(CHANNEL_VOLUME) || isLinked(CHANNEL_MUTE)) {
-            channelServices.get(CHANNEL_VOLUME).handleCommand(CHANNEL_VOLUME, RefreshType.REFRESH, this);
+            channelServices.get(CHANNEL_VOLUME).handleCommand(CHANNEL_VOLUME, RefreshType.REFRESH);
         }
 
         if (isLinked(CHANNEL_APP_NAME)) {
-            channelServices.get(CHANNEL_APP_NAME).handleCommand(CHANNEL_APP_NAME, RefreshType.REFRESH, this);
+            channelServices.get(CHANNEL_APP_NAME).handleCommand(CHANNEL_APP_NAME, RefreshType.REFRESH);
         }
 
-        if(isLinked(CHANNEL_TV_CHANNEL)) {
-            channelServices.get(CHANNEL_TV_CHANNEL).handleCommand(CHANNEL_TV_CHANNEL, RefreshType.REFRESH, this);
+        if (isLinked(CHANNEL_TV_CHANNEL)) {
+            channelServices.get(CHANNEL_TV_CHANNEL).handleCommand(CHANNEL_TV_CHANNEL, RefreshType.REFRESH);
         }
     }
 
