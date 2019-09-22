@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
@@ -187,7 +188,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         try {
             httpClient = ConnectionManagerUtil.createSharedHttpClient(target, config.username, config.password);
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e) {
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     String.format("Error occurred during creation of http client: %s", e.getMessage()));
             return;
@@ -212,6 +213,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         services.put(CHANNEL_AMBILIGHT_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_HUE_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_STYLE, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_COLOR, ambilightService);
 
         services.put(CHANNEL_TV_CHANNEL, new TvChannelService(this, connectionManager));
         services.put(CHANNEL_POWER, new PowerService(this, connectionManager));

@@ -21,6 +21,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -51,8 +52,7 @@ public final class ConnectionManagerUtil {
     }
 
     public static CloseableHttpClient createSharedHttpClient(HttpHost target, String username, String password)
-            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException,
-            CertificateException {
+            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         CredentialsProvider credProvider = new BasicCredentialsProvider();
         credProvider.setCredentials(new AuthScope(target.getHostName(), target.getPort()),
                 new UsernamePasswordCredentials(username, password));
@@ -60,7 +60,7 @@ public final class ConnectionManagerUtil {
         RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(CONNECT_TIMEOUT).setSocketTimeout(
                 SOCKET_TIMEOUT).build();
 
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(createSSLContextWithPhilipsTvCertificate(),
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(getSslConnectionWithoutCertValidation(),
                 NoopHostnameVerifier.INSTANCE);
 
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
@@ -73,27 +73,8 @@ public final class ConnectionManagerUtil {
                 .setConnectionManagerShared(true).build();
     }
 
-    private static SSLContext createSSLContextWithPhilipsTvCertificate()
-            throws NoSuchAlgorithmException, KeyManagementException, IOException, CertificateException,
-            KeyStoreException {
-
-        SSLContext sslContext;
-        try (InputStream is = Objects.requireNonNull(
-                Thread.currentThread().getContextClassLoader().getResource("xtv_ca.crt")).openStream()) {
-
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate caCert = (X509Certificate) cf.generateCertificate(is);
-
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null); // You don't need the KeyStore instance to come from a file.
-            ks.setCertificateEntry("caCert", caCert);
-
-            tmf.init(ks);
-
-            sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, tmf.getTrustManagers(), null);
-        }
-        return sslContext;
+    private static SSLContext getSslConnectionWithoutCertValidation()
+            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+        return new SSLContextBuilder().loadTrustMaterial(null, (certificate, authType) -> true).build();
     }
 }

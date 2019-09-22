@@ -19,13 +19,11 @@ public class AmbilightConfigDto {
     @JsonProperty
     private String styleName;
 
-    public void setIsExpert(boolean isExpert) {
-        this.isExpert = isExpert;
-    }
+    @JsonProperty("colorSettings")
+    private AmbilightColorSettingsDto colorSettings;
 
-    public boolean isIsExpert() {
-        return isExpert;
-    }
+    @JsonProperty("algorithm")
+    private String algorithm;
 
     public void setMenuSetting(String menuSetting) {
         this.menuSetting = menuSetting;
@@ -41,6 +39,30 @@ public class AmbilightConfigDto {
 
     public String getStyleName() {
         return styleName;
+    }
+
+    public boolean isIsExpert() {
+        return isExpert;
+    }
+
+    public void setIsExpert(boolean isExpert) {
+        this.isExpert = isExpert;
+    }
+
+    public AmbilightColorSettingsDto getColorSettings() {
+        return colorSettings;
+    }
+
+    public void setColorSettings(AmbilightColorSettingsDto colorSettings) {
+        this.colorSettings = colorSettings;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 
     @Override

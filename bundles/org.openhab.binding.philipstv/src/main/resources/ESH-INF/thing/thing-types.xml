@@ -22,6 +22,7 @@
             <channel id="ambilightPower" typeId="ambilightPower"/>
             <channel id="ambilightHuePower" typeId="ambilightHuePower"/>
             <channel id="ambilightStyle" typeId="ambilightStyle"/>
+            <channel id="ambilightColor" typeId="ambilightColor"/>
         </channels>
 
         <config-description-ref uri="thing-type:philipstv:tv" />
@@ -148,10 +149,16 @@
         <description>Ambilight + Hue power. Turns ambilight with connected Philips Hue Lamps on or off.</description>
     </channel-type>
 
-    <channel-type id="ambilightStyle">
+    <channel-type id="ambilightStyle" advanced="true">
         <item-type>String</item-type>
         <label>Ambilight Style</label>
         <description>Current ambilight style. Changing this to a value from the List, switches the ambilight style.</description>
+    </channel-type>
+
+    <channel-type id="ambilightColor" advanced="true">
+        <item-type>Color</item-type>
+        <label>Ambilight Color</label>
+        <description>Sets the Ambilight color.</description>
     </channel-type>
 
 </thing:thing-descriptions>
