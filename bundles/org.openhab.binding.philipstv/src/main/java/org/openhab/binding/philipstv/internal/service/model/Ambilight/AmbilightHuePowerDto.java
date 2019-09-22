@@ -1,8 +1,8 @@
 package org.openhab.binding.philipstv.internal.service.model.Ambilight;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Generated;
+
+import java.util.List;
 
 /**
  * The {@link AmbilightHuePowerDto} class defines the Data Transfer Object
@@ -10,24 +10,21 @@ import javax.annotation.Generated;
  *
  * @author Benjamin Meyer - initial contribution
  */
-public class AmbilightHuePowerDto{
+public class AmbilightHuePowerDto {
 
-	@JsonProperty
-	private List<ValuesDto> values;
+    @JsonProperty
+    private List<ValuesDto> values;
 
-	public void setValues(List<ValuesDto> values){
-		this.values = values;
-	}
+    public void setValues(List<ValuesDto> values) {
+        this.values = values;
+    }
 
-	public List<ValuesDto> getValues(){
-		return values;
-	}
+    public List<ValuesDto> getValues() {
+        return values;
+    }
 
-	@Override
- 	public String toString(){
-		return 
-			"AmbilightHuePowerDto{" + 
-			"values = '" + values + '\'' + 
-			"}";
-		}
+    @Override
+    public String toString() {
+        return "AmbilightHuePowerDto{" + "values = '" + values + '\'' + "}";
+    }
 }

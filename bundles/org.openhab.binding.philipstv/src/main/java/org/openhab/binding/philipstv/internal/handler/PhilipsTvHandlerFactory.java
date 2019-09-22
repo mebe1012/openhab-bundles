@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2019 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,14 +8,12 @@
  */
 package org.openhab.binding.philipstv.internal.handler;
 
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -70,11 +68,13 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Reference
-    protected void setDynamicStateDescriptionProvider(PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
+    protected void setDynamicStateDescriptionProvider(
+            PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
         this.stateDescriptionProvider = stateDescriptionProvider;
     }
 
-    protected void unsetDynamicStateDescriptionProvider(PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
+    protected void unsetDynamicStateDescriptionProvider(
+            PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
         this.stateDescriptionProvider = null;
     }
 

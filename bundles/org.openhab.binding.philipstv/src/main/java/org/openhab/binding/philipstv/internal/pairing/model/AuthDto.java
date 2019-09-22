@@ -2,8 +2,6 @@ package org.openhab.binding.philipstv.internal.pairing.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.annotation.Generated;
-
 /**
  * Part of {@link FinishPairingDto}
  *

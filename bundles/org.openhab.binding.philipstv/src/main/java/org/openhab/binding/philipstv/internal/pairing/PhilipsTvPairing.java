@@ -39,6 +39,7 @@ import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.Formatter;
 import java.util.stream.Collectors;
@@ -70,7 +71,8 @@ public class PhilipsTvPairing {
     private final String pairingBasePath = BASE_PATH + "pair" + SLASH;
 
     public void requestPairingPin(HttpHost target)
-            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
+            CertificateException {
 
         RequestCodeDto requestCodeDto = new RequestCodeDto();
         requestCodeDto.setScope(Stream.of("read", "write", "control").collect(Collectors.toList()));
@@ -92,7 +94,7 @@ public class PhilipsTvPairing {
 
     public void finishPairingWithTv(PhilipsTvHandler handler, HttpHost target)
             throws NoSuchAlgorithmException, InvalidKeyException, IOException, KeyStoreException,
-            KeyManagementException {
+            KeyManagementException, CertificateException {
         String pairingCode = handler.config.pairingCode;
         FinishPairingDto finishPairingDto = new FinishPairingDto();
         finishPairingDto.setDevice(createDeviceSpecification());

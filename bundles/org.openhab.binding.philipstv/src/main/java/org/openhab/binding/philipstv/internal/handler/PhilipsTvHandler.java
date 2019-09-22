@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -165,7 +166,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             try {
                 initPairingCodeRetrieval(
                         target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
-            } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | CertificateException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Error occurred while trying to present a Pairing Code on TV.");
             }
@@ -186,7 +187,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
         try {
             httpClient = ConnectionManagerUtil.createSharedHttpClient(target, config.username, config.password);
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     String.format("Error occurred during creation of http client: %s", e.getMessage()));
             return;
@@ -229,7 +230,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
      * Starts the pairing Process with the TV, which results in a Pairing Code shown on TV.
      */
     private void initPairingCodeRetrieval(HttpHost target)
-            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
+            CertificateException {
         logger.info("Pairing code for tv authentication is missing. " +
                 "Starting initial pairing process. Please provide manually the pairing code shown on the tv at the configuration of the tv thing.");
         PhilipsTvPairing pairing = new PhilipsTvPairing();

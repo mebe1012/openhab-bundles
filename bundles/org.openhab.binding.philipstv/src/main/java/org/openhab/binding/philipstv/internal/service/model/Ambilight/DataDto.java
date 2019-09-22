@@ -1,7 +1,6 @@
 package org.openhab.binding.philipstv.internal.service.model.Ambilight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Generated;
 
 /**
  * Part of {@link AmbilightHuePowerDto}
@@ -10,22 +9,19 @@ import javax.annotation.Generated;
  */
 public class DataDto {
 
-	@JsonProperty
-	private String value;
+    @JsonProperty
+    private String value;
 
-	public void setValue(String value){
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-	public String getValue(){
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	@Override
- 	public String toString(){
-		return 
-			"Data{" + 
-			"value = '" + value + '\'' + 
-			"}";
-		}
+    @Override
+    public String toString() {
+        return "Data{" + "value = '" + value + '\'' + "}";
+    }
 }
