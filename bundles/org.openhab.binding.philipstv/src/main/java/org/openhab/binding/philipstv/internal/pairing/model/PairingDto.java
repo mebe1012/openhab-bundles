@@ -2,6 +2,11 @@ package org.openhab.binding.philipstv.internal.pairing.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Response Data Transfer Object of {@link RequestCodeDto}
+ *
+ * @author Benjamin Meyer - initial contribution
+ */
 public class PairingDto {
 
     @JsonProperty("auth_key")

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Generated;
 
 /**
- * The {@link AmbilightHuePowerDto} class defines the Data Transfer Object (POJO)
+ * The {@link AmbilightHuePowerDto} class defines the Data Transfer Object
  * for the Philips TV API /menuitems/settings/update endpoint to update the config for controlling ambilight hue power.
  *
  * @author Benjamin Meyer - initial contribution

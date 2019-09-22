@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * The {@link AvailableAppsDto} class defines the Data Transfer Object (POJO)
+ * The {@link AvailableAppsDto} class defines the Data Transfer Object
  * for the Philips TV API /applications endpoint for retrieving all installed apps.
  * @author Benjamin Meyer - initial contribution
  */

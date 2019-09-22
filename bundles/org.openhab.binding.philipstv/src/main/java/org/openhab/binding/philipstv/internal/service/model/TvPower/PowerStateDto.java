@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 
 /**
- * The {@link PowerStateDto} class defines the Data Transfer Object (POJO)
+ * The {@link PowerStateDto} class defines the Data Transfer Object
  * for the Philips TV API /powerstate endpoint to retrieve or set the current power state.
  *
  * @author Benjamin Meyer - initial contribution

@@ -3,7 +3,7 @@ package org.openhab.binding.philipstv.internal.service.model.Ambilight;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The {@link AmbilightConfigDto} class defines the Data Transfer Object (POJO)
+ * The {@link AmbilightConfigDto} class defines the Data Transfer Object
  * for the Philips TV API /ambilight/currentconfiguration endpoint to retrieve or set the current ambilight style.
  *
  * @author Benjamin Meyer - initial contribution

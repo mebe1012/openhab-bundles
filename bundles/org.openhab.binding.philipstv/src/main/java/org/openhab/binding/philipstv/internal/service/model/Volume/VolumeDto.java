@@ -3,7 +3,7 @@ package org.openhab.binding.philipstv.internal.service.model.Volume;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The {@link VolumeDto} class defines the Data Transfer Object (POJO)
+ * The {@link VolumeDto} class defines the Data Transfer Object
  * for the Philips TV API /audio/volume endpoint.
  *
  * @author Benjamin Meyer - initial contribution

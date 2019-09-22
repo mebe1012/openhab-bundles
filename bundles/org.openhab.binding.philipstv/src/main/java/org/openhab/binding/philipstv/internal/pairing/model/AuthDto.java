@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Generated;
 
+/**
+ * Part of {@link FinishPairingDto}
+ *
+ * @author Benjamin Meyer - initial contribution
+ */
 public class AuthDto {
 
     @JsonProperty("auth_signature")

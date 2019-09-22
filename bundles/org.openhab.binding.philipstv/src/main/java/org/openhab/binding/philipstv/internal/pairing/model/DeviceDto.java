@@ -2,6 +2,11 @@ package org.openhab.binding.philipstv.internal.pairing.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Part of {@link RequestCodeDto} and {@link FinishPairingDto}
+ *
+ * @author Benjamin Meyer - initial contribution
+ */
 public class DeviceDto {
 
     @JsonProperty("app_name")
