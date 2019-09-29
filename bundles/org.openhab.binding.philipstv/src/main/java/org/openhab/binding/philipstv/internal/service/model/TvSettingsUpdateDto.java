@@ -8,7 +8,7 @@ import java.util.List;
  * The {@link TvSettingsUpdateDto} class defines the Data Transfer Object
  * for the Philips TV API /menuitems/settings/update endpoint to update settings of the tv, e.g. turning on/off ambilight hue power.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class TvSettingsUpdateDto {
 

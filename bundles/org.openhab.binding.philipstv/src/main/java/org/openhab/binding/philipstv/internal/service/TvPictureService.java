@@ -24,7 +24,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.T
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.UPDATE_SETTINGS_PATH;
 
 /**
- * @author Benjamin Meyer - inital contribution
+ * @author Benjamin Meyer - Inital contribution
  */
 public class TvPictureService implements PhilipsTvService {
 

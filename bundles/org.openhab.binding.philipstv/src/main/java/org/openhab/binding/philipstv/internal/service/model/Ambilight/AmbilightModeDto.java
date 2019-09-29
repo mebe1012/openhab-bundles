@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <p> manual: The cached ambilight colours are shown.
  * <p> expert: The cached ambilight colours are used as input for the internal ambilight algorithm
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class AmbilightModeDto {
 

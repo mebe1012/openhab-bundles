@@ -9,7 +9,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.P
  * The {@link AmbilightPowerDto} class defines the Data Transfer Object
  * for the Philips TV API /ambilight/power endpoint to retrieve or set the current power state.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class AmbilightPowerDto {
 

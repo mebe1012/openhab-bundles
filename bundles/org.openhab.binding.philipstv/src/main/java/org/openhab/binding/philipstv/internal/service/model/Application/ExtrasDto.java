@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Part of {@link IntentDto}
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class ExtrasDto {
 

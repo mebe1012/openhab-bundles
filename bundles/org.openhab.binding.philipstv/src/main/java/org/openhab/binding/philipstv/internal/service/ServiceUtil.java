@@ -15,7 +15,7 @@ import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MA
 /**
  * Util class for common used methods from philips tv services
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 final class ServiceUtil {
 

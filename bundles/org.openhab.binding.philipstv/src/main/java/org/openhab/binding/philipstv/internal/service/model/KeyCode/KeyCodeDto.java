@@ -6,7 +6,8 @@ import org.openhab.binding.philipstv.internal.service.KeyCode;
 /**
  * The {@link KeyCodeDto} class defines the Data Transfer Object
  * for the Philips TV API /input/key endpoint for remote controller emulation.
- * @author Benjamin Meyer - initial contribution
+ *
+ * @author Benjamin Meyer - Initial contribution
  */
 public class KeyCodeDto {
 

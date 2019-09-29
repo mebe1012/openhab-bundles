@@ -7,7 +7,8 @@ import java.util.List;
 /**
  * The {@link AvailableTvChannelsDto} class defines the Data Transfer Object
  * for the Philips TV API channeldb/tv/channelLists/all endpoint for retrieving all tv channels.
- * @author Benjamin Meyer - initial contribution
+ *
+ * @author Benjamin Meyer - Initial contribution
  */
 public class AvailableTvChannelsDto {
 

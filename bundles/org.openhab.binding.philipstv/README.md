@@ -15,6 +15,7 @@ Afterwards the one-time pairing process must be worked through.
 
 
 You need to pair your TV first, in order to control it:
+
 1.  As soon as you add the discovered TV in your inbox as a Thing, the pairing process will start.
 2.  A Pairing Code will be presented on your TV.
 3.  Go to the created Thing (in PaperUI: Configuration > Things) and set the Pairing Code as a Configuration Parameter.

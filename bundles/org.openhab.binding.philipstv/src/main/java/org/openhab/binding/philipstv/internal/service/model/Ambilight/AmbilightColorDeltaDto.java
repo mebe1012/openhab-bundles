@@ -1,7 +1,6 @@
 package org.openhab.binding.philipstv.internal.service.model.Ambilight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Generated;
 
 public class AmbilightColorDeltaDto {
 

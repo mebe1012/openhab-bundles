@@ -21,6 +21,11 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.L
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
+/**
+ * Service for toggling the Google Assistant on the Philips TV
+ *
+ * @author Benjamin Meyer - Initial contribution
+ */
 public class SearchContentService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

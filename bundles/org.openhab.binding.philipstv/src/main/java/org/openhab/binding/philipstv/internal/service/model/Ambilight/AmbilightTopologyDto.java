@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <p> right (integer): The number of pixels on the right.
  * <p> bottom (integer): The number of pixels on the bottom.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class AmbilightTopologyDto {
 

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The {@link VolumeDto} class defines the Data Transfer Object
  * for the Philips TV API /audio/volume endpoint.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class VolumeDto {
 

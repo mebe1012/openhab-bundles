@@ -8,7 +8,7 @@ import java.util.List;
  * The {@link RequestCodeDto} class defines the Data Transfer Object
  * for the Philips TV API /pair/request endpoint to request a pairing code.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class RequestCodeDto {
 

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The {@link TvChannelDto} class defines the Data Transfer Object
  * for the Philips TV API /activities/tv endpoint to get and switch tv channels.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class TvChannelDto {
 

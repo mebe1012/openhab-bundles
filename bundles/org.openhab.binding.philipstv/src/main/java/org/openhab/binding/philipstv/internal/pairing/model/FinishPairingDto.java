@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The {@link FinishPairingDto} class defines the Data Transfer Object
  * for the Philips TV API /pair/grant endpoint to finish pairing.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class FinishPairingDto {
 

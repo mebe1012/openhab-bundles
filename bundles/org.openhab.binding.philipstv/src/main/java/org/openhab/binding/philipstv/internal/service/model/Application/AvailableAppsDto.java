@@ -7,7 +7,8 @@ import java.util.List;
 /**
  * The {@link AvailableAppsDto} class defines the Data Transfer Object
  * for the Philips TV API /applications endpoint for retrieving all installed apps.
- * @author Benjamin Meyer - initial contribution
+ *
+ * @author Benjamin Meyer - Initial contribution
  */
 public class AvailableAppsDto {
 

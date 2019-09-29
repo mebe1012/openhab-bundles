@@ -8,7 +8,7 @@ import java.util.List;
  * The {@link TvSettingsCurrentDto} class defines the Data Transfer Object
  * for the POST Request to Philips TV API /menuitems/settings/current endpoint to retrieve current settings of the tv, e.g. the tv picture brightness.
  *
- * @author Benjamin Meyer - initial contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class TvSettingsCurrentDto {
 
