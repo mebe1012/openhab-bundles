@@ -36,6 +36,7 @@ import org.openhab.binding.philipstv.internal.service.KeyCodeService;
 import org.openhab.binding.philipstv.internal.service.PowerService;
 import org.openhab.binding.philipstv.internal.service.SearchContentService;
 import org.openhab.binding.philipstv.internal.service.TvChannelService;
+import org.openhab.binding.philipstv.internal.service.TvPictureService;
 import org.openhab.binding.philipstv.internal.service.VolumeService;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.slf4j.Logger;
@@ -56,17 +57,24 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_BOTTOM_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LEFT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_RIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_TOP_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_BRIGHTNESS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_CONTRAST;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_KEY_CODE;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_MUTE;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_PLAYER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SEARCH_CONTENT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SHARPNESS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
@@ -201,6 +209,11 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         services.put(CHANNEL_VOLUME, volumeService);
         services.put(CHANNEL_MUTE, volumeService);
 
+        PhilipsTvService tvPictureService = new TvPictureService(this, connectionManager);
+        services.put(CHANNEL_BRIGHTNESS, tvPictureService);
+        services.put(CHANNEL_SHARPNESS, tvPictureService);
+        services.put(CHANNEL_CONTRAST, tvPictureService);
+
         PhilipsTvService keyCodeService = new KeyCodeService(this, connectionManager);
         services.put(CHANNEL_KEY_CODE, keyCodeService);
         services.put(CHANNEL_PLAYER, keyCodeService);
@@ -214,6 +227,10 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         services.put(CHANNEL_AMBILIGHT_HUE_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_STYLE, ambilightService);
         services.put(CHANNEL_AMBILIGHT_COLOR, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_LEFT_COLOR, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_RIGHT_COLOR, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_TOP_COLOR, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_BOTTOM_COLOR, ambilightService);
 
         services.put(CHANNEL_TV_CHANNEL, new TvChannelService(this, connectionManager));
         services.put(CHANNEL_POWER, new PowerService(this, connectionManager));

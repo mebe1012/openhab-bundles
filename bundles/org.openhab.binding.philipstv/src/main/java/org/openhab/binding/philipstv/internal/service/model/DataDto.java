@@ -1,22 +1,22 @@
-package org.openhab.binding.philipstv.internal.service.model.Ambilight;
+package org.openhab.binding.philipstv.internal.service.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Part of {@link AmbilightHuePowerDto}
+ * Part of {@link TvSettingsUpdateDto}
  *
  * @author Benjamin Meyer - initial contribution
  */
 public class DataDto {
 
     @JsonProperty
-    private String value;
+    private Object value; // can be int or string
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 

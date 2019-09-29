@@ -29,6 +29,9 @@ public final class PhilipsTvBindingConstants {
     public static final String CHANNEL_VOLUME = "volume";
     public static final String CHANNEL_POWER = "power";
     public static final String CHANNEL_MUTE = "mute";
+    public static final String CHANNEL_BRIGHTNESS = "brightness";
+    public static final String CHANNEL_CONTRAST = "contrast";
+    public static final String CHANNEL_SHARPNESS = "sharpness";
     public static final String CHANNEL_KEY_CODE = "keyCode";
     public static final String CHANNEL_APP_NAME = "appName";
     public static final String CHANNEL_APP_ICON = "appIcon";
@@ -39,6 +42,10 @@ public final class PhilipsTvBindingConstants {
     public static final String CHANNEL_AMBILIGHT_HUE_POWER = "ambilightHuePower";
     public static final String CHANNEL_AMBILIGHT_STYLE = "ambilightStyle";
     public static final String CHANNEL_AMBILIGHT_COLOR = "ambilightColor";
+    public static final String CHANNEL_AMBILIGHT_LEFT_COLOR = "ambilightLeftColor";
+    public static final String CHANNEL_AMBILIGHT_RIGHT_COLOR = "ambilightRightColor";
+    public static final String CHANNEL_AMBILIGHT_TOP_COLOR = "ambilightTopColor";
+    public static final String CHANNEL_AMBILIGHT_BOTTOM_COLOR = "ambilightBottomColor";
 
     // Config Parameters
     public static final String HOST = "host";
@@ -52,9 +59,9 @@ public final class PhilipsTvBindingConstants {
     public static final String HTTPS = "https";
 
     // Timeout values
-    public static final int CONNECT_TIMEOUT = 3 * 1000;
+    static final int CONNECT_TIMEOUT = 3 * 1000;
 
-    public static final int SOCKET_TIMEOUT = 1 * 1000;
+    static final int SOCKET_TIMEOUT = 1 * 1000;
 
     // Default port for jointspace v6
     public static final int DEFAULT_PORT = 1926;
@@ -67,7 +74,7 @@ public final class PhilipsTvBindingConstants {
     // REST Paths
     public static final String SLASH = "/";
 
-    public static final String API_VERSION = "6";
+    private static final String API_VERSION = "6";
 
     public static final String BASE_PATH = SLASH + API_VERSION + SLASH;
 
@@ -79,7 +86,7 @@ public final class PhilipsTvBindingConstants {
 
     public static final String GET_AVAILABLE_APP_LIST_PATH = BASE_PATH + "applications";
 
-    public static final String ACTIVITIES_BASE_PATH = BASE_PATH + "activities" + SLASH;
+    private static final String ACTIVITIES_BASE_PATH = BASE_PATH + "activities" + SLASH;
 
     public static final String GET_AVAILABLE_TV_CHANNEL_LIST_PATH =
             BASE_PATH + "channeldb" + SLASH + "tv" + SLASH + "channelLists" + SLASH + "all";
@@ -88,15 +95,19 @@ public final class PhilipsTvBindingConstants {
     public static final String GET_CURRENT_APP_PATH = ACTIVITIES_BASE_PATH + "current";
     public static final String LAUNCH_APP_PATH = ACTIVITIES_BASE_PATH + "launch";
 
-    public static final String AMBILIGHT_BASE_PATH = BASE_PATH + "ambilight" + SLASH;
+    private static final String AMBILIGHT_BASE_PATH = BASE_PATH + "ambilight" + SLASH;
     public static final String AMBILIGHT_POWERSTATE_PATH = AMBILIGHT_BASE_PATH + "power";
     public static final String AMBILIGHT_CONFIG_PATH = AMBILIGHT_BASE_PATH + "currentconfiguration";
     public static final String AMBILIGHT_MODE_PATH = AMBILIGHT_BASE_PATH + "mode";
+    public static final String AMBILIGHT_CACHED_PATH = AMBILIGHT_BASE_PATH + "cached";
+    public static final String AMBILIGHT_TOPOLOGY_PATH = AMBILIGHT_BASE_PATH + "topology";
 
-    public static final String UPDATE_SETTINGS_PATH = BASE_PATH + "menuitems" + SLASH + "settings" + SLASH + "update";
+    private static final String SETTINGS_BASE_PATH = BASE_PATH + "menuitems" + SLASH + "settings" + SLASH;
+    public static final String UPDATE_SETTINGS_PATH = SETTINGS_BASE_PATH + "update";
+    public static final String CURRENT_SETTINGS_PATH = SETTINGS_BASE_PATH + "current";
+    public static final String STRUCTURE_SETTINGS_PATH = SETTINGS_BASE_PATH + "structure";
 
     // Logging messages
     public static final String TV_OFFLINE_MSG = "TV is not reachable and should therefore be off.";
-
     public static final String TV_NOT_LISTENING_MSG = "TV does not accept commands at the moment.";
 }

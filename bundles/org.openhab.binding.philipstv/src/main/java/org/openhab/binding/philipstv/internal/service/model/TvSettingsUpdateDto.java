@@ -1,16 +1,16 @@
-package org.openhab.binding.philipstv.internal.service.model.Ambilight;
+package org.openhab.binding.philipstv.internal.service.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 /**
- * The {@link AmbilightHuePowerDto} class defines the Data Transfer Object
- * for the Philips TV API /menuitems/settings/update endpoint to update the config for controlling ambilight hue power.
+ * The {@link TvSettingsUpdateDto} class defines the Data Transfer Object
+ * for the Philips TV API /menuitems/settings/update endpoint to update settings of the tv, e.g. turning on/off ambilight hue power.
  *
  * @author Benjamin Meyer - initial contribution
  */
-public class AmbilightHuePowerDto {
+public class TvSettingsUpdateDto {
 
     @JsonProperty
     private List<ValuesDto> values;
@@ -25,6 +25,6 @@ public class AmbilightHuePowerDto {
 
     @Override
     public String toString() {
-        return "AmbilightHuePowerDto{" + "values = '" + values + '\'' + "}";
+        return "TvSettingsDto{" + "values = '" + values + '\'' + "}";
     }
 }

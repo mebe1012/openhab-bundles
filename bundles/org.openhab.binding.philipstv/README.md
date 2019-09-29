@@ -9,7 +9,7 @@ Only Philips TVs produced in the year 2016 or later, using the Android TV OS.
 
 The TV must be turned on in order to be discovered. It will be initial named after its TV model description.
  
- Afterwards the one-time pairing process must be worked through.
+Afterwards the one-time pairing process must be worked through.
 
 ## Thing Configuration
 
@@ -37,7 +37,16 @@ TVs support the following channels:
 | keyCode          | String    | The key code channel emulates the infrared remote controller and allows to send virtual button presses. |
 | ambilightPower   | Switch    | Ambilight power control.                        | 
 | ambilightHuePower| Switch    | Ambilight + Hue power control.                        |
-
+| ambilightStyle   | String    | Ambilight Style plus Algorithm used, e.g. "FOLLOW_VIDEO STANDARD" or "FOLLOW_COLOR HOT_LAVA".           |
+| ambilightColor   | Color     | Color for all Ambilight Sides. Changing this color will affect all sides at once.                       |
+| ambilightLeftColor| Color    | Color for left Ambilight Side. Changing this color will affect the left side.                           |
+| ambilightRightColor| Color   | Color for right Ambilight Side. Changing this color will affect the right side.                         |
+| ambilightTopColor| Color     | Color for top Ambilight Side. Changing this color will affect the top side.                             |
+| ambilightBottomColor| Color  | Color for bottom Ambilight Side. Changing this color will affect the bottom side.                       |
+| brightness       | Dimmer    | Brightness of the TV picture.                                                                           |
+| contrast         | Dimmer    | Contrast of the TV picture.                                                                             |
+| sharpness        | Dimmer    | Sharpness of the TV picture.                                                                            |
+| volume           | Number    | Volume level of the TV.                                                                                 |
 ## Full Example
 
 ```
@@ -52,4 +61,13 @@ Player PhilipsTV_Player "Philips TV - Player" {channel="philipstv:tv:5AFEF00D_BA
 String PhilipsTV_Search_Content "Philips TV - Search Content" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:searchContent"}
 Switch PhilipsTV_Ambilight_Power "Philips TV - Ambilight Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightPower"}
 Switch PhilipsTV_Ambilight_Hue_Power "Philips TV - Ambilight Hue Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightHuePower"}
+String PhilipsTV_Ambilight_Style "Philips TV - Ambilight Style" (Fernseher) {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightStyle"}
+Color PhilipsTv_AmbilightAllColor "Philips TV - All Sides Ambilight Color" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightColor"}
+Color PhilipsTv_AmbilightLeftColor "Philips TV - Left Side Ambilight Color" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightLeftColor"}
+Color PhilipsTv_AmbilightRightColor "Philips TV - Right Side Ambilight Color" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightRightColor"}
+Color PhilipsTv_AmbilightTopColor "Philips TV - Top Side Ambilight Color" (Fernseher) {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightTopColor"}
+Color PhilipsTv_AmbilightBottomColor "Philips TV - Bottom Side Ambilight Color" (Fernseher) {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightBottomColor"}
+Dimmer PhilipsTv_Brightness "Philips TV - Brightness" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:brightness"}
+Dimmer PhilipsTv_Contrast "Philips TV - Contrast" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:contrast"}
+Dimmer PhilipsTv_Sharpness "Philips TV - Sharpness" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:sharpness"}
 ```
