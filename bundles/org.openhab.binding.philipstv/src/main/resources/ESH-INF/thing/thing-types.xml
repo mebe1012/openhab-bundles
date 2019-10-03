@@ -200,34 +200,35 @@
 
     <channel-type id="ambilightColor" advanced="true">
         <item-type>Color</item-type>
-        <label>All Sides Ambilight Color</label>
+        <label>All Ambilight</label>
         <description>Sets the Ambilight color for all sides.</description>
         <category>Ambilight</category>
     </channel-type>
 
     <channel-type id="ambilightLeftColor" advanced="true">
         <item-type>Color</item-type>
-        <label>Left Side Ambilight Color</label>
+        <label>Left Ambilight</label>
         <description>Sets the Ambilight color for the left side.</description>
         <category>Ambilight</category>
     </channel-type>
 
     <channel-type id="ambilightRightColor" advanced="true">
         <item-type>Color</item-type>
-        <label>Right Side Ambilight Color</label>
+        <label>Right Ambilight</label>
         <description>Sets the Ambilight color for the right side.</description>
         <category>Ambilight</category>
     </channel-type>
 
     <channel-type id="ambilightTopColor" advanced="true">
         <item-type>Color</item-type>
-        <label>Top Side Ambilight Color</label>
+        <label>Top Ambilight</label>
         <description>Sets the Ambilight color for the top.</description>
+        <category>Ambilight</category>
     </channel-type>
 
     <channel-type id="ambilightBottomColor" advanced="true">
         <item-type>Color</item-type>
-        <label>Bottom Side Ambilight Color</label>
+        <label>Bottom Ambilight</label>
         <description>Sets the Ambilight color for the bottom.</description>
         <category>Ambilight</category>
     </channel-type>
