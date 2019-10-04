@@ -21,22 +21,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class NodesDto {
 
-	@JsonProperty("nodeid")
-	private int nodeid;
+    @JsonProperty("nodeid")
+    private int nodeid;
 
-	public void setNodeid(int nodeid){
-		this.nodeid = nodeid;
-	}
+    public void setNodeid(int nodeid) {
+        this.nodeid = nodeid;
+    }
 
-	public int getNodeid(){
-		return nodeid;
-	}
+    public int getNodeid() {
+        return nodeid;
+    }
 
-	@Override
- 	public String toString(){
-		return 
-			"NodesItem{" + 
-			"nodeid = '" + nodeid + '\'' + 
-			"}";
-		}
+    @Override
+    public String toString() {
+        return "NodesItem{" + "nodeid = '" + nodeid + '\'' + "}";
+    }
 }

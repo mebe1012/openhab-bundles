@@ -24,17 +24,17 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightColorDeltaDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightColorDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightColorSettingsDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightConfigDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightModeDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightPowerDto;
-import org.openhab.binding.philipstv.internal.service.model.Ambilight.AmbilightTopologyDto;
 import org.openhab.binding.philipstv.internal.service.model.DataDto;
 import org.openhab.binding.philipstv.internal.service.model.TvSettingsUpdateDto;
 import org.openhab.binding.philipstv.internal.service.model.ValueDto;
 import org.openhab.binding.philipstv.internal.service.model.ValuesDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightColorDeltaDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightColorDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightColorSettingsDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightConfigDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightModeDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightPowerDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightTopologyDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +64,11 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.T
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.UPDATE_SETTINGS_PATH;
 
+/**
+ * Service for handling commands regarding Ambilight settings of the TV
+ *
+ * @author Benjamin Meyer - Initial contribution
+ */
 public class AmbilightService implements PhilipsTvService {
 
     private static final List<String> AMBILIGHT_COLOR_CHANNELS = Stream.of(CHANNEL_AMBILIGHT_COLOR,

@@ -20,9 +20,9 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.Application.ExtrasDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.IntentDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.LaunchAppDto;
+import org.openhab.binding.philipstv.internal.service.model.application.ExtrasDto;
+import org.openhab.binding.philipstv.internal.service.model.application.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.LaunchAppDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.philipstv.internal.service.model.Application;
+package org.openhab.binding.philipstv.internal.service.model.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

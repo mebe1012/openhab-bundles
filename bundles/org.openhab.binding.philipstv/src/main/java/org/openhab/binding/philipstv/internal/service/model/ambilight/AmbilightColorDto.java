@@ -10,10 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.philipstv.internal.service.model.Ambilight;
+package org.openhab.binding.philipstv.internal.service.model.ambilight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Part of {@link AmbilightColorSettingsDto}
+ *
+ * @author Benjamin Meyer - Initial contribution
+ */
 public class AmbilightColorDto {
 
     @JsonProperty("saturation")

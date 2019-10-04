@@ -10,30 +10,31 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.philipstv.internal.service.model.Application;
+package org.openhab.binding.philipstv.internal.service.model.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Part of {@link IntentDto}
+ * The {@link LaunchAppDto} class defines the Data Transfer Object
+ * for the Philips TV API /activities/launch endpoint for launching TV apps and launching search for content.
  *
  * @author Benjamin Meyer - Initial contribution
  */
-public class ExtrasDto {
+public class LaunchAppDto {
 
     @JsonProperty
-    private String query;
+    private IntentDto intent;
 
-    public void setQuery(String query) {
-        this.query = query;
+    public void setIntent(IntentDto intent) {
+        this.intent = intent;
     }
 
-    public String getQuery() {
-        return query;
+    public IntentDto getIntent() {
+        return intent;
     }
 
     @Override
     public String toString() {
-        return "Extras{" + "query = '" + query + '\'' + "}";
+        return "LaunchAppDto{" + "intent = '" + intent + '\'' + "}";
     }
 }

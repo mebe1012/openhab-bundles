@@ -38,7 +38,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.U
 /**
  * Service for handling commands regarding the TV picture settings
  *
- * @author Benjamin Meyer - Inital contribution
+ * @author Benjamin Meyer - Initial contribution
  */
 public class TvPictureService implements PhilipsTvService {
 

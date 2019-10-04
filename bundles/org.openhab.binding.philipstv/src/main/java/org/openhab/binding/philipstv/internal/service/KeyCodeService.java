@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.KeyCode.KeyCodeDto;
+import org.openhab.binding.philipstv.internal.service.model.keycode.KeyCodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

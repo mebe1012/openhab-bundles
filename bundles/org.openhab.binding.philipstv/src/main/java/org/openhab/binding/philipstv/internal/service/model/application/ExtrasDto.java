@@ -10,31 +10,30 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.philipstv.internal.service.model.Application;
+package org.openhab.binding.philipstv.internal.service.model.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The {@link LaunchAppDto} class defines the Data Transfer Object
- * for the Philips TV API /activities/current endpoint for retrieving the current running TV app.
+ * Part of {@link IntentDto}
  *
  * @author Benjamin Meyer - Initial contribution
  */
-public class CurrentAppDto {
+public class ExtrasDto {
 
     @JsonProperty
-    private ComponentDto component;
+    private String query;
 
-    public void setComponent(ComponentDto component) {
-        this.component = component;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
-    public ComponentDto getComponent() {
-        return component;
+    public String getQuery() {
+        return query;
     }
 
     @Override
     public String toString() {
-        return "Intent{" + "component = '" + component + "}";
+        return "Extras{" + "query = '" + query + '\'' + "}";
     }
 }

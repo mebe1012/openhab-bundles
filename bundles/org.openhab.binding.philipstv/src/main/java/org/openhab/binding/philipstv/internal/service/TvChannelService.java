@@ -20,10 +20,10 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.TvChannel.AvailableTvChannelsDto;
-import org.openhab.binding.philipstv.internal.service.model.TvChannel.ChannelDto;
-import org.openhab.binding.philipstv.internal.service.model.TvChannel.ChannelListDto;
-import org.openhab.binding.philipstv.internal.service.model.TvChannel.TvChannelDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.AvailableTvChannelsDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.ChannelDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.ChannelListDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.TvChannelDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +41,11 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.T
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
+/**
+ * Service for handling commands regarding setting or retrieving the TV channel
+ *
+ * @author Benjamin Meyer - Initial contribution
+ */
 public class TvChannelService implements PhilipsTvService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

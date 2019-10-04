@@ -23,12 +23,12 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.Application.ApplicationsDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.AvailableAppsDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.ComponentDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.CurrentAppDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.IntentDto;
-import org.openhab.binding.philipstv.internal.service.model.Application.LaunchAppDto;
+import org.openhab.binding.philipstv.internal.service.model.application.ApplicationsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.AvailableAppsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.ComponentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.CurrentAppDto;
+import org.openhab.binding.philipstv.internal.service.model.application.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.LaunchAppDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

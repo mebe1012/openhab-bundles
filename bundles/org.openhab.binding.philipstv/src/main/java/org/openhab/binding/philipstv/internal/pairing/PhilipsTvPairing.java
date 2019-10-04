@@ -76,9 +76,7 @@ public class PhilipsTvPairing {
     private final String pairingBasePath = BASE_PATH + "pair" + SLASH;
 
     public void requestPairingPin(HttpHost target)
-            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
-            CertificateException {
-
+            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RequestCodeDto requestCodeDto = new RequestCodeDto();
         requestCodeDto.setScope(Stream.of("read", "write", "control").collect(Collectors.toList()));
         requestCodeDto.setDevice(createDeviceSpecification());
