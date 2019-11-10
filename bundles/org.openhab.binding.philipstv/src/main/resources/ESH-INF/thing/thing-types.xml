@@ -24,6 +24,7 @@
             <channel id="searchContent" typeId="searchContent"/>
             <channel id="ambilightPower" typeId="ambilightPower"/>
             <channel id="ambilightHuePower" typeId="ambilightHuePower"/>
+            <channel id="ambilightLoungePower" typeId="ambilightLoungePower"/>
             <channel id="ambilightStyle" typeId="ambilightStyle"/>
             <channel id="ambilightColor" typeId="ambilightColor"/>
             <channel id="ambilightLeftColor" typeId="ambilightLeftColor"/>
@@ -159,6 +160,13 @@
         <item-type>Switch</item-type>
         <label>Ambilight + Hue Power</label>
         <description>Ambilight + Hue power. Turns ambilight with connected Philips Hue Lamps on or off.</description>
+        <category>Ambilight</category>
+    </channel-type>
+
+    <channel-type id="ambilightLoungePower">
+        <item-type>Switch</item-type>
+        <label>Ambilight Lounge Power</label>
+        <description>Ambilight lounge power. Turns ambilight lounge on or off.</description>
         <category>Ambilight</category>
     </channel-type>
 

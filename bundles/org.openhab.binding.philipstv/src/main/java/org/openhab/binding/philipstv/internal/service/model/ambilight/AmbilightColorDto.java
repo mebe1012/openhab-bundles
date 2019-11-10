@@ -13,6 +13,7 @@
 package org.openhab.binding.philipstv.internal.service.model.ambilight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.smarthome.core.library.types.HSBType;
 
 /**
  * Part of {@link AmbilightColorSettingsDto}
@@ -29,6 +30,15 @@ public class AmbilightColorDto {
 
     @JsonProperty("hue")
     private int hue;
+
+    public AmbilightColorDto() {
+    }
+
+    public AmbilightColorDto(HSBType hsb) {
+        hue = hsb.getHue().intValue() * 255 / 360;
+        saturation = hsb.getSaturation().intValue() * 255 / 100;
+        brightness = hsb.getBrightness().intValue() * 255 / 100;
+    }
 
     public void setSaturation(int saturation) {
         this.saturation = saturation;

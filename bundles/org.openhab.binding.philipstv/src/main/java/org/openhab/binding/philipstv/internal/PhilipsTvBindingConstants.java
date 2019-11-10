@@ -45,6 +45,7 @@ public final class PhilipsTvBindingConstants {
     public static final String CHANNEL_SEARCH_CONTENT = "searchContent";
     public static final String CHANNEL_AMBILIGHT_POWER = "ambilightPower";
     public static final String CHANNEL_AMBILIGHT_HUE_POWER = "ambilightHuePower";
+    public static final String CHANNEL_AMBILIGHT_LOUNGE_POWER = "ambilightLoungePower";
     public static final String CHANNEL_AMBILIGHT_STYLE = "ambilightStyle";
     public static final String CHANNEL_AMBILIGHT_COLOR = "ambilightColor";
     public static final String CHANNEL_AMBILIGHT_LEFT_COLOR = "ambilightLeftColor";
@@ -64,9 +65,9 @@ public final class PhilipsTvBindingConstants {
     public static final String HTTPS = "https";
 
     // Timeout values
-    static final int CONNECT_TIMEOUT = 3 * 1000;
+    static final int CONNECT_TIMEOUT_MILLISECONDS = 3 * 1000;
 
-    static final int SOCKET_TIMEOUT = 1 * 1000;
+    static final int SOCKET_TIMEOUT_MILLISECONDS = 1 * 1000;
 
     // Default port for jointspace v6
     public static final int DEFAULT_PORT = 1926;
@@ -106,6 +107,7 @@ public final class PhilipsTvBindingConstants {
     public static final String AMBILIGHT_MODE_PATH = AMBILIGHT_BASE_PATH + "mode";
     public static final String AMBILIGHT_CACHED_PATH = AMBILIGHT_BASE_PATH + "cached";
     public static final String AMBILIGHT_TOPOLOGY_PATH = AMBILIGHT_BASE_PATH + "topology";
+    public static final String AMBILIGHT_LOUNGE_PATH = AMBILIGHT_BASE_PATH + "lounge";
 
     private static final String SETTINGS_BASE_PATH = BASE_PATH + "menuitems" + SLASH + "settings" + SLASH;
     public static final String UPDATE_SETTINGS_PATH = SETTINGS_BASE_PATH + "update";

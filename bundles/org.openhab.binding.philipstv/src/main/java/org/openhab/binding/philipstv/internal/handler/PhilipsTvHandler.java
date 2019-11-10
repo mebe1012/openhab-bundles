@@ -66,6 +66,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LEFT_COLOR;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LOUNGE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_RIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
@@ -134,7 +135,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             return; // pairing process is not finished
         }
 
-        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER))) {
+        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER) & !channelUID.getId().equals(CHANNEL_AMBILIGHT_LOUNGE_POWER))) {
             // Check if tv turned on meanwhile
             channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
@@ -230,6 +231,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         PhilipsTvService ambilightService = new AmbilightService(this, connectionManager);
         services.put(CHANNEL_AMBILIGHT_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_HUE_POWER, ambilightService);
+        services.put(CHANNEL_AMBILIGHT_LOUNGE_POWER, ambilightService);
         services.put(CHANNEL_AMBILIGHT_STYLE, ambilightService);
         services.put(CHANNEL_AMBILIGHT_COLOR, ambilightService);
         services.put(CHANNEL_AMBILIGHT_LEFT_COLOR, ambilightService);

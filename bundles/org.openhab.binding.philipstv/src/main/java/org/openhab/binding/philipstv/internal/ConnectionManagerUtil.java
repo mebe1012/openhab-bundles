@@ -34,9 +34,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT_MILLISECONDS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT_MILLISECONDS;
 
 /**
  * The {@link ConnectionManagerUtil} is offering methods for connection specific processes.
@@ -54,8 +54,8 @@ public final class ConnectionManagerUtil {
         credProvider.setCredentials(new AuthScope(target.getHostName(), target.getPort()),
                 new UsernamePasswordCredentials(username, password));
 
-        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(CONNECT_TIMEOUT).setSocketTimeout(
-                SOCKET_TIMEOUT).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(CONNECT_TIMEOUT_MILLISECONDS).setSocketTimeout(
+                SOCKET_TIMEOUT_MILLISECONDS).build();
 
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(getSslConnectionWithoutCertValidation(),
                 NoopHostnameVerifier.INSTANCE);

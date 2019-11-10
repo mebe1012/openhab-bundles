@@ -32,6 +32,7 @@ import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightC
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightColorDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightColorSettingsDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightConfigDto;
+import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightLoungeDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightModeDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightPowerDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightTopologyDto;
@@ -48,6 +49,7 @@ import java.util.stream.Stream;
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CACHED_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CONFIG_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_LOUNGE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_MODE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_POWERSTATE_PATH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_TOPOLOGY_PATH;
@@ -55,6 +57,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LEFT_COLOR;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LOUNGE_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_RIGHT_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
@@ -77,6 +80,7 @@ public class AmbilightService implements PhilipsTvService {
     private static final int AMBILIGHT_HUE_NODE_ID = 2131230774;
     private static final int AMBILIGHT_BRIGHTNESS_NODE_ID = 2131230769;
     private static final String AMBILIGHT_MODE_MANUAL = "manual";
+    private static final String AMBILIGHT_MODE_DEFAULT = "default";
     private static final String AMBILIGHT_STYLE_FOLLOW_VIDEO = "FOLLOW_VIDEO";
     private static final String AMBILIGHT_STYLE_FOLLOW_COLOR = "FOLLOW_COLOR";
     private static final String AMBILIGHT_ALGORITHM_MANUAL_HUE = "MANUAL HUE";
@@ -105,6 +109,8 @@ public class AmbilightService implements PhilipsTvService {
                         ambilightPowerDto.isPoweredOn() ? OnOffType.ON : OnOffType.OFF);
             } else if (CHANNEL_AMBILIGHT_HUE_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightHuePowerState(command);
+            } else if (CHANNEL_AMBILIGHT_LOUNGE_POWER.equals(channel) && (command instanceof OnOffType)){
+                setAmbilightLoungePowerState(command);
             } else if (CHANNEL_AMBILIGHT_STYLE.equals(channel) && (command instanceof StringType)) {
                 setAmbilightStyle(command.toString());
             } else if (CHANNEL_AMBILIGHT_STYLE.equals(channel) && (command instanceof RefreshType)) {
@@ -173,6 +179,20 @@ public class AmbilightService implements PhilipsTvService {
         String ambilightHuePowerJson = OBJECT_MAPPER.writeValueAsString(ambilightHuePower);
         logger.debug("Post Ambilight hue power state json: {}", ambilightHuePowerJson);
         connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, ambilightHuePowerJson);
+    }
+
+    private void setAmbilightLoungePowerState(Command command) throws IOException {
+        AmbilightLoungeDto ambilightLoungeDto = new AmbilightLoungeDto();
+
+        AmbilightColorDto ambilightColorDto = new AmbilightColorDto();
+        if(command.equals(OnOffType.OFF)) {
+            ambilightColorDto.setHue(255); // 0 = ON / 255 = OFF
+        }
+        ambilightLoungeDto.setColor(ambilightColorDto);
+
+        String setAmbilightLoungeJson = OBJECT_MAPPER.writeValueAsString(ambilightLoungeDto);
+        logger.debug("Setting ambilight lounge power state json: {}", setAmbilightLoungeJson);
+        connectionManager.doHttpsPost(AMBILIGHT_LOUNGE_PATH, setAmbilightLoungeJson);
     }
 
     private void setAmbilightStyle(String styleToSet) throws IOException {
@@ -289,11 +309,7 @@ public class AmbilightService implements PhilipsTvService {
 
         AmbilightColorSettingsDto ambilightColorSettings = new AmbilightColorSettingsDto();
 
-        AmbilightColorDto ambilightColor = new AmbilightColorDto();
-        ambilightColor.setHue(hsb.getHue().intValue() * 255 / 360);
-        ambilightColor.setSaturation(hsb.getSaturation().intValue() * 255 / 100);
-        ambilightColor.setBrightness(hsb.getBrightness().intValue() * 255 / 100);
-
+        AmbilightColorDto ambilightColor = new AmbilightColorDto(hsb);
         AmbilightColorDeltaDto ambilightColorDelta = new AmbilightColorDeltaDto();
         ambilightColorDelta.setHue(0);
         ambilightColorDelta.setSaturation(0);
@@ -309,4 +325,5 @@ public class AmbilightService implements PhilipsTvService {
         logger.debug("Setting ambilight colors json: {}", setAmbilightColorsJson);
         connectionManager.doHttpsPost(AMBILIGHT_CONFIG_PATH, setAmbilightColorsJson);
     }
+
 }
