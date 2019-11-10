@@ -62,6 +62,7 @@ Player PhilipsTV_Player "Philips TV - Player" {channel="philipstv:tv:5AFEF00D_BA
 String PhilipsTV_Search_Content "Philips TV - Search Content" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:searchContent"}
 Switch PhilipsTV_Ambilight_Power "Philips TV - Ambilight Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightPower"}
 Switch PhilipsTV_Ambilight_Hue_Power "Philips TV - Ambilight Hue Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightHuePower"}
+Switch PhilipsTV_Ambilight_Lounger_Power "Philips TV - Ambilight Lounge Power" (Fernseher) {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightLoungePower"}
 String PhilipsTV_Ambilight_Style "Philips TV - Ambilight Style" (Fernseher) {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightStyle"}
 Color PhilipsTv_AmbilightAllColor "Philips TV - All Sides Ambilight Color" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightColor"}
 Color PhilipsTv_AmbilightLeftColor "Philips TV - Left Side Ambilight Color" {channel="philipstv:tv:F00DBABE_AA5E_BABA_DADA_1c5a6bef9271:ambilightLeftColor"}
