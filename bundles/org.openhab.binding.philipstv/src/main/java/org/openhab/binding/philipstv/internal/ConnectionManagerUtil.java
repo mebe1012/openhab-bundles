@@ -16,6 +16,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -25,6 +26,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 
@@ -64,10 +66,12 @@ public final class ConnectionManagerUtil {
                 .register(HTTPS, sslsf).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+		
+		HttpRequestRetryHandler rh = new DefaultHttpRequestRetryHandler(0, false);
 
         return HttpClients.custom().setDefaultRequestConfig(requestConfig).setSSLSocketFactory(sslsf)
                 .setDefaultCredentialsProvider(credProvider).setConnectionManager(connManager)
-                .setConnectionManagerShared(true).build();
+                .setConnectionManagerShared(true).setRetryHandler(rh).build();
     }
 
     private static SSLContext getSslConnectionWithoutCertValidation()
