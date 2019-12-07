@@ -296,19 +296,14 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     public void postUpdateThing(ThingStatus status, ThingStatusDetail statusDetail, String msg) {
         if (status == ThingStatus.ONLINE) {
             updateState(CHANNEL_POWER, OnOffType.ON);
-            // Init refresh scheduler only, if pairing is completed
-            if (isSchedulerInitializable()) {
-                logger.debug("Creating Refresh Job for Philips TV: {}", getThing().getLabel());
-                logger.debug("Refresh rate from thing config is: {}", config.refreshRate);
+            if (isSchedulerInitializable()) { // Init refresh scheduler only, if pairing is completed
                 startRefreshScheduler();
             }
         } else if (status == ThingStatus.OFFLINE) {
             updateState(CHANNEL_POWER, OnOffType.OFF);
             if (!TV_NOT_LISTENING_MSG.equals(msg)) { // avoid cancelling refresh if TV is temporarily not available
                 if (config.useUpnpDiscovery && (refreshHandler != null) && !refreshHandler.isCancelled()) {
-                    logger.debug("Stopping Refresh Job for Philips TV: {}", getThing().getLabel());
-                    refreshHandler.cancel(true);
-                    refreshHandler = null;
+                    stopRefreshScheduler();
                 }
                 // Reset app and channel list (if existing) for new retrieval during next startup
                 if (channelServices != null) {
@@ -328,11 +323,17 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     private void startRefreshScheduler() {
         int configuredRefreshRateOrDefault = Optional.ofNullable(config.refreshRate).orElse(10);
         if (configuredRefreshRateOrDefault > 0) { // If value equals zero, refreshing should not be scheduled
-            logger.debug("Refresh Job for Philips TV {} with refresh rate of {}.", getThing().getLabel(),
+            logger.info("Starting Refresh Scheduler for Philips TV {} with refresh rate of {}.", getThing().getLabel(),
                     configuredRefreshRateOrDefault);
             refreshHandler = scheduler.scheduleWithFixedDelay(this::refreshTvProperties, 10,
                     configuredRefreshRateOrDefault, TimeUnit.SECONDS);
         }
+    }
+
+    private void stopRefreshScheduler() {
+        logger.info("Stopping Refresh Scheduler for Philips TV: {}", getThing().getLabel());
+        refreshHandler.cancel(true);
+        refreshHandler = null;
     }
 
     private void refreshTvProperties() {
@@ -404,9 +405,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         }
 
         if ((refreshHandler != null) && !refreshHandler.isCancelled()) {
-            logger.debug("Stopping Refresh Job for Philips TV: {}", getThing().getLabel());
-            refreshHandler.cancel(true);
-            refreshHandler = null;
+            stopRefreshScheduler();
         }
     }
 
