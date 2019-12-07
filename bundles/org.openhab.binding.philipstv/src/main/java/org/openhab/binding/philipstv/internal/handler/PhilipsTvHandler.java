@@ -172,6 +172,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     @Override
     public void initialize() {
         logger.debug("Init of handler for Thing: {}", getThing().getLabel());
+        config = getConfigAs(PhilipsTvConfiguration.class);
 
         if ((config.host == null) || (config.port == null)) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
