@@ -80,7 +80,6 @@ public class AmbilightService implements PhilipsTvService {
     private static final int AMBILIGHT_HUE_NODE_ID = 2131230774;
     private static final int AMBILIGHT_BRIGHTNESS_NODE_ID = 2131230769;
     private static final String AMBILIGHT_MODE_MANUAL = "manual";
-    private static final String AMBILIGHT_MODE_DEFAULT = "default";
     private static final String AMBILIGHT_STYLE_FOLLOW_VIDEO = "FOLLOW_VIDEO";
     private static final String AMBILIGHT_STYLE_FOLLOW_COLOR = "FOLLOW_COLOR";
     private static final String AMBILIGHT_ALGORITHM_MANUAL_HUE = "MANUAL HUE";

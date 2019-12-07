@@ -43,6 +43,14 @@
             </description>
             <advanced>true</advanced>
         </parameter>
+        <parameter name="useUpnpDiscovery" type="boolean">
+            <label>Use UPnP Discovery</label>
+            <description>
+                Enables UPnP Discovery. If disabled, constant HTTPS polling will happen.
+            </description>
+            <advanced>true</advanced>
+            <default>true</default>
+        </parameter>
     </config-description>
 
 </config-description:config-descriptions>

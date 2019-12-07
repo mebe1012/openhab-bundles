@@ -22,9 +22,10 @@ import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
-import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
+import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
 import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
 import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
@@ -95,10 +96,10 @@ public class PhilipsTvPairing {
         logger.info("The pairing code is valid for {} seconds.", pairingDto.getTimeout());
     }
 
-    public void finishPairingWithTv(PhilipsTvHandler handler, HttpHost target)
+    public void finishPairingWithTv(PhilipsTvConfiguration config, Configuration thingConfig, HttpHost target)
             throws NoSuchAlgorithmException, InvalidKeyException, IOException, KeyStoreException,
             KeyManagementException, CertificateException {
-        String pairingCode = handler.config.pairingCode;
+        String pairingCode = config.pairingCode;
         FinishPairingDto finishPairingDto = new FinishPairingDto();
         finishPairingDto.setDevice(createDeviceSpecification());
 
@@ -137,10 +138,10 @@ public class PhilipsTvPairing {
                 logger.debug("{}", jsonContent);
             }
 
-            handler.config.username = deviceId;
-            handler.getThing().getConfiguration().put(USERNAME, deviceId);
-            handler.config.password = authKey;
-            handler.getThing().getConfiguration().put(PASSWORD, authKey);
+            config.username = deviceId;
+            thingConfig.put(USERNAME, deviceId);
+            config.password = authKey;
+            thingConfig.put(PASSWORD, authKey);
         }
     }
 

@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-2019 Contributors to the openHAB project
- *
+ * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- *
+ * <p>
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- *
+ * <p>
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.handler;
@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -101,7 +100,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider;
 
-    public PhilipsTvConfiguration config;
+    private PhilipsTvConfiguration config;
 
     private ThingUID upnpThingUID;
 
@@ -115,15 +114,21 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         super(thing);
 
         logger.debug("Create a Philips TV Handler for thing '{}'", thing.getUID());
+        config = getConfigAs(PhilipsTvConfiguration.class);
+        logger.debug("UPnP discovery enabled: {}", config.useUpnpDiscovery);
 
-        if (discoveryServiceRegistry != null) {
-            logger.debug("Discovery servic registry was initialized.");
+        if (discoveryServiceRegistry != null && config.useUpnpDiscovery) {
+            logger.debug("Discovery service registry was initialized.");
             this.discoveryServiceRegistry = discoveryServiceRegistry;
         }
 
         if (stateDescriptionProvider != null) {
             logger.debug("State description was initialized.");
             this.stateDescriptionProvider = stateDescriptionProvider;
+        }
+
+        if (!config.useUpnpDiscovery) {
+            startRefreshScheduler();
         }
     }
 
@@ -135,7 +140,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             return; // pairing process is not finished
         }
 
-        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER) & !channelUID.getId().equals(CHANNEL_AMBILIGHT_LOUNGE_POWER))) {
+        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER) &
+                !channelUID.getId().equals(CHANNEL_AMBILIGHT_LOUNGE_POWER))) {
             // Check if tv turned on meanwhile
             channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
@@ -166,7 +172,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     @Override
     public void initialize() {
         logger.debug("Init of handler for Thing: {}", getThing().getLabel());
-        config = getConfigAs(PhilipsTvConfiguration.class);
+
         if ((config.host == null) || (config.port == null)) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "Cannot connect to Philips TV. Host and/or port are not set.");
@@ -181,7 +187,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             try {
                 initPairingCodeRetrieval(
                         target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
-            } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | CertificateException e) {
+            } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Error occurred while trying to present a Pairing Code on TV.");
             }
@@ -204,7 +210,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             httpClient = ConnectionManagerUtil.createSharedHttpClient(target, config.username, config.password);
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                    String.format("Error occurred during creation of http client: %s", e.getMessage()));
+                    String.format("Error occurred during creation of HTTP client: %s", e.getMessage()));
             return;
         }
 
@@ -248,7 +254,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             discoveryServiceRegistry.addDiscoveryListener(this);
         }
 
-        // Thing is initialized, check powerstate and available communication of the TV and set ONLINE or OFFLINE
+        // Thing is initialized, check power state and available communication of the TV and set ONLINE or OFFLINE
         channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
     }
 
@@ -256,8 +262,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
      * Starts the pairing Process with the TV, which results in a Pairing Code shown on TV.
      */
     private void initPairingCodeRetrieval(HttpHost target)
-            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
-            CertificateException {
+            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         logger.info("Pairing code for tv authentication is missing. " +
                 "Starting initial pairing process. Please provide manually the pairing code shown on the tv at the configuration of the tv thing.");
         PhilipsTvPairing pairing = new PhilipsTvPairing();
@@ -270,9 +275,9 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
                 "Pairing code is available, but username and/or password is missing. Therefore we try to grant authorization and retrieve username and password.");
         PhilipsTvPairing pairing = new PhilipsTvPairing();
         try {
-            pairing.finishPairingWithTv(this, target);
+            pairing.finishPairingWithTv(config, getConfig(), target);
             postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
-                    "Authentication with Philips TV device was successful. Continueing initialization of the tv.");
+                    "Authentication with Philips TV device was successful. Continuing initialization of the tv.");
         } catch (Exception e) {
             postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.HANDLER_INITIALIZING_ERROR,
                     "Could not successfully finish pairing process with the TV.");
@@ -299,7 +304,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         } else if (status == ThingStatus.OFFLINE) {
             updateState(CHANNEL_POWER, OnOffType.OFF);
             if (!TV_NOT_LISTENING_MSG.equals(msg)) { // avoid cancelling refresh if TV is temporarily not available
-                if ((refreshHandler != null) && !refreshHandler.isCancelled()) {
+                if (config.useUpnpDiscovery && (refreshHandler != null) && !refreshHandler.isCancelled()) {
                     logger.debug("Stopping Refresh Job for Philips TV: {}", getThing().getLabel());
                     refreshHandler.cancel(true);
                     refreshHandler = null;
@@ -320,19 +325,20 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     }
 
     private void startRefreshScheduler() {
-        int configuredDelayOrDefault = Optional.ofNullable(config.refreshRate).orElse(10);
-        // If value equals zero, refreshing should not be scheduled
-        if (configuredDelayOrDefault != 0) {
-            refreshHandler = scheduler.scheduleWithFixedDelay(this::refreshTvProperties, 10, configuredDelayOrDefault,
-                    TimeUnit.SECONDS);
+        int configuredRefreshRateOrDefault = Optional.ofNullable(config.refreshRate).orElse(10);
+        if (configuredRefreshRateOrDefault > 0) { // If value equals zero, refreshing should not be scheduled
+            logger.debug("Refresh Job for Philips TV {} with refresh rate of {}.", getThing().getLabel(),
+                    configuredRefreshRateOrDefault);
+            refreshHandler = scheduler.scheduleWithFixedDelay(this::refreshTvProperties, 10,
+                    configuredRefreshRateOrDefault, TimeUnit.SECONDS);
         }
     }
 
     private void refreshTvProperties() {
-        if (getThing().getStatus() == ThingStatus.OFFLINE) { // handles case if tv temporarily does not accept commands
+        if (getThing().getStatus() == ThingStatus.OFFLINE || !config.useUpnpDiscovery) {
             channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
-                return; // tv is still not accepting commands
+                return;
             }
         }
 
@@ -397,6 +403,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         }
 
         if ((refreshHandler != null) && !refreshHandler.isCancelled()) {
+            logger.debug("Stopping Refresh Job for Philips TV: {}", getThing().getLabel());
             refreshHandler.cancel(true);
             refreshHandler = null;
         }

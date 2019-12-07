@@ -47,9 +47,6 @@ public class PhilipsTvDynamicStateDescriptionProvider implements DynamicStateDes
     public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
             @Nullable Locale locale) {
         List<StateOption> options = channelOptionsMap.get(channel.getUID());
-        if (options == null) {
-            return null;
-        }
 
         if (original != null) {
             return StateDescriptionFragmentBuilder.create(original).withOptions(options).build().toStateDescription();

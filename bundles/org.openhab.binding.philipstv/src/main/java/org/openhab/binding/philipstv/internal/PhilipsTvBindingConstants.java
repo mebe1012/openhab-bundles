@@ -67,7 +67,7 @@ public final class PhilipsTvBindingConstants {
     // Connection specific values
     static final int CONNECT_TIMEOUT_MILLISECONDS = 3 * 1000;
 
-    static final int SOCKET_TIMEOUT_MILLISECONDS = 1 * 1000;
+    static final int SOCKET_TIMEOUT_MILLISECONDS = 1000;
 
     static final int MAX_REQUEST_RETRIES = 3;
 

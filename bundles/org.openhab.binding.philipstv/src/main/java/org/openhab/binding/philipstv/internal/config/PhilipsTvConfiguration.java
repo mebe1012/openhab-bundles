@@ -22,6 +22,7 @@ public class PhilipsTvConfiguration {
     public String host;
     public Integer port;
     public Integer refreshRate;
+    public Boolean useUpnpDiscovery;
 
     public String pairingCode;
     public String username;
