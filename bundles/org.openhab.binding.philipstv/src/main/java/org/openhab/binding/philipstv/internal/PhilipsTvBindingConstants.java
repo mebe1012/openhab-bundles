@@ -64,10 +64,12 @@ public final class PhilipsTvBindingConstants {
 
     public static final String HTTPS = "https";
 
-    // Timeout values
+    // Connection specific values
     static final int CONNECT_TIMEOUT_MILLISECONDS = 3 * 1000;
 
     static final int SOCKET_TIMEOUT_MILLISECONDS = 1 * 1000;
+
+    static final int MAX_REQUEST_RETRIES = 3;
 
     // Default port for jointspace v6
     public static final int DEFAULT_PORT = 1926;

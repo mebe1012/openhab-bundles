@@ -69,14 +69,6 @@ public class ConnectionManager {
         return jsonContent;
     }
 
-    private void validateResponse(CloseableHttpResponse response, String uri) throws HttpResponseException {
-        if (response == null) {
-            throw new HttpResponseException(0, String.format("The response for the call to %s was empty.", uri));
-        } else if (response.getStatusLine().getStatusCode() == 401) {
-            throw new HttpResponseException(401, "The given username/password combination is invalid.");
-        }
-    }
-
     public String doHttpsPost(String path, String json) throws IOException {
         String uri = httpHost.toURI() + path;
         logger.debug(TARGET_URI_MSG, uri);
@@ -90,6 +82,14 @@ public class ConnectionManager {
             jsonContent = getJsonFromResponse(response);
         }
         return jsonContent;
+    }
+
+    private void validateResponse(CloseableHttpResponse response, String uri) throws HttpResponseException {
+        if (response == null) {
+            throw new HttpResponseException(0, String.format("The response for the request to %s was empty.", uri));
+        } else if (response.getStatusLine().getStatusCode() == 401) {
+            throw new HttpResponseException(401, "The given username/password combination is invalid.");
+        }
     }
 
     private String getJsonFromResponse(HttpResponse response) throws IOException {

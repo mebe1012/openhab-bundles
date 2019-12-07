@@ -40,6 +40,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT_MILLISECONDS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAX_REQUEST_RETRIES;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT_MILLISECONDS;
 
 /**
@@ -50,7 +51,6 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.S
 public final class ConnectionManagerUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
-    public static final int MAX_RETRIES = 3;
 
     private ConnectionManagerUtil() {
     }
@@ -73,7 +73,7 @@ public final class ConnectionManagerUtil {
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
         HttpRequestRetryHandler requestRetryHandler = (exception, executionCount, context) -> {
-            if (executionCount >= MAX_RETRIES) {
+            if (executionCount >= MAX_REQUEST_RETRIES) {
                 return false;
             }
             if (exception instanceof SocketTimeoutException) {
