@@ -50,6 +50,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.S
 public final class ConnectionManagerUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+    public static final int MAX_RETRIES = 3;
 
     private ConnectionManagerUtil() {
     }
@@ -72,7 +73,7 @@ public final class ConnectionManagerUtil {
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
         HttpRequestRetryHandler requestRetryHandler = (exception, executionCount, context) -> {
-            if (executionCount >= 4) {
+            if (executionCount >= MAX_RETRIES) {
                 return false;
             }
             if (exception instanceof SocketTimeoutException) {
