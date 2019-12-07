@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_BOTTOM_COLOR;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
@@ -104,7 +105,9 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private ThingUID upnpThingUID;
 
-    private ScheduledFuture<?> refreshHandler;
+    private ScheduledFuture<?> refreshScheduler;
+
+    private Predicate<ScheduledFuture<?>> isRefreshSchedulerRunning = r -> (r != null) && !r.isCancelled();
 
     /* Philips TV services */
     private Map<String, PhilipsTvService> channelServices;
@@ -302,7 +305,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         } else if (status == ThingStatus.OFFLINE) {
             updateState(CHANNEL_POWER, OnOffType.OFF);
             if (!TV_NOT_LISTENING_MSG.equals(msg)) { // avoid cancelling refresh if TV is temporarily not available
-                if (config.useUpnpDiscovery && (refreshHandler != null) && !refreshHandler.isCancelled()) {
+                if (config.useUpnpDiscovery && isRefreshSchedulerRunning.test(refreshScheduler)) {
                     stopRefreshScheduler();
                 }
                 // Reset app and channel list (if existing) for new retrieval during next startup
@@ -317,7 +320,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private boolean isSchedulerInitializable() {
         return (config.username != null) && (config.password != null) &&
-                ((refreshHandler == null) || refreshHandler.isDone());
+                ((refreshScheduler == null) || refreshScheduler.isDone());
     }
 
     private void startRefreshScheduler() {
@@ -325,15 +328,15 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         if (configuredRefreshRateOrDefault > 0) { // If value equals zero, refreshing should not be scheduled
             logger.info("Starting Refresh Scheduler for Philips TV {} with refresh rate of {}.", getThing().getLabel(),
                     configuredRefreshRateOrDefault);
-            refreshHandler = scheduler.scheduleWithFixedDelay(this::refreshTvProperties, 10,
+            refreshScheduler = scheduler.scheduleWithFixedDelay(this::refreshTvProperties, 10,
                     configuredRefreshRateOrDefault, TimeUnit.SECONDS);
         }
     }
 
     private void stopRefreshScheduler() {
         logger.info("Stopping Refresh Scheduler for Philips TV: {}", getThing().getLabel());
-        refreshHandler.cancel(true);
-        refreshHandler = null;
+        refreshScheduler.cancel(true);
+        refreshScheduler = null;
     }
 
     private void refreshTvProperties() {
@@ -369,7 +372,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {
         logger.debug("thingDiscovered: {}", result);
 
-        if (config.host.equals(result.getProperties().get(HOST))) {
+        if (config.useUpnpDiscovery && config.host.equals(result.getProperties().get(HOST))) {
             /*
              * Philips TV discovery services creates thing UID from UPnP UDN.
              * When thing is generated manually, thing UID may not match UPnP UDN, so store it for later use (e.g.
@@ -404,7 +407,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             discoveryServiceRegistry.removeDiscoveryListener(this);
         }
 
-        if ((refreshHandler != null) && !refreshHandler.isCancelled()) {
+        if (isRefreshSchedulerRunning.test(refreshScheduler)) {
             stopRefreshScheduler();
         }
     }
