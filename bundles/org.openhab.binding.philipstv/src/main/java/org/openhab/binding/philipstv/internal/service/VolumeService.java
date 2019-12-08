@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-2019 Contributors to the openHAB project
- *
+ * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- *
+ * <p>
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- *
+ * <p>
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.service;
@@ -58,49 +58,29 @@ public class VolumeService implements PhilipsTvService {
 
     @Override
     public void handleCommand(String channel, Command command) {
-        if (command instanceof RefreshType) {
-            if (CHANNEL_VOLUME.equals(channel)) {
-                try {
-                    VolumeDto volumeDto = getVolume();
-                    handler.postUpdateChannel(CHANNEL_VOLUME, new DecimalType(volumeDto.getCurrentVolume()));
-                    handler.postUpdateChannel(CHANNEL_MUTE, volumeDto.isMuted() ? OnOffType.ON : OnOffType.OFF);
-                } catch (Exception e) {
-                    if (isTvOfflineException(e)) {
-                        logger.warn("Could not refresh TV volume: TV is offline.");
-                        handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
-                    } else if (isTvNotListeningException(e)) {
-                        handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                                TV_NOT_LISTENING_MSG);
-                    } else {
-                        logger.warn("Error retrieving the Volume: {}", e.getMessage(), e);
-                    }
-                }
-            }
-        } else if (command instanceof DecimalType) {
-            try {
+        try {
+            if (command instanceof RefreshType) {
+                VolumeDto volumeDto = getVolume();
+                handler.postUpdateChannel(CHANNEL_VOLUME, new DecimalType(volumeDto.getCurrentVolume()));
+                handler.postUpdateChannel(CHANNEL_MUTE, volumeDto.isMuted() ? OnOffType.ON : OnOffType.OFF);
+            } else if (CHANNEL_VOLUME.equals(channel) && command instanceof DecimalType) {
                 setVolume((DecimalType) command);
                 handler.postUpdateChannel(CHANNEL_VOLUME, (DecimalType) command);
-            } catch (Exception e) {
-                if (isTvOfflineException(e)) {
-                    logger.warn("Could not execute command for TV volume: TV is offline.");
-                    handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
-                } else {
-                    logger.warn("Error during the setting of Volume: {}", e.getMessage(), e);
-                }
-            }
-        } else if (CHANNEL_MUTE.equals(channel) && (command instanceof OnOffType)) {
-            try {
+            } else if (CHANNEL_MUTE.equals(channel) && command instanceof OnOffType) {
                 setMute();
-            } catch (Exception e) {
-                if (isTvOfflineException(e)) {
-                    logger.warn("Could not execute Mute command: TV is offline.");
-                    handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
-                } else {
-                    logger.warn("Unknown error occurred during setting of Mute: {}", e.getMessage(), e);
-                }
+            } else {
+                logger.warn("Unknown command: {} for Channel {}", command, channel);
             }
-        } else {
-            logger.warn("Unknown command: {} for Channel {}", command, channel);
+        } catch (Exception e) {
+            if (isTvOfflineException(e)) {
+                handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, TV_OFFLINE_MSG);
+            } else if (isTvNotListeningException(e)) {
+                handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                        TV_NOT_LISTENING_MSG);
+            } else {
+                logger.warn("Error during handling the VolumeService command {} for Channel {}: {}", command, channel,
+                        e.getMessage(), e);
+            }
         }
     }
 

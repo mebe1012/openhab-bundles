@@ -120,7 +120,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         config = getConfigAs(PhilipsTvConfiguration.class);
         logger.debug("UPnP discovery enabled: {}", config.useUpnpDiscovery);
 
-        if (discoveryServiceRegistry != null && config.useUpnpDiscovery) {
+        if (config.useUpnpDiscovery && discoveryServiceRegistry != null) {
             logger.debug("Discovery service registry was initialized.");
             this.discoveryServiceRegistry = discoveryServiceRegistry;
         }
