@@ -19,7 +19,19 @@ You need to pair your TV first, in order to control it:
 1.  As soon as you add the discovered TV in your inbox as a Thing, the pairing process will start.
 2.  A Pairing Code will be presented on your TV.
 3.  Go to the created Thing (in PaperUI: Configuration > Things) and set the Pairing Code as a Configuration Parameter.
-4. Your TV is now fully controllable.
+4.  Your TV is now fully controllable.
+
+Additional Configuration is possible, but not a must:
+
+| Configuration  | Type | Description                                                                                             |
+|------------------|-----------|---------------------------------------------------------------------------------------------------------|
+| Network Address  | Text    | IP Address of the TV. Automatically resolved with UPnP Discovery.                                                                                 |
+| Network Port     | Integer   | Used Port for the TV. Defaults to 1926.                                                                                |
+| Pairing Code     | Text      | Needed for first time retrieval of credentials. See instructions above.                                                                        |
+| Refresh Rate     | Integer   | Refreshes TV status details. If UPnP Discovery is turned off, this determines how often the power state of the tv is checked.                                                                            |
+| Username         | Text    | Username for the authentication against the Philips TV.  
+| Password         | Text    | Password for the authentication against the Philips TV. |     
+| Use UPnP Discovery | Boolean    | Enables UPnP Discovery. If disabled, constant HTTPS polling will happen. Defaults to true, which is the recommended way. |  
 
 ## Channels
 
