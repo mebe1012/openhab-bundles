@@ -85,6 +85,7 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 
 /**
@@ -298,7 +299,11 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     public void postUpdateThing(ThingStatus status, ThingStatusDetail statusDetail, String msg) {
         if (status == ThingStatus.ONLINE) {
-            updateState(CHANNEL_POWER, OnOffType.ON);
+            if (msg.equalsIgnoreCase(STANDBY)) {
+                updateState(CHANNEL_POWER, OnOffType.OFF);
+            } else {
+                updateState(CHANNEL_POWER, OnOffType.ON);
+            }
             if (isSchedulerInitializable()) { // Init refresh scheduler only, if pairing is completed
                 startRefreshScheduler();
             }
