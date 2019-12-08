@@ -131,7 +131,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             this.stateDescriptionProvider = stateDescriptionProvider;
         }
 
-        if (!config.useUpnpDiscovery) {
+        if (!config.useUpnpDiscovery && isSchedulerInitializable()) {
             startRefreshScheduler();
         }
     }
