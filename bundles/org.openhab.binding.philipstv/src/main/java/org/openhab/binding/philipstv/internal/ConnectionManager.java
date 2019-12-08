@@ -45,9 +45,9 @@ public class ConnectionManager {
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug https://github.com/eclipse/jetty.project/issues/1555
-    private CloseableHttpClient httpClient;
+    private final CloseableHttpClient httpClient;
 
-    private HttpHost httpHost;
+    private final HttpHost httpHost;
 
     public ConnectionManager(CloseableHttpClient httpClient, HttpHost httpHost) {
         this.httpClient = httpClient;

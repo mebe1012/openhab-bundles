@@ -45,7 +45,6 @@ import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.Formatter;
 import java.util.stream.Collectors;
@@ -98,7 +97,7 @@ public class PhilipsTvPairing {
 
     public void finishPairingWithTv(PhilipsTvConfiguration config, Configuration thingConfig, HttpHost target)
             throws NoSuchAlgorithmException, InvalidKeyException, IOException, KeyStoreException,
-            KeyManagementException, CertificateException {
+            KeyManagementException {
         String pairingCode = config.pairingCode;
         FinishPairingDto finishPairingDto = new FinishPairingDto();
         finishPairingDto.setDevice(createDeviceSpecification());
@@ -112,13 +111,13 @@ public class PhilipsTvPairing {
         finishPairingDto.setAuth(authDto);
         String grantPairingJson = OBJECT_MAPPER.writeValueAsString(finishPairingDto);
 
-        try (CloseableHttpClient client = ConnectionManagerUtil.createSharedHttpClient(target, deviceId, authKey);) {
+        try (CloseableHttpClient client = ConnectionManagerUtil.createSharedHttpClient(target, deviceId, authKey)) {
             logger.debug("{} and device id: {} and auth_key: {}", grantPairingJson, deviceId, authKey);
 
             String grantPairingCodePath = pairingBasePath + "grant";
             HttpPost httpPost = new HttpPost(grantPairingCodePath);
             httpPost.setHeader("Content-type", "application/json");
-            httpPost.setEntity(new StringEntity(grantPairingJson.toString()));
+            httpPost.setEntity(new StringEntity(grantPairingJson));
 
             DigestScheme digestAuth = new DigestScheme();
             // Prevent ERROR logging from HttpAuthenticator

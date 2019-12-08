@@ -107,7 +107,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private ScheduledFuture<?> refreshScheduler;
 
-    private Predicate<ScheduledFuture<?>> isRefreshSchedulerRunning = r -> (r != null) && !r.isCancelled();
+    private final Predicate<ScheduledFuture<?>> isRefreshSchedulerRunning = r -> (r != null) && !r.isCancelled();
 
     /* Philips TV services */
     private Map<String, PhilipsTvService> channelServices;
