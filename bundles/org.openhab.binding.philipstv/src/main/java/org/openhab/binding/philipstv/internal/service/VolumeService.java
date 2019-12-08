@@ -78,7 +78,7 @@ public class VolumeService implements PhilipsTvService {
             }
         } else if (command instanceof DecimalType) {
             try {
-                setVolume(command);
+                setVolume((DecimalType) command);
                 handler.postUpdateChannel(CHANNEL_VOLUME, (DecimalType) command);
             } catch (Exception e) {
                 if (isTvOfflineException(e)) {
@@ -109,10 +109,10 @@ public class VolumeService implements PhilipsTvService {
         return OBJECT_MAPPER.readValue(jsonContent, VolumeDto.class);
     }
 
-    private void setVolume(Command command) throws IOException {
+    private void setVolume(DecimalType volumeToSet) throws IOException {
         VolumeDto volumeDto = new VolumeDto();
         volumeDto.setMuted(false);
-        volumeDto.setCurrentVolume(command.toString());
+        volumeDto.setCurrentVolume(Integer.toString(volumeToSet.intValue()));
         String volumeJson = OBJECT_MAPPER.writeValueAsString(volumeDto);
         logger.debug("Set json volume: {}", volumeJson);
         connectionManager.doHttpsPost(VOLUME_PATH, volumeJson);
