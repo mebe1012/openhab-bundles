@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
 
 /**
  * The {@link PowerStateDto} class defines the Data Transfer Object
@@ -39,5 +40,10 @@ public class PowerStateDto {
     @JsonIgnore
     public boolean isPoweredOn() {
         return powerState.equalsIgnoreCase(POWER_ON);
+    }
+
+    @JsonIgnore
+    public boolean isStandby() {
+        return powerState.equalsIgnoreCase(STANDBY);
     }
 }

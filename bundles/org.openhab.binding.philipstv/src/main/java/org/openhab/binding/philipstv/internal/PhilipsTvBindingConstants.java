@@ -79,6 +79,8 @@ public final class PhilipsTvBindingConstants {
 
     public static final String POWER_OFF = "Off";
 
+    public static final String STANDBY = "Standby";
+
     // REST Paths
     public static final String SLASH = "/";
 
