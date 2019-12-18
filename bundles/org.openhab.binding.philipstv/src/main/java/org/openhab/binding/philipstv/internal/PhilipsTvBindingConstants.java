@@ -58,6 +58,8 @@ public final class PhilipsTvBindingConstants {
 
     public static final String PORT = "port";
 
+    public static final String MAC_ADDRESS = "macAddress";
+
     public static final String USERNAME = "username";
 
     public static final String PASSWORD = "password";
@@ -81,6 +83,8 @@ public final class PhilipsTvBindingConstants {
 
     public static final String STANDBY = "Standby";
 
+    public static final String EMPTY = "";
+
     // REST Paths
     public static final String SLASH = "/";
 
@@ -95,6 +99,8 @@ public final class PhilipsTvBindingConstants {
     public static final String TV_POWERSTATE_PATH = BASE_PATH + "powerstate";
 
     public static final String GET_AVAILABLE_APP_LIST_PATH = BASE_PATH + "applications";
+
+    public static final String GET_NETWORK_DEVICES_PATH = BASE_PATH + "network" + SLASH + "devices";
 
     private static final String ACTIVITIES_BASE_PATH = BASE_PATH + "activities" + SLASH;
 

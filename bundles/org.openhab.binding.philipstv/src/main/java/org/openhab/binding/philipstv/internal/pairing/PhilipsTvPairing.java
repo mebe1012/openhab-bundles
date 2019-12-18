@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PASSWORD;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.USERNAME;
@@ -81,7 +82,7 @@ public class PhilipsTvPairing {
         requestCodeDto.setScope(Stream.of("read", "write", "control").collect(Collectors.toList()));
         requestCodeDto.setDevice(createDeviceSpecification());
 
-        CloseableHttpClient httpClient = ConnectionManagerUtil.createSharedHttpClient(target, "", "");
+        CloseableHttpClient httpClient = ConnectionManagerUtil.createSharedHttpClient(target, EMPTY, EMPTY);
         ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
         String requestCodeJson = OBJECT_MAPPER.writeValueAsString(requestCodeDto);
         String requestPairingCodePath = pairingBasePath + "request";

@@ -79,7 +79,6 @@ public class PhilipsTvDiscoveryParticipant implements UpnpDiscoveryParticipant {
                 String modelName = modelDetails.getModelName();
                 String modelDescription = modelDetails.getModelDescription();
                 if (modelName != null && modelDescription != null) {
-                    logger.debug("Device found: {} with desc {}", modelName, modelDescription);
                     if (modelName.contains("Philips TV")) {
                         logger.debug("Device found: {} with desc {}", modelName, modelDescription);
                         // One Philips TV contains several UPnP devices.

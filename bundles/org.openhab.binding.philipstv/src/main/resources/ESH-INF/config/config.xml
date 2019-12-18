@@ -17,6 +17,11 @@
             <advanced>true</advanced>
             <default>1926</default>
         </parameter>
+        <parameter name="macAddress" type="text">
+            <label>MAC Address</label>
+            <description>MAC address of the Philips TV device.</description>
+            <advanced>true</advanced>
+        </parameter>
         <parameter name="pairingCode" type="text">
             <label>Pairing Code (4 digits)</label>
             <description>Initial pairing code for the Philips TV device to authenticate with the device.</description>

@@ -20,6 +20,7 @@ package org.openhab.binding.philipstv.internal.config;
 public class PhilipsTvConfiguration {
 
     public String host;
+    public String macAddress;
     public Integer port;
     public Integer refreshRate;
     public Boolean useUpnpDiscovery;

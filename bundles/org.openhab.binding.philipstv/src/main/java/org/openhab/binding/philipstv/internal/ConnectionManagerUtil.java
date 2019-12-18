@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 
-import java.net.SocketTimeoutException;
+import java.net.NoRouteToHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -76,11 +76,7 @@ public final class ConnectionManagerUtil {
             if (executionCount >= MAX_REQUEST_RETRIES) {
                 return false;
             }
-            if (exception instanceof SocketTimeoutException) {
-                logger.debug("Read timed out exception occurred, trying GET again.");
-                return true;
-            }
-            return false;
+            return !(exception instanceof NoRouteToHostException);
         };
 
         return HttpClients.custom().setDefaultRequestConfig(requestConfig).setSSLSocketFactory(sslsf)

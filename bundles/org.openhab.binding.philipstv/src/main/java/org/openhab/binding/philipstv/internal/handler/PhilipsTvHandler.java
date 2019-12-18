@@ -33,6 +33,7 @@ import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
+import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.pairing.PhilipsTvPairing;
 import org.openhab.binding.philipstv.internal.service.AmbilightService;
@@ -83,8 +84,10 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SHARPNESS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAC_ADDRESS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 
@@ -98,11 +101,11 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    public PhilipsTvConfiguration config;
+
     private DiscoveryServiceRegistry discoveryServiceRegistry;
 
     private PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider;
-
-    private PhilipsTvConfiguration config;
 
     private ThingUID upnpThingUID;
 
@@ -220,6 +223,21 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         }
 
         ConnectionManager connectionManager = new ConnectionManager(httpClient, target);
+
+        if (config.macAddress == null || config.macAddress.isEmpty()) {
+            try {
+                Optional<String> macAddress = WakeOnLanUtil.getMacFromEnabledInterface(connectionManager);
+                if (macAddress.isPresent()) {
+                    getConfig().put(MAC_ADDRESS, macAddress.get());
+                } else {
+                    logger.debug("MAC Address could not be determined for Wake-On-LAN support, " +
+                            "because Wake-On-LAN is not enabled on the TV.");
+                }
+            } catch (IOException e) {
+                logger.debug("Error occurred during retrieval of MAC Address: {}", e.getMessage());
+            }
+        }
+
         Map<String, PhilipsTvService> services = new HashMap<>();
 
         PhilipsTvService volumeService = new VolumeService(this, connectionManager);
@@ -297,7 +315,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         updateState(channelUID, state);
     }
 
-    public void postUpdateThing(ThingStatus status, ThingStatusDetail statusDetail, String msg) {
+    public synchronized void postUpdateThing(ThingStatus status, ThingStatusDetail statusDetail, String msg) {
         if (status == ThingStatus.ONLINE) {
             if (msg.equalsIgnoreCase(STANDBY)) {
                 updateState(CHANNEL_POWER, OnOffType.OFF);
@@ -385,7 +403,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
              */
             upnpThingUID = result.getThingUID();
             logger.debug("thingDiscovered, thingUID={}, discoveredUID={}", getThing().getUID(), upnpThingUID);
-            postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, "");
+            postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, EMPTY);
         }
     }
 
@@ -394,7 +412,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         logger.debug("thingRemoved: {}", thingUID);
 
         if (thingUID.equals(upnpThingUID)) {
-            postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "");
+            postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, STANDBY);
         }
     }
 

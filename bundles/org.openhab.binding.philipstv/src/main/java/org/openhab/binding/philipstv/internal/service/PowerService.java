@@ -19,6 +19,8 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
+import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.openhab.binding.philipstv.internal.service.model.power.PowerStateDto;
@@ -26,13 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.function.Predicate;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_POWERSTATE_PATH;
-import static org.openhab.binding.philipstv.internal.service.KeyCode.KEY_STANDBY;
 
 /**
  * The {@link PowerService} is responsible for handling power states commands, which are sent to the
@@ -48,6 +52,9 @@ public class PowerService implements PhilipsTvService {
 
     private final ConnectionManager connectionManager;
 
+    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null &&
+            !config.macAddress.isEmpty();
+
     public PowerService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
         this.handler = handler;
         this.connectionManager = connectionManager;
@@ -59,18 +66,18 @@ public class PowerService implements PhilipsTvService {
             if (command instanceof RefreshType) {
                 PowerStateDto powerStateDto = getPowerState();
                 if (powerStateDto.isPoweredOn()) {
-                    handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, "");
+                    handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, EMPTY);
                 } else if (powerStateDto.isStandby()) {
-                    handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, "Standby");
+                    handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, STANDBY);
                 } else {
-                    handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "");
+                    handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, EMPTY);
                 }
             } else if (command instanceof OnOffType) {
-                setPowerState(command);
+                setPowerState((OnOffType) command);
                 if (command == OnOffType.ON) {
                     handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, "Tv turned on.");
                 } else {
-                    handler.postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Tv turned off.");
+                    handler.postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, STANDBY);
                 }
             } else {
                 logger.warn("Unknown command: {} for Channel {}", command, channel);
@@ -83,7 +90,7 @@ public class PowerService implements PhilipsTvService {
                         TV_NOT_LISTENING_MSG);
             } else {
                 logger.warn("Unexpected Error handling the PowerState command {} for Channel {}: {}", command, channel,
-                        e.getMessage(), e);
+                        e.getMessage());
             }
         }
     }
@@ -92,9 +99,16 @@ public class PowerService implements PhilipsTvService {
         return OBJECT_MAPPER.readValue(connectionManager.doHttpsGet(TV_POWERSTATE_PATH), PowerStateDto.class);
     }
 
-    private void setPowerState(Command command) throws IOException {
+    private void setPowerState(OnOffType onOffType) throws IOException, InterruptedException {
         PowerStateDto powerStateDto = new PowerStateDto();
-        powerStateDto.setPowerState(command.equals(OnOffType.ON) ? POWER_ON : KEY_STANDBY.toString());
+        if (onOffType == OnOffType.ON) {
+            if (isWakeOnLanEnabled.test(handler.config) && !WakeOnLanUtil.isReachable(handler.config.host)) {
+                WakeOnLanUtil.wakeOnLan(handler.config.host, handler.config.macAddress);
+            }
+            powerStateDto.setPowerState(POWER_ON);
+        } else {
+            powerStateDto.setPowerState(STANDBY);
+        }
 
         String powerStateJson = OBJECT_MAPPER.writeValueAsString(powerStateDto);
         logger.debug("PowerState Json sent: {}", powerStateJson);
