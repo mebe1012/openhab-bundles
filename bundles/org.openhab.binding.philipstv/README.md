@@ -27,6 +27,7 @@ Additional Configuration is possible, but not a must:
 |------------------|-----------|---------------------------------------------------------------------------------------------------------|
 | Network Address  | Text    | IP Address of the TV. Automatically resolved with UPnP Discovery.                                                                                 |
 | Network Port     | Integer   | Used Port for the TV. Defaults to 1926.                                                                                |
+| MAC Address      | Text      | MAC address of the Philips TV device. |
 | Pairing Code     | Text      | Needed for first time retrieval of credentials. See instructions above.                                                                        |
 | Refresh Rate     | Integer   | Refreshes TV status details. If UPnP Discovery is turned off, this determines how often the power state of the tv is checked.                                                                            |
 | Username         | Text    | Username for the authentication against the Philips TV.  
@@ -45,7 +46,7 @@ TVs support the following channels:
 | AppIcon          | Image     | Icon of the current running App.                                                                               |
 | tvChannel        | String    | Name of the current TV channel. Changing this to a value from the available TV Channel List in this Item, starts a TV Channel.                                                                             |
 | player           | Player    | Player item which emulates the infrared remote controller actions.                                                         |
-| searchContent    | String    | Changing this value toggles the Google Assisntant search on the TV for the given input.                                                           |
+| searchContent    | String    | Changing this value toggles the Google Assistant search on the TV for the given input.                                                           |
 | power            | Switch    | TV power. Turning on only works in combination with Wake-On-LAN.                        |
 | keyCode          | String    | The key code channel emulates the infrared remote controller and allows to send virtual button presses. |
 | ambilightPower   | Switch    | Ambilight power control.                        | 
