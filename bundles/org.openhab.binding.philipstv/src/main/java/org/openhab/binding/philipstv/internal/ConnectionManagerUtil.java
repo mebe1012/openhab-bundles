@@ -20,6 +20,7 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -73,10 +74,14 @@ public final class ConnectionManagerUtil {
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
         HttpRequestRetryHandler requestRetryHandler = (exception, executionCount, context) -> {
-            if (executionCount >= MAX_REQUEST_RETRIES) {
+            if (exception instanceof NoRouteToHostException) {
                 return false;
             }
-            return !(exception instanceof NoRouteToHostException);
+            if ((exception instanceof HttpHostConnectException) && exception.getMessage().contains(
+                    "Connection refused")) {
+                return false;
+            }
+            return executionCount < MAX_REQUEST_RETRIES;
         };
 
         return HttpClients.custom().setDefaultRequestConfig(requestConfig).setSSLSocketFactory(sslsf)

@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-2019 Contributors to the openHAB project
- *
+ * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- *
+ * <p>
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- *
+ * <p>
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.service;
@@ -22,6 +22,8 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
+import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.openhab.binding.philipstv.internal.service.model.DataDto;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -88,6 +91,9 @@ public class AmbilightService implements PhilipsTvService {
 
     private final PhilipsTvHandler handler;
 
+    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null &&
+            !config.macAddress.isEmpty();
+
     private AmbilightTopologyDto ambilightTopology;
 
     private final ConnectionManager connectionManager;
@@ -108,7 +114,7 @@ public class AmbilightService implements PhilipsTvService {
                         ambilightPowerDto.isPoweredOn() ? OnOffType.ON : OnOffType.OFF);
             } else if (CHANNEL_AMBILIGHT_HUE_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightHuePowerState(command);
-            } else if (CHANNEL_AMBILIGHT_LOUNGE_POWER.equals(channel) && (command instanceof OnOffType)){
+            } else if (CHANNEL_AMBILIGHT_LOUNGE_POWER.equals(channel) && (command instanceof OnOffType)) {
                 setAmbilightLoungePowerState(command);
             } else if (CHANNEL_AMBILIGHT_STYLE.equals(channel) && (command instanceof StringType)) {
                 setAmbilightStyle(command.toString());
@@ -180,12 +186,17 @@ public class AmbilightService implements PhilipsTvService {
         connectionManager.doHttpsPost(UPDATE_SETTINGS_PATH, ambilightHuePowerJson);
     }
 
-    private void setAmbilightLoungePowerState(Command command) throws IOException {
+    private void setAmbilightLoungePowerState(Command command) throws IOException, InterruptedException {
         AmbilightLoungeDto ambilightLoungeDto = new AmbilightLoungeDto();
 
         AmbilightColorDto ambilightColorDto = new AmbilightColorDto();
-        if(command.equals(OnOffType.OFF)) {
-            ambilightColorDto.setHue(255); // 0 = ON / 255 = OFF
+        if (command.equals(OnOffType.ON)) {
+            if (isWakeOnLanEnabled.test(handler.config) && !WakeOnLanUtil.isReachable(handler.config.host)) {
+                WakeOnLanUtil.wakeOnLan(handler.config.host, handler.config.macAddress);
+            }
+            ambilightColorDto.setHue(0);
+        } else {
+            ambilightColorDto.setHue(255);
         }
         ambilightLoungeDto.setColor(ambilightColorDto);
 
