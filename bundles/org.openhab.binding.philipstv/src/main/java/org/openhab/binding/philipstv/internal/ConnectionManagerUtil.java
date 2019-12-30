@@ -29,8 +29,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 
@@ -50,8 +48,6 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.S
  * @author Benjamin Meyer - Initial contribution
  */
 public final class ConnectionManagerUtil {
-
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
 
     private ConnectionManagerUtil() {
     }
