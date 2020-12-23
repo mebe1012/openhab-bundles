@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.philipstv.internal.service.model.channel;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The {@link AvailableTvChannelsDto} class defines the Data Transfer Object
@@ -103,8 +103,8 @@ public class AvailableTvChannelsDto {
 
     @Override
     public String toString() {
-        return "AvailableTvChannelsDto{" + "channel = '" + channel + '\'' + ",id = '" + id + '\'' + ",medium = '" +
-                medium + '\'' + ",version = '" + version + '\'' + ",listType = '" + listType + '\'' + ",operator = '" +
-                operator + '\'' + ",installCountry = '" + installCountry + '\'' + "}";
+        return "AvailableTvChannelsDto{" + "channel = '" + channel + '\'' + ",id = '" + id + '\'' + ",medium = '"
+                + medium + '\'' + ",version = '" + version + '\'' + ",listType = '" + listType + '\'' + ",operator = '"
+                + operator + '\'' + ",installCountry = '" + installCountry + '\'' + "}";
     }
 }

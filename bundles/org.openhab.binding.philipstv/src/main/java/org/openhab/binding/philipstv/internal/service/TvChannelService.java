@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,12 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.openhab.binding.philipstv.internal.ConnectionManager;
-import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
-import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.channel.AvailableTvChannelsDto;
-import org.openhab.binding.philipstv.internal.service.model.channel.ChannelDto;
-import org.openhab.binding.philipstv.internal.service.model.channel.ChannelListDto;
-import org.openhab.binding.philipstv.internal.service.model.channel.TvChannelDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_TV_CHANNEL_LIST_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_CHANNEL_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 import java.io.IOException;
 import java.util.Map;
@@ -34,12 +26,20 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_TV_CHANNEL_LIST_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_CHANNEL_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
+import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.channel.AvailableTvChannelsDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.ChannelDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.ChannelListDto;
+import org.openhab.binding.philipstv.internal.service.model.channel.TvChannelDto;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service for handling commands regarding setting or retrieving the TV channel
@@ -108,8 +108,8 @@ public class TvChannelService implements PhilipsTvService {
         AvailableTvChannelsDto availableTvChannelsDto = OBJECT_MAPPER.readValue(
                 connectionManager.doHttpsGet(GET_AVAILABLE_TV_CHANNEL_LIST_PATH), AvailableTvChannelsDto.class);
 
-        ConcurrentMap<String, String> tvChannelsMap = availableTvChannelsDto.getChannel().stream().collect(
-                Collectors.toConcurrentMap(ChannelDto::getName, ChannelDto::getCcid, (c1, c2) -> c1));
+        ConcurrentMap<String, String> tvChannelsMap = availableTvChannelsDto.getChannel().stream()
+                .collect(Collectors.toConcurrentMap(ChannelDto::getName, ChannelDto::getCcid, (c1, c2) -> c1));
 
         logger.debug("TV Channels added: {}", tvChannelsMap.size());
         if (logger.isTraceEnabled()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,91 +48,82 @@ public class ChannelDto {
     @JsonProperty
     private int sid;
 
-    public void setServiceType(String serviceType){
+    public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
     }
 
-    public String getServiceType(){
+    public String getServiceType() {
         return serviceType;
     }
 
-    public void setLogoVersion(int logoVersion){
+    public void setLogoVersion(int logoVersion) {
         this.logoVersion = logoVersion;
     }
 
-    public int getLogoVersion(){
+    public int getLogoVersion() {
         return logoVersion;
     }
 
-    public void setCcid(String ccid){
+    public void setCcid(String ccid) {
         this.ccid = ccid;
     }
 
-    public String getCcid(){
+    public String getCcid() {
         return ccid;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public void setPreset(String preset){
+    public void setPreset(String preset) {
         this.preset = preset;
     }
 
-    public String getPreset(){
+    public String getPreset() {
         return preset;
     }
 
-    public void setTsid(int tsid){
+    public void setTsid(int tsid) {
         this.tsid = tsid;
     }
 
-    public int getTsid(){
+    public int getTsid() {
         return tsid;
     }
 
-    public void setType(String type){
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 
-    public void setOnid(int onid){
+    public void setOnid(int onid) {
         this.onid = onid;
     }
 
-    public int getOnid(){
+    public int getOnid() {
         return onid;
     }
 
-    public void setSid(int sid){
+    public void setSid(int sid) {
         this.sid = sid;
     }
 
-    public int getSid(){
+    public int getSid() {
         return sid;
     }
 
     @Override
-    public String toString(){
-        return
-                "ChannelItem{" +
-                        "serviceType = '" + serviceType + '\'' +
-                        ",logoVersion = '" + logoVersion + '\'' +
-                        ",ccid = '" + ccid + '\'' +
-                        ",name = '" + name + '\'' +
-                        ",preset = '" + preset + '\'' +
-                        ",tsid = '" + tsid + '\'' +
-                        ",type = '" + type + '\'' +
-                        ",onid = '" + onid + '\'' +
-                        ",sid = '" + sid + '\'' +
-                        "}";
+    public String toString() {
+        return "ChannelItem{" + "serviceType = '" + serviceType + '\'' + ",logoVersion = '" + logoVersion + '\''
+                + ",ccid = '" + ccid + '\'' + ",name = '" + name + '\'' + ",preset = '" + preset + '\'' + ",tsid = '"
+                + tsid + '\'' + ",type = '" + type + '\'' + ",onid = '" + onid + '\'' + ",sid = '" + sid + '\'' + "}";
     }
 }

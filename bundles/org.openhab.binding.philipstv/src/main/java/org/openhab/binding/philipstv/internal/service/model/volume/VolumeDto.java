@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,25 +22,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VolumeDto {
 
-  @JsonProperty("current")
-  private String currentVolume;
+    @JsonProperty("current")
+    private String currentVolume;
 
-  @JsonProperty
-  private boolean muted;
+    @JsonProperty
+    private boolean muted;
 
-  public String getCurrentVolume() {
-    return currentVolume;
-  }
+    public String getCurrentVolume() {
+        return currentVolume;
+    }
 
-  public void setCurrentVolume(String currentVolume) {
-    this.currentVolume = currentVolume;
-  }
+    public void setCurrentVolume(String currentVolume) {
+        this.currentVolume = currentVolume;
+    }
 
-  public boolean isMuted() {
-    return muted;
-  }
+    public boolean isMuted() {
+        return muted;
+    }
 
-  public void setMuted(boolean muted) {
-    this.muted = muted;
-  }
+    public void setMuted(boolean muted) {
+        this.muted = muted;
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,12 +18,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * The {@link AmbilightTopologyDto} class defines the Data Transfer Object
  * for the Philips TV API /ambilight/topology endpoint to retrieve the ambilight topology information.
- * <p> Endpoint returns:
- * <p> layers (integer): The number of layers.
- * <p> left (integer): The number of pixels on the left.
- * <p> top (integer): The number of pixels on the top.
- * <p> right (integer): The number of pixels on the right.
- * <p> bottom (integer): The number of pixels on the bottom.
+ * <p>
+ * Endpoint returns:
+ * <p>
+ * layers (integer): The number of layers.
+ * <p>
+ * left (integer): The number of pixels on the left.
+ * <p>
+ * top (integer): The number of pixels on the top.
+ * <p>
+ * right (integer): The number of pixels on the right.
+ * <p>
+ * bottom (integer): The number of pixels on the bottom.
  *
  * @author Benjamin Meyer - Initial contribution
  */
@@ -88,27 +94,27 @@ public class AmbilightTopologyDto {
     public int getPixelSizeForGivenSide(String side) {
         int value;
         switch (side) {
-        case "left":
-            value = left;
-            break;
-        case "right":
-            value = right;
-            break;
-        case "top":
-            value = top;
-            break;
-        case "bottom":
-            value = bottom;
-            break;
-        default:
-            throw new IllegalStateException("Unexpected side: " + side);
+            case "left":
+                value = left;
+                break;
+            case "right":
+                value = right;
+                break;
+            case "top":
+                value = top;
+                break;
+            case "bottom":
+                value = bottom;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected side: " + side);
         }
         return value;
     }
 
     @Override
     public String toString() {
-        return "AmbilightTopologyDto{" + "top = '" + top + '\'' + ",left = '" + left + '\'' + ",bottom = '" + bottom +
-                '\'' + ",layers = '" + layers + '\'' + ",right = '" + right + '\'' + "}";
+        return "AmbilightTopologyDto{" + "top = '" + top + '\'' + ",left = '" + left + '\'' + ",bottom = '" + bottom
+                + '\'' + ",layers = '" + layers + '\'' + ",right = '" + right + '\'' + "}";
     }
 }

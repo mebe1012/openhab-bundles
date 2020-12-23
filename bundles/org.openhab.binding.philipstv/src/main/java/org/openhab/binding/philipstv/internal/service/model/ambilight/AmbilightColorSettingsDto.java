@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,37 +30,33 @@ public class AmbilightColorSettingsDto {
     @JsonProperty("speed")
     private int speed;
 
-    public void setColor(AmbilightColorDto color){
+    public void setColor(AmbilightColorDto color) {
         this.color = color;
     }
 
-    public AmbilightColorDto getColor(){
+    public AmbilightColorDto getColor() {
         return color;
     }
 
-    public void setColorDelta(AmbilightColorDeltaDto colorDelta){
+    public void setColorDelta(AmbilightColorDeltaDto colorDelta) {
         this.colorDelta = colorDelta;
     }
 
-    public AmbilightColorDeltaDto getColorDelta(){
+    public AmbilightColorDeltaDto getColorDelta() {
         return colorDelta;
     }
 
-    public void setSpeed(int speed){
+    public void setSpeed(int speed) {
         this.speed = speed;
     }
 
-    public int getSpeed(){
+    public int getSpeed() {
         return speed;
     }
 
     @Override
-    public String toString(){
-        return
-                "ColorSettings{" +
-                        "color = '" + color + '\'' +
-                        ",colorDelta = '" + colorDelta + '\'' +
-                        ",speed = '" + speed + '\'' +
-                        "}";
+    public String toString() {
+        return "ColorSettings{" + "color = '" + color + '\'' + ",colorDelta = '" + colorDelta + '\'' + ",speed = '"
+                + speed + '\'' + "}";
     }
 }

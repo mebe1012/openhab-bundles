@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,20 @@
  */
 package org.openhab.binding.philipstv.internal.handler;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
 
 import java.util.Collections;
 import java.util.Set;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
+import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
+import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link PhilipsTvHandlerFactory} is responsible for creating things and thing
@@ -77,5 +77,4 @@ public class PhilipsTvHandlerFactory extends BaseThingHandlerFactory {
             PhilipsTvDynamicStateDescriptionProvider stateDescriptionProvider) {
         this.stateDescriptionProvider = null;
     }
-
 }

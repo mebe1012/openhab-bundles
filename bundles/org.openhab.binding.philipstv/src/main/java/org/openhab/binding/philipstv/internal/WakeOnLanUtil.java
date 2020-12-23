@@ -1,23 +1,20 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- * <p>
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- * <p>
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
  */
 
 package org.openhab.binding.philipstv.internal;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_NETWORK_DEVICES_PATH;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -35,8 +32,12 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_NETWORK_DEVICES_PATH;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * The {@link WakeOnLanUtil} is offering methods for powering on TVs via Wake-On-LAN.
@@ -54,8 +55,8 @@ public final class WakeOnLanUtil {
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([:\\-])");
 
-    private static final Predicate<JsonNode> IS_WOL_ENABLED = j -> j.get("wake-on-lan").asText().equalsIgnoreCase(
-            "Enabled");
+    private static final Predicate<JsonNode> IS_WOL_ENABLED = j -> j.get("wake-on-lan").asText()
+            .equalsIgnoreCase("Enabled");
 
     private static final Predicate<NetworkInterface> IS_NOT_LOOPBACK = ni -> {
         try {
@@ -70,10 +71,11 @@ public final class WakeOnLanUtil {
 
     public static Optional<String> getMacFromEnabledInterface(ConnectionManager connectionManager) throws IOException {
         String jsonContent = connectionManager.doHttpsGet(GET_NETWORK_DEVICES_PATH);
-        List<JsonNode> jsonNode = OBJECT_MAPPER.readValue(jsonContent, new TypeReference<List<JsonNode>>() {});
+        List<JsonNode> jsonNode = OBJECT_MAPPER.readValue(jsonContent, new TypeReference<List<JsonNode>>() {
+        });
 
-        return jsonNode.stream().filter(IS_WOL_ENABLED).map(j -> j.get("mac").asText()).peek(
-                m -> LOGGER.debug("Mac identified as: {}", m)).findFirst();
+        return jsonNode.stream().filter(IS_WOL_ENABLED).map(j -> j.get("mac").asText())
+                .peek(m -> LOGGER.debug("Mac identified as: {}", m)).findFirst();
     }
 
     public static void wakeOnLan(String ip, String mac) throws IOException, InterruptedException {
@@ -99,8 +101,8 @@ public final class WakeOnLanUtil {
         }
 
         List<InetAddress> broadcastAddresses = Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
-                .filter(IS_NOT_LOOPBACK).map(NetworkInterface::getInterfaceAddresses).flatMap(Collection::stream).map(
-                        InterfaceAddress::getBroadcast).filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(IS_NOT_LOOPBACK).map(NetworkInterface::getInterfaceAddresses).flatMap(Collection::stream)
+                .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull).collect(Collectors.toList());
 
         for (InetAddress broadcast : broadcastAddresses) {
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, broadcast, WOL_PORT);

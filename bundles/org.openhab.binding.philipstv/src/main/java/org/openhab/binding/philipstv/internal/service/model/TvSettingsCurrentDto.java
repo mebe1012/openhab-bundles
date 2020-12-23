@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,13 +12,14 @@
  */
 package org.openhab.binding.philipstv.internal.service.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The {@link TvSettingsCurrentDto} class defines the Data Transfer Object
- * for the POST Request to Philips TV API /menuitems/settings/current endpoint to retrieve current settings of the tv, e.g. the tv picture brightness.
+ * for the POST Request to Philips TV API /menuitems/settings/current endpoint to retrieve current settings of the tv,
+ * e.g. the tv picture brightness.
  *
  * @author Benjamin Meyer - Initial contribution
  */

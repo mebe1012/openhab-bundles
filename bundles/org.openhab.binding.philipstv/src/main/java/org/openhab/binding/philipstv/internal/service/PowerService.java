@@ -1,42 +1,37 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- * <p>
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- * <p>
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+
+import java.io.IOException;
+import java.util.function.Predicate;
+
 import org.apache.http.ParseException;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
 import org.openhab.binding.philipstv.internal.service.model.power.PowerStateDto;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.function.Predicate;
-
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_POWERSTATE_PATH;
 
 /**
  * The {@link PowerService} is responsible for handling power states commands, which are sent to the
@@ -52,8 +47,8 @@ public class PowerService implements PhilipsTvService {
 
     private final ConnectionManager connectionManager;
 
-    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null &&
-            !config.macAddress.isEmpty();
+    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null
+            && !config.macAddress.isEmpty();
 
     public PowerService(PhilipsTvHandler handler, ConnectionManager connectionManager) {
         this.handler = handler;

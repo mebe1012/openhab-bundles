@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,34 +12,6 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import org.apache.http.ParseException;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.openhab.binding.philipstv.internal.ConnectionManager;
-import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
-import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.application.ApplicationsDto;
-import org.openhab.binding.philipstv.internal.service.model.application.AvailableAppsDto;
-import org.openhab.binding.philipstv.internal.service.model.application.ComponentDto;
-import org.openhab.binding.philipstv.internal.service.model.application.CurrentAppDto;
-import org.openhab.binding.philipstv.internal.service.model.application.IntentDto;
-import org.openhab.binding.philipstv.internal.service.model.application.LaunchAppDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
@@ -49,6 +21,34 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.L
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.http.ParseException;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
+import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.binding.philipstv.internal.service.model.application.ApplicationsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.AvailableAppsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.ComponentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.CurrentAppDto;
+import org.openhab.binding.philipstv.internal.service.model.application.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.LaunchAppDto;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AppService} is responsible for handling key code commands, which emulate a button
@@ -158,8 +158,8 @@ public class AppService implements PhilipsTvService {
 
     private RawType getIconForApp(String packageName, String className) throws IOException {
         String pathForIcon = String.format("%s%s-%s%sicon", SLASH, className, packageName, SLASH);
-        byte[] icon = connectionManager.doHttpsGetForImage(
-                String.format("%s%s", GET_AVAILABLE_APP_LIST_PATH, pathForIcon));
+        byte[] icon = connectionManager
+                .doHttpsGetForImage(String.format("%s%s", GET_AVAILABLE_APP_LIST_PATH, pathForIcon));
         if ((icon != null) && (icon.length > 0)) {
             return new RawType(icon, "image/png");
         } else {
@@ -168,13 +168,15 @@ public class AppService implements PhilipsTvService {
     }
 
     private Map<String, AbstractMap.SimpleEntry<String, String>> getAvailableAppListFromTv() throws IOException {
-        AvailableAppsDto availableAppsDto = OBJECT_MAPPER.readValue(
-                connectionManager.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH), AvailableAppsDto.class);
+        AvailableAppsDto availableAppsDto = OBJECT_MAPPER
+                .readValue(connectionManager.doHttpsGet(GET_AVAILABLE_APP_LIST_PATH), AvailableAppsDto.class);
 
         ConcurrentMap<String, AbstractMap.SimpleEntry<String, String>> appsMap = availableAppsDto.getApplications()
-                .stream().collect(Collectors.toConcurrentMap(ApplicationsDto::getLabel,
+                .stream()
+                .collect(Collectors.toConcurrentMap(ApplicationsDto::getLabel,
                         a -> new AbstractMap.SimpleEntry<>(a.getIntent().getComponent().getPackageName(),
-                                a.getIntent().getComponent().getClassName()), (a1, a2) -> a1));
+                                a.getIntent().getComponent().getClassName()),
+                        (a1, a2) -> a1));
 
         logger.debug("Apps added: {}", appsMap.size());
         if (logger.isTraceEnabled()) {

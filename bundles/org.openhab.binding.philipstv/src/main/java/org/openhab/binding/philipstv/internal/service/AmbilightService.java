@@ -1,26 +1,28 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- * <p>
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- * <p>
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
@@ -38,37 +40,18 @@ import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightL
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightModeDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightPowerDto;
 import org.openhab.binding.philipstv.internal.service.model.ambilight.AmbilightTopologyDto;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CACHED_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_CONFIG_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_LOUNGE_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_MODE_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_POWERSTATE_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.AMBILIGHT_TOPOLOGY_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_BOTTOM_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LEFT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LOUNGE_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_RIGHT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_TOP_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_OFF;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.UPDATE_SETTINGS_PATH;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Service for handling commands regarding Ambilight settings of the TV
@@ -77,9 +60,10 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.U
  */
 public class AmbilightService implements PhilipsTvService {
 
-    private static final List<String> AMBILIGHT_COLOR_CHANNELS = Stream.of(CHANNEL_AMBILIGHT_COLOR,
-            CHANNEL_AMBILIGHT_LEFT_COLOR, CHANNEL_AMBILIGHT_RIGHT_COLOR, CHANNEL_AMBILIGHT_TOP_COLOR,
-            CHANNEL_AMBILIGHT_BOTTOM_COLOR).collect(Collectors.toList());
+    private static final List<String> AMBILIGHT_COLOR_CHANNELS = Stream
+            .of(CHANNEL_AMBILIGHT_COLOR, CHANNEL_AMBILIGHT_LEFT_COLOR, CHANNEL_AMBILIGHT_RIGHT_COLOR,
+                    CHANNEL_AMBILIGHT_TOP_COLOR, CHANNEL_AMBILIGHT_BOTTOM_COLOR)
+            .collect(Collectors.toList());
     private static final int AMBILIGHT_HUE_NODE_ID = 2131230774;
     private static final int AMBILIGHT_BRIGHTNESS_NODE_ID = 2131230769;
     private static final String AMBILIGHT_MODE_MANUAL = "manual";
@@ -91,8 +75,8 @@ public class AmbilightService implements PhilipsTvService {
 
     private final PhilipsTvHandler handler;
 
-    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null &&
-            !config.macAddress.isEmpty();
+    private final Predicate<PhilipsTvConfiguration> isWakeOnLanEnabled = config -> config.macAddress != null
+            && !config.macAddress.isEmpty();
 
     private AmbilightTopologyDto ambilightTopology;
 
@@ -124,9 +108,9 @@ public class AmbilightService implements PhilipsTvService {
                 handler.postUpdateChannel(CHANNEL_AMBILIGHT_STYLE, new StringType(styleWithAlgorithm));
             } else if (CHANNEL_AMBILIGHT_COLOR.equals(channel) && (command instanceof HSBType)) {
                 setAllAmbilightColors((HSBType) command);
-            } else if ((CHANNEL_AMBILIGHT_LEFT_COLOR.equals(channel) || CHANNEL_AMBILIGHT_RIGHT_COLOR.equals(channel) ||
-                    CHANNEL_AMBILIGHT_TOP_COLOR.equals(channel) || CHANNEL_AMBILIGHT_BOTTOM_COLOR.equals(channel)) &&
-                    (command instanceof HSBType)) {
+            } else if ((CHANNEL_AMBILIGHT_LEFT_COLOR.equals(channel) || CHANNEL_AMBILIGHT_RIGHT_COLOR.equals(channel)
+                    || CHANNEL_AMBILIGHT_TOP_COLOR.equals(channel) || CHANNEL_AMBILIGHT_BOTTOM_COLOR.equals(channel))
+                    && (command instanceof HSBType)) {
                 setAmbilightPixel((HSBType) command, channel);
             } else if (AMBILIGHT_COLOR_CHANNELS.contains(channel) && (command instanceof PercentType)) {
                 setAmbilightBrightness(((PercentType) command).intValue());
@@ -293,20 +277,20 @@ public class AmbilightService implements PhilipsTvService {
     private String determineAmbilightSide(String channel) {
         String sideToSet;
         switch (channel) {
-        case CHANNEL_AMBILIGHT_LEFT_COLOR:
-            sideToSet = "left";
-            break;
-        case CHANNEL_AMBILIGHT_RIGHT_COLOR:
-            sideToSet = "right";
-            break;
-        case CHANNEL_AMBILIGHT_TOP_COLOR:
-            sideToSet = "top";
-            break;
-        case CHANNEL_AMBILIGHT_BOTTOM_COLOR:
-            sideToSet = "bottom";
-            break;
-        default:
-            throw new IllegalStateException("Unexpected channel for ambilight pixel set: " + channel);
+            case CHANNEL_AMBILIGHT_LEFT_COLOR:
+                sideToSet = "left";
+                break;
+            case CHANNEL_AMBILIGHT_RIGHT_COLOR:
+                sideToSet = "right";
+                break;
+            case CHANNEL_AMBILIGHT_TOP_COLOR:
+                sideToSet = "top";
+                break;
+            case CHANNEL_AMBILIGHT_BOTTOM_COLOR:
+                sideToSet = "bottom";
+                break;
+            default:
+                throw new IllegalStateException("Unexpected channel for ambilight pixel set: " + channel);
         }
         return sideToSet;
     }
@@ -335,5 +319,4 @@ public class AmbilightService implements PhilipsTvService {
         logger.debug("Setting ambilight colors json: {}", setAmbilightColorsJson);
         connectionManager.doHttpsPost(AMBILIGHT_CONFIG_PATH, setAmbilightColorsJson);
     }
-
 }

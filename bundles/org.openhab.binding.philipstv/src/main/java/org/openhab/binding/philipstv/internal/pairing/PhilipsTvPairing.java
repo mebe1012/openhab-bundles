@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,30 +12,8 @@
  */
 package org.openhab.binding.philipstv.internal.pairing;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.auth.DigestScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.openhab.binding.philipstv.internal.ConnectionManager;
-import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
-import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
-import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
-import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
-import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
-import org.openhab.binding.philipstv.internal.pairing.model.PairingDto;
-import org.openhab.binding.philipstv.internal.pairing.model.RequestCodeDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -50,12 +28,30 @@ import java.util.Formatter;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PASSWORD;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.USERNAME;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.http.HttpHost;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.DigestScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.openhab.binding.philipstv.internal.ConnectionManager;
+import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
+import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
+import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
+import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
+import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.PairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.RequestCodeDto;
+import org.openhab.core.config.core.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PhilipsTvPairing} is responsible for the initial pairing process with the Philips TV.
@@ -87,8 +83,8 @@ public class PhilipsTvPairing {
         String requestCodeJson = OBJECT_MAPPER.writeValueAsString(requestCodeDto);
         String requestPairingCodePath = pairingBasePath + "request";
         logger.debug("Request pairing code with json: {}", requestCodeJson);
-        PairingDto pairingDto = OBJECT_MAPPER.readValue(
-                connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson), PairingDto.class);
+        PairingDto pairingDto = OBJECT_MAPPER
+                .readValue(connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson), PairingDto.class);
 
         authTimestamp = pairingDto.getTimestamp();
         authKey = pairingDto.getAuthKey();

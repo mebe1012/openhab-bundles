@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,22 +22,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class AmbilightLoungeDto {
 
-	@JsonProperty("color")
-	private AmbilightColorDto color;
+    @JsonProperty("color")
+    private AmbilightColorDto color;
 
-	public void setColor(AmbilightColorDto color){
-		this.color = color;
-	}
+    public void setColor(AmbilightColorDto color) {
+        this.color = color;
+    }
 
-	public AmbilightColorDto getColor(){
-		return color;
-	}
+    public AmbilightColorDto getColor() {
+        return color;
+    }
 
-	@Override
- 	public String toString(){
-		return 
-			"AmbilightLoungeDto{" + 
-			"color = '" + color + '\'' +
-			"}";
-		}
+    @Override
+    public String toString() {
+        return "AmbilightLoungeDto{" + "color = '" + color + '\'' + "}";
+    }
 }

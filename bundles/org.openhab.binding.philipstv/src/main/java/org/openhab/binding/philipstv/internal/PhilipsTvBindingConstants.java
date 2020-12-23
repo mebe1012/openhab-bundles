@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.philipstv.internal;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link PhilipsTvBindingConstants} class defines common constants, which are used across the
@@ -104,8 +104,8 @@ public final class PhilipsTvBindingConstants {
 
     private static final String ACTIVITIES_BASE_PATH = BASE_PATH + "activities" + SLASH;
 
-    public static final String GET_AVAILABLE_TV_CHANNEL_LIST_PATH =
-            BASE_PATH + "channeldb" + SLASH + "tv" + SLASH + "channelLists" + SLASH + "all";
+    public static final String GET_AVAILABLE_TV_CHANNEL_LIST_PATH = BASE_PATH + "channeldb" + SLASH + "tv" + SLASH
+            + "channelLists" + SLASH + "all";
 
     public static final String TV_CHANNEL_PATH = ACTIVITIES_BASE_PATH + "tv";
     public static final String GET_CURRENT_APP_PATH = ACTIVITIES_BASE_PATH + "current";

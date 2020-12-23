@@ -1,20 +1,20 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- * <p>
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- * <p>
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -27,8 +27,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The {@link ConnectionManager} is responsible for handling https GETs and POSTs to the Philips
@@ -44,7 +45,8 @@ public class ConnectionManager {
 
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug https://github.com/eclipse/jetty.project/issues/1555
+    // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug
+    // https://github.com/eclipse/jetty.project/issues/1555
     private final CloseableHttpClient httpClient;
 
     private final HttpHost httpHost;
@@ -104,8 +106,8 @@ public class ConnectionManager {
         String uri = httpHost.toURI() + path;
         logger.debug(TARGET_URI_MSG, uri);
         HttpGet httpGet = new HttpGet(uri);
-        try (CloseableHttpClient client = httpClient; CloseableHttpResponse response = client.execute(httpHost,
-                httpGet)) {
+        try (CloseableHttpClient client = httpClient;
+                CloseableHttpResponse response = client.execute(httpHost, httpGet)) {
             if ((response != null) && (response.getStatusLine().getStatusCode() == 401)) {
                 throw new HttpResponseException(401, "The given username/password combination is invalid.");
             }

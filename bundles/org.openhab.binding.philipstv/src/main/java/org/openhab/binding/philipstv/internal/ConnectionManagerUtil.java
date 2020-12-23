@@ -1,16 +1,25 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- * <p>
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- * <p>
+ *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal;
+
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+
+import java.net.NoRouteToHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -29,18 +38,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
-
-import javax.net.ssl.SSLContext;
-
-import java.net.NoRouteToHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT_MILLISECONDS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAX_REQUEST_RETRIES;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT_MILLISECONDS;
 
 /**
  * The {@link ConnectionManagerUtil} is offering methods for connection specific processes.
@@ -64,7 +61,7 @@ public final class ConnectionManagerUtil {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(getSslConnectionWithoutCertValidation(),
                 NoopHostnameVerifier.INSTANCE);
 
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
                 .register(HTTPS, sslsf).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
@@ -73,16 +70,16 @@ public final class ConnectionManagerUtil {
             if (exception instanceof NoRouteToHostException) {
                 return false;
             }
-            if ((exception instanceof HttpHostConnectException) && exception.getMessage().contains(
-                    "Connection refused")) {
+            if ((exception instanceof HttpHostConnectException)
+                    && exception.getMessage().contains("Connection refused")) {
                 return false;
             }
             return executionCount < MAX_REQUEST_RETRIES;
         };
 
         return HttpClients.custom().setDefaultRequestConfig(requestConfig).setSSLSocketFactory(sslsf)
-                .setDefaultCredentialsProvider(credProvider).setConnectionManager(connManager).setRetryHandler(
-                        requestRetryHandler).setConnectionManagerShared(true).build();
+                .setDefaultCredentialsProvider(credProvider).setConnectionManager(connManager)
+                .setRetryHandler(requestRetryHandler).setConnectionManagerShared(true).build();
     }
 
     private static SSLContext getSslConnectionWithoutCertValidation()

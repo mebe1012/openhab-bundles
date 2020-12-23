@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,9 +19,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * for the Philips TV API /ambilight/mode endpoint to retrieve or set the ambilight mode.
  * <p>
  * current (string): One of following values:
- * <p> internal: The internal ambilight algorithm is used to calculate the ambilight colours.
- * <p> manual: The cached ambilight colours are shown.
- * <p> expert: The cached ambilight colours are used as input for the internal ambilight algorithm
+ * <p>
+ * internal: The internal ambilight algorithm is used to calculate the ambilight colours.
+ * <p>
+ * manual: The cached ambilight colours are shown.
+ * <p>
+ * expert: The cached ambilight colours are used as input for the internal ambilight algorithm
  *
  * @author Benjamin Meyer - Initial contribution
  */
