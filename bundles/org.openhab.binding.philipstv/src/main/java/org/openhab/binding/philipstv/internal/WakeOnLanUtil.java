@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,17 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.net.*;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,8 +45,8 @@ public final class WakeOnLanUtil {
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([:\\-])");
 
-    private static final Predicate<JsonNode> IS_WOL_ENABLED = j -> j.get("wake-on-lan").asText().equalsIgnoreCase(
-            "Enabled");
+    private static final Predicate<JsonNode> IS_WOL_ENABLED = j -> j.get("wake-on-lan").asText()
+            .equalsIgnoreCase("Enabled");
 
     private static final Predicate<NetworkInterface> IS_NOT_LOOPBACK = ni -> {
         try {
@@ -70,10 +61,11 @@ public final class WakeOnLanUtil {
 
     public static Optional<String> getMacFromEnabledInterface(ConnectionManager connectionManager) throws IOException {
         String jsonContent = connectionManager.doHttpsGet(GET_NETWORK_DEVICES_PATH);
-        List<JsonNode> jsonNode = OBJECT_MAPPER.readValue(jsonContent, new TypeReference<List<JsonNode>>() {});
+        List<JsonNode> jsonNode = OBJECT_MAPPER.readValue(jsonContent, new TypeReference<List<JsonNode>>() {
+        });
 
-        return jsonNode.stream().filter(IS_WOL_ENABLED).map(j -> j.get("mac").asText()).peek(
-                m -> LOGGER.debug("Mac identified as: {}", m)).findFirst();
+        return jsonNode.stream().filter(IS_WOL_ENABLED).map(j -> j.get("mac").asText())
+                .peek(m -> LOGGER.debug("Mac identified as: {}", m)).findFirst();
     }
 
     public static void wakeOnLan(String ip, String mac) throws IOException, InterruptedException {
@@ -99,8 +91,8 @@ public final class WakeOnLanUtil {
         }
 
         List<InetAddress> broadcastAddresses = Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
-                .filter(IS_NOT_LOOPBACK).map(NetworkInterface::getInterfaceAddresses).flatMap(Collection::stream).map(
-                        InterfaceAddress::getBroadcast).filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(IS_NOT_LOOPBACK).map(NetworkInterface::getInterfaceAddresses).flatMap(Collection::stream)
+                .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull).collect(Collectors.toList());
 
         for (InetAddress broadcast : broadcastAddresses) {
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, broadcast, WOL_PORT);

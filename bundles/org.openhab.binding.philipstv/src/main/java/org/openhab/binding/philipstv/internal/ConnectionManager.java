@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,7 +44,8 @@ public class ConnectionManager {
 
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug https://github.com/eclipse/jetty.project/issues/1555
+    // Cannot use jetty in OH2.4 due to 9.4.11.v20180605 version with digest auth bug
+    // https://github.com/eclipse/jetty.project/issues/1555
     private final CloseableHttpClient httpClient;
 
     private final HttpHost httpHost;
@@ -104,8 +105,8 @@ public class ConnectionManager {
         String uri = httpHost.toURI() + path;
         logger.debug(TARGET_URI_MSG, uri);
         HttpGet httpGet = new HttpGet(uri);
-        try (CloseableHttpClient client = httpClient; CloseableHttpResponse response = client.execute(httpHost,
-                httpGet)) {
+        try (CloseableHttpClient client = httpClient;
+             CloseableHttpResponse response = client.execute(httpHost, httpGet)) {
             if ((response != null) && (response.getStatusLine().getStatusCode() == 401)) {
                 throw new HttpResponseException(401, "The given username/password combination is invalid.");
             }

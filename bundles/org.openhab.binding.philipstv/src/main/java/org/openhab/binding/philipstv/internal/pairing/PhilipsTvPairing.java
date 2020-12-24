@@ -1,13 +1,13 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
- *
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
- *
+ * <p>
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0
- *
+ * <p>
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.philipstv.internal.pairing;
@@ -22,40 +22,27 @@ import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
-import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
-import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
-import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
-import org.openhab.binding.philipstv.internal.pairing.model.PairingDto;
-import org.openhab.binding.philipstv.internal.pairing.model.RequestCodeDto;
+import org.openhab.binding.philipstv.internal.pairing.model.*;
+import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Base64;
 import java.util.Formatter;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PASSWORD;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.USERNAME;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
 
 /**
  * The {@link PhilipsTvPairing} is responsible for the initial pairing process with the Philips TV.
@@ -87,8 +74,8 @@ public class PhilipsTvPairing {
         String requestCodeJson = OBJECT_MAPPER.writeValueAsString(requestCodeDto);
         String requestPairingCodePath = pairingBasePath + "request";
         logger.debug("Request pairing code with json: {}", requestCodeJson);
-        PairingDto pairingDto = OBJECT_MAPPER.readValue(
-                connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson), PairingDto.class);
+        PairingDto pairingDto = OBJECT_MAPPER
+                .readValue(connectionManager.doHttpsPost(requestPairingCodePath, requestCodeJson), PairingDto.class);
 
         authTimestamp = pairingDto.getTimestamp();
         authKey = pairingDto.getAuthKey();

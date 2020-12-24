@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,37 +14,25 @@ package org.openhab.binding.philipstv.internal.handler;
 
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.eclipse.smarthome.config.discovery.DiscoveryListener;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
 import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
 import org.openhab.binding.philipstv.internal.pairing.PhilipsTvPairing;
-import org.openhab.binding.philipstv.internal.service.AmbilightService;
-import org.openhab.binding.philipstv.internal.service.AppService;
-import org.openhab.binding.philipstv.internal.service.KeyCodeService;
-import org.openhab.binding.philipstv.internal.service.PowerService;
-import org.openhab.binding.philipstv.internal.service.SearchContentService;
-import org.openhab.binding.philipstv.internal.service.TvChannelService;
-import org.openhab.binding.philipstv.internal.service.TvPictureService;
-import org.openhab.binding.philipstv.internal.service.VolumeService;
+import org.openhab.binding.philipstv.internal.service.*;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.*;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,44 +40,12 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_BOTTOM_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_HUE_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LEFT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_LOUNGE_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_RIGHT_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_STYLE;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_AMBILIGHT_TOP_COLOR;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_BRIGHTNESS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_CONTRAST;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_KEY_CODE;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_MUTE;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_PLAYER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_POWER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SEARCH_CONTENT;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SHARPNESS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAC_ADDRESS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
 
 /**
  * The {@link PhilipsTvHandler} is responsible for handling commands, which are sent to one of the
@@ -147,8 +103,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             return; // pairing process is not finished
         }
 
-        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER) &
-                !channelUID.getId().equals(CHANNEL_AMBILIGHT_LOUNGE_POWER))) {
+        if ((getThing().getStatus() == ThingStatus.OFFLINE) && (!channelUID.getId().equals(CHANNEL_POWER)
+                & !channelUID.getId().equals(CHANNEL_AMBILIGHT_LOUNGE_POWER))) {
             // Check if tv turned on meanwhile
             channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
             if (getThing().getStatus() == ThingStatus.OFFLINE) {
@@ -193,8 +149,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing is not configured yet, trying to present a Pairing Code on TV.");
             try {
-                initPairingCodeRetrieval(
-                        target); //TODO wirft keine Exception wenn URL auf Grund anderer Version nicht gefunden wird
+                initPairingCodeRetrieval(target); // TODO wirft keine Exception wenn URL auf Grund anderer Version nicht
+                // gefunden wird
             } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                         "Error occurred while trying to present a Pairing Code on TV.");
@@ -203,8 +159,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
         } else if ((config.pairingCode != null) && ((config.username == null) || (config.password == null))) {
             updateStatus(ThingStatus.ONLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                     "Pairing Code is available, but credentials missing. Trying to retrieve them.");
-            boolean hasFailed = initCredentialsRetrieval(
-                    target); // TODO hier fehlt authTimeStamp falls zu lange Zeit vergangen ist - man MUSS von vorne anfangen
+            boolean hasFailed = initCredentialsRetrieval(target); // TODO hier fehlt authTimeStamp falls zu lange Zeit
+            // vergangen ist - man MUSS von vorne anfangen
             if (hasFailed) {
                 postUpdateThing(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                         "Error occurred during retrieval of credentials.");
@@ -230,8 +186,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
                 if (macAddress.isPresent()) {
                     getConfig().put(MAC_ADDRESS, macAddress.get());
                 } else {
-                    logger.debug("MAC Address could not be determined for Wake-On-LAN support, " +
-                            "because Wake-On-LAN is not enabled on the TV.");
+                    logger.debug("MAC Address could not be determined for Wake-On-LAN support, "
+                            + "because Wake-On-LAN is not enabled on the TV.");
                 }
             } catch (IOException e) {
                 logger.debug("Error occurred during retrieval of MAC Address: {}", e.getMessage());
@@ -286,8 +242,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
      */
     private void initPairingCodeRetrieval(HttpHost target)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        logger.info("Pairing code for tv authentication is missing. " +
-                "Starting initial pairing process. Please provide manually the pairing code shown on the tv at the configuration of the tv thing.");
+        logger.info("Pairing code for tv authentication is missing. "
+                + "Starting initial pairing process. Please provide manually the pairing code shown on the tv at the configuration of the tv thing.");
         PhilipsTvPairing pairing = new PhilipsTvPairing();
         pairing.requestPairingPin(target);
     }
@@ -342,8 +298,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     }
 
     private boolean isSchedulerInitializable() {
-        return (config.username != null) && (config.password != null) &&
-                ((refreshScheduler == null) || refreshScheduler.isDone());
+        return (config.username != null) && (config.password != null)
+                && ((refreshScheduler == null) || refreshScheduler.isDone());
     }
 
     private void startRefreshScheduler() {
@@ -434,5 +390,4 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
             stopRefreshScheduler();
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  * <p>
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,16 +31,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
-
 import java.net.NoRouteToHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT_MILLISECONDS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAX_REQUEST_RETRIES;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT_MILLISECONDS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
 
 /**
  * The {@link ConnectionManagerUtil} is offering methods for connection specific processes.
@@ -73,16 +69,16 @@ public final class ConnectionManagerUtil {
             if (exception instanceof NoRouteToHostException) {
                 return false;
             }
-            if ((exception instanceof HttpHostConnectException) && exception.getMessage().contains(
-                    "Connection refused")) {
+            if ((exception instanceof HttpHostConnectException)
+                    && exception.getMessage().contains("Connection refused")) {
                 return false;
             }
             return executionCount < MAX_REQUEST_RETRIES;
         };
 
         return HttpClients.custom().setDefaultRequestConfig(requestConfig).setSSLSocketFactory(sslsf)
-                .setDefaultCredentialsProvider(credProvider).setConnectionManager(connManager).setRetryHandler(
-                        requestRetryHandler).setConnectionManagerShared(true).build();
+                .setDefaultCredentialsProvider(credProvider).setConnectionManager(connManager)
+                .setRetryHandler(requestRetryHandler).setConnectionManagerShared(true).build();
     }
 
     private static SSLContext getSslConnectionWithoutCertValidation()
