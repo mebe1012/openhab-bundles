@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,27 +15,14 @@ package org.openhab.binding.homematic.internal.converter.type;
 import java.math.BigDecimal;
 
 import javax.measure.Quantity;
-import javax.measure.quantity.Angle;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.ElectricPotential;
-import javax.measure.quantity.Energy;
-import javax.measure.quantity.Frequency;
-import javax.measure.quantity.Illuminance;
-import javax.measure.quantity.Length;
-import javax.measure.quantity.Power;
-import javax.measure.quantity.Pressure;
-import javax.measure.quantity.Speed;
-import javax.measure.quantity.Temperature;
-import javax.measure.quantity.Volume;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.homematic.internal.converter.ConverterException;
 import org.openhab.binding.homematic.internal.model.HmDatapoint;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.Type;
 
 /**
  * Converts between a Homematic datapoint value and a {@link DecimalType}.
@@ -58,12 +45,10 @@ public class QuantityTypeConverter extends AbstractTypeConverter<QuantityType<? 
 
     @Override
     protected Object toBinding(QuantityType<? extends Quantity<?>> type, HmDatapoint dp) throws ConverterException {
-
         if (dp.isIntegerType()) {
             return toUnitFromDatapoint(type, dp).intValue();
         }
         return round(toUnitFromDatapoint(type, dp).doubleValue()).doubleValue();
-
     }
 
     private QuantityType<? extends Quantity<?>> toUnitFromDatapoint(QuantityType<? extends Quantity<?>> type,
@@ -76,11 +61,11 @@ public class QuantityTypeConverter extends AbstractTypeConverter<QuantityType<? 
         // convert the given QuantityType to a QuantityType with the unit of the target datapoint
         switch (dp.getUnit()) {
             case "Lux":
-                return type.toUnit(SmartHomeUnits.LUX);
+                return type.toUnit(Units.LUX);
             case "degree":
-                return type.toUnit(SmartHomeUnits.DEGREE_ANGLE);
+                return type.toUnit(Units.DEGREE_ANGLE);
             case HUNDRED_PERCENT:
-                return type.toUnit(SmartHomeUnits.ONE);
+                return type.toUnit(Units.ONE);
             case UNCORRECT_ENCODED_CELSIUS:
                 return type.toUnit(SIUnits.CELSIUS);
             case "dBm":
@@ -116,33 +101,33 @@ public class QuantityTypeConverter extends AbstractTypeConverter<QuantityType<? 
         switch (unit) {
             case UNCORRECT_ENCODED_CELSIUS:
             case "°C":
-                return new QuantityType<Temperature>(number, SIUnits.CELSIUS);
+                return new QuantityType<>(number, SIUnits.CELSIUS);
             case "V":
-                return new QuantityType<ElectricPotential>(number, SmartHomeUnits.VOLT);
+                return new QuantityType<>(number, Units.VOLT);
             case "%":
-                return new QuantityType<Dimensionless>(number, SmartHomeUnits.PERCENT);
+                return new QuantityType<>(number, Units.PERCENT);
             case "mHz":
-                return new QuantityType<Frequency>(number, MetricPrefix.MILLI(SmartHomeUnits.HERTZ));
+                return new QuantityType<>(number, MetricPrefix.MILLI(Units.HERTZ));
             case "Hz":
-                return new QuantityType<Frequency>(number, SmartHomeUnits.HERTZ);
+                return new QuantityType<>(number, Units.HERTZ);
             case "hPa":
-                return new QuantityType<Pressure>(number, SIUnits.PASCAL.multiply(2));
+                return new QuantityType<>(number, SIUnits.PASCAL.multiply(2));
             case "Lux":
-                return new QuantityType<Illuminance>(number, SmartHomeUnits.LUX);
+                return new QuantityType<>(number, Units.LUX);
             case "degree":
-                return new QuantityType<Angle>(number, SmartHomeUnits.DEGREE_ANGLE);
+                return new QuantityType<>(number, Units.DEGREE_ANGLE);
             case "km/h":
-                return new QuantityType<Speed>(number, SIUnits.KILOMETRE_PER_HOUR);
+                return new QuantityType<>(number, SIUnits.KILOMETRE_PER_HOUR);
             case "mm":
-                return new QuantityType<Length>(number, MetricPrefix.MILLI(SIUnits.METRE));
+                return new QuantityType<>(number, MetricPrefix.MILLI(SIUnits.METRE));
             case "W":
-                return new QuantityType<Power>(number, SmartHomeUnits.WATT);
+                return new QuantityType<>(number, Units.WATT);
             case "Wh":
-                return new QuantityType<Energy>(number, SmartHomeUnits.WATT_HOUR);
+                return new QuantityType<>(number, Units.WATT_HOUR);
             case "m3":
-                return new QuantityType<Volume>(number, SIUnits.CUBIC_METRE);
+                return new QuantityType<>(number, SIUnits.CUBIC_METRE);
             case HUNDRED_PERCENT:
-                return new QuantityType<Dimensionless>(number.doubleValue() * 100.0, SmartHomeUnits.PERCENT);
+                return new QuantityType<>(number.doubleValue() * 100.0, Units.PERCENT);
             case "dBm":
             case "s":
             case "min":
@@ -152,7 +137,7 @@ public class QuantityTypeConverter extends AbstractTypeConverter<QuantityType<? 
             case "year":
             case "":
             default:
-                return new QuantityType<Dimensionless>(number, SmartHomeUnits.ONE);
+                return new QuantityType<>(number, Units.ONE);
         }
     }
 
@@ -161,5 +146,4 @@ public class QuantityTypeConverter extends AbstractTypeConverter<QuantityType<? 
         // increase logging verbosity for this type of converter
         return LogLevel.DEBUG;
     }
-
 }

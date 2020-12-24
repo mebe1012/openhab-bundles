@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,9 +13,9 @@
 package org.openhab.binding.dsmr.internal.device;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.dsmr.internal.device.connector.DSMRSerialConnector;
 import org.openhab.binding.dsmr.internal.device.connector.DSMRSerialSettings;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 
 /**
  * Implementation of a DSMRDevice with fixed serial port settings. With fixed port settings the code is much simpler

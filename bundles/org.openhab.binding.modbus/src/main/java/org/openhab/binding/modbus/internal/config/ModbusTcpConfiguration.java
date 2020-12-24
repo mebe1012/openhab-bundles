@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,8 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class ModbusTcpConfiguration {
-    @Nullable
-    private String host;
+    private @Nullable String host;
     private int port;
     private int id;
     private int timeBetweenTransactionsMillis;
@@ -105,5 +104,4 @@ public class ModbusTcpConfiguration {
     public void setDiscoveryEnabled(boolean enableDiscovery) {
         this.enableDiscovery = enableDiscovery;
     }
-
 }

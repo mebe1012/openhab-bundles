@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.max.internal.discovery;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 import static org.openhab.binding.max.internal.MaxBindingConstants.*;
+import static org.openhab.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -31,12 +31,12 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.max.internal.Utils;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Marcel Verpaalen - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.max")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.max")
 public class MaxCubeBridgeDiscovery extends AbstractDiscoveryService {
 
     private static final String MAXCUBE_DISCOVER_STRING = "eQ3Max*\0**********I";
@@ -156,8 +156,7 @@ public class MaxCubeBridgeDiscovery extends AbstractDiscoveryService {
 
     private void discoveryResultSubmission(String IpAddress, String cubeSerialNumber, String rfAddress) {
         if (cubeSerialNumber != null) {
-            logger.trace("Adding new MAX! Cube Lan Gateway on {} with id '{}' to Smarthome inbox", IpAddress,
-                    cubeSerialNumber);
+            logger.trace("Adding new MAX! Cube Lan Gateway on {} with id '{}' to inbox", IpAddress, cubeSerialNumber);
             Map<String, Object> properties = new HashMap<>(2);
             properties.put(PROPERTY_IP_ADDRESS, IpAddress);
             properties.put(PROPERTY_SERIAL_NUMBER, cubeSerialNumber);
@@ -217,5 +216,4 @@ public class MaxCubeBridgeDiscovery extends AbstractDiscoveryService {
             logger.debug("IO error during MAX! Cube discovery: {}", e.getMessage());
         }
     }
-
 }

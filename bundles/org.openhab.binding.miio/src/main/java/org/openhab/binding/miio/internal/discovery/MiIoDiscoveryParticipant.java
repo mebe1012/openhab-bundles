@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,14 +21,19 @@ import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.miio.internal.MiIoDevices;
+import org.openhab.binding.miio.internal.cloud.CloudConnector;
+import org.openhab.binding.miio.internal.cloud.CloudDeviceDTO;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +43,18 @@ import org.slf4j.LoggerFactory;
  * @author Marcel Verpaalen - Initial contribution
  *
  */
-@Component(service = MDNSDiscoveryParticipant.class, immediate = true)
+@NonNullByDefault
+@Component(service = MDNSDiscoveryParticipant.class)
 public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
+    private final CloudConnector cloudConnector;
     private Logger logger = LoggerFactory.getLogger(MiIoDiscoveryParticipant.class);
+
+    @Activate
+    public MiIoDiscoveryParticipant(@Reference CloudConnector cloudConnector) {
+        this.cloudConnector = cloudConnector;
+        logger.debug("Start Xiaomi Mi IO mDNS discovery");
+    }
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
@@ -54,7 +67,7 @@ public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
     }
 
     @Override
-    public ThingUID getThingUID(@Nullable ServiceInfo service) {
+    public @Nullable ThingUID getThingUID(@Nullable ServiceInfo service) {
         if (service == null) {
             return null;
         }
@@ -64,9 +77,9 @@ public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
             logger.trace("mDNS Could not identify Type / Device Id from '{}'", service.getName());
             return null;
         }
-        int did;
+        long did;
         try {
-            did = Integer.parseUnsignedInt(id[1]);
+            did = Long.parseUnsignedLong(id[1]);
         } catch (Exception e) {
             logger.trace("mDNS Could not identify Device ID from '{}'", id[1]);
             return null;
@@ -77,7 +90,7 @@ public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
         return new ThingUID(thingType, uidName);
     }
 
-    private InetAddress getIpAddress(ServiceInfo service) {
+    private @Nullable InetAddress getIpAddress(ServiceInfo service) {
         InetAddress address = null;
         for (InetAddress addr : service.getInet4Addresses()) {
             return addr;
@@ -90,7 +103,7 @@ public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
     }
 
     @Override
-    public DiscoveryResult createResult(ServiceInfo service) {
+    public @Nullable DiscoveryResult createResult(ServiceInfo service) {
         DiscoveryResult result = null;
         ThingUID uid = getThingUID(service);
         if (uid != null) {
@@ -98,15 +111,29 @@ public class MiIoDiscoveryParticipant implements MDNSDiscoveryParticipant {
             // remove the domain from the name
             InetAddress ip = getIpAddress(service);
             if (ip == null) {
+                logger.debug("Mi IO mDNS Discovery could not determine ip address from service info: {}", service);
                 return null;
             }
             String inetAddress = ip.toString().substring(1); // trim leading slash
             String id = uid.getId();
             String label = "Xiaomi Mi Device " + id + " (" + Long.parseUnsignedLong(id, 16) + ") " + service.getName();
+            if (cloudConnector.isConnected()) {
+                cloudConnector.getDevicesList();
+                CloudDeviceDTO cloudInfo = cloudConnector.getDeviceInfo(id);
+                if (cloudInfo != null) {
+                    logger.debug("Cloud Info: {}", cloudInfo);
+                    properties.put(PROPERTY_TOKEN, cloudInfo.getToken());
+                    label = label + " with token";
+                    String country = cloudInfo.getServer();
+                    if (!country.isEmpty() && cloudInfo.getIsOnline()) {
+                        properties.put(PROPERTY_CLOUDSERVER, country);
+                    }
+                }
+            }
             properties.put(PROPERTY_HOST_IP, inetAddress);
             properties.put(PROPERTY_DID, id);
-            result = DiscoveryResultBuilder.create(uid).withProperties(properties).withRepresentationProperty(id)
-                    .withLabel(label).build();
+            result = DiscoveryResultBuilder.create(uid).withProperties(properties)
+                    .withRepresentationProperty(PROPERTY_DID).withLabel(label).build();
             logger.debug("Mi IO mDNS Discovery found {} with address '{}:{}' name '{}'", uid, inetAddress,
                     service.getPort(), label);
         }

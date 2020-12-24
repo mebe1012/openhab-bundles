@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,17 +16,17 @@ import static org.openhab.binding.dscalarm.internal.DSCAlarmBindingConstants.*;
 
 import java.util.EventObject;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.dscalarm.internal.DSCAlarmCode;
 import org.openhab.binding.dscalarm.internal.DSCAlarmEvent;
 import org.openhab.binding.dscalarm.internal.DSCAlarmMessage;
 import org.openhab.binding.dscalarm.internal.DSCAlarmMessage.DSCAlarmMessageInfoType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,6 @@ public class ZoneThingHandler extends DSCAlarmBaseThingHandler {
 
         if (dscAlarmBridgeHandler != null && dscAlarmBridgeHandler.isConnected()
                 && channelUID.getId().equals(ZONE_BYPASS_MODE)) {
-
             String data = String.valueOf(getPartitionNumber()) + "*1" + String.format("%02d", getZoneNumber()) + "#";
 
             dscAlarmBridgeHandler.sendCommand(DSCAlarmCode.KeySequence, data);

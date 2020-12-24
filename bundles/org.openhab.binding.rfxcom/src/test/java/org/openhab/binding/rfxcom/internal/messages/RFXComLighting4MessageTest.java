@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 import static org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType.LIGHTING4;
 import static org.openhab.binding.rfxcom.internal.messages.RFXComLighting4Message.Commands.*;
@@ -21,18 +21,21 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComLighting4Messag
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.rfxcom.internal.config.RFXComDeviceConfiguration;
 import org.openhab.binding.rfxcom.internal.config.RFXComDeviceConfigurationBuilder;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Test for RFXCom-binding
  *
- * @author Martin van Wingerden
+ * @author Martin van Wingerden - Initial contribution
  */
+@NonNullByDefault
 public class RFXComLighting4MessageTest {
     @Test
     public void basicBoundaryCheck() throws RFXComException {
@@ -46,30 +49,30 @@ public class RFXComLighting4MessageTest {
         byte[] binaryMessage = message.decodeMessage();
         RFXComLighting4Message msg = (RFXComLighting4Message) RFXComMessageFactory.createMessage(binaryMessage);
 
-        assertEquals("Sensor Id", "90000", msg.getDeviceId());
-
+        assertEquals("90000", msg.getDeviceId(), "Sensor Id");
     }
 
-    private void testMessage(String hexMsg, RFXComLighting4Message.SubType subType, String deviceId, Integer pulse,
-            RFXComLighting4Message.Commands command, Integer seqNbr, int signalLevel, int offCommand, int onCommand)
-            throws RFXComException {
+    private void testMessage(String hexMsg, RFXComLighting4Message.SubType subType, String deviceId,
+            @Nullable Integer pulse, RFXComLighting4Message.Commands command, @Nullable Integer seqNbr, int signalLevel,
+            int offCommand, int onCommand) throws RFXComException {
         testMessage(hexMsg, subType, deviceId, pulse, command.toByte(), seqNbr, signalLevel, offCommand, onCommand);
     }
 
-    private void testMessage(String hexMsg, RFXComLighting4Message.SubType subType, String deviceId, Integer pulse,
-            byte commandByte, Integer seqNbr, int signalLevel, int offCommand, int onCommand) throws RFXComException {
+    private void testMessage(String hexMsg, RFXComLighting4Message.SubType subType, String deviceId,
+            @Nullable Integer pulse, byte commandByte, @Nullable Integer seqNbr, int signalLevel, int offCommand,
+            int onCommand) throws RFXComException {
         RFXComLighting4Message msg = (RFXComLighting4Message) RFXComMessageFactory
                 .createMessage(HexUtils.hexToBytes(hexMsg));
-        assertEquals("Sensor Id", deviceId, msg.getDeviceId());
-        assertEquals("Command", commandByte, RFXComTestHelper.getActualIntValue(msg, CHANNEL_COMMAND_ID));
+        assertEquals(deviceId, msg.getDeviceId(), "Sensor Id");
+        assertEquals(commandByte, RFXComTestHelper.getActualIntValue(msg, CHANNEL_COMMAND_ID), "Command");
         if (seqNbr != null) {
-            assertEquals("Seq Number", seqNbr.shortValue(), (short) (msg.seqNbr & 0xFF));
+            assertEquals(seqNbr.shortValue(), (short) (msg.seqNbr & 0xFF), "Seq Number");
         }
-        assertEquals("Signal Level", signalLevel, RFXComTestHelper.getActualIntValue(msg, CHANNEL_SIGNAL_LEVEL));
+        assertEquals(signalLevel, RFXComTestHelper.getActualIntValue(msg, CHANNEL_SIGNAL_LEVEL), "Signal Level");
 
         byte[] decoded = msg.decodeMessage();
 
-        assertEquals("Message converted back", hexMsg, HexUtils.bytesToHex(decoded));
+        assertEquals(hexMsg, HexUtils.bytesToHex(decoded), "Message converted back");
 
         RFXComTestHelper.checkDiscoveryResult(msg, deviceId, pulse, subType.toString(), offCommand, onCommand);
     }
@@ -87,12 +90,12 @@ public class RFXComLighting4MessageTest {
     }
 
     @Test
-    public void test_some_alarm_remote() throws RFXComException {
+    public void testSomeAlarmRemote() throws RFXComException {
         testMessage("0913004A0D8998016E60", PT2262, "55449", 366, ON_8, 74, 2, 4, 8);
     }
 
     @Test
-    public void test_cheap_pir_sensor() throws RFXComException {
+    public void testCheapPirSensor() throws RFXComException {
         testMessage("091300EF505FC6019670", PT2262, "329212", 406, ON_6, 239, 2, 4, 6);
     }
 

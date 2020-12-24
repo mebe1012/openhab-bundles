@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,18 +14,18 @@ package org.openhab.binding.lametrictime.internal.handler;
 
 import static org.openhab.binding.lametrictime.internal.LaMetricTimeBindingConstants.CHANNEL_APP_CONTROL;
 
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.lametrictime.api.local.ApplicationActionException;
+import org.openhab.binding.lametrictime.api.model.CoreApps;
 import org.openhab.binding.lametrictime.internal.config.LaMetricTimeAppConfiguration;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.syphr.lametrictime.api.local.ApplicationActionException;
-import org.syphr.lametrictime.api.model.CoreApps;
 
 /**
  * The {@link RadioAppHandler} represents an instance of the built-in radio app.

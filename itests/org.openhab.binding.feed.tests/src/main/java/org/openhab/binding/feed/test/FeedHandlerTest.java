@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,48 +13,47 @@
 package org.openhab.binding.feed.test;
 
 import static java.lang.Thread.sleep;
-import static org.eclipse.smarthome.core.thing.ThingStatus.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.StateChangeListener;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingProvider;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ManagedItemChannelLinkProvider;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.feed.internal.FeedBindingConstants;
 import org.openhab.binding.feed.internal.handler.FeedHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingProvider;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
@@ -69,7 +68,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
     // Servlet URL configuration
     private static final String MOCK_SERVLET_PROTOCOL = "http";
     private static final String MOCK_SERVLET_HOSTNAME = "localhost";
-    private static final int MOCK_SERVLET_PORT = 9090;
+    private static final int MOCK_SERVLET_PORT = Integer.getInteger("org.osgi.service.http.port", 8080);
     private static final String MOCK_SERVLET_PATH = "/test/feed";
 
     // Files used for the test as input. They are located in /src/test/resources directory
@@ -94,7 +93,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
     /**
      * It is updated from mocked {@link StateChangeListener#stateUpdated() }
      */
-    private StringType currentItemState = null;
+    private StringType currentItemState;
 
     // Required services for the test
     private ManagedThingProvider managedThingProvider;
@@ -105,6 +104,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
     private Thing feedThing;
     private FeedHandler feedHandler;
     private ChannelUID channelUID;
+    private HttpService httpService;
 
     /**
      * This class is used as a mock for HTTP web server, serving XML feed content.
@@ -139,11 +139,12 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         public void setFeedContent(String feedContentFile) throws IOException {
             String path = "input/" + feedContentFile;
-            feedContent = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(path));
+            feedContent = new String(getClass().getClassLoader().getResourceAsStream(path).readAllBytes(),
+                    StandardCharsets.UTF_8);
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         volatileStorageService = new VolatileStorageService();
         registerService(volatileStorageService);
@@ -157,7 +158,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
         registerFeedTestServlet();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         currentItemState = null;
         if (feedThing != null) {
@@ -175,9 +176,8 @@ public class FeedHandlerTest extends JavaOSGiTest {
         });
     }
 
-    private void registerFeedTestServlet() {
-        HttpService httpService = getService(HttpService.class);
-        assertThat(httpService, is(notNullValue()));
+    private synchronized void registerFeedTestServlet() {
+        waitForAssert(() -> assertThat(httpService = getService(HttpService.class), is(notNullValue())));
         servlet = new FeedServiceMock(DEFAULT_MOCK_CONTENT);
         try {
             httpService.registerServlet(MOCK_SERVLET_PATH, servlet, null, null);
@@ -186,10 +186,12 @@ public class FeedHandlerTest extends JavaOSGiTest {
         }
     }
 
-    private void unregisterFeedTestServlet() {
-        HttpService httpService = getService(HttpService.class);
-        assertThat(httpService, is(notNullValue()));
-        httpService.unregister(MOCK_SERVLET_PATH);
+    private synchronized void unregisterFeedTestServlet() {
+        waitForAssert(() -> assertThat(httpService = getService(HttpService.class), is(notNullValue())));
+        try {
+            httpService.unregister(MOCK_SERVLET_PATH);
+        } catch (IllegalArgumentException ignore) {
+        }
         servlet = null;
     }
 
@@ -232,8 +234,8 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         // This will ensure that the configuration is read before the channelLinked() method in FeedHandler is called !
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), anyOf(is(ONLINE), is(OFFLINE)));
-        }, 30000, DFL_SLEEP_TIME);
+            assertThat(feedThing.getStatus(), anyOf(is(ThingStatus.ONLINE), is(ThingStatus.OFFLINE)));
+        }, 60000, DFL_SLEEP_TIME);
         initializeItem(channelUID);
     }
 
@@ -270,7 +272,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
         initializeDefaultFeedHandler();
 
         waitForAssert(() -> {
-            assertThat("Feed Thing can not be initialized", feedThing.getStatus(), is(equalTo(ONLINE)));
+            assertThat("Feed Thing can not be initialized", feedThing.getStatus(), is(equalTo(ThingStatus.ONLINE)));
             assertThat("Item's state is not updated on initialize", currentItemState, is(notNullValue()));
         });
 
@@ -294,7 +296,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             assertThat("Error occurred while trying to connect to server. Content is not downloaded!",
-                    feedThing.getStatus(), is(equalTo(ONLINE)));
+                    feedThing.getStatus(), is(equalTo(ThingStatus.ONLINE)));
         });
 
         waitForAssert(() -> {
@@ -315,7 +317,6 @@ public class FeedHandlerTest extends JavaOSGiTest {
     }
 
     @Test
-    @Category(SlowTests.class)
     public void assertThatItemsStateIsNotUpdatedOnAutoRefreshIfContentIsNotChanged()
             throws IOException, InterruptedException {
         boolean commandReceived = false;
@@ -324,7 +325,6 @@ public class FeedHandlerTest extends JavaOSGiTest {
     }
 
     @Test
-    @Category(SlowTests.class)
     public void assertThatItemsStateIsUpdatedOnAutoRefreshIfContentChanged() throws IOException, InterruptedException {
         boolean commandReceived = false;
         boolean contentChanged = true;
@@ -363,7 +363,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
         feedHandler.handleCommand(channelUID, RefreshType.REFRESH);
 
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), is(equalTo(OFFLINE)));
+            assertThat(feedThing.getStatus(), is(equalTo(ThingStatus.OFFLINE)));
         });
 
         servlet.httpStatus = HttpStatus.OK_200;
@@ -374,7 +374,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
         feedHandler.handleCommand(channelUID, RefreshType.REFRESH);
 
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), is(equalTo(ONLINE)));
+            assertThat(feedThing.getStatus(), is(equalTo(ThingStatus.ONLINE)));
         });
     }
 
@@ -386,7 +386,7 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         initializeFeedHandler(invalidURL);
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), is(equalTo(OFFLINE)));
+            assertThat(feedThing.getStatus(), is(equalTo(ThingStatus.OFFLINE)));
             assertThat(feedThing.getStatusInfo().getStatusDetail(), is(equalTo(ThingStatusDetail.CONFIGURATION_ERROR)));
         });
     }
@@ -399,9 +399,9 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         initializeFeedHandler(invalidURL);
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), is(equalTo(OFFLINE)));
+            assertThat(feedThing.getStatus(), is(equalTo(ThingStatus.OFFLINE)));
             assertThat(feedThing.getStatusInfo().getStatusDetail(), is(equalTo(ThingStatusDetail.COMMUNICATION_ERROR)));
-        });
+        }, 30000, DFL_SLEEP_TIME);
     }
 
     @Test
@@ -412,9 +412,8 @@ public class FeedHandlerTest extends JavaOSGiTest {
 
         initializeFeedHandler(invalidURL);
         waitForAssert(() -> {
-            assertThat(feedThing.getStatus(), is(equalTo(OFFLINE)));
+            assertThat(feedThing.getStatus(), is(equalTo(ThingStatus.OFFLINE)));
             assertThat(feedThing.getStatusInfo().getStatusDetail(), is(equalTo(ThingStatusDetail.COMMUNICATION_ERROR)));
         });
     }
-
 }

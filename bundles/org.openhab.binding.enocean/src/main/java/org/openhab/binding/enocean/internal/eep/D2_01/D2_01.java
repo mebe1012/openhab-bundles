@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,22 +16,22 @@ import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.*;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.enocean.internal.config.EnOceanChannelDimmerConfig;
-import org.openhab.binding.enocean.internal.eep.EEPHelper;
 import org.openhab.binding.enocean.internal.eep.Base._VLDMessage;
+import org.openhab.binding.enocean.internal.eep.EEPHelper;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.HexUtils;
 
 /**
  *
@@ -159,7 +159,7 @@ public abstract class D2_01 extends _VLDMessage {
 
             float energy = Long.parseLong(HexUtils.bytesToHex(new byte[] { bytes[2], bytes[3], bytes[4], bytes[5] }),
                     16) * factor;
-            return new QuantityType<>(energy, SmartHomeUnits.KILOWATT_HOUR);
+            return new QuantityType<>(energy, Units.KILOWATT_HOUR);
         }
 
         return UnDefType.UNDEF;
@@ -183,7 +183,7 @@ public abstract class D2_01 extends _VLDMessage {
             float power = Long.parseLong(HexUtils.bytesToHex(new byte[] { bytes[2], bytes[3], bytes[4], bytes[5] }), 16)
                     * factor;
 
-            return new QuantityType<>(power, SmartHomeUnits.WATT);
+            return new QuantityType<>(power, Units.WATT);
         }
 
         return UnDefType.UNDEF;
@@ -198,7 +198,6 @@ public abstract class D2_01 extends _VLDMessage {
     @Override
     protected void convertFromCommandImpl(String channelId, String channelTypeId, Command command,
             Function<String, State> getCurrentStateFunc, Configuration config) {
-
         if (channelId.equals(CHANNEL_GENERAL_SWITCHING)) {
             if (command == RefreshType.REFRESH) {
                 setSwitchingQueryData(AllChannels_Mask);
@@ -231,9 +230,8 @@ public abstract class D2_01 extends _VLDMessage {
     }
 
     @Override
-    protected State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc,
-            Configuration config) {
-
+    protected State convertToStateImpl(String channelId, String channelTypeId,
+            Function<String, State> getCurrentStateFunc, Configuration config) {
         switch (channelId) {
             case CHANNEL_GENERAL_SWITCHING:
                 return getSwitchingData();
@@ -253,5 +251,4 @@ public abstract class D2_01 extends _VLDMessage {
 
         return UnDefType.UNDEF;
     }
-
 }

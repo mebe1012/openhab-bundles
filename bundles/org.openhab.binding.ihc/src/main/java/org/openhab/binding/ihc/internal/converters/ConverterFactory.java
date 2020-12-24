@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,6 @@ package org.openhab.binding.ihc.internal.converters;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSBooleanValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSDateValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSEnumValue;
@@ -32,6 +24,14 @@ import org.openhab.binding.ihc.internal.ws.resourcevalues.WSResourceValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSTimeValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSTimerValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSWeekdayValue;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.Type;
 
 /**
  * IHC / ELKO <-> openHAB data type converter factory.
@@ -80,7 +80,7 @@ public enum ConverterFactory {
     private Map<Key, Converter<? extends WSResourceValue, ? extends Type>> converters;
 
     private ConverterFactory() {
-        converters = new HashMap<Key, Converter<? extends WSResourceValue, ? extends Type>>();
+        converters = new HashMap<>();
 
         converters.put(new Key(WSDateValue.class, DateTimeType.class), new DateTimeTypeWSDateValueConverter());
         converters.put(new Key(WSTimeValue.class, DateTimeType.class), new DateTimeTypeWSTimeValueConverter());

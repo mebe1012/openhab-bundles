@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,19 +15,19 @@ package org.openhab.binding.lirc.internal.handler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.lirc.internal.LIRCBindingConstants;
 import org.openhab.binding.lirc.internal.LIRCMessageListener;
 import org.openhab.binding.lirc.internal.config.LIRCRemoteConfiguration;
 import org.openhab.binding.lirc.internal.messages.LIRCButtonEvent;
 import org.openhab.binding.lirc.internal.messages.LIRCResponse;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

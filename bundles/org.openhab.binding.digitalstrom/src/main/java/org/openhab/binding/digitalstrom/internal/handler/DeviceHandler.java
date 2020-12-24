@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,29 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.digitalstrom.internal.DigitalSTROMBindingConstants;
 import org.openhab.binding.digitalstrom.internal.lib.GeneralLibConstance;
 import org.openhab.binding.digitalstrom.internal.lib.config.Config;
@@ -62,6 +39,29 @@ import org.openhab.binding.digitalstrom.internal.lib.structure.devices.devicepar
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.impl.DeviceBinaryInput;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.impl.DeviceStateUpdateImpl;
 import org.openhab.binding.digitalstrom.internal.providers.DsChannelTypeProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
     /**
      * Contains all supported thing types of this handler, will be filled by DsDeviceThingTypeProvider.
      */
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<ThingTypeUID>();
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>();
 
     public static final String TWO_STAGE_SWITCH_IDENTICATOR = "2";
     public static final String THREE_STAGE_SWITCH_IDENTICATOR = "3";
@@ -175,9 +175,6 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
         }
         if (bridgeStatusInfo.getStatus().equals(ThingStatus.OFFLINE)) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
-        }
-        if (bridgeStatusInfo.getStatus().equals(ThingStatus.REMOVED)) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Bridge has been removed.");
         }
         logger.debug("Set status to {}", getThing().getStatusInfo());
     }
@@ -314,7 +311,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
                     if (deviceStateUpdate.isSensorUpdateType()) {
                         updateState(getSensorChannelID(deviceStateUpdate.getTypeAsSensorEnum()),
                                 new DecimalType(deviceStateUpdate.getValueAsFloat()));
-                        logger.debug("Update ESH-State");
+                        logger.debug("Update state");
                         return;
                     }
                     if (deviceStateUpdate.isBinarayInputType()) {
@@ -405,7 +402,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
                     }
                     updateState(DsChannelTypeProvider.SHADE, new PercentType(percent));
                 }
-                logger.debug("Update ESH-State");
+                logger.debug("Update state");
             }
         }
     }
@@ -421,7 +418,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
     @Override
     public synchronized void onDeviceRemoved(GeneralDeviceInformation device) {
         if (device instanceof Device) {
-            this.device = null;
+            this.device = (Device) device;
             if (this.getThing().getStatus().equals(ThingStatus.ONLINE)) {
                 if (!((Device) device).isPresent()) {
                     updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE,
@@ -527,7 +524,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
     }
 
     private String getBinarayInputList() {
-        List<String> binarayInputs = new ArrayList<String>(device.getBinaryInputs().size());
+        List<String> binarayInputs = new ArrayList<>(device.getBinaryInputs().size());
         for (DeviceBinaryInput binInput : device.getBinaryInputs()) {
             DeviceBinarayInputEnum devBinInp = DeviceBinarayInputEnum.getdeviceBinarayInput(binInput.getInputType());
             if (devBinInp != null) {
@@ -592,7 +589,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
 
     private boolean addLoadedSensorChannel(String sensorChannelType) {
         if (loadedSensorChannels == null) {
-            loadedSensorChannels = new LinkedList<String>();
+            loadedSensorChannels = new LinkedList<>();
         }
         if (!loadedSensorChannels.contains(sensorChannelType.toString())) {
             return loadedSensorChannels.add(sensorChannelType.toString());
@@ -615,7 +612,7 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
     }
 
     private void checkSensorChannel() {
-        List<Channel> channelList = new LinkedList<Channel>(this.getThing().getChannels());
+        List<Channel> channelList = new LinkedList<>(this.getThing().getChannels());
 
         boolean channelListChanged = false;
 
@@ -732,21 +729,21 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
         }
         currentChannel = channelTypeUID.getId();
 
-        List<Channel> channelList = new LinkedList<Channel>(this.getThing().getChannels());
+        List<Channel> channelList = new LinkedList<>(this.getThing().getChannels());
         boolean channelIsAlreadyLoaded = false;
         boolean channelListChanged = false;
 
         if (!channelList.isEmpty()) {
             Iterator<Channel> channelInter = channelList.iterator();
             while (channelInter.hasNext()) {
-                Channel eshChannel = channelInter.next();
-                if (DsChannelTypeProvider.isOutputChannel(eshChannel.getUID().getId())) {
-                    if (!eshChannel.getUID().getId().equals(currentChannel)
-                            && !(device.isShade() && eshChannel.getUID().getId().equals(DsChannelTypeProvider.SHADE))) {
+                Channel channel = channelInter.next();
+                if (DsChannelTypeProvider.isOutputChannel(channel.getUID().getId())) {
+                    if (!channel.getUID().getId().equals(currentChannel)
+                            && !(device.isShade() && channel.getUID().getId().equals(DsChannelTypeProvider.SHADE))) {
                         channelInter.remove();
                         channelListChanged = true;
                     } else {
-                        if (!eshChannel.getUID().getId().equals(DsChannelTypeProvider.SHADE)) {
+                        if (!channel.getUID().getId().equals(DsChannelTypeProvider.SHADE)) {
                             channelIsAlreadyLoaded = true;
                         }
                     }
@@ -768,7 +765,6 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
             updateThing(thingBuilder.build());
             logger.debug("load channel: {} with item: {}", channelTypeUID.getAsString(), acceptedItemType);
         }
-
     }
 
     private ChannelUID getSensorChannelUID(SensorEnum sensorType) {
@@ -935,38 +931,39 @@ public class DeviceHandler extends BaseThingHandler implements DeviceStatusListe
                 // super.updateThing(editThing().build());
             }
         }
-
     }
 
     @Override
     public void onDeviceConfigChanged(ChangeableDeviceConfigEnum whichConfig) {
-        switch (whichConfig) {
-            case DEVICE_NAME:
-                super.updateProperty(DEVICE_NAME, device.getName());
-                break;
-            case METER_DSID:
-                super.updateProperty(DEVICE_METER_ID, device.getMeterDSID().getValue());
-                break;
-            case ZONE_ID:
-                super.updateProperty(DEVICE_ZONE_ID, device.getZoneId() + "");
-                break;
-            case GROUPS:
-                super.updateProperty(DEVICE_GROUPS, device.getGroups().toString());
-                break;
-            case FUNCTIONAL_GROUP:
-                super.updateProperty(DEVICE_FUNCTIONAL_COLOR_GROUP, device.getFunctionalColorGroup().toString());
-                checkOutputChannel();
-                break;
-            case OUTPUT_MODE:
-                super.updateProperty(DEVICE_OUTPUT_MODE, device.getOutputMode().toString());
-                checkOutputChannel();
-                break;
-            case BINARY_INPUTS:
-                super.updateProperty(DEVICE_BINARAY_INPUTS, getBinarayInputList());
-                checkSensorChannel();
-                break;
-            default:
-                break;
+        if (whichConfig != null) {
+            switch (whichConfig) {
+                case DEVICE_NAME:
+                    super.updateProperty(DEVICE_NAME, device.getName());
+                    break;
+                case METER_DSID:
+                    super.updateProperty(DEVICE_METER_ID, device.getMeterDSID().getValue());
+                    break;
+                case ZONE_ID:
+                    super.updateProperty(DEVICE_ZONE_ID, device.getZoneId() + "");
+                    break;
+                case GROUPS:
+                    super.updateProperty(DEVICE_GROUPS, device.getGroups().toString());
+                    break;
+                case FUNCTIONAL_GROUP:
+                    super.updateProperty(DEVICE_FUNCTIONAL_COLOR_GROUP, device.getFunctionalColorGroup().toString());
+                    checkOutputChannel();
+                    break;
+                case OUTPUT_MODE:
+                    super.updateProperty(DEVICE_OUTPUT_MODE, device.getOutputMode().toString());
+                    checkOutputChannel();
+                    break;
+                case BINARY_INPUTS:
+                    super.updateProperty(DEVICE_BINARAY_INPUTS, getBinarayInputList());
+                    checkSensorChannel();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

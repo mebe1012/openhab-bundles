@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,26 +12,26 @@
  */
 package org.openhab.binding.bosesoundtouch.internal;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_HARDWARE_VERSION;
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_MODEL_ID;
 import static org.openhab.binding.bosesoundtouch.internal.BoseSoundTouchBindingConstants.*;
+import static org.openhab.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
+import static org.openhab.core.thing.Thing.PROPERTY_HARDWARE_VERSION;
+import static org.openhab.core.thing.Thing.PROPERTY_MODEL_ID;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.bosesoundtouch.internal.handler.BoseSoundTouchHandler;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -202,8 +202,7 @@ public class XMLResponseHandler extends DefaultHandler {
                         }
                         state = XMLHandlerState.Unprocessed;
                     } else if (state != XMLHandlerState.Volume && state != XMLHandlerState.Presets
-                            && state != XMLHandlerState.Group
-                            && state != XMLHandlerState.Unprocessed) {
+                            && state != XMLHandlerState.Group && state != XMLHandlerState.Unprocessed) {
                         if (!checkDeviceId(localName, attributes, false)) {
                             state = XMLHandlerState.Unprocessed;
                             break;

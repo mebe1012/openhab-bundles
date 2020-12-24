@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,14 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.digitalstrom.internal.discovery.DiscoveryServiceManager;
 import org.openhab.binding.digitalstrom.internal.handler.BridgeHandler;
 import org.openhab.binding.digitalstrom.internal.handler.CircuitHandler;
@@ -35,6 +27,14 @@ import org.openhab.binding.digitalstrom.internal.handler.ZoneTemperatureControlH
 import org.openhab.binding.digitalstrom.internal.lib.manager.ConnectionManager;
 import org.openhab.binding.digitalstrom.internal.lib.manager.impl.ConnectionManagerImpl;
 import org.openhab.binding.digitalstrom.internal.lib.serverconnection.constants.JSONApiResponseKeysEnum;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
 public class DigitalSTROMHandlerFactory extends BaseThingHandlerFactory {
 
     private final Logger logger = LoggerFactory.getLogger(DigitalSTROMHandlerFactory.class);
-    private final HashMap<String, DiscoveryServiceManager> discoveryServiceManagers = new HashMap<String, DiscoveryServiceManager>();
+    private final Map<String, DiscoveryServiceManager> discoveryServiceManagers = new HashMap<>();
 
-    private HashMap<ThingUID, BridgeHandler> bridgeHandlers;
+    private Map<ThingUID, BridgeHandler> bridgeHandlers;
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -109,7 +109,7 @@ public class DigitalSTROMHandlerFactory extends BaseThingHandlerFactory {
         if (BridgeHandler.SUPPORTED_THING_TYPES.contains(thingTypeUID)) {
             BridgeHandler handler = new BridgeHandler((Bridge) thing);
             if (bridgeHandlers == null) {
-                bridgeHandlers = new HashMap<ThingUID, BridgeHandler>();
+                bridgeHandlers = new HashMap<>();
             }
             bridgeHandlers.put(thing.getUID(), handler);
             DiscoveryServiceManager discoveryServiceManager = new DiscoveryServiceManager(handler);

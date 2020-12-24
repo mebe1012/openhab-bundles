@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,30 +28,30 @@ import javax.measure.quantity.Length;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.gpstracker.internal.config.ConfigHelper;
 import org.openhab.binding.gpstracker.internal.message.LocationMessage;
 import org.openhab.binding.gpstracker.internal.message.NotificationBroker;
 import org.openhab.binding.gpstracker.internal.message.NotificationHandler;
 import org.openhab.binding.gpstracker.internal.message.TransitionMessage;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,11 +120,11 @@ public class TrackerHandler extends BaseThingHandler {
     /**
      * Constructor.
      *
-     * @param thing              Thing.
+     * @param thing Thing.
      * @param notificationBroker Notification broker
-     * @param regions            Global region set
-     * @param sysLocation        Location of the system
-     * @param unitProvider       Unit provider
+     * @param regions Global region set
+     * @param sysLocation Location of the system
+     * @param unitProvider Unit provider
      */
     public TrackerHandler(Thing thing, NotificationBroker notificationBroker, Set<String> regions,
             PointType sysLocation, UnitProvider unitProvider) {
@@ -269,7 +269,7 @@ public class TrackerHandler extends BaseThingHandler {
      * Fire trigger event with regionName/enter|leave payload but only if the event differs from the last event.
      *
      * @param regionName Region name
-     * @param event      Occurred event
+     * @param event Occurred event
      */
     private void triggerRegionChannel(@NonNull String regionName, @NonNull String event) {
         Boolean lastState = lastTriggeredStates.get(regionName);

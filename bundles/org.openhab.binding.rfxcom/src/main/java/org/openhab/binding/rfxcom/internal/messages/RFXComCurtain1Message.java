@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,20 +15,21 @@ package org.openhab.binding.rfxcom.internal.messages;
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 import static org.openhab.binding.rfxcom.internal.messages.ByteEnumUtil.fromByte;
 
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 
 /**
  * RFXCOM data class for curtain1 message. See Harrison.
  *
  * @author Evert van Es - Initial contribution
- * @author Pauli Anttila
+ * @author Pauli Anttila - Migrated to OH2
  */
 public class RFXComCurtain1Message extends RFXComBatteryDeviceMessage<RFXComCurtain1Message.SubType> {
 
@@ -130,11 +131,11 @@ public class RFXComCurtain1Message extends RFXComBatteryDeviceMessage<RFXComCurt
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         if (channelId.equals(CHANNEL_COMMAND)) {
             return (command == Commands.CLOSE ? OpenClosedType.CLOSED : OpenClosedType.OPEN);
         } else {
-            return super.convertToState(channelId);
+            return super.convertToState(channelId, deviceState);
         }
     }
 

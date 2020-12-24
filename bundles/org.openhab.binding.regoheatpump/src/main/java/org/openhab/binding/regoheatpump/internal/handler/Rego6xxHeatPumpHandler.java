@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,21 +29,6 @@ import java.util.stream.Collectors;
 
 import javax.measure.Unit;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.regoheatpump.internal.protocol.RegoConnection;
 import org.openhab.binding.regoheatpump.internal.rego6xx.CommandFactory;
 import org.openhab.binding.regoheatpump.internal.rego6xx.ErrorLine;
@@ -51,6 +36,21 @@ import org.openhab.binding.regoheatpump.internal.rego6xx.Rego6xxProtocolExceptio
 import org.openhab.binding.regoheatpump.internal.rego6xx.RegoRegisterMapper;
 import org.openhab.binding.regoheatpump.internal.rego6xx.ResponseParser;
 import org.openhab.binding.regoheatpump.internal.rego6xx.ResponseParserFactory;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,7 +154,7 @@ abstract class Rego6xxHeatPumpHandler extends BaseThingHandler {
     }
 
     private void processChannelWriteRequest(RegoRegisterMapper.Channel channel, Command command) {
-        short value = (short) (commandToValue(command) / channel.scaleFactor() + 0.5);
+        short value = (short) Math.round(commandToValue(command) / channel.scaleFactor());
         byte[] commandPayload = CommandFactory.createWriteToSystemRegisterCommand(channel.address(), value);
         executeCommand(null, commandPayload, ResponseParserFactory.WRITE, result -> {
             // Ignore result since it is a write command.
@@ -235,7 +235,7 @@ abstract class Rego6xxHeatPumpHandler extends BaseThingHandler {
             byte[] command = CommandFactory.createReadFromSystemRegisterCommand(channel.address());
             executeCommandAndUpdateState(channelIID, command, ResponseParserFactory.SHORT, value -> {
                 Unit<?> unit = channel.unit();
-                double result = value * channel.scaleFactor();
+                double result = Math.round(channel.convertValue(value) * channel.scaleFactor() * 10.0) / 10.0;
                 return unit != null ? new QuantityType<>(result, unit) : new DecimalType(result);
             });
         } else {

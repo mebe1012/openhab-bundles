@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,17 +13,16 @@
 package org.openhab.binding.exec.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
- * The {@link ExecBinding} class defines common constants, which are
+ * The {@link ExecBindingConstants} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Karel Goderis - Initial contribution
  */
 @NonNullByDefault
 public class ExecBindingConstants {
-
     public static final String BINDING_ID = "exec";
 
     // List of all Thing Type UIDs
@@ -35,5 +34,4 @@ public class ExecBindingConstants {
     public static final String EXIT = "exit";
     public static final String RUN = "run";
     public static final String LAST_EXECUTION = "lastexecution";
-
 }

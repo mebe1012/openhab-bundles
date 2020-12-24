@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.binding.openweathermap.internal.handler;
 import static org.openhab.binding.openweathermap.internal.OpenWeatherMapBindingConstants.*;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,36 +25,36 @@ import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelGroupUID;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.openweathermap.internal.config.OpenWeatherMapLocationConfiguration;
 import org.openhab.binding.openweathermap.internal.connection.OpenWeatherMapCommunicationException;
 import org.openhab.binding.openweathermap.internal.connection.OpenWeatherMapConfigurationException;
 import org.openhab.binding.openweathermap.internal.connection.OpenWeatherMapConnection;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelGroupUID;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,14 +69,18 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractOpenWeatherMapHandler.class);
 
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.unmodifiableSet(
-            Stream.of(THING_TYPE_WEATHER_AND_FORECAST, THING_TYPE_UVINDEX).collect(Collectors.toSet()));
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections
+            .unmodifiableSet(Stream.of(THING_TYPE_WEATHER_AND_FORECAST, THING_TYPE_UVINDEX,
+                    THING_TYPE_ONECALL_WEATHER_AND_FORECAST, THING_TYPE_ONECALL_HISTORY).collect(Collectors.toSet()));
+
+    private final TimeZoneProvider timeZoneProvider;
 
     // keeps track of the parsed location
     protected @Nullable PointType location;
 
-    public AbstractOpenWeatherMapHandler(Thing thing) {
+    public AbstractOpenWeatherMapHandler(Thing thing, final TimeZoneProvider timeZoneProvider) {
         super(thing);
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -85,18 +88,19 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
         OpenWeatherMapLocationConfiguration config = getConfigAs(OpenWeatherMapLocationConfiguration.class);
 
         boolean configValid = true;
-        if (StringUtils.trimToNull(config.getLocation()) == null) {
+        if (config.location == null || config.location.trim().isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-missing-location");
             configValid = false;
         }
 
         try {
-            location = new PointType(config.getLocation());
+            location = new PointType(config.location);
         } catch (IllegalArgumentException e) {
-            location = null;
+            logger.warn("Error parsing 'location' parameter: {}", e.getMessage());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-parsing-location");
+            location = null;
             configValid = false;
         }
 
@@ -148,8 +152,8 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
      *
      * @param connection {@link OpenWeatherMapConnection} instance
      * @return true, if the request for the OpenWeatherMap data was successful
-     * @throws OpenWeatherMapCommunicationException
-     * @throws OpenWeatherMapConfigurationException
+     * @throws OpenWeatherMapCommunicationException if there is a problem retrieving the data
+     * @throws OpenWeatherMapConfigurationException if there is a configuration error
      */
     protected abstract boolean requestData(OpenWeatherMapConnection connection)
             throws OpenWeatherMapCommunicationException, OpenWeatherMapConfigurationException;
@@ -176,8 +180,8 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
 
     protected State getDateTimeTypeState(@Nullable Integer value) {
         return (value == null) ? UnDefType.UNDEF
-                : new DateTimeType(
-                        ZonedDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()), ZoneId.systemDefault()));
+                : new DateTimeType(ZonedDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()),
+                        timeZoneProvider.getTimeZone()));
     }
 
     protected State getDecimalTypeState(@Nullable Double value) {
@@ -202,7 +206,8 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
     }
 
     protected List<Channel> createChannelsForGroup(String channelGroupId, ChannelGroupTypeUID channelGroupTypeUID) {
-        logger.debug("Building channel group '{}' for thing '{}'.", channelGroupId, getThing().getUID());
+        logger.debug("Building channel group '{}' for thing '{}' and GroupType '{}'.", channelGroupId,
+                getThing().getUID(), channelGroupTypeUID);
         List<Channel> channels = new ArrayList<>();
         ThingHandlerCallback callback = getCallback();
         if (callback != null) {
@@ -218,6 +223,7 @@ public abstract class AbstractOpenWeatherMapHandler extends BaseThingHandler {
                 channels.add(newChannel);
             }
         }
+        logger.debug("Built channels: {}", channels);
         return channels;
     }
 

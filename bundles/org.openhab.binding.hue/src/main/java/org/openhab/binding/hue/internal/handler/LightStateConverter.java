@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,21 +14,20 @@ package org.openhab.binding.hue.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
 import org.openhab.binding.hue.internal.State;
-import org.openhab.binding.hue.internal.StateUpdate;
 import org.openhab.binding.hue.internal.State.AlertMode;
 import org.openhab.binding.hue.internal.State.ColorMode;
 import org.openhab.binding.hue.internal.State.Effect;
+import org.openhab.binding.hue.internal.StateUpdate;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
 
 /**
- * The {@link LightStateConverter} is responsible for mapping Eclipse SmartHome
- * types to jue types and vice versa.
+ * The {@link LightStateConverter} is responsible for mapping to/from jue types.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Oliver Libutzki - Adjustments
@@ -206,7 +205,12 @@ public class LightStateConverter {
      * @return string type representing the alert mode.
      */
     public static StringType toAlertStringType(State lightState) {
-        return new StringType(lightState.getAlertMode().toString());
+        AlertMode alertMode = lightState.getAlertMode();
+        if (alertMode == null) {
+            return new StringType("NULL");
+        } else {
+            return new StringType(alertMode.toString());
+        }
     }
 
     /**
@@ -305,5 +309,4 @@ public class LightStateConverter {
         }
         return percentValue;
     }
-
 }

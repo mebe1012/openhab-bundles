@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,16 @@ import java.text.MessageFormat;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.openhab.binding.knx.internal.KNXBindingConstants;
 import org.openhab.binding.knx.internal.client.CustomKNXNetworkLinkIP;
 import org.openhab.binding.knx.internal.client.IPClient;
 import org.openhab.binding.knx.internal.client.KNXClient;
 import org.openhab.binding.knx.internal.client.NoOpClient;
 import org.openhab.binding.knx.internal.config.IPBridgeConfiguration;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,5 +123,4 @@ public class IPBridgeThingHandler extends KNXBridgeBaseThingHandler {
         }
         return ret;
     }
-
 }

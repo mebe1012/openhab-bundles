@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,10 @@
 package org.openhab.persistence.mapdb.internal;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.TypeParser;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +26,8 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A GSON TypeAdapter for Eclipse SmartHome State values.
- * 
+ * A GSON TypeAdapter for openHAB State values.
+ *
  * @author Martin Kühl - Initial contribution
  */
 public class StateTypeAdapter extends TypeAdapter<State> {
@@ -43,15 +42,19 @@ public class StateTypeAdapter extends TypeAdapter<State> {
             return null;
         }
         String value = reader.nextString();
-        String[] parts = value.split(TYPE_SEPARATOR);
-        String valueTypeName = parts[0];
-        String valueAsString = parts[1];
 
         try {
+            int index = value.indexOf(TYPE_SEPARATOR);
+            if (index == -1) {
+                logger.warn("Couldn't deserialize state '{}': type separator '{}' not found", value, TYPE_SEPARATOR);
+                return null;
+            }
+            String valueTypeName = value.substring(0, index);
+            String valueAsString = value.substring(index + TYPE_SEPARATOR.length());
+
             @SuppressWarnings("unchecked")
             Class<? extends State> valueType = (Class<? extends State>) Class.forName(valueTypeName);
-            List<Class<? extends State>> types = Collections.singletonList(valueType);
-            return TypeParser.parseState(types, valueAsString);
+            return TypeParser.parseState(List.of(valueType), valueAsString);
         } catch (Exception e) {
             logger.warn("Couldn't deserialize state '{}': {}", value, e.getMessage());
         }

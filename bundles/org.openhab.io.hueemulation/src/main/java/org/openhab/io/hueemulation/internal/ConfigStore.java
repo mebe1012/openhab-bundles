@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,8 @@ package org.openhab.io.hueemulation.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.IllegalFormatException;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -27,16 +28,16 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.net.CidrAddress;
-import org.eclipse.smarthome.core.net.NetUtil;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.net.CidrAddress;
+import org.openhab.core.net.NetUtil;
+import org.openhab.core.net.NetworkAddressService;
 import org.openhab.io.hueemulation.internal.dto.HueAuthorizedConfig;
 import org.openhab.io.hueemulation.internal.dto.HueDataStore;
 import org.openhab.io.hueemulation.internal.dto.HueGroupEntry;
@@ -71,16 +72,13 @@ import com.google.gson.GsonBuilder;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = false, service = { ConfigStore.class }, configurationPid = {
-        HueEmulationService.CONFIG_PID }, property = { "com.eclipsesource.jaxrs.publish=false",
-                ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=io:hueemulation",
-                ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=io",
-                ConfigurableService.SERVICE_PROPERTY_LABEL + "=Hue Emulation" })
+@Component(immediate = false, service = ConfigStore.class, configurationPid = HueEmulationService.CONFIG_PID)
+@ConfigurableService(category = "io", label = "Hue Emulation", description_uri = "io:hueemulation")
 @NonNullByDefault
 public class ConfigStore {
 
     public static final String METAKEY = "HUEEMU";
-    public static final String EVENT_ADDRESS_CHANGED = "ESH_EMU_CONFIG_ADDR_CHANGED";
+    public static final String EVENT_ADDRESS_CHANGED = "HUE_EMU_CONFIG_ADDR_CHANGED";
 
     private final Logger logger = LoggerFactory.getLogger(ConfigStore.class);
 
@@ -123,6 +121,8 @@ public class ConfigStore {
     public Set<String> ignoreItemsFilter = Collections.emptySet();
 
     private int highestAssignedHueID = 1;
+
+    private String hueIDPrefix = "";
 
     public ConfigStore() {
         scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
@@ -193,11 +193,11 @@ public class ConfigStore {
         InetAddress configuredAddress = null;
         int networkPrefixLength = 24; // Default for most networks: 255.255.255.0
 
-        if (config.discoveryIps != null) {
-            discoveryIps = Collections.unmodifiableSet(Stream.of(config.discoveryIps.split(",")).map(String::trim)
+        if (config.discoveryIp != null) {
+            discoveryIps = Collections.unmodifiableSet(Stream.of(config.discoveryIp.split(",")).map(String::trim)
                     .map(this::byName).filter(e -> e != null).collect(Collectors.toSet()));
         } else {
-            discoveryIps = new HashSet<>();
+            discoveryIps = new LinkedHashSet<>();
             configuredAddress = byName(networkAddressService.getPrimaryIpv4HostAddress());
             if (configuredAddress != null) {
                 discoveryIps.add(configuredAddress);
@@ -211,14 +211,19 @@ public class ConfigStore {
             }
         }
 
-        if (discoveryIps.size() == 0) {
-            logger.warn("No interface IP address configured or found. Hue emulation service disabled!");
-            return;
+        if (discoveryIps.isEmpty()) {
+            try {
+                logger.info("No discovery ip specified. Trying to determine the host address");
+                configuredAddress = InetAddress.getLocalHost();
+            } catch (Exception e) {
+                logger.info("Host address cannot be determined. Trying loopback address");
+                configuredAddress = InetAddress.getLoopbackAddress();
+            }
+        } else {
+            configuredAddress = discoveryIps.iterator().next();
         }
 
-        if (configuredAddress == null) {
-            configuredAddress = InetAddress.getLoopbackAddress();
-        }
+        logger.info("Using discovery ip {}", configuredAddress.getHostAddress());
 
         // Get and apply configurations
         ds.config.createNewUserOnEveryEndpoint = config.createNewUserOnEveryEndpoint;
@@ -231,19 +236,57 @@ public class ConfigStore {
             ds.config.bridgeid = ds.config.bridgeid.substring(0, 12);
         }
 
+        hueIDPrefix = getHueIDPrefixFromUUID(config.uuid);
+
         if (config.permanentV1bridge) {
             ds.config.makeV1bridge();
         }
 
         setLinkbutton(config.pairingEnabled, config.createNewUserOnEveryEndpoint, config.temporarilyEmulateV1bridge);
         ds.config.mac = NetworkUtils.getMAC(configuredAddress);
-        ds.config.ipaddress = configuredAddress.getHostAddress();
+        ds.config.ipaddress = getConfiguredHostAddress(configuredAddress);
         ds.config.netmask = networkPrefixLength < 32 ? NetUtil.networkPrefixLengthToNetmask(networkPrefixLength)
                 : "255.255.255.0";
 
         if (eventAdmin != null) {
             eventAdmin.postEvent(new Event(EVENT_ADDRESS_CHANGED, Collections.emptyMap()));
         }
+    }
+
+    private String getConfiguredHostAddress(InetAddress configuredAddress) {
+        String hostAddress = configuredAddress.getHostAddress();
+        int percentIndex = hostAddress.indexOf("%");
+        if (percentIndex != -1) {
+            return hostAddress.substring(0, percentIndex);
+        } else {
+            return hostAddress;
+        }
+    }
+
+    /**
+     * Get the prefix used to create a unique id
+     *
+     * @param uuid The uuid
+     * @return The prefix in the format of AA:BB:CC:DD:EE:FF:00:11 if uuid is a valid UUID, otherwise uuid is returned.
+     */
+    private String getHueIDPrefixFromUUID(final String uuid) {
+        // Hue API example of a unique id is AA:BB:CC:DD:EE:FF:00:11-XX
+        // XX is generated from the item.
+        String prefix = uuid;
+        try {
+            // Generate prefix if uuid is a randomly generated UUID
+            if (UUID.fromString(uuid).version() == 4) {
+                final StringBuilder sb = new StringBuilder(23);
+                sb.append(uuid, 0, 2).append(":").append(uuid, 2, 4).append(":").append(uuid, 4, 6).append(":")
+                        .append(uuid, 6, 8).append(":").append(uuid, 9, 11).append(":").append(uuid, 11, 13).append(":")
+                        .append(uuid, 14, 16).append(":").append(uuid, 16, 18);
+                prefix = sb.toString().toUpperCase();
+            }
+        } catch (final IllegalArgumentException e) {
+            // uuid is not a valid UUID
+        }
+
+        return prefix;
     }
 
     @Deactivate
@@ -302,8 +345,25 @@ public class ConfigStore {
         return String.valueOf(hueId);
     }
 
+    /**
+     * Get the unique id
+     *
+     * @param hueId The item hueID
+     * @return The unique id
+     */
+    public String getHueUniqueId(final String hueId) {
+        String unique = hueId;
+        try {
+            unique = String.format("%02X", Integer.valueOf(hueId));
+        } catch (final NumberFormatException | IllegalFormatException e) {
+            // Use the hueId as is
+        }
+
+        return hueIDPrefix + "-" + unique;
+    }
+
     public boolean isReady() {
-        return discoveryIps.size() > 0;
+        return !discoveryIps.isEmpty();
     }
 
     public HueEmulationConfig getConfig() {

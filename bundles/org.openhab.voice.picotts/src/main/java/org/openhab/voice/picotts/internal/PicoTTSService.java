@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,12 +18,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -83,5 +83,4 @@ public class PicoTTSService implements TTSService {
     public String getLabel(Locale locale) {
         return "PicoTTS";
     }
-
 }

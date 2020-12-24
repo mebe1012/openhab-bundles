@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,6 @@
 package org.openhab.binding.sonyaudio.internal;
 
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.WebSocketFactory;
 import org.openhab.binding.sonyaudio.internal.handler.HtCt800Handler;
 import org.openhab.binding.sonyaudio.internal.handler.HtMt500Handler;
 import org.openhab.binding.sonyaudio.internal.handler.HtSt5000Handler;
@@ -26,6 +20,12 @@ import org.openhab.binding.sonyaudio.internal.handler.HtZ9fHandler;
 import org.openhab.binding.sonyaudio.internal.handler.HtZf9Handler;
 import org.openhab.binding.sonyaudio.internal.handler.SrsZr5Handler;
 import org.openhab.binding.sonyaudio.internal.handler.StrDn1080Handler;
+import org.openhab.core.io.net.http.WebSocketFactory;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -77,5 +77,4 @@ public class SonyAudioHandlerFactory extends BaseThingHandlerFactory {
     protected void unsetWebSocketFactory(WebSocketFactory webSocketFactory) {
         this.webSocketClient = null;
     }
-
 }

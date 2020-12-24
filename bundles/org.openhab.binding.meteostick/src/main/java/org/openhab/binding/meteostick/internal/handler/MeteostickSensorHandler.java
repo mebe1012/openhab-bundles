@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.meteostick.internal.handler;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.MILLI;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.*;
-import static org.eclipse.smarthome.core.library.unit.SmartHomeUnits.*;
 import static org.openhab.binding.meteostick.internal.MeteostickBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.MILLI;
+import static org.openhab.core.library.unit.SIUnits.*;
+import static org.openhab.core.library.unit.Units.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,17 +28,17 @@ import java.util.TreeMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -272,7 +272,6 @@ public class MeteostickSensorHandler extends BaseThingHandler implements Meteost
         }
 
         public BigDecimal getTotal(BigDecimal spoon) {
-
             removeOldEntries();
 
             int least = -1;
@@ -341,7 +340,6 @@ public class MeteostickSensorHandler extends BaseThingHandler implements Meteost
         }
 
         public WindStats getStats() {
-
             removeOldEntries();
 
             double ewSum = 0;

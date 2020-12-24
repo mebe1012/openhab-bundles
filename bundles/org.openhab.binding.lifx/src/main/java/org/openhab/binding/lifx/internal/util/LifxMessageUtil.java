@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,11 @@ import java.math.RoundingMode;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.PercentType;
 import org.openhab.binding.lifx.internal.fields.HSBK;
 import org.openhab.binding.lifx.internal.protocol.Product.TemperatureRange;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * Utility class for sharing message utility methods between objects.
@@ -131,5 +131,4 @@ public final class LifxMessageUtil {
     public static long randomSourceId() {
         return UUID.randomUUID().getLeastSignificantBits() & (-1L >>> 32);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.openhab.binding.astro.internal.config.AstroChannelConfig;
 import org.openhab.binding.astro.internal.model.Range;
@@ -160,15 +159,22 @@ public class DateTimeUtils {
     /**
      * Returns the next Calendar from today.
      */
-    public static Calendar getNext(Calendar... calendars) {
-        Calendar now = Calendar.getInstance();
+    public static Calendar getNextFromToday(Calendar... calendars) {
+        return getNext(Calendar.getInstance(), calendars);
+    }
+
+    static Calendar getNext(Calendar now, Calendar... calendars) {
         Calendar next = null;
+        Calendar firstSeasonOfYear = null;
         for (Calendar calendar : calendars) {
+            if (firstSeasonOfYear == null || calendar.before(firstSeasonOfYear)) {
+                firstSeasonOfYear = calendar;
+            }
             if (calendar.after(now) && (next == null || calendar.before(next))) {
                 next = calendar;
             }
         }
-        return next;
+        return next == null ? firstSeasonOfYear : next;
     }
 
     /**
@@ -185,18 +191,18 @@ public class DateTimeUtils {
      */
     public static Calendar applyConfig(Calendar cal, AstroChannelConfig config) {
         Calendar cCal = cal;
-        if (config.getOffset() != null && config.getOffset() != 0) {
+        if (config.offset != 0) {
             Calendar cOffset = Calendar.getInstance();
             cOffset.setTime(cCal.getTime());
-            cOffset.add(Calendar.MINUTE, config.getOffset());
+            cOffset.add(Calendar.MINUTE, config.offset);
             cCal = cOffset;
         }
 
-        Calendar cEarliest = adjustTime(cCal, getMinutesFromTime(config.getEarliest()));
+        Calendar cEarliest = adjustTime(cCal, getMinutesFromTime(config.earliest));
         if (cCal.before(cEarliest)) {
             return cEarliest;
         }
-        Calendar cLatest = adjustTime(cCal, getMinutesFromTime(config.getLatest()));
+        Calendar cLatest = adjustTime(cCal, getMinutesFromTime(config.latest));
         if (cCal.after(cLatest)) {
             return cLatest;
         }
@@ -218,20 +224,24 @@ public class DateTimeUtils {
      * Parses a HH:MM string and returns the minutes.
      */
     private static int getMinutesFromTime(String configTime) {
-        String time = StringUtils.trimToNull(configTime);
-        if (time != null) {
-            try {
-                if (!HHMM_PATTERN.matcher(time).matches()) {
-                    throw new NumberFormatException();
-                } else {
-                    int hour = Integer.parseInt(StringUtils.substringBefore(time, ":"));
-                    int minutes = Integer.parseInt(StringUtils.substringAfter(time, ":"));
-                    return (hour * 60) + minutes;
+        if (configTime != null) {
+            String time = configTime.trim();
+            if (!time.isEmpty()) {
+                try {
+                    if (!HHMM_PATTERN.matcher(time).matches()) {
+                        throw new NumberFormatException();
+                    } else {
+                        String[] elements = time.split(":");
+                        int hour = Integer.parseInt(elements[0]);
+                        int minutes = Integer.parseInt(elements[1]);
+                        return (hour * 60) + minutes;
+                    }
+                } catch (NumberFormatException ex) {
+                    LOGGER.warn(
+                            "Can not parse astro channel configuration '{}' to hour and minutes, use pattern hh:mm, ignoring!",
+                            time);
                 }
-            } catch (Exception ex) {
-                LOGGER.warn(
-                        "Can not parse astro channel configuration '{}' to hour and minutes, use pattern hh:mm, ignoring!",
-                        time);
+
             }
         }
         return 0;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.silvercrestwifisocket.internal.SilvercrestWifiSocketBindingConstants;
 import org.openhab.binding.silvercrestwifisocket.internal.discovery.SilvercrestWifiSocketDiscoveryService;
 import org.openhab.binding.silvercrestwifisocket.internal.entities.SilvercrestWifiSocketResponse;
 import org.openhab.binding.silvercrestwifisocket.internal.runnable.SilvercrestWifiSocketUpdateReceiverRunnable;
+import org.openhab.core.thing.Thing;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jaime Vaz - Initial contribution
  */
-@Component(service = SilvercrestWifiSocketMediator.class, immediate = true)
+@Component(service = SilvercrestWifiSocketMediator.class)
 public class SilvercrestWifiSocketMediatorImpl implements SilvercrestWifiSocketMediator {
 
     private final Logger logger = LoggerFactory.getLogger(SilvercrestWifiSocketMediatorImpl.class);

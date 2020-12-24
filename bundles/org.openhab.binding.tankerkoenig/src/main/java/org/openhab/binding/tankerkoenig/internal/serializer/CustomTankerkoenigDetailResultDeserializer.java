@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.tankerkoenig.internal.serializer;
 
 import java.lang.reflect.Type;
 
-import org.openhab.binding.tankerkoenig.internal.config.LittleStation;
-import org.openhab.binding.tankerkoenig.internal.config.OpeningTime;
-import org.openhab.binding.tankerkoenig.internal.config.OpeningTimes;
-import org.openhab.binding.tankerkoenig.internal.config.TankerkoenigDetailResult;
+import org.openhab.binding.tankerkoenig.internal.dto.LittleStation;
+import org.openhab.binding.tankerkoenig.internal.dto.OpeningTime;
+import org.openhab.binding.tankerkoenig.internal.dto.OpeningTimes;
+import org.openhab.binding.tankerkoenig.internal.dto.TankerkoenigDetailResult;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

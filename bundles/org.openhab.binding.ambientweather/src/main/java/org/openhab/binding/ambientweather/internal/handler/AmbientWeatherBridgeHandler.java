@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,17 +21,17 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.ambientweather.internal.config.BridgeConfig;
 import org.openhab.binding.ambientweather.internal.model.DeviceJson;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,10 @@ public class AmbientWeatherBridgeHandler extends BaseBridgeHandler {
     private ScheduledFuture<?> validateKeysJob;
 
     // Application key is granted only by request from developer
-    @Nullable
-    private String applicationKey;
+    private String applicationKey = "";
 
     // API key assigned to user in ambientweather.net dashboard
-    @Nullable
-    private String apiKey;
+    private String apiKey = "";
 
     // Used Ambient Weather real-time API to retrieve weather data
     // for weather stations assigned to an API key
@@ -151,8 +149,9 @@ public class AmbientWeatherBridgeHandler extends BaseBridgeHandler {
         return true;
     }
 
-    public void setThingOfflineWithCommError(String errorDetail, String statusDescription) {
-        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, statusDescription);
+    public void setThingOfflineWithCommError(@Nullable String errorDetail, @Nullable String statusDescription) {
+        String status = statusDescription != null ? statusDescription : "null";
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, status);
     }
 
     @Override
@@ -213,11 +212,11 @@ public class AmbientWeatherBridgeHandler extends BaseBridgeHandler {
         updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE);
     }
 
-    public @Nullable String getApplicationKey() {
+    public String getApplicationKey() {
         return applicationKey;
     }
 
-    public @Nullable String getApiKey() {
+    public String getApiKey() {
         return apiKey;
     }
 

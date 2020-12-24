@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,14 @@
  */
 package org.openhab.binding.max.internal.command;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link C_CubeCommand} to request configuration of a new MAX! device after inclusion.
  *
  * @author Marcel Verpaalen - Initial Contribution
  */
+@NonNullByDefault
 public class CCommand extends CubeCommand {
     private final String rfAddress;
 
@@ -34,5 +37,4 @@ public class CCommand extends CubeCommand {
     public String getReturnStrings() {
         return "C:";
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.homematic.internal.converter.type;
 
 import static org.openhab.binding.homematic.internal.misc.HomematicConstants.DATAPOINT_NAME_SENSOR;
 
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.homematic.internal.converter.ConverterException;
 import org.openhab.binding.homematic.internal.model.HmDatapoint;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.types.Type;
 
 /**
  * Converts between a Homematic datapoint value and a openHAB OpenClosedType.
@@ -52,5 +52,4 @@ public class OpenClosedTypeConverter extends AbstractTypeConverter<OpenClosedTyp
     private boolean isInvert(HmDatapoint dp) {
         return !DATAPOINT_NAME_SENSOR.equals(dp.getName()) && !isStateInvertDatapoint(dp);
     }
-
 }

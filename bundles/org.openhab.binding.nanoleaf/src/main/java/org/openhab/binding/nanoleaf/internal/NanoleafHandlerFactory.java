@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,21 +22,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.nanoleaf.internal.discovery.NanoleafPanelsDiscoveryService;
 import org.openhab.binding.nanoleaf.internal.handler.NanoleafControllerHandler;
 import org.openhab.binding.nanoleaf.internal.handler.NanoleafPanelHandler;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -48,18 +50,21 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martin Raepple - Initial contribution
  */
-
+@NonNullByDefault
 @Component(configurationPid = "binding.nanoleaf", service = ThingHandlerFactory.class)
 public class NanoleafHandlerFactory extends BaseThingHandlerFactory {
 
-    private final Logger logger = LoggerFactory.getLogger(NanoleafHandlerFactory.class);
-
-    private HttpClient httpClient;
-
-    private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
-
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
             .unmodifiableSet(Stream.of(THING_TYPE_LIGHT_PANEL, THING_TYPE_CONTROLLER).collect(Collectors.toSet()));
+
+    private final Logger logger = LoggerFactory.getLogger(NanoleafHandlerFactory.class);
+    private final Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
+    private final HttpClient httpClient;
+
+    @Activate
+    public NanoleafHandlerFactory(@Reference final HttpClientFactory httpClientFactory) {
+        this.httpClient = httpClientFactory.getCommonHttpClient();
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -91,27 +96,21 @@ public class NanoleafHandlerFactory extends BaseThingHandlerFactory {
         }
     }
 
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = httpClientFactory.getCommonHttpClient();
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = null;
-    }
-
     private synchronized void registerDiscoveryService(NanoleafControllerHandler bridgeHandler) {
         NanoleafPanelsDiscoveryService discoveryService = new NanoleafPanelsDiscoveryService(bridgeHandler);
-        discoveryServiceRegs.put(bridgeHandler.getThing().getUID(), bundleContext
-                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
+        discoveryServiceRegs.put(bridgeHandler.getThing().getUID(),
+                bundleContext.registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<>()));
         logger.debug("Discovery service for panels registered.");
     }
 
+    @SuppressWarnings("null")
     private synchronized void unregisterDiscoveryService(Thing thing) {
+        @Nullable
         ServiceRegistration<?> serviceReg = discoveryServiceRegs.remove(thing.getUID());
+        // would require null check but "if (response!=null)" throws warning on comoile time :´-(
         if (serviceReg != null) {
             serviceReg.unregister();
-            logger.debug("Discovery service for panels removed.");
         }
+        logger.debug("Discovery service for panels removed.");
     }
 }

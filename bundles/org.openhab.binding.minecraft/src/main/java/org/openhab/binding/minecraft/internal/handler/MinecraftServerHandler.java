@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,6 @@ package org.openhab.binding.minecraft.internal.handler;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.minecraft.internal.MinecraftBindingConstants;
 import org.openhab.binding.minecraft.internal.config.ServerConfig;
 import org.openhab.binding.minecraft.internal.message.OHMessage;
@@ -31,6 +23,14 @@ import org.openhab.binding.minecraft.internal.message.data.ServerData;
 import org.openhab.binding.minecraft.internal.message.data.SignData;
 import org.openhab.binding.minecraft.internal.server.ServerConnection;
 import org.openhab.binding.minecraft.internal.util.RetryWithDelay;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

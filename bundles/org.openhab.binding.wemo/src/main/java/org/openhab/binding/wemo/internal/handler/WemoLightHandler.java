@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,23 +23,23 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOParticipant;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
 
     private final Logger logger = LoggerFactory.getLogger(WemoLightHandler.class);
 
-    private Map<String, Boolean> subscriptionState = new HashMap<String, Boolean>();
+    private Map<String, Boolean> subscriptionState = new HashMap<>();
 
     private UpnpIOService service;
 
@@ -96,7 +96,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
                 getDeviceState();
                 onSubscription();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
             }
         }
@@ -185,7 +185,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
             try {
                 getDeviceState();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
             }
         } else {
             Configuration configuration = getConfig();
@@ -271,12 +271,10 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
                 if (wemoURL != null && capability != null && value != null) {
                     String wemoCallResponse = wemoHttpCaller.executeCall(wemoURL, soapHeader, content);
                     if (wemoCallResponse != null) {
-                        if (capability != null && capability.equals("10008") && value != null) {
+                        if (capability.equals("10008")) {
                             OnOffType binaryState = null;
                             binaryState = value.equals("0") ? OnOffType.OFF : OnOffType.ON;
-                            if (binaryState != null) {
-                                updateState(CHANNEL_STATE, binaryState);
-                            }
+                            updateState(CHANNEL_STATE, binaryState);
                         }
                     }
                 }
@@ -322,9 +320,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
                     if (splitResponse[0] != null) {
                         OnOffType binaryState = null;
                         binaryState = splitResponse[0].equals("0") ? OnOffType.OFF : OnOffType.ON;
-                        if (binaryState != null) {
-                            updateState(CHANNEL_STATE, binaryState);
-                        }
+                        updateState(CHANNEL_STATE, binaryState);
                     }
                     if (splitResponse[1] != null) {
                         String splitBrightness[] = splitResponse[1].split(":");
@@ -358,9 +354,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
             case "10006":
                 OnOffType binaryState = null;
                 binaryState = newValue.equals("0") ? OnOffType.OFF : OnOffType.ON;
-                if (binaryState != null) {
-                    updateState(CHANNEL_STATE, binaryState);
-                }
+                updateState(CHANNEL_STATE, binaryState);
                 break;
             case "10008":
                 String splitValue[] = newValue.split(":");
@@ -403,7 +397,7 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
                 service.removeSubscription(this, SUBSCRIPTION);
             }
 
-            subscriptionState = new HashMap<String, Boolean>();
+            subscriptionState = new HashMap<>();
             service.unregisterParticipant(this);
         }
     }
@@ -436,5 +430,4 @@ public class WemoLightHandler extends AbstractWemoHandler implements UpnpIOParti
         }
         return null;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,14 +16,14 @@ import static org.openhab.binding.tradfri.internal.TradfriBindingConstants.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.tradfri.internal.model.TradfriControllerData;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,12 +78,14 @@ public class TradfriControllerHandler extends TradfriThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (command instanceof RefreshType) {
-            logger.debug("Refreshing channel {}", channelUID);
-            coapClient.asyncGet(this);
-            return;
-        }
+        if (active) {
+            if (command instanceof RefreshType) {
+                logger.debug("Refreshing channel {}", channelUID);
+                coapClient.asyncGet(this);
+                return;
+            }
 
-        logger.debug("The controller is a read-only device and cannot handle commands.");
+            logger.debug("The controller is a read-only device and cannot handle commands.");
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,12 +17,12 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.rotel.internal.communication.RotelCommand;
 import org.openhab.binding.rotel.internal.communication.RotelConnector;
 import org.openhab.binding.rotel.internal.communication.RotelDsp;
 import org.openhab.binding.rotel.internal.communication.RotelFlagsMapping;
 import org.openhab.binding.rotel.internal.communication.RotelSource;
+import org.openhab.core.types.StateOption;
 
 /**
  * Represents the different supported models
@@ -76,7 +76,7 @@ public enum RotelModel {
             RotelConnector.NO_SPECIAL_CHARACTERS),
     RC1570("RC-1570", 115200, 7, 96, true, 10, true, -1, true, false, 6, 0, RotelConnector.SPECIAL_CHARACTERS),
     RC1572("RC-1572", 115200, 8, 96, true, 10, false, -1, true, true, 6, 0, RotelConnector.SPECIAL_CHARACTERS),
-    RC1590("RC-1590", 115200, 9, 96, true, 10, false, -1, true, false, 6, 0, RotelConnector.SPECIAL_CHARACTERS),
+    RC1590("RC-1590", 115200, 9, 96, true, 10, false, -1, true, true, 6, 0, RotelConnector.SPECIAL_CHARACTERS),
     RCD1570("RCD-1570", 115200, 0, null, false, null, true, -1, false, true, 6, 0, RotelConnector.SPECIAL_CHARACTERS),
     RCD1572("RCD-1572", 57600, 0, null, false, null, true, -1, false, true, 6, 0,
             RotelConnector.SPECIAL_CHARACTERS_RCD1572),
@@ -816,5 +816,4 @@ public enum RotelModel {
         }
         throw new RotelException("Invalid model name: " + name);
     }
-
 }

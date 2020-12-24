@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.wemo.internal.discovery.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,10 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -34,6 +32,8 @@ import org.openhab.binding.wemo.internal.handler.WemoBridgeHandler;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
 import org.openhab.binding.wemo.internal.test.GenericWemoLightOSGiTestParent;
 import org.openhab.binding.wemo.internal.test.GenericWemoOSGiTest;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
 
 /**
  * Tests for {@link WemoLinkDiscoveryService}.
@@ -43,7 +43,7 @@ import org.openhab.binding.wemo.internal.test.GenericWemoOSGiTest;
  */
 public class WemoLinkDiscoveryServiceOSGiTest extends GenericWemoLightOSGiTestParent {
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         setUpServices();
     }

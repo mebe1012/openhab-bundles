@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,27 +13,30 @@
 package org.openhab.binding.tradfri.internal.discovery;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.binding.tradfri.internal.TradfriBindingConstants.*;
 import static org.openhab.binding.tradfri.internal.config.TradfriDeviceConfig.CONFIG_ID;
 
 import java.util.Collection;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryListener;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.openhab.binding.tradfri.internal.discovery.TradfriDiscoveryService;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.tradfri.internal.handler.TradfriGatewayHandler;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -44,57 +47,61 @@ import com.google.gson.JsonParser;
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added support for remote controller and motion sensor devices (read-only battery level)
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class TradfriDiscoveryServiceTest {
 
     private static final ThingUID GATEWAY_THING_UID = new ThingUID("tradfri:gateway:1");
 
-    @Mock
-    private TradfriGatewayHandler handler;
+    private @Mock TradfriGatewayHandler handler;
 
-    private DiscoveryListener listener;
+    private final DiscoveryListener listener = new DiscoveryListener() {
+        @Override
+        public void thingRemoved(DiscoveryService source, ThingUID thingUID) {
+        }
+
+        @Override
+        public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {
+            discoveryResult = result;
+        }
+
+        @Override
+        public Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
+                Collection<ThingTypeUID> thingTypeUIDs, ThingUID bridgeUID) {
+            return null;
+        }
+    };
+
     private DiscoveryResult discoveryResult;
 
     private TradfriDiscoveryService discovery;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         when(handler.getThing()).thenReturn(BridgeBuilder.create(GATEWAY_TYPE_UID, "1").build());
-        discovery = new TradfriDiscoveryService(handler);
 
-        listener = new DiscoveryListener() {
-            @Override
-            public void thingRemoved(DiscoveryService source, ThingUID thingUID) {
-            }
-
-            @Override
-            public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {
-                discoveryResult = result;
-            }
-
-            @Override
-            public Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
-                    Collection<ThingTypeUID> thingTypeUIDs, ThingUID bridgeUID) {
-                return null;
-            }
-        };
+        discovery = new TradfriDiscoveryService();
+        discovery.setThingHandler(handler);
         discovery.addDiscoveryListener(listener);
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
         discoveryResult = null;
     }
 
     @Test
     public void correctSupportedTypes() {
-        assertThat(discovery.getSupportedThingTypes().size(), is(6));
+        assertThat(discovery.getSupportedThingTypes().size(), is(9));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_DIMMABLE_LIGHT));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_COLOR_TEMP_LIGHT));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_COLOR_LIGHT));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_DIMMER));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_MOTION_SENSOR));
         assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_REMOTE_CONTROL));
+        assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_OPEN_CLOSE_REMOTE_CONTROL));
+        assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_ONOFF_PLUG));
+        assertTrue(discovery.getSupportedThingTypes().contains(THING_TYPE_BLINDS));
     }
 
     @Test
@@ -160,6 +167,22 @@ public class TradfriDiscoveryServiceTest {
         assertThat(discoveryResult.getThingTypeUID(), is(THING_TYPE_COLOR_LIGHT));
         assertThat(discoveryResult.getBridgeUID(), is(GATEWAY_THING_UID));
         assertThat(discoveryResult.getProperties().get(CONFIG_ID), is(65550));
+        assertThat(discoveryResult.getRepresentationProperty(), is(CONFIG_ID));
+    }
+
+    @Test
+    public void validDiscoveryResultAlternativeColorLightCWS() {
+        String json = "{\"3311\":[{\"5850\":1,\"5709\":32886,\"5851\":216,\"5707\":5309,\"5708\":52400,\"5710\":27217,\"5706\":\"efd275\",\"9003\":0}],\"9001\":\"Mushroom lamp\",\"9002\":1571036916,\"9020\":1571588312,\"9003\":65539,\"9054\":0,\"9019\":1,\"3\":{\"0\":\"IKEA of Sweden\",\"1\":\"TRADFRI bulb E27 C\\/WS opal 600\",\"2\":\"\",\"3\":\"1.3.009\",\"6\":1},\"5750\":2}";
+        JsonObject data = new JsonParser().parse(json).getAsJsonObject();
+
+        discovery.onUpdate("65539", data);
+
+        assertNotNull(discoveryResult);
+        assertThat(discoveryResult.getFlag(), is(DiscoveryResultFlag.NEW));
+        assertThat(discoveryResult.getThingUID(), is(new ThingUID("tradfri:0210:1:65539")));
+        assertThat(discoveryResult.getThingTypeUID(), is(THING_TYPE_COLOR_LIGHT));
+        assertThat(discoveryResult.getBridgeUID(), is(GATEWAY_THING_UID));
+        assertThat(discoveryResult.getProperties().get(CONFIG_ID), is(65539));
         assertThat(discoveryResult.getRepresentationProperty(), is(CONFIG_ID));
     }
 

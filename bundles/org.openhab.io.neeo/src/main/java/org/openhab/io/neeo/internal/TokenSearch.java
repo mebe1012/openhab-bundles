@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.binding.BindingInfo;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.type.ThingType;
 import org.openhab.io.neeo.internal.models.NeeoDevice;
 import org.openhab.io.neeo.internal.models.TokenScore;
 import org.slf4j.Logger;
@@ -110,7 +110,7 @@ public class TokenSearch {
 
                 final Map<@NonNull String, String> properties = thing.getProperties();
                 final String vendor = properties.get(Thing.PROPERTY_VENDOR);
-                if (StringUtils.isNotEmpty(vendor)) {
+                if (vendor != null && !vendor.isEmpty()) {
                     score += search(vendor, needles);
                 }
 

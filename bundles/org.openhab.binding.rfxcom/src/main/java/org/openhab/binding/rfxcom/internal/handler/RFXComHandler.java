@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,21 +14,10 @@ package org.openhab.binding.rfxcom.internal.handler;
 
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.rfxcom.internal.DeviceMessageListener;
 import org.openhab.binding.rfxcom.internal.config.RFXComDeviceConfiguration;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
@@ -37,6 +26,21 @@ import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType
 import org.openhab.binding.rfxcom.internal.messages.RFXComDeviceMessage;
 import org.openhab.binding.rfxcom.internal.messages.RFXComMessage;
 import org.openhab.binding.rfxcom.internal.messages.RFXComMessageFactory;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +50,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Pauli Anttila - Initial contribution
  */
-public class RFXComHandler extends BaseThingHandler implements DeviceMessageListener {
+public class RFXComHandler extends BaseThingHandler implements DeviceMessageListener, DeviceState {
     private static final int LOW_BATTERY_LEVEL = 1;
 
     private final Logger logger = LoggerFactory.getLogger(RFXComHandler.class);
+
+    private final Map<String, Type> stateMap = new ConcurrentHashMap<>();
 
     private RFXComBridgeHandler bridgeHandler;
     private RFXComDeviceConfiguration config;
@@ -90,6 +96,8 @@ public class RFXComHandler extends BaseThingHandler implements DeviceMessageList
         logger.debug("Initializing thing {}", getThing().getUID());
         initializeBridge((getBridge() == null) ? null : getBridge().getHandler(),
                 (getBridge() == null) ? null : getBridge().getStatus());
+
+        stateMap.clear();
     }
 
     @Override
@@ -115,7 +123,7 @@ public class RFXComHandler extends BaseThingHandler implements DeviceMessageList
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
             }
         } else {
-            updateStatus(ThingStatus.OFFLINE);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED);
         }
     }
 
@@ -149,15 +157,16 @@ public class RFXComHandler extends BaseThingHandler implements DeviceMessageList
                                 case CHANNEL_COMMAND:
                                 case CHANNEL_CHIME_SOUND:
                                 case CHANNEL_MOOD:
-                                    postNullableCommand(uid, message.convertToCommand(channelId));
+                                    postNullableCommand(uid, message.convertToCommand(channelId, this));
                                     break;
 
                                 case CHANNEL_LOW_BATTERY:
-                                    updateNullableState(uid, isLowBattery(message.convertToState(CHANNEL_BATTERY_LEVEL)));
+                                    updateNullableState(uid,
+                                            isLowBattery(message.convertToState(CHANNEL_BATTERY_LEVEL, this)));
                                     break;
 
                                 default:
-                                    updateNullableState(uid, message.convertToState(channelId));
+                                    updateNullableState(uid, message.convertToState(channelId, this));
                                     break;
                             }
                         } catch (RFXComException e) {
@@ -176,6 +185,7 @@ public class RFXComHandler extends BaseThingHandler implements DeviceMessageList
             return;
         }
 
+        stateMap.put(uid.getId(), state);
         updateState(uid, state);
     }
 
@@ -184,7 +194,13 @@ public class RFXComHandler extends BaseThingHandler implements DeviceMessageList
             return;
         }
 
+        stateMap.put(uid.getId(), command);
         postCommand(uid, command);
+    }
+
+    @Override
+    public Type getLastState(String channelId) {
+        return stateMap.get(channelId);
     }
 
     /**

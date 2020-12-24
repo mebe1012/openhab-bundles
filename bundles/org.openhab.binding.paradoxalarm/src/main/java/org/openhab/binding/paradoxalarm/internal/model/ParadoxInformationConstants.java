@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.util.HexUtils;
+import org.openhab.core.util.HexUtils;
 
 /**
  * The {@link ParadoxInformation} Class that provides the basic panel
@@ -55,5 +55,4 @@ public class ParadoxInformationConstants {
 
         return ParadoxInformationConstants.panelTypes.getOrDefault(key, PanelType.UNKNOWN);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,22 +28,6 @@ import java.util.concurrent.Future;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.homematic.internal.HomematicBindingConstants;
 import org.openhab.binding.homematic.internal.common.HomematicConfig;
 import org.openhab.binding.homematic.internal.communicator.HomematicGateway;
@@ -62,6 +46,22 @@ import org.openhab.binding.homematic.internal.model.HmParamsetType;
 import org.openhab.binding.homematic.internal.type.HomematicTypeGeneratorImpl;
 import org.openhab.binding.homematic.internal.type.MetadataUtils;
 import org.openhab.binding.homematic.internal.type.UidUtils;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,8 +105,7 @@ public class HomematicThingHandler extends BaseThingHandler {
         });
     }
 
-    private void doInitializeInBackground()
-            throws GatewayNotAvailableException, HomematicClientException, IOException {
+    private void doInitializeInBackground() throws GatewayNotAvailableException, HomematicClientException, IOException {
         HomematicGateway gateway = getHomematicGateway();
         HmDevice device = gateway.getDevice(UidUtils.getHomematicAddress(getThing()));
         HmChannel channelZero = device.getChannel(0);
@@ -151,6 +150,12 @@ public class HomematicThingHandler extends BaseThingHandler {
         if (updateDynamicChannelList(device, thingChannels)) {
             updateThing(editThing().withChannels(thingChannels).build());
         }
+
+        thingChannels.forEach(channel -> {
+            if (isLinked(channel.getUID())) {
+                channelLinked(channel.getUID());
+            }
+        });
     }
 
     /**
@@ -311,7 +316,7 @@ public class HomematicThingHandler extends BaseThingHandler {
      * Returns the rx mode that shall be used for transmitting a new value of a datapoint to the device. The
      * HomematicThingHandler always uses the default rx mode; custom thing handlers can override this method to
      * adjust the rx mode.
-     * 
+     *
      * @param datapointName The datapoint that will be updated on the device
      * @param currentValue The current value of the datapoint
      * @param newValue The value that will be sent to the device
@@ -368,7 +373,6 @@ public class HomematicThingHandler extends BaseThingHandler {
      */
     private void updateChannelState(final HmDatapoint dp, Channel channel)
             throws IOException, GatewayNotAvailableException, ConverterException {
-
         if (dp.isTrigger()) {
             if (dp.getValue() != null) {
                 triggerChannel(channel.getUID(), ObjectUtils.toString(dp.getValue()));
@@ -389,8 +393,7 @@ public class HomematicThingHandler extends BaseThingHandler {
     /**
      * Loads all values for the given Homematic channel if it is not initialized.
      */
-    private void loadHomematicChannelValues(HmChannel hmChannel)
-            throws GatewayNotAvailableException, IOException {
+    private void loadHomematicChannelValues(HmChannel hmChannel) throws GatewayNotAvailableException, IOException {
         if (!hmChannel.isInitialized()) {
             synchronized (this) {
                 if (!hmChannel.isInitialized()) {
@@ -419,7 +422,7 @@ public class HomematicThingHandler extends BaseThingHandler {
         ThingStatus newStatus = ThingStatus.ONLINE;
         ThingStatusDetail newDetail = ThingStatusDetail.NONE;
 
-        if (getBridge().getStatus() == ThingStatus.OFFLINE) {
+        if ((getBridge() != null) && (getBridge().getStatus() == ThingStatus.OFFLINE)) {
             newStatus = ThingStatus.OFFLINE;
             newDetail = ThingStatusDetail.BRIDGE_OFFLINE;
         } else if (device.isFirmwareUpdating()) {
@@ -560,7 +563,7 @@ public class HomematicThingHandler extends BaseThingHandler {
     public synchronized void deviceRemoved() {
         deviceDeletionPending = false;
         if (getThing().getStatus() == ThingStatus.REMOVING) {
-            // thing removal was initiated on ESH side
+            // thing removal was initiated
             updateStatus(ThingStatus.REMOVED);
         } else {
             // device removal was initiated on homematic side, thing is not removed

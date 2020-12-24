@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,13 +15,12 @@ package org.openhab.binding.modbus.discovery.internal;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.modbus.discovery.ModbusDiscoveryParticipant;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Nagy Attila Gabor - initial contribution
  *
  */
-@Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.modbus")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.modbus")
 @NonNullByDefault
 public class ModbusDiscoveryService extends AbstractDiscoveryService {
 
@@ -82,7 +81,7 @@ public class ModbusDiscoveryService extends AbstractDiscoveryService {
     protected void startScan() {
         logger.trace("ModbusDiscoveryService starting scan");
 
-        if (participants.size() == 0) {
+        if (participants.isEmpty()) {
             // There's no point on continuing if there are no participants at the moment
             stopScan();
             return;
@@ -116,7 +115,7 @@ public class ModbusDiscoveryService extends AbstractDiscoveryService {
      * instances. They call back this method when a thing has been discovered
      */
     @Override
-    protected void thingDiscovered(@NonNull DiscoveryResult discoveryResult) {
+    protected void thingDiscovered(DiscoveryResult discoveryResult) {
         super.thingDiscovered(discoveryResult);
     }
 

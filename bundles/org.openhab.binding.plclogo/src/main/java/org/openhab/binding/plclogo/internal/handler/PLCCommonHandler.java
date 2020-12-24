@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,18 +19,18 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.plclogo.internal.PLCLogoBindingConstants;
 import org.openhab.binding.plclogo.internal.PLCLogoBindingConstants.Layout;
 import org.openhab.binding.plclogo.internal.PLCLogoClient;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.BridgeHandler;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public abstract class PLCCommonHandler extends BaseThingHandler {
         String family = getLogoFamily();
         logger.debug("Get start address of {} LOGO! for {} blocks.", family, kind);
 
-        Map<?, @Nullable Layout> memory = LOGO_MEMORY_BLOCK.get(family);
+        Map<?, Layout> memory = LOGO_MEMORY_BLOCK.get(family);
         Layout layout = (memory != null) ? memory.get(kind) : null;
         return layout != null ? layout.address : INVALID;
     }
@@ -111,7 +111,7 @@ public abstract class PLCCommonHandler extends BaseThingHandler {
         String family = getLogoFamily();
         logger.debug("Get data buffer length of {} LOGO! for {} blocks.", family, kind);
 
-        Map<?, @Nullable Layout> memory = LOGO_MEMORY_BLOCK.get(family);
+        Map<?, Layout> memory = LOGO_MEMORY_BLOCK.get(family);
         Layout layout = (memory != null) ? memory.get(kind) : null;
         return layout != null ? layout.length : 0;
     }
@@ -186,7 +186,7 @@ public abstract class PLCCommonHandler extends BaseThingHandler {
         logger.debug("Get base address of {} LOGO! for block {} .", family, name);
 
         String block = name.split("\\.")[0];
-        Map<?, @Nullable Layout> memory = LOGO_MEMORY_BLOCK.get(family);
+        Map<?, Layout> memory = LOGO_MEMORY_BLOCK.get(family);
         if (isValid(name) && !block.isEmpty() && (memory != null)) {
             if (Character.isDigit(block.charAt(1))) {
                 layout = memory.get(block.substring(0, 1));
@@ -246,7 +246,6 @@ public abstract class PLCCommonHandler extends BaseThingHandler {
             if ((handler != null) && (handler instanceof PLCBridgeHandler)) {
                 return (PLCBridgeHandler) handler;
             }
-
         }
         return null;
     }
@@ -281,7 +280,10 @@ public abstract class PLCCommonHandler extends BaseThingHandler {
     }
 
     protected static String getBlockFromChannel(final @Nullable Channel channel) {
-        return channel == null ? NOT_SUPPORTED : channel.getProperties().get(BLOCK_PROPERTY);
+        if (channel == null) {
+            return NOT_SUPPORTED;
+        }
+        String block = channel.getProperties().get(BLOCK_PROPERTY);
+        return block == null ? NOT_SUPPORTED : block;
     }
-
 }

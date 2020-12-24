@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,15 @@ import static org.openhab.binding.dmx.internal.DmxBindingConstants.THING_TYPE_AR
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.dmx.internal.config.ArtnetBridgeHandlerConfiguration;
 import org.openhab.binding.dmx.internal.dmxoverethernet.ArtnetNode;
 import org.openhab.binding.dmx.internal.dmxoverethernet.ArtnetPacket;
 import org.openhab.binding.dmx.internal.dmxoverethernet.DmxOverEthernetHandler;
 import org.openhab.binding.dmx.internal.dmxoverethernet.IpNode;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

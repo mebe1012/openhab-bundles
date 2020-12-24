@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,12 +22,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.milight.internal.handler.BridgeV3Handler;
 import org.openhab.binding.milight.internal.handler.BridgeV6Handler;
 import org.openhab.binding.milight.internal.handler.MilightV2RGBHandler;
@@ -37,6 +31,12 @@ import org.openhab.binding.milight.internal.handler.MilightV6RGBCWWWHandler;
 import org.openhab.binding.milight.internal.handler.MilightV6RGBIBOXHandler;
 import org.openhab.binding.milight.internal.handler.MilightV6RGBWHandler;
 import org.openhab.binding.milight.internal.protocol.QueuedSend;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Component;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,11 +15,6 @@ package org.openhab.binding.evohome.internal.discovery;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.evohome.internal.EvohomeBindingConstants;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Gateway;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Location;
@@ -27,6 +22,11 @@ import org.openhab.binding.evohome.internal.api.models.v2.response.TemperatureCo
 import org.openhab.binding.evohome.internal.api.models.v2.response.Zone;
 import org.openhab.binding.evohome.internal.handler.AccountStatusListener;
 import org.openhab.binding.evohome.internal.handler.EvohomeAccountBridgeHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,5 +130,4 @@ public class EvohomeDiscoveryService extends AbstractDiscoveryService implements
                 .withBridge(bridgeUID).withLabel(displayLabel).build();
         thingDiscovered(discoveryResult);
     }
-
 }

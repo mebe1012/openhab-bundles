@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,31 +16,36 @@ import static org.openhab.binding.network.internal.NetworkBindingConstants.*;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.network.internal.NetworkBindingConfiguration;
+import org.openhab.binding.network.internal.NetworkBindingConfigurationListener;
 import org.openhab.binding.network.internal.NetworkBindingConstants;
 import org.openhab.binding.network.internal.NetworkHandlerConfiguration;
 import org.openhab.binding.network.internal.PresenceDetection;
 import org.openhab.binding.network.internal.PresenceDetectionListener;
 import org.openhab.binding.network.internal.PresenceDetectionValue;
+import org.openhab.binding.network.internal.WakeOnLanPacketSender;
+import org.openhab.binding.network.internal.action.NetworkActions;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +55,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Marc Mettke - Initial contribution
  * @author David Graeff - Rewritten
+ * @author Wouter Born - Add Wake-on-LAN thing action support
  */
 @NonNullByDefault
-public class NetworkHandler extends BaseThingHandler implements PresenceDetectionListener {
+public class NetworkHandler extends BaseThingHandler
+        implements PresenceDetectionListener, NetworkBindingConfigurationListener {
     private final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
     private @NonNullByDefault({}) PresenceDetection presenceDetection;
+    private @NonNullByDefault({}) WakeOnLanPacketSender wakeOnLanPacketSender;
 
     private boolean isTCPServiceDevice;
     private NetworkBindingConfiguration configuration;
@@ -72,11 +80,12 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
         super(thing);
         this.isTCPServiceDevice = isTCPServiceDevice;
         this.configuration = configuration;
+        this.configuration.addNetworkBindingConfigurationListener(this);
     }
 
     private void refreshValue(ChannelUID channelUID) {
-        // We are not yet even initialised, don't do anything
-        if (!presenceDetection.isAutomaticRefreshing()) {
+        // We are not yet even initialized, don't do anything
+        if (presenceDetection == null || !presenceDetection.isAutomaticRefreshing()) {
             return;
         }
 
@@ -89,7 +98,7 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
             case CHANNEL_DEPRECATED_TIME:
                 presenceDetection.getValue(value -> {
                     updateState(CHANNEL_LATENCY,
-                            new QuantityType<>(value.getLowestLatency(), MetricPrefix.MILLI(SmartHomeUnits.SECOND)));
+                            new QuantityType<>(value.getLowestLatency(), MetricPrefix.MILLI(Units.SECOND)));
                     updateState(CHANNEL_DEPRECATED_TIME, new DecimalType(value.getLowestLatency()));
                 });
                 break;
@@ -120,8 +129,7 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
     @Override
     public void partialDetectionResult(PresenceDetectionValue value) {
         updateState(CHANNEL_ONLINE, OnOffType.ON);
-        updateState(CHANNEL_LATENCY,
-                new QuantityType<>(value.getLowestLatency(), MetricPrefix.MILLI(SmartHomeUnits.SECOND)));
+        updateState(CHANNEL_LATENCY, new QuantityType<>(value.getLowestLatency(), MetricPrefix.MILLI(Units.SECOND)));
         updateState(CHANNEL_DEPRECATED_TIME, new DecimalType(value.getLowestLatency()));
     }
 
@@ -165,6 +173,7 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
 
         this.presenceDetection = presenceDetection;
         presenceDetection.setHostname(handlerConfiguration.hostname);
+        presenceDetection.setPreferResponseTimeAsLatency(configuration.preferResponseTimeAsLatency);
 
         if (isTCPServiceDevice) {
             Integer port = handlerConfiguration.port;
@@ -188,6 +197,8 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
         this.retries = handlerConfiguration.retry.intValue();
         presenceDetection.setRefreshInterval(handlerConfiguration.refreshInterval.longValue());
         presenceDetection.setTimeout(handlerConfiguration.timeout.intValue());
+
+        wakeOnLanPacketSender = new WakeOnLanPacketSender(handlerConfiguration.macAddress);
 
         updateStatus(ThingStatus.ONLINE);
         presenceDetection.startAutomaticRefresh(scheduler);
@@ -217,5 +228,24 @@ public class NetworkHandler extends BaseThingHandler implements PresenceDetectio
      */
     public boolean isTCPServiceDevice() {
         return isTCPServiceDevice;
+    }
+
+    @Override
+    public void bindingConfigurationChanged() {
+        // Make sure that changed binding configuration is reflected
+        presenceDetection.setPreferResponseTimeAsLatency(configuration.preferResponseTimeAsLatency);
+    }
+
+    @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return Collections.singletonList(NetworkActions.class);
+    }
+
+    public void sendWakeOnLanPacket() {
+        if (handlerConfiguration.macAddress.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot send WoL packet because the 'macAddress' is not configured for " + thing.getUID());
+        }
+        wakeOnLanPacketSender.sendPacket();
     }
 }

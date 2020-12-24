@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,10 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
 import org.openhab.binding.russound.internal.net.SocketSession;
 import org.openhab.binding.russound.internal.net.SocketSessionListener;
 import org.openhab.binding.russound.internal.rio.AbstractRioProtocol;
@@ -32,6 +28,10 @@ import org.openhab.binding.russound.internal.rio.RioPresetsProtocol;
 import org.openhab.binding.russound.internal.rio.RioSystemFavoritesProtocol;
 import org.openhab.binding.russound.internal.rio.models.GsonUtilities;
 import org.openhab.binding.russound.internal.rio.models.RioFavorite;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +142,6 @@ class RioZoneProtocol extends AbstractRioProtocol
 
         this.zoneFavorites[0] = new RioFavorite(1);
         this.zoneFavorites[1] = new RioFavorite(2);
-
     }
 
     /**
@@ -824,7 +823,6 @@ class RioZoneProtocol extends AbstractRioProtocol
         } else {
             logger.warn("Invalid Zone Notification response: '{}'", resp);
         }
-
     }
 
     /**
@@ -938,7 +936,6 @@ class RioZoneProtocol extends AbstractRioProtocol
         if (m.matches()) {
             handleZoneFavoriteNotification(m, response);
         }
-
     }
 
     /**
@@ -950,5 +947,4 @@ class RioZoneProtocol extends AbstractRioProtocol
         favoritesProtocol.removeListener(this);
         super.dispose();
     }
-
 }

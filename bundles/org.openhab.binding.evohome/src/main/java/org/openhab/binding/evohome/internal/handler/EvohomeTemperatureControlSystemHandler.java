@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,16 @@
  */
 package org.openhab.binding.evohome.internal.handler;
 
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.evohome.internal.EvohomeBindingConstants;
 import org.openhab.binding.evohome.internal.api.models.v2.response.GatewayStatus;
 import org.openhab.binding.evohome.internal.api.models.v2.response.TemperatureControlSystemStatus;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 
 /**
  * Handler for a temperature control system. Gets and sets global system mode.
@@ -49,7 +49,7 @@ public class EvohomeTemperatureControlSystemHandler extends BaseEvohomeHandler {
         if (tcsStatus == null || gatewayStatus == null) {
             updateEvohomeThingStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                     "Status not found, check the display id");
-        } else if (handleActiveFaults(gatewayStatus) == false) {
+        } else if (!handleActiveFaults(gatewayStatus)) {
             updateEvohomeThingStatus(ThingStatus.ONLINE);
             updateState(EvohomeBindingConstants.DISPLAY_SYSTEM_MODE_CHANNEL,
                     new StringType(tcsStatus.getMode().getMode()));
@@ -76,5 +76,4 @@ public class EvohomeTemperatureControlSystemHandler extends BaseEvohomeHandler {
         }
         return false;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,11 +19,13 @@ import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +36,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Kuhl - Initial contribution
  */
-@Component(immediate = true)
+@Component(service = MDNSDiscoveryParticipant.class, configurationPid = "mdnsdiscovery.innogysmarthome")
+@NonNullByDefault
 public class InnogyBridgeDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
     private final Logger logger = LoggerFactory.getLogger(InnogyBridgeDiscoveryParticipant.class);
@@ -50,7 +53,7 @@ public class InnogyBridgeDiscoveryParticipant implements MDNSDiscoveryParticipan
     }
 
     @Override
-    public DiscoveryResult createResult(ServiceInfo service) {
+    public @Nullable DiscoveryResult createResult(ServiceInfo service) {
         ThingUID uid = getThingUID(service);
         if (uid != null) {
             DiscoveryResult result = DiscoveryResultBuilder.create(uid)
@@ -61,7 +64,7 @@ public class InnogyBridgeDiscoveryParticipant implements MDNSDiscoveryParticipan
     }
 
     @Override
-    public ThingUID getThingUID(ServiceInfo service) {
+    public @Nullable ThingUID getThingUID(@Nullable ServiceInfo service) {
         if (service != null) {
             String serviceName = service.getName();
             if (serviceName.startsWith("SMARTHOME")) {
@@ -70,7 +73,6 @@ public class InnogyBridgeDiscoveryParticipant implements MDNSDiscoveryParticipan
                 return new ThingUID(THING_TYPE_BRIDGE, serviceName);
             }
         }
-
         return null;
     }
 }

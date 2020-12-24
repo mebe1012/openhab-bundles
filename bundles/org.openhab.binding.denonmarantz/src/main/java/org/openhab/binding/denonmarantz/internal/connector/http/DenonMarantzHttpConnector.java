@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,7 +39,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.api.Result;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.denonmarantz.internal.DenonMarantzState;
 import org.openhab.binding.denonmarantz.internal.config.DenonMarantzConfiguration;
 import org.openhab.binding.denonmarantz.internal.connector.DenonMarantzConnector;
@@ -51,6 +50,7 @@ import org.openhab.binding.denonmarantz.internal.xml.entities.commands.AppComman
 import org.openhab.binding.denonmarantz.internal.xml.entities.commands.AppCommandResponse;
 import org.openhab.binding.denonmarantz.internal.xml.entities.commands.CommandRx;
 import org.openhab.binding.denonmarantz.internal.xml.entities.commands.CommandTx;
+import org.openhab.core.io.net.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +127,7 @@ public class DenonMarantzHttpConnector extends DenonMarantzConnector {
                 try {
                     refreshHttpProperties();
                 } catch (IOException e) {
-                    logger.debug("IO error while retrieving document: {}", e);
+                    logger.debug("IO error while retrieving document", e);
                     state.connectionError("IO error while connecting to AVR: " + e.getMessage());
                     stopPolling();
                 } catch (RuntimeException e) {
@@ -244,6 +244,12 @@ public class DenonMarantzHttpConnector extends DenonMarantzConnector {
                         state.setZone3Volume(zoneSecondary.getMasterVolume().getValue());
                         state.setZone3Mute(zoneSecondary.getMute().getValue());
                         state.setZone3Input(zoneSecondary.getInputFuncSelect().getValue());
+                        break;
+                    case 4:
+                        state.setZone4Power(zoneSecondary.getPower().getValue());
+                        state.setZone4Volume(zoneSecondary.getMasterVolume().getValue());
+                        state.setZone4Mute(zoneSecondary.getMute().getValue());
+                        state.setZone4Input(zoneSecondary.getInputFuncSelect().getValue());
                         break;
                 }
             }
@@ -364,5 +370,4 @@ public class DenonMarantzHttpConnector extends DenonMarantzConnector {
             return Introspector.decapitalize(super.getLocalName());
         }
     }
-
 }

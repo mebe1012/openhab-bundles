@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,11 +16,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.powermax.internal.PowermaxBindingConstants;
 import org.openhab.binding.powermax.internal.config.PowermaxX10Configuration;
 import org.openhab.binding.powermax.internal.config.PowermaxZoneConfiguration;
@@ -30,6 +27,13 @@ import org.openhab.binding.powermax.internal.state.PowermaxPanelSettings;
 import org.openhab.binding.powermax.internal.state.PowermaxPanelSettingsListener;
 import org.openhab.binding.powermax.internal.state.PowermaxX10Settings;
 import org.openhab.binding.powermax.internal.state.PowermaxZoneSettings;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,28 +42,47 @@ import org.slf4j.LoggerFactory;
  * all enrolled zones and X10 devices
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Use ThingHandlerService
  */
-public class PowermaxDiscoveryService extends AbstractDiscoveryService implements PowermaxPanelSettingsListener {
+@NonNullByDefault
+public class PowermaxDiscoveryService extends AbstractDiscoveryService
+        implements PowermaxPanelSettingsListener, ThingHandlerService {
 
     private final Logger logger = LoggerFactory.getLogger(PowermaxDiscoveryService.class);
 
     private static final int SEARCH_TIME = 5;
 
-    private PowermaxBridgeHandler bridgeHandler;
+    private @Nullable PowermaxBridgeHandler bridgeHandler;
 
     /**
      * Creates a PowermaxDiscoveryService with background discovery disabled.
      */
-    public PowermaxDiscoveryService(PowermaxBridgeHandler bridgeHandler) {
+    public PowermaxDiscoveryService() {
         super(PowermaxBindingConstants.SUPPORTED_THING_TYPES_UIDS, SEARCH_TIME, true);
-        this.bridgeHandler = bridgeHandler;
+    }
+
+    @Override
+    public void setThingHandler(ThingHandler handler) {
+        if (handler instanceof PowermaxBridgeHandler) {
+            bridgeHandler = (PowermaxBridgeHandler) handler;
+        }
+    }
+
+    @Override
+    public @Nullable ThingHandler getThingHandler() {
+        return bridgeHandler;
     }
 
     /**
      * Activates the Discovery Service.
      */
+    @Override
     public void activate() {
-        bridgeHandler.registerPanelSettingsListener(this);
+        super.activate(null);
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null) {
+            handler.registerPanelSettingsListener(this);
+        }
     }
 
     /**
@@ -67,30 +90,38 @@ public class PowermaxDiscoveryService extends AbstractDiscoveryService implement
      */
     @Override
     public void deactivate() {
-        bridgeHandler.unregisterPanelSettingsListener(this);
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null) {
+            handler.unregisterPanelSettingsListener(this);
+        }
+        super.deactivate();
     }
 
     @Override
     protected void startScan() {
         logger.debug("Updating discovered things (new scan)");
-        updateFromSettings(bridgeHandler.getPanelSettings());
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null) {
+            updateFromSettings(handler.getPanelSettings());
+        }
     }
 
     @Override
-    public void onPanelSettingsUpdated(PowermaxPanelSettings settings) {
+    public void onPanelSettingsUpdated(@Nullable PowermaxPanelSettings settings) {
         logger.debug("Updating discovered things (global settings updated)");
         updateFromSettings(settings);
     }
 
     @Override
-    public void onZoneSettingsUpdated(int zoneNumber, PowermaxPanelSettings settings) {
+    public void onZoneSettingsUpdated(int zoneNumber, @Nullable PowermaxPanelSettings settings) {
         logger.debug("Updating discovered things (zone {} updated)", zoneNumber);
         PowermaxZoneSettings zoneSettings = (settings == null) ? null : settings.getZoneSettings(zoneNumber);
         updateFromZoneSettings(zoneNumber, zoneSettings);
     }
 
-    private void updateFromSettings(PowermaxPanelSettings settings) {
-        if (settings != null) {
+    private void updateFromSettings(@Nullable PowermaxPanelSettings settings) {
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null && settings != null) {
             long beforeUpdate = new Date().getTime();
 
             for (int i = 1; i <= settings.getNbZones(); i++) {
@@ -104,25 +135,26 @@ public class PowermaxDiscoveryService extends AbstractDiscoveryService implement
             }
 
             // Remove not updated discovered things
-            removeOlderResults(beforeUpdate, bridgeHandler.getThing().getUID());
+            removeOlderResults(beforeUpdate, handler.getThing().getUID());
         }
     }
 
-    private void updateFromZoneSettings(int zoneNumber, PowermaxZoneSettings zoneSettings) {
-        if (zoneSettings != null) {
+    private void updateFromZoneSettings(int zoneNumber, @Nullable PowermaxZoneSettings zoneSettings) {
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null && zoneSettings != null) {
             // Prevent for adding already known zone
-            for (Thing thing : bridgeHandler.getThing().getThings()) {
+            for (Thing thing : handler.getThing().getThings()) {
+                ThingHandler thingHandler = thing.getHandler();
                 if (thing.getThingTypeUID().equals(PowermaxBindingConstants.THING_TYPE_ZONE)
-                        && thing.getHandler() != null) {
-                    PowermaxZoneConfiguration config = ((PowermaxThingHandler) thing.getHandler())
-                            .getZoneConfiguration();
+                        && thingHandler instanceof PowermaxThingHandler) {
+                    PowermaxZoneConfiguration config = ((PowermaxThingHandler) thingHandler).getZoneConfiguration();
                     if (config.zoneNumber == zoneNumber) {
                         return;
                     }
                 }
             }
 
-            ThingUID bridgeUID = bridgeHandler.getThing().getUID();
+            ThingUID bridgeUID = handler.getThing().getUID();
             ThingUID thingUID = new ThingUID(PowermaxBindingConstants.THING_TYPE_ZONE, bridgeUID,
                     String.valueOf(zoneNumber));
             String sensorType = zoneSettings.getSensorType();
@@ -143,20 +175,22 @@ public class PowermaxDiscoveryService extends AbstractDiscoveryService implement
         }
     }
 
-    private void updateFromDeviceSettings(int deviceNumber, PowermaxX10Settings deviceSettings) {
-        if (deviceSettings != null && deviceSettings.isEnabled()) {
+    private void updateFromDeviceSettings(int deviceNumber, @Nullable PowermaxX10Settings deviceSettings) {
+        PowermaxBridgeHandler handler = bridgeHandler;
+        if (handler != null && deviceSettings != null && deviceSettings.isEnabled()) {
             // Prevent for adding already known X10 device
-            for (Thing thing : bridgeHandler.getThing().getThings()) {
+            for (Thing thing : handler.getThing().getThings()) {
+                ThingHandler thingHandler = thing.getHandler();
                 if (thing.getThingTypeUID().equals(PowermaxBindingConstants.THING_TYPE_X10)
-                        && thing.getHandler() != null) {
-                    PowermaxX10Configuration config = ((PowermaxThingHandler) thing.getHandler()).getX10Configuration();
+                        && thingHandler instanceof PowermaxThingHandler) {
+                    PowermaxX10Configuration config = ((PowermaxThingHandler) thingHandler).getX10Configuration();
                     if (config.deviceNumber == deviceNumber) {
                         return;
                     }
                 }
             }
 
-            ThingUID bridgeUID = bridgeHandler.getThing().getUID();
+            ThingUID bridgeUID = handler.getThing().getUID();
             ThingUID thingUID = new ThingUID(PowermaxBindingConstants.THING_TYPE_X10, bridgeUID,
                     String.valueOf(deviceNumber));
             String name = (deviceSettings.getName() != null) ? deviceSettings.getName()
@@ -169,5 +203,4 @@ public class PowermaxDiscoveryService extends AbstractDiscoveryService implement
             thingDiscovered(discoveryResult);
         }
     }
-
 }

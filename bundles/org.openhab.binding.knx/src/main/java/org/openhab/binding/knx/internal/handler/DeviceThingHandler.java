@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,17 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.knx.internal.KNXBindingConstants;
 import org.openhab.binding.knx.internal.KNXTypeMapper;
 import org.openhab.binding.knx.internal.channel.KNXChannelType;
@@ -47,6 +36,17 @@ import org.openhab.binding.knx.internal.client.InboundSpec;
 import org.openhab.binding.knx.internal.client.OutboundSpec;
 import org.openhab.binding.knx.internal.config.DeviceConfig;
 import org.openhab.binding.knx.internal.dpt.KNXCoreTypeMapper;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +72,8 @@ public class DeviceThingHandler extends AbstractKNXThingHandler {
     private final Set<GroupAddress> groupAddresses = new HashSet<>();
     private final Set<GroupAddress> groupAddressesWriteBlockedOnce = new HashSet<>();
     private final Set<OutboundSpec> groupAddressesRespondingSpec = new HashSet<>();
-    private final Map<GroupAddress, @Nullable ScheduledFuture<?>> readFutures = new HashMap<>();
-    private final Map<ChannelUID, @Nullable ScheduledFuture<?>> channelFutures = new HashMap<>();
-    private @Nullable IndividualAddress address;
+    private final Map<GroupAddress, ScheduledFuture<?>> readFutures = new HashMap<>();
+    private final Map<ChannelUID, ScheduledFuture<?>> channelFutures = new HashMap<>();
     private int readInterval;
 
     public DeviceThingHandler(Thing thing) {
@@ -95,6 +94,28 @@ public class DeviceThingHandler extends AbstractKNXThingHandler {
             groupAddresses.addAll(selector.getWriteAddresses(channelConfiguration));
             groupAddresses.addAll(selector.getListenAddresses(channelConfiguration));
         });
+    }
+
+    @Override
+    public void dispose() {
+        cancelChannelFutures();
+        freeGroupAdresses();
+        super.dispose();
+    }
+
+    private void cancelChannelFutures() {
+        for (ScheduledFuture<?> future : channelFutures.values()) {
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            }
+        }
+        channelFutures.clear();
+    }
+
+    private void freeGroupAdresses() {
+        groupAddresses.clear();
+        groupAddressesWriteBlockedOnce.clear();
+        groupAddressesRespondingSpec.clear();
     }
 
     @Override
@@ -242,7 +263,6 @@ public class DeviceThingHandler extends AbstractKNXThingHandler {
                     break;
             }
         }
-
     }
 
     private boolean isControl(ChannelUID channelUID) {
@@ -261,7 +281,7 @@ public class DeviceThingHandler extends AbstractKNXThingHandler {
     /** KNXIO */
     private void sendGroupValueResponse(Channel channel, GroupAddress destination) {
         Set<GroupAddress> rsa = getKNXChannelType(channel).getWriteAddresses(channel.getConfiguration());
-        if (rsa.size() > 0) {
+        if (!rsa.isEmpty()) {
             logger.trace("onGroupRead size '{}'", rsa.size());
             withKNXType(channel, (selector, configuration) -> {
                 Optional<OutboundSpec> os = groupAddressesRespondingSpec.stream().filter(spec -> {
@@ -412,5 +432,4 @@ public class DeviceThingHandler extends AbstractKNXThingHandler {
     private KNXChannelType getKNXChannelType(Channel channel) {
         return KNXChannelTypes.getType(channel.getChannelTypeUID());
     }
-
 }

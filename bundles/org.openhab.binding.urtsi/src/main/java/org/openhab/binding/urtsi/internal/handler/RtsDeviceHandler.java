@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,19 +12,19 @@
  */
 package org.openhab.binding.urtsi.internal.handler;
 
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.urtsi.internal.UrtsiBindingConstants;
 import org.openhab.binding.urtsi.internal.config.RtsDeviceConfig;
 import org.openhab.binding.urtsi.internal.mapping.UrtsiChannelMapping;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * The {@link RtsDeviceHandler} is responsible for handling commands, which are
@@ -91,5 +91,4 @@ public class RtsDeviceHandler extends BaseThingHandler {
 
         }
     }
-
 }

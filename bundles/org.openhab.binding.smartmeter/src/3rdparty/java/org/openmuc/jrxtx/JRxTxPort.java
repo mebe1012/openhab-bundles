@@ -1,16 +1,16 @@
 package org.openmuc.jrxtx;
 
 import static java.text.MessageFormat.format;
-import static org.eclipse.smarthome.io.transport.serial.SerialPort.*;
+import static org.openhab.core.io.transport.serial.SerialPort.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,7 +30,7 @@ class JRxTxPort implements org.openmuc.jrxtx.SerialPort {
 
     private volatile boolean closed;
 
-    private org.eclipse.smarthome.io.transport.serial.SerialPort rxtxPort;
+    private org.openhab.core.io.transport.serial.SerialPort rxtxPort;
 
     private SerialInputStream serialIs;
     private SerialOutputStream serial0s;
@@ -63,7 +63,7 @@ class JRxTxPort implements org.openmuc.jrxtx.SerialPort {
                 String errMessage = format("Serial port {0} not found or port is busy.", portName);
                 throw new PortNotFoundException(errMessage);
             }
-            org.eclipse.smarthome.io.transport.serial.SerialPort comPort = serialPortIdentifier.open("meterreader", 0);
+            org.openhab.core.io.transport.serial.SerialPort comPort = serialPortIdentifier.open("meterreader", 0);
             // if (!(comPort instanceof RXTXPort)) {
             // throw new SerialPortException("Unable to open the serial port. Port is not RXTX.");
             // }
@@ -92,7 +92,7 @@ class JRxTxPort implements org.openmuc.jrxtx.SerialPort {
     }
 
     private static void setFlowControl(FlowControl flowControl,
-            org.eclipse.smarthome.io.transport.serial.SerialPort rxtxPort) throws IOException {
+            org.openhab.core.io.transport.serial.SerialPort rxtxPort) throws IOException {
         try {
             switch (flowControl) {
                 case RTS_CTS:
@@ -113,7 +113,7 @@ class JRxTxPort implements org.openmuc.jrxtx.SerialPort {
         }
     }
 
-    private JRxTxPort(org.eclipse.smarthome.io.transport.serial.SerialPort comPort, String portName, int baudRate,
+    private JRxTxPort(org.openhab.core.io.transport.serial.SerialPort comPort, String portName, int baudRate,
             Parity parity, DataBits dataBits, StopBits stopBits, FlowControl flowControl) throws IOException {
         this.rxtxPort = comPort;
         this.portName = portName;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,17 +20,19 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.SensorId;
 import org.openhab.binding.onewire.internal.Util;
 import org.openhab.binding.onewire.internal.handler.OwBaseThingHandler;
 import org.openhab.binding.onewire.internal.handler.OwserverBridgeHandler;
 import org.openhab.binding.onewire.internal.owserver.OwserverDeviceParameter;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link EDS006x} class defines an EDS006x device
@@ -39,6 +41,7 @@ import org.openhab.binding.onewire.internal.owserver.OwserverDeviceParameter;
  */
 @NonNullByDefault
 public class EDS006x extends AbstractOwDevice {
+    private final Logger logger = LoggerFactory.getLogger(EDS006x.class);
     private OwserverDeviceParameter temperatureParameter = new OwserverDeviceParameter("/temperature");
     private OwserverDeviceParameter humidityParameter = new OwserverDeviceParameter("/humidity");
     private OwserverDeviceParameter pressureParameter = new OwserverDeviceParameter("/pressure");
@@ -62,6 +65,7 @@ public class EDS006x extends AbstractOwDevice {
     @Override
     public void refresh(OwserverBridgeHandler bridgeHandler, Boolean forcedRefresh) throws OwException {
         if (isConfigured) {
+            logger.trace("refresh of sensor {} started", sensorId);
             if (enabledChannels.contains(CHANNEL_TEMPERATURE) || enabledChannels.contains(CHANNEL_HUMIDITY)
                     || enabledChannels.contains(CHANNEL_ABSOLUTE_HUMIDITY)
                     || enabledChannels.contains(CHANNEL_DEWPOINT)) {
@@ -75,8 +79,7 @@ public class EDS006x extends AbstractOwDevice {
                 if (enabledChannels.contains(CHANNEL_HUMIDITY) || enabledChannels.contains(CHANNEL_ABSOLUTE_HUMIDITY)
                         || enabledChannels.contains(CHANNEL_DEWPOINT)) {
                     QuantityType<Dimensionless> humidity = new QuantityType<>(
-                            (DecimalType) bridgeHandler.readDecimalType(sensorId, humidityParameter),
-                            SmartHomeUnits.PERCENT);
+                            (DecimalType) bridgeHandler.readDecimalType(sensorId, humidityParameter), Units.PERCENT);
 
                     if (enabledChannels.contains(CHANNEL_HUMIDITY)) {
                         callback.postUpdate(CHANNEL_HUMIDITY, humidity);
@@ -95,7 +98,7 @@ public class EDS006x extends AbstractOwDevice {
 
             if (enabledChannels.contains(CHANNEL_LIGHT)) {
                 QuantityType<Illuminance> light = new QuantityType<>(
-                        (DecimalType) bridgeHandler.readDecimalType(sensorId, lightParameter), SmartHomeUnits.LUX);
+                        (DecimalType) bridgeHandler.readDecimalType(sensorId, lightParameter), Units.LUX);
                 callback.postUpdate(CHANNEL_LIGHT, light);
             }
 

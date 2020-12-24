@@ -1,8 +1,8 @@
 # Siemens RDS Binding
 
-The Siemens RDS binding provides the infrastructure for connecting openHAB to the Siemens Climatix IC cloud server and integrate connected Siemens RDS Smart thermostats onto the openHAB bus.
+The Siemens RDS binding provides the infrastructure for connecting openHAB to the Siemens Climatix IC cloud server and integrate connected [Siemens RDS Smart thermostats](https://new.siemens.com/global/en/products/buildings/hvac/room-thermostats/smart-thermostat.html) onto the openHAB bus.
 
-See the Siemens web-site for product details: https://new.siemens.com/global/en/products/buildings/hvac/room-thermostats/smart-thermostat.html
+![Siemens RDS](doc/rds110-family.jpg)
 
 ## Supported Things
 
@@ -20,7 +20,7 @@ If the Configuration Parameters are all valid, then the Climatix IC Account Thin
 If the sign on succeeds, the Thing will indicate its status as Online, otherwise it will show an error status. 
 
 Once the Thing of the type Climatix IC Account has been created and successfully signed on to the cloud server, it will automatically interrogate the server to discover all the respective RDS Smart Thermostat Things associated with that account.
-After a short while, all discovered RDS Smart Thermostat Things will be displayed in the PaperUI Inbox.
+After a short while, all discovered RDS Smart Thermostat Things will be displayed in the Inbox.
 If in future you add new RDS Smart Thermostat devices to your Siemens account (e.g. via the Siemens App) then these new devices will also appear in the Inbox.    
 
 ## Thing Configuration for "Climatix IC Account"
@@ -41,7 +41,7 @@ Note: You must create ONLY ONE Thing of the type Climatix IC Account; duplicate 
 ## Thing Configuration for "RDS Smart Thermostat"
 
 Each RDS Smart Thermostat Thing is identified in the Climatix IC Account by means of a unique Plant Id code.
-The PaperUI automatic discovery process determines the Plant Id codes of all connected thermostats automatically.   
+The automatic discovery determines the Plant Id codes of all connected thermostats automatically.
 
 | Configuration Parameter | Description                                                                                                 | 
 |-------------------------|-------------------------------------------------------------------------------------------------------------|
@@ -56,7 +56,7 @@ The RDS Smart Thermostat supports several channels as shown below.
 | roomTemperature          | Number:Temperature | Actual Room Temperature                                                     |
 | targetTemperature        | Number:Temperature | Target temperature setting for the room                                     |
 | thermostatOutputState    | String             | The output state of the thermostat (Heating, Off, Cooling)                  |
-| roomHumidity	           | Number             | Actual Room Humidity                                                        |
+| roomHumidity	           | Number:Dimensionless| Actual Room Humidity                                                       |
 | roomAirQuality           | String             | Actual Room Air Quality (Poor..Good)                                        |
 | outsideTemperature       | Number:Temperature | Actual Outside temperature                                                  |
 | energySavingsLevel       | String             | Energy saving level (Green Leaf score) (Poor..Excellent)                    |
@@ -75,7 +75,6 @@ Bridge siemensrds:climatixic:mybridgename "Climatix IC Account" [ userEmail="ema
 ```
 
 To manually configure an RDS Smart Thermostat Thing requires knowledge of the "Plant Id" which is a unique code used to identify a specific thermostat device in the Siemens Climatix IC cloud server account.
-The PaperUI automatic Discovery service (see above) discovers the "Plant Id" codes during the discovery process.
 
 ```
 Bridge siemensrds:climatixic:mybridgename "Climatix IC Account" [ userEmail="email@example.com", userPassword="secret", apiKey="32-character-code-provided-by-siemens", pollingInterval=60 ] {
@@ -90,7 +89,7 @@ Bridge siemensrds:climatixic:mybridgename "Climatix IC Account" [ userEmail="ema
 Number:Temperature Upstairs_RoomTemperature "Room Temperature" { channel="siemensrds:rds:mybridgename:myupstairs:roomTemperature" }
 Number:Temperature Upstairs_TargetTemperature "Target Temperature" { channel="siemensrds:rds:mybridgename:myupstairs:targetTemperature" }
 String Upstairs_ThermostatOutputState "Thermostat Output State" { channel="siemensrds:rds:mybridgename:myupstairs:thermostatOutputState" }
-Number Upstairs_RoomHumidity "Room Humidity"	{ channel="siemensrds:rds:mybridgename:myupstairs:roomHumidity" }
+Number:Dimensionless Upstairs_RoomHumidity "Room Humidity"	{ channel="siemensrds:rds:mybridgename:myupstairs:roomHumidity" }
 String Upstairs_RoomAirQuality "Room Air Quality" { channel="siemensrds:rds:mybridgename:myupstairs:roomAirQuality" }
 Number:Temperature Upstairs_OutsideTemperature "Outside Temperature" { channel="siemensrds:rds:mybridgename:myupstairs:outsideTemperature" }
 String Upstairs_EnergySavingsLevel "Energy Savings Level" { channel="siemensrds:rds:mybridgename:myupstairs:energySavingsLevel" }

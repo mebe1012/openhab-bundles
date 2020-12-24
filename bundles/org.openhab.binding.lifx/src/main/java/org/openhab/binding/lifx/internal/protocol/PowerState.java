@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.lifx.internal.protocol;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.openhab.core.library.types.OnOffType;
 
 /**
  * Represents light power states (on or off).
@@ -54,5 +54,4 @@ public enum PowerState {
     public OnOffType toOnOffType() {
         return this == ON ? OnOffType.ON : OnOffType.OFF;
     }
-
 }

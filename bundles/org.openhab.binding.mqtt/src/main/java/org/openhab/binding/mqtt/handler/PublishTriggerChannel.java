@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,9 @@ package org.openhab.binding.mqtt.handler;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttMessageSubscriber;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttMessageSubscriber;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * Subscribes to a state topic and calls {@link AbstractBrokerHandler#triggerChannel(ChannelUID, String)} if a value got

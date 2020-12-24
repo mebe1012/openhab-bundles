@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -93,9 +93,8 @@ public class BinRpcMessage implements RpcRequest<byte[]>, RpcResponse {
             offset += currentLength;
         }
         if (offset != datasize) {
-            throw new EOFException(
-                    "Only " + offset + " bytes received while reading message payload, expected " + datasize
-                            + " bytes");
+            throw new EOFException("Only " + offset + " bytes received while reading message payload, expected "
+                    + datasize + " bytes");
         }
         byte[] message = ArrayUtils.addAll(sig, payload);
         decodeMessage(message, methodHeader);
@@ -137,7 +136,7 @@ public class BinRpcMessage implements RpcRequest<byte[]>, RpcResponse {
 
     private void generateResponseData() throws IOException {
         offset = 8 + (methodName != null ? methodName.length() + 8 : 0);
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<>();
         while (offset < binRpcData.length) {
             values.add(readRpcValue());
         }
@@ -205,6 +204,13 @@ public class BinRpcMessage implements RpcRequest<byte[]>, RpcResponse {
         return (new BigInteger(bi)).intValue();
     }
 
+    private long readInt64() {
+        byte bi[] = new byte[8];
+        System.arraycopy(binRpcData, offset, bi, 0, 8);
+        offset += 8;
+        return (new BigInteger(bi)).longValue();
+    }
+
     private String readString() throws UnsupportedEncodingException {
         int len = readInt();
         offset += len;
@@ -227,10 +233,13 @@ public class BinRpcMessage implements RpcRequest<byte[]>, RpcResponse {
                 return bd.setScale(6, RoundingMode.HALF_DOWN).doubleValue();
             case 5:
                 return new Date(readInt() * 1000);
+            case 0xD1:
+                // Int64
+                return new Long(readInt64());
             case 0x100:
                 // Array
                 int numElements = readInt();
-                Collection<Object> array = new ArrayList<Object>();
+                Collection<Object> array = new ArrayList<>();
                 while (numElements-- > 0) {
                     array.add(readRpcValue());
                 }
@@ -238,7 +247,7 @@ public class BinRpcMessage implements RpcRequest<byte[]>, RpcResponse {
             case 0x101:
                 // Struct
                 numElements = readInt();
-                Map<String, Object> struct = new TreeMap<String, Object>();
+                Map<String, Object> struct = new TreeMap<>();
                 while (numElements-- > 0) {
                     String name = readString();
                     struct.put(name, readRpcValue());

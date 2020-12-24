@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,20 +13,20 @@
 package org.openhab.binding.fronius.internal.handler;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.fronius.internal.FroniusBridgeConfiguration;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,14 +94,11 @@ public class FroniusBridgeHandler extends BaseBridgeHandler {
             Runnable runnable = () -> {
                 boolean online = false;
                 try {
-                    InetAddress inet;
-                    inet = InetAddress.getByName(config.hostname);
-                    if (inet.isReachable(5000)) {
+                    if (HttpUtil.executeUrl("GET", "http://" + config.hostname, 5000) != null) {
                         online = true;
                     }
                 } catch (IOException e) {
                     logger.debug("Connection Error: {}", e.getMessage());
-                    return;
                 }
 
                 if (!online) {
@@ -119,5 +116,4 @@ public class FroniusBridgeHandler extends BaseBridgeHandler {
             refreshJob = scheduler.scheduleWithFixedDelay(runnable, 0, delay, TimeUnit.SECONDS);
         }
     }
-
 }

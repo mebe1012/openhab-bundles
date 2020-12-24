@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.OpenHAB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Marcel Verpaalen - Initial contribution
  */
+@NonNullByDefault
 public class MaxBackupUtils {
 
     private final Logger logger = LoggerFactory.getLogger(MaxBackupUtils.class);
@@ -35,12 +37,12 @@ public class MaxBackupUtils {
     private final String dbFolderName;
     private final String backupId;
     private boolean inProgress = false;
-    private StringBuilder msg;
-    private String cube;
+    private StringBuilder msg = new StringBuilder();
+    private String cube = "";
 
     public MaxBackupUtils(String backupId) {
         this.backupId = backupId;
-        dbFolderName = ConfigConstants.getUserDataFolder() + File.separator + BACKUP_PATH;
+        dbFolderName = OpenHAB.getUserDataFolder() + File.separator + BACKUP_PATH;
         File folder = new File(dbFolderName);
         if (!folder.exists()) {
             folder.mkdirs();
@@ -65,7 +67,6 @@ public class MaxBackupUtils {
             inProgress = false;
             saveMsg(msg.toString(), cube);
         }
-
     }
 
     private void saveMsg(String data, String cube) {

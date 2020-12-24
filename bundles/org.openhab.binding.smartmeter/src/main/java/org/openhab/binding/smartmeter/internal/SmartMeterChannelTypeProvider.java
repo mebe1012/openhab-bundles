@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,17 +23,15 @@ import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.thing.type.StateChannelTypeBuilder;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
-import org.eclipse.smarthome.core.types.util.UnitUtils;
 import org.openhab.binding.smartmeter.SmartMeterBindingConstants;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.StateChannelTypeBuilder;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +49,10 @@ public class SmartMeterChannelTypeProvider implements ChannelTypeProvider, Meter
 
     private final Logger logger = LoggerFactory.getLogger(SmartMeterChannelTypeProvider.class);
 
-    private Map<String, ChannelType> obisChannelMap = new ConcurrentHashMap<>();
+    private final Map<String, ChannelType> obisChannelMap = new ConcurrentHashMap<>();
 
     @Override
-    public @NonNull Collection<@NonNull ChannelType> getChannelTypes(@Nullable Locale locale) {
+    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return obisChannelMap.values();
     }
 
@@ -65,20 +63,8 @@ public class SmartMeterChannelTypeProvider implements ChannelTypeProvider, Meter
     }
 
     @Override
-    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
-            @Nullable Locale locale) {
-        return null;
-    }
-
-    @Override
-    public @Nullable Collection<@NonNull ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
-        return null;
-    }
-
-    @Override
     public void errorOccurred(Throwable e) {
         // Nothing to do if there is an reading error...
-
     }
 
     @Override
@@ -97,16 +83,14 @@ public class SmartMeterChannelTypeProvider implements ChannelTypeProvider, Meter
             stateDescriptionBuilder = ChannelTypeBuilder
                     .state(new ChannelTypeUID(SmartMeterBindingConstants.BINDING_ID, obisChannelId), obis,
                             CoreItemFactory.NUMBER + ":" + dimension)
-                    .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true)
-                            .withPattern("%.2f %unit%").build().toStateDescription())
+                    .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
+                            .withPattern("%.2f %unit%").build())
                     .withConfigDescriptionURI(URI.create(SmartMeterBindingConstants.CHANNEL_TYPE_METERREADER_OBIS));
         } else {
             stateDescriptionBuilder = ChannelTypeBuilder
                     .state(new ChannelTypeUID(SmartMeterBindingConstants.BINDING_ID, obisChannelId), obis,
                             CoreItemFactory.STRING)
-                    .withStateDescription(
-                            StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription());
-
+                    .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build());
         }
         return stateDescriptionBuilder.build();
     }
@@ -118,12 +102,11 @@ public class SmartMeterChannelTypeProvider implements ChannelTypeProvider, Meter
 
     /**
      * Gets the {@link ChannelTypeUID} for the given OBIS code.
-     * 
+     *
      * @param obis The obis code.
      * @return The {@link ChannelTypeUID} or null.
      */
     public ChannelTypeUID getChannelTypeIdForObis(String obis) {
         return obisChannelMap.get(obis).getUID();
     }
-
 }

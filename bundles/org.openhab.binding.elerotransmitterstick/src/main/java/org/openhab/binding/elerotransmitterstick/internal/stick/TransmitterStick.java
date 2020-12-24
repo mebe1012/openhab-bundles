@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.openhab.binding.elerotransmitterstick.internal.config.EleroTransmitterStickConfig;
 import org.openhab.binding.elerotransmitterstick.internal.handler.StatusListener;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +43,18 @@ public class TransmitterStick {
     private final StickListener listener;
 
     private EleroTransmitterStickConfig config;
+    private SerialPortManager serialPortManager;
     private CommandWorker worker;
 
     public TransmitterStick(StickListener l) {
         listener = l;
     }
 
-    public synchronized void initialize(EleroTransmitterStickConfig stickConfig, ScheduledExecutorService scheduler) {
+    public synchronized void initialize(EleroTransmitterStickConfig stickConfig, ScheduledExecutorService scheduler,
+            SerialPortManager serialPortManager) {
         logger.debug("Initializing Transmitter Stick...");
         config = stickConfig;
+        this.serialPortManager = serialPortManager;
         worker = new CommandWorker();
         scheduler.schedule(worker, 0, TimeUnit.MILLISECONDS);
         logger.debug("Transmitter Stick initialized, worker running.");
@@ -155,7 +159,7 @@ public class TransmitterStick {
         private static final long serialVersionUID = -3216360253151368826L;
 
         public DueCommandSet() {
-            super(new Comparator<Command>() {
+            super(new Comparator<>() {
                 /**
                  * Due commands are sorted by priority first and then by delay.
                  */
@@ -206,7 +210,7 @@ public class TransmitterStick {
         };
 
         CommandWorker() {
-            connection = new SerialConnection(config.portName);
+            connection = new SerialConnection(config.portName, serialPortManager);
             updateInterval = config.updateInterval;
         }
 
@@ -269,7 +273,7 @@ public class TransmitterStick {
 
                 try {
                     // in case we have no commands that are currently due, wait for a new one
-                    if (dueCommands.size() == 0) {
+                    if (dueCommands.isEmpty()) {
                         logger.debug("No due commands, invoking take on queue...");
                         dueCommands.add(cmdQueue.take());
                         logger.trace("take returned {}", dueCommands.first());

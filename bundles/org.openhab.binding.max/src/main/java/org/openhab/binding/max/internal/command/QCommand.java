@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,14 @@
  */
 package org.openhab.binding.max.internal.command;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link QCommand} Quits the connection to the MAX! Cube.
  *
  * @author Marcel Verpaalen - Initial Contribution
  */
+@NonNullByDefault
 public class QCommand extends CubeCommand {
 
     @Override
@@ -26,6 +29,6 @@ public class QCommand extends CubeCommand {
 
     @Override
     public String getReturnStrings() {
-        return null;
+        return "";
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.PointType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,8 +151,8 @@ public class BuienradarPredictionAPI implements PredictionAPI {
             logger.warn("Buienradar API at URI {} return empty result", address);
             return Optional.empty();
         }
-        final List<Prediction> predictions = new ArrayList<Prediction>(24);
-        final List<String> errors = new LinkedList<String>();
+        final List<Prediction> predictions = new ArrayList<>(24);
+        final List<String> errors = new LinkedList<>();
         logger.debug("Returned result from buienradar: {}", result);
         final String[] lines = result.split("\n");
         Optional<ZonedDateTime> actual = Optional.empty();
@@ -162,7 +162,8 @@ public class BuienradarPredictionAPI implements PredictionAPI {
                 actual = Optional.of(prediction.getActualDateTime());
                 predictions.add(prediction);
             } catch (BuienradarParseException e) {
-                errors.add(e.getMessage());
+                String error = e.getMessage();
+                errors.add(error != null ? error : "null");
             }
         }
         if (!errors.isEmpty()) {
@@ -170,5 +171,4 @@ public class BuienradarPredictionAPI implements PredictionAPI {
         }
         return Optional.of(predictions);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,23 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 /**
  * Test for RFXCom-binding
  *
- * @author Martin van Wingerden
+ * @author Martin van Wingerden - Initial contribution
  */
+@NonNullByDefault
 public class RFXComPowerMessageTest {
-    @Test(expected = RFXComMessageNotImplementedException.class)
-    public void checkNotImplemented() throws Exception {
+    @Test
+    public void checkNotImplemented() {
         // TODO Note that this message is supported in the 1.9 binding
-        RFXComMessageFactory.createMessage(RFXComBaseMessage.PacketType.POWER);
+        assertThrows(RFXComMessageNotImplementedException.class,
+                () -> RFXComMessageFactory.createMessage(RFXComBaseMessage.PacketType.POWER));
     }
 }

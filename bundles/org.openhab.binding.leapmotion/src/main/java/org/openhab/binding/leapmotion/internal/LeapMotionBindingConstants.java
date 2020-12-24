@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,8 @@
 package org.openhab.binding.leapmotion.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * The {@link LeapMotionBindingConstants} class defines common constants, which are
@@ -40,5 +40,4 @@ public class LeapMotionBindingConstants {
     public static final String GESTURE_ANTICLOCKWISE = "anticlockwise";
     public static final String GESTURE_FINGERS = "fingers";
     public static final String GESTURE_NOHAND = "nohand";
-
 }

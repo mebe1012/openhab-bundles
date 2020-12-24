@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.dwdunwetter.internal.data;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,11 +23,11 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Tests for {@link DwdWarningsData}
@@ -47,7 +47,7 @@ public class DwdWarningsDataTest {
     private TestDataProvider testDataProvider;
     private DwdWarningsData warningsData;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         this.testDataProvider = new TestDataProvider();
         loadXmlFromFile();

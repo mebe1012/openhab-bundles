@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,14 @@ package org.openhab.binding.miele.internal.handler;
 import java.lang.reflect.Method;
 import java.util.Map.Entry;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.DeviceMetaData;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

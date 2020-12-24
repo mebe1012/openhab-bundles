@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,15 +18,15 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.profiles.Profile;
-import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
-import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
-import org.eclipse.smarthome.core.thing.profiles.ProfileFactory;
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeBuilder;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.thing.profiles.Profile;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.thing.profiles.ProfileFactory;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeBuilder;
+import org.openhab.core.thing.profiles.ProfileTypeProvider;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -60,7 +60,7 @@ public class RegexTransformationProfileFactory implements ProfileFactory, Profil
         return Arrays.asList(RegexTransformationProfile.PROFILE_TYPE_UID);
     }
 
-    @Reference(target = "(smarthome.transform=REGEX)")
+    @Reference(target = "(openhab.transform=REGEX)")
     public void addTransformationService(TransformationService service) {
         this.service = service;
     }

@@ -6,6 +6,8 @@
 
 -resolve.effective: active
 
+-tester: biz.aQute.tester.junit-platform
+
 # Run all integration tests which are named xyzTest
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 
@@ -16,13 +18,17 @@ Import-Package: org.osgi.framework.*;version="[1.8,2)",*
 -runsystempackages: sun.reflect
 
 -runfw: org.eclipse.osgi
--runee: JavaSE-1.8
+-runee: JavaSE-11
 
 # The integration test itself does not export anything.
 Export-Package: 
 -exportcontents: 
 
 -runrequires.ee: \
-    bnd.identity;id='org.apache.servicemix.specs.activation-api-1.1',\
-    bnd.identity;id='org.apache.servicemix.specs.jaxb-api-2.2',\
-    bnd.identity;id='org.apache.servicemix.bundles.jaxb-impl'
+    bnd.identity;id='org.apache.servicemix.specs.activation-api-1.2.1',\
+    bnd.identity;id='org.glassfish.hk2.osgi-resource-locator',\
+    bnd.identity;id='com.sun.xml.bind.jaxb-osgi'
+
+-runrequires.junit: \
+    bnd.identity;id='biz.aQute.tester.junit-platform',\
+    bnd.identity;id='junit-jupiter-engine'

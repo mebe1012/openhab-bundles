@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,11 +26,11 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.type.ChannelType;
 import org.openhab.io.neeo.internal.NeeoConstants;
 import org.openhab.io.neeo.internal.NeeoUtil;
 import org.openhab.io.neeo.internal.ServiceContext;
@@ -89,10 +89,10 @@ public class NeeoDevice {
     /**
      * Creates the device from the given parameters
      *
-     * @param thing    the non-null thing
+     * @param thing the non-null thing
      * @param channels the non-null, possibly empty channels
-     * @param type     the device type
-     * @param timing   the possibly null device timings
+     * @param type the device type
+     * @param timing the possibly null device timings
      */
     public NeeoDevice(Thing thing, List<NeeoDeviceChannel> channels, NeeoDeviceType type,
             @Nullable NeeoDeviceTiming timing) {
@@ -103,16 +103,16 @@ public class NeeoDevice {
     /**
      * Creates the device from the given parameters
      *
-     * @param uid                the non-null uid
-     * @param driverVersion      the driver version for the device
-     * @param type               the non-null device type
-     * @param manufacturer       the non-empty manufacturer
-     * @param name               the non-empty name
-     * @param channels           the non-null, possibly empty list of channels
-     * @param deviceTiming       a possibly null device timings
+     * @param uid the non-null uid
+     * @param driverVersion the driver version for the device
+     * @param type the non-null device type
+     * @param manufacturer the non-empty manufacturer
+     * @param name the non-empty name
+     * @param channels the non-null, possibly empty list of channels
+     * @param deviceTiming a possibly null device timings
      * @param deviceCapabilities a possibly null, possibly empty list of device capabilities
-     * @param specificName       a possibly null, possibly empty specific name
-     * @param iconName           a possibly null, possibly empty custom icon name
+     * @param specificName a possibly null, possibly empty specific name
+     * @param iconName a possibly null, possibly empty custom icon name
      */
     public NeeoDevice(NeeoThingUID uid, int driverVersion, NeeoDeviceType type, String manufacturer,
             @Nullable String name, List<NeeoDeviceChannel> channels, @Nullable NeeoDeviceTiming deviceTiming,
@@ -128,8 +128,8 @@ public class NeeoDevice {
 
         for (NeeoDeviceChannel channel : channels) {
             final String itemName = channel.getItemName();
-            final Entry<String, ItemSubType> key = new AbstractMap.SimpleEntry<String, ItemSubType>(
-                    channel.getItemName(), channel.getSubType());
+            final Entry<String, ItemSubType> key = new AbstractMap.SimpleEntry<>(channel.getItemName(),
+                    channel.getSubType());
 
             if (!uniqueIds.containsKey(key)) {
                 uniqueIds.put(key, new HashSet<>());
@@ -325,8 +325,8 @@ public class NeeoDevice {
     /**
      * Gets the channel for the given item name (and channel number)
      *
-     * @param itemName   the non-empty item name
-     * @param subType    the non-null sub type
+     * @param itemName the non-empty item name
+     * @param subType the non-null sub type
      * @param channelNbr the channel nbr
      * @return the channel or null if none found
      */

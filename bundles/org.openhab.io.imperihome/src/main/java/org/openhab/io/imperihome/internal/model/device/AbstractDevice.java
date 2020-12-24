@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,11 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.StateChangeListener;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.State;
 import org.openhab.io.imperihome.internal.action.Action;
 import org.openhab.io.imperihome.internal.action.ActionRegistry;
 import org.openhab.io.imperihome.internal.model.param.DeviceParam;
@@ -185,6 +185,7 @@ public abstract class AbstractDevice implements StateChangeListener {
 
     /**
      * Process any device-specific ISS tags.
+     * 
      * @param issTags ISS tags map.
      */
     public void processCustomTags(Map<TagType, List<String>> issTags) {
@@ -239,8 +240,7 @@ public abstract class AbstractDevice implements StateChangeListener {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{id='" + id + '\'' + ", name='" + name + '\'' + ", room='" + room + '\'' + ", type="
-                + type + ", invert=" + inverted + ", icon=" + defaultIcon + ", links=" + links + '}';
+        return getClass().getSimpleName() + "{id='" + id + '\'' + ", name='" + name + '\'' + ", room='" + room + '\''
+                + ", type=" + type + ", invert=" + inverted + ", icon=" + defaultIcon + ", links=" + links + '}';
     }
-
 }

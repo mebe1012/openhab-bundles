@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,13 @@ package org.openhab.binding.netatmo.internal.handler;
 
 import static org.openhab.binding.netatmo.internal.NetatmoBindingConstants.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,39 +28,44 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import org.apache.oltu.oauth2.client.OAuthClient;
+import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
-import org.eclipse.jdt.annotation.NonNull;
+import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.netatmo.internal.config.NetatmoBridgeConfiguration;
 import org.openhab.binding.netatmo.internal.webhook.NAWebhookCameraEvent;
 import org.openhab.binding.netatmo.internal.webhook.NAWebhookCameraEventPerson;
 import org.openhab.binding.netatmo.internal.webhook.WelcomeWebHookServlet;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.client.ApiClient;
+import io.swagger.client.ApiException;
 import io.swagger.client.api.HealthyhomecoachApi;
 import io.swagger.client.api.PartnerApi;
 import io.swagger.client.api.StationApi;
 import io.swagger.client.api.ThermostatApi;
 import io.swagger.client.api.WelcomeApi;
+import io.swagger.client.auth.Authentication;
 import io.swagger.client.auth.OAuth;
-import io.swagger.client.auth.OAuthFlow;
 import io.swagger.client.model.NAHealthyHomeCoachDataBody;
+import io.swagger.client.model.NAMeasureBodyElem;
 import io.swagger.client.model.NAStationDataBody;
 import io.swagger.client.model.NAThermostatDataBody;
 import io.swagger.client.model.NAWelcomeHomeData;
-import retrofit.RestAdapter.LogLevel;
-import retrofit.RetrofitError;
-import retrofit.RetrofitError.Kind;
 
 /**
  * {@link NetatmoBridgeHandler} is the handler for a Netatmo API and connects it
@@ -65,38 +73,47 @@ import retrofit.RetrofitError.Kind;
  * {@link NetatmoBridgeHandler} to request informations about their status
  *
  * @author Gaël L'hopital - Initial contribution OH2 version
+ * @author Rob Nielsen - Added day, week, and month measurements to the weather station and modules
  *
  */
+@NonNullByDefault
 public class NetatmoBridgeHandler extends BaseBridgeHandler {
-    private Logger logger = LoggerFactory.getLogger(NetatmoBridgeHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(NetatmoBridgeHandler.class);
 
-    public NetatmoBridgeConfiguration configuration;
-    private ScheduledFuture<?> refreshJob;
-    private APIMap apiMap;
-    private WelcomeWebHookServlet webHookServlet;
+    public NetatmoBridgeConfiguration configuration = new NetatmoBridgeConfiguration();
+    private @Nullable ScheduledFuture<?> refreshJob;
+    private @Nullable APICreator apiCreator;
+    private @Nullable WelcomeWebHookServlet webHookServlet;
     private List<NetatmoDataListener> dataListeners = new CopyOnWriteArrayList<>();
 
-    @NonNullByDefault
-    private class APIMap extends HashMap<Class<?>, Object> {
-        private static final long serialVersionUID = -2024031764691952343L;
-        private ApiClient apiClient;
+    private static class APICreator {
 
-        public APIMap(ApiClient apiClient) {
+        private final ApiClient apiClient;
+        private final Map<Class<?>, Object> apiMap;
+
+        private APICreator(ApiClient apiClient) {
             super();
             this.apiClient = apiClient;
+            apiMap = new HashMap<>();
         }
 
-        public Object get(Class<?> apiClass) {
-            if (!super.containsKey(apiClass)) {
-                Object api = apiClient.createService(apiClass);
-                super.put(apiClass, api);
+        @SuppressWarnings("unchecked")
+        public <T> T getAPI(Class<T> apiClass) {
+            T api = (T) apiMap.get(apiClass);
+            if (api == null) {
+                try {
+                    api = apiClass.getDeclaredConstructor(ApiClient.class).newInstance(apiClient);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                        | NoSuchMethodException e) {
+                    throw new RuntimeException("Error on executing API class constructor!", e);
+                }
+                apiMap.put(apiClass, api);
             }
-            return super.get(apiClass);
+            return api;
         }
-
     }
 
-    public NetatmoBridgeHandler(@NonNull Bridge bridge, WelcomeWebHookServlet webHookServlet) {
+    public NetatmoBridgeHandler(Bridge bridge, @Nullable WelcomeWebHookServlet webHookServlet) {
         super(bridge);
         this.webHookServlet = webHookServlet;
     }
@@ -111,11 +128,14 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
 
     private void connectionSucceed() {
         updateStatus(ThingStatus.ONLINE);
+        WelcomeWebHookServlet servlet = webHookServlet;
         String webHookURI = getWebHookURI();
-        if (webHookURI != null) {
-            webHookServlet.activate(this);
-            logger.debug("Setting up Netatmo Welcome WebHook");
-            getWelcomeApi().addwebhook(webHookURI, WEBHOOK_APP);
+        if (servlet != null && webHookURI != null) {
+            getWelcomeApi().ifPresent(api -> {
+                servlet.activate(this);
+                logger.debug("Setting up Netatmo Welcome WebHook");
+                api.addwebhook(webHookURI, WEBHOOK_APP);
+            });
         }
     }
 
@@ -128,61 +148,68 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
                 // I use a connection to Netatmo API using PartnerAPI to ensure that API is reachable
                 getPartnerApi().partnerdevices();
                 connectionSucceed();
-            } catch (RetrofitError e) {
-                if (e.getKind() == Kind.NETWORK) {
-                    logger.warn("Network error while connecting to Netatmo API, will retry in {} s",
-                            configuration.reconnectInterval);
-                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                            "Netatmo Access Failed, will retry in " + configuration.reconnectInterval + " seconds.");
-                } else {
-                    switch (e.getResponse().getStatus()) {
-                        case 404: // If no partner station has been associated - likely to happen - we'll have this
-                                  // error
-                                  // but it means connection to API is OK
-                            connectionSucceed();
-                            break;
-                        case 403: // Forbidden Access maybe too many requests ? Let's wait next cycle
-                            logger.warn("Error 403 while connecting to Netatmo API, will retry in {} s",
-                                    configuration.reconnectInterval);
-                            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                                    "Netatmo Access Forbidden, will retry in " + configuration.reconnectInterval
-                                            + " seconds.");
-                            break;
-                        default:
-                            if (logger.isDebugEnabled()) {
-                                // we also attach the stack trace
-                                logger.error("Unable to connect Netatmo API : {}", e.getMessage(), e);
-                            } else {
-                                logger.error("Unable to connect Netatmo API : {}", e.getMessage());
-                            }
-                            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                                    "Unable to connect Netatmo API : " + e.getLocalizedMessage());
-                            return;
-                    }
+            } catch (ApiException e) {
+                switch (e.getCode()) {
+                    case 404: // If no partner station has been associated - likely to happen - we'll have this
+                              // error
+                              // but it means connection to API is OK
+                        connectionSucceed();
+                        break;
+                    case 403: // Forbidden Access maybe too many requests ? Let's wait next cycle
+                        logger.warn("Error 403 while connecting to Netatmo API, will retry in {} s",
+                                configuration.reconnectInterval);
+                        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                                "Netatmo Access Forbidden, will retry in " + configuration.reconnectInterval
+                                        + " seconds.");
+                        break;
+                    default:
+                        if (logger.isDebugEnabled()) {
+                            // we also attach the stack trace
+                            logger.error("Unable to connect Netatmo API : {}", e.getMessage(), e);
+                        } else {
+                            logger.error("Unable to connect Netatmo API : {}", e.getMessage());
+                        }
+                        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                                "Unable to connect Netatmo API : " + e.getLocalizedMessage());
                 }
+            } catch (RuntimeException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.warn("Unable to connect Netatmo API : {}", e.getMessage(), e);
+                } else {
+                    logger.warn("Unable to connect Netatmo API : {}", e.getMessage());
+                }
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                        "Netatmo Access Failed, will retry in " + configuration.reconnectInterval + " seconds.");
             }
             // We'll do this every x seconds to guaranty token refresh
         }, 2, configuration.reconnectInterval, TimeUnit.SECONDS);
     }
 
-    // We'll use TrustingOkHttpClient because Netatmo certificate is a StartTTLS
-    // not trusted by default java certificate control mechanism
-    private void initializeApiClient() throws RetrofitError {
-        ApiClient apiClient = new ApiClient();
+    private void initializeApiClient() {
+        try {
+            ApiClient apiClient = new ApiClient();
 
-        OAuth auth = new OAuth(new TrustingOkHttpClient(),
-                OAuthClientRequest.tokenLocation("https://api.netatmo.net/oauth2/token"));
-        auth.setFlow(OAuthFlow.password);
-        auth.setAuthenticationRequestBuilder(OAuthClientRequest.authorizationLocation(""));
+            OAuthClientRequest oAuthRequest = OAuthClientRequest.tokenLocation("https://api.netatmo.net/oauth2/token")
+                    .setClientId(configuration.clientId).setClientSecret(configuration.clientSecret)
+                    .setUsername(configuration.username).setPassword(configuration.password).setScope(getApiScope())
+                    .setGrantType(GrantType.PASSWORD).buildBodyMessage();
 
-        apiClient.getApiAuthorizations().put("password_oauth", auth);
-        apiClient.getTokenEndPoint().setClientId(configuration.clientId).setClientSecret(configuration.clientSecret)
-                .setUsername(configuration.username).setPassword(configuration.password).setScope(getApiScope());
+            OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
 
-        apiClient.configureFromOkclient(new TrustingOkHttpClient());
-        apiClient.getAdapterBuilder().setLogLevel(logger.isDebugEnabled() ? LogLevel.FULL : LogLevel.NONE);
+            OAuthJSONAccessTokenResponse accessTokenResponse = oAuthClient.accessToken(oAuthRequest,
+                    OAuthJSONAccessTokenResponse.class);
+            String accessToken = accessTokenResponse.getAccessToken();
 
-        apiMap = new APIMap(apiClient);
+            for (Authentication authentication : apiClient.getAuthentications().values()) {
+                if (authentication instanceof OAuth) {
+                    ((OAuth) authentication).setAccessToken(accessToken);
+                }
+            }
+
+            apiCreator = new APICreator(apiClient);
+        } catch (OAuthSystemException | OAuthProblemException e) {
+            throw new RuntimeException("Error on trying to get an access token!", e);
+        }
     }
 
     private String getApiScope() {
@@ -207,6 +234,11 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
             scopes.add("write_camera");
         }
 
+        if (configuration.readPresence) {
+            scopes.add("read_presence");
+            scopes.add("access_presence");
+        }
+
         return String.join(" ", scopes);
     }
 
@@ -215,62 +247,78 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
         logger.debug("Netatmo Bridge is read-only and does not handle commands");
     }
 
-    public PartnerApi getPartnerApi() {
-        return (PartnerApi) apiMap.get(PartnerApi.class);
+    public @Nullable PartnerApi getPartnerApi() {
+        return apiCreator != null ? apiCreator.getAPI(PartnerApi.class) : null;
     }
 
-    private StationApi getStationApi() {
-        return (StationApi) apiMap.get(StationApi.class);
+    public Optional<StationApi> getStationApi() {
+        return apiCreator != null ? Optional.of(apiCreator.getAPI(StationApi.class)) : Optional.empty();
     }
 
-    private HealthyhomecoachApi getHomeCoachApi() {
-        return (HealthyhomecoachApi) apiMap.get(HealthyhomecoachApi.class);
+    public Optional<HealthyhomecoachApi> getHomeCoachApi() {
+        return apiCreator != null ? Optional.of(apiCreator.getAPI(HealthyhomecoachApi.class)) : Optional.empty();
     }
 
-    public ThermostatApi getThermostatApi() {
-        return (ThermostatApi) apiMap.get(ThermostatApi.class);
+    public Optional<ThermostatApi> getThermostatApi() {
+        return apiCreator != null ? Optional.of(apiCreator.getAPI(ThermostatApi.class)) : Optional.empty();
     }
 
-    public WelcomeApi getWelcomeApi() {
-        return (WelcomeApi) apiMap.get(WelcomeApi.class);
+    public Optional<WelcomeApi> getWelcomeApi() {
+        return apiCreator != null ? Optional.of(apiCreator.getAPI(WelcomeApi.class)) : Optional.empty();
     }
 
     @Override
     public void dispose() {
         logger.debug("Running dispose()");
 
-        if (getWebHookURI() != null) {
-            logger.debug("Releasing Netatmo Welcome WebHook");
-            webHookServlet.deactivate();
-            getWelcomeApi().dropwebhook(WEBHOOK_APP);
+        WelcomeWebHookServlet servlet = webHookServlet;
+        if (servlet != null && getWebHookURI() != null) {
+            getWelcomeApi().ifPresent(api -> {
+                logger.debug("Releasing Netatmo Welcome WebHook");
+                servlet.deactivate();
+                api.dropwebhook(WEBHOOK_APP);
+            });
         }
 
-        if (refreshJob != null && !refreshJob.isCancelled()) {
-            refreshJob.cancel(true);
+        ScheduledFuture<?> job = refreshJob;
+        if (job != null) {
+            job.cancel(true);
             refreshJob = null;
         }
     }
 
-    public NAStationDataBody getStationsDataBody(String equipmentId) {
-        NAStationDataBody data = getStationApi().getstationsdata(equipmentId).getBody();
+    public Optional<NAStationDataBody> getStationsDataBody(@Nullable String equipmentId) {
+        Optional<NAStationDataBody> data = getStationApi().map(api -> api.getstationsdata(equipmentId, true).getBody());
         updateStatus(ThingStatus.ONLINE);
         return data;
     }
 
-    public NAHealthyHomeCoachDataBody getHomecoachDataBody(String equipmentId) {
-        NAHealthyHomeCoachDataBody data = getHomeCoachApi().gethomecoachsdata(equipmentId).getBody();
+    public List<Float> getStationMeasureResponses(String equipmentId, @Nullable String moduleId, String scale,
+            List<String> types) {
+        List<NAMeasureBodyElem> data = getStationApi()
+                .map(api -> api.getmeasure(equipmentId, scale, types, moduleId, null, "last", 1, true, false).getBody())
+                .orElse(null);
+        updateStatus(ThingStatus.ONLINE);
+        NAMeasureBodyElem element = (data != null && data.size() > 0) ? data.get(0) : null;
+        return element != null ? element.getValue().get(0) : Collections.emptyList();
+    }
+
+    public Optional<NAHealthyHomeCoachDataBody> getHomecoachDataBody(@Nullable String equipmentId) {
+        Optional<NAHealthyHomeCoachDataBody> data = getHomeCoachApi()
+                .map(api -> api.gethomecoachsdata(equipmentId).getBody());
         updateStatus(ThingStatus.ONLINE);
         return data;
     }
 
-    public NAThermostatDataBody getThermostatsDataBody(String equipmentId) {
-        NAThermostatDataBody data = getThermostatApi().getthermostatsdata(equipmentId).getBody();
+    public Optional<NAThermostatDataBody> getThermostatsDataBody(@Nullable String equipmentId) {
+        Optional<NAThermostatDataBody> data = getThermostatApi()
+                .map(api -> api.getthermostatsdata(equipmentId).getBody());
         updateStatus(ThingStatus.ONLINE);
         return data;
     }
 
-    public NAWelcomeHomeData getWelcomeDataBody(String homeId) {
-        NAWelcomeHomeData data = getWelcomeApi().gethomedata(homeId, null).getBody();
+    public Optional<NAWelcomeHomeData> getWelcomeDataBody(@Nullable String homeId) {
+        Optional<NAWelcomeHomeData> data = getWelcomeApi().map(api -> api.gethomedata(homeId, null).getBody());
         updateStatus(ThingStatus.ONLINE);
         return data;
     }
@@ -280,7 +328,7 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
      *
      * @return Url of the picture or UnDefType.UNDEF
      */
-    public String getPictureUrl(String id, String key) {
+    public String getPictureUrl(@Nullable String id, @Nullable String key) {
         StringBuilder ret = new StringBuilder();
         if (id != null && key != null) {
             ret.append(WELCOME_PICTURE_URL).append("?").append(WELCOME_PICTURE_IMAGEID).append("=").append(id)
@@ -289,7 +337,7 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
         return ret.toString();
     }
 
-    public Optional<AbstractNetatmoThingHandler> findNAThing(String searchedId) {
+    public Optional<AbstractNetatmoThingHandler> findNAThing(@Nullable String searchedId) {
         List<Thing> things = getThing().getThings();
         Stream<AbstractNetatmoThingHandler> naHandlers = things.stream().map(Thing::getHandler)
                 .filter(AbstractNetatmoThingHandler.class::isInstance).map(AbstractNetatmoThingHandler.class::cast)
@@ -334,19 +382,21 @@ public class NetatmoBridgeHandler extends BaseBridgeHandler {
         }
     }
 
-    private String getWebHookURI() {
+    private @Nullable String getWebHookURI() {
         String webHookURI = null;
-        if (configuration.webHookUrl != null && configuration.readWelcome && webHookServlet != null) {
+        WelcomeWebHookServlet webHookServlet = this.webHookServlet;
+        if (configuration.webHookUrl != null && (configuration.readWelcome || configuration.readPresence)
+                && webHookServlet != null) {
             webHookURI = configuration.webHookUrl + webHookServlet.getPath();
         }
         return webHookURI;
     }
 
-    public boolean registerDataListener(@NonNull NetatmoDataListener dataListener) {
+    public boolean registerDataListener(NetatmoDataListener dataListener) {
         return dataListeners.add(dataListener);
     }
 
-    public boolean unregisterDataListener(@NonNull NetatmoDataListener dataListener) {
+    public boolean unregisterDataListener(NetatmoDataListener dataListener) {
         return dataListeners.remove(dataListener);
     }
 

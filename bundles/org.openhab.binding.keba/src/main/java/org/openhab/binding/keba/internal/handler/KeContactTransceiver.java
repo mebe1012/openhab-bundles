@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +173,7 @@ class KeContactTransceiver {
                         handlers.size());
             }
 
-            if (handlers.size() == 0) {
+            if (handlers.isEmpty()) {
                 stop();
             }
         }
@@ -236,7 +236,7 @@ class KeContactTransceiver {
                             boolean error = false;
 
                             for (KeContactHandler handler : handlers) {
-                                if (datagramChannels.get(handler).equals(theChannel)) {
+                                if (theChannel.equals(datagramChannels.get(handler))) {
                                     theHandler = handler;
                                     break;
                                 }
@@ -398,7 +398,7 @@ class KeContactTransceiver {
                 } else {
                     return;
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ClosedSelectorException e) {
                 Thread.currentThread().interrupt();
                 return;
             }

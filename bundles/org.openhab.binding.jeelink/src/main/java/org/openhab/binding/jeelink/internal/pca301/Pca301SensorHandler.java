@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,17 +20,17 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.jeelink.internal.JeeLinkHandler;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.ReadingPublisher;
 import org.openhab.binding.jeelink.internal.config.Pca301SensorConfig;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +49,8 @@ public class Pca301SensorHandler extends JeeLinkSensorHandler<Pca301Reading> {
     private ScheduledFuture<?> retry;
     private int sendCount;
 
-    public Pca301SensorHandler(Thing thing) {
-        super(thing);
+    public Pca301SensorHandler(Thing thing, String sensorType) {
+        super(thing, sensorType);
     }
 
     @Override
@@ -105,8 +105,8 @@ public class Pca301SensorHandler extends JeeLinkSensorHandler<Pca301Reading> {
                     BigDecimal current = new BigDecimal(reading.getCurrent()).setScale(1, RoundingMode.HALF_UP);
                     state = reading.isOn() ? OnOffType.ON : OnOffType.OFF;
 
-                    updateState(CURRENT_POWER_CHANNEL, new QuantityType<>(current, SmartHomeUnits.WATT));
-                    updateState(CONSUMPTION_CHANNEL, new QuantityType<>(reading.getTotal(), SmartHomeUnits.WATT_HOUR));
+                    updateState(CURRENT_POWER_CHANNEL, new QuantityType<>(current, Units.WATT));
+                    updateState(CONSUMPTION_CHANNEL, new QuantityType<>(reading.getTotal(), Units.WATT_HOUR));
                     updateState(SWITCHING_STATE_CHANNEL, state);
 
                     logger.debug("updated states for thing {} ({}): state={}, current={}, total={}",

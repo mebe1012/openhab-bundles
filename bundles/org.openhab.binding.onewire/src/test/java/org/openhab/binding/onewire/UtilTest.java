@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,21 +12,23 @@
  */
 package org.openhab.binding.onewire;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.library.dimension.Density;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.onewire.internal.Util;
+import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.types.QuantityType;
 
 /**
  * Tests cases for {@link Util}.
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class UtilTest {
 
     @Test
@@ -38,7 +40,6 @@ public class UtilTest {
         QuantityType<Density> absoluteHumidity = (QuantityType<Density>) Util.calculateAbsoluteHumidity(temperature,
                 relativeHumidity);
         assertEquals(12.93, absoluteHumidity.doubleValue(), 0.01);
-
     }
 
     @Test

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Implements a datetime value.
@@ -44,11 +45,14 @@ public class DateTimeValue extends Value {
     }
 
     @Override
-    public String getMQTTpublishValue() {
+    public String getMQTTpublishValue(@Nullable String pattern) {
         if (state == UnDefType.UNDEF) {
             return "";
         }
-
-        return ((DateTimeType) state).getZonedDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String formatPattern = pattern;
+        if (formatPattern == null || "%s".contentEquals(formatPattern)) {
+            return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(((DateTimeType) state).getZonedDateTime());
+        }
+        return String.format(formatPattern, ((DateTimeType) state).getZonedDateTime());
     }
 }

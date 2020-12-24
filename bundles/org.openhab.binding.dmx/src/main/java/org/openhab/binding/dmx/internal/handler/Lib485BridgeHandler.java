@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.dmx.internal.DmxBridgeHandler;
 import org.openhab.binding.dmx.internal.config.Lib485BridgeHandlerConfiguration;
 import org.openhab.binding.dmx.internal.dmxoverethernet.IpNode;
 import org.openhab.binding.dmx.internal.multiverse.Universe;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class Lib485BridgeHandler extends DmxBridgeHandler {
     public static final int DEFAULT_PORT = 9020;
 
     private final Logger logger = LoggerFactory.getLogger(Lib485BridgeHandler.class);
-    private final Map<IpNode, Socket> receiverNodes = new HashMap<IpNode, Socket>();
+    private final Map<IpNode, Socket> receiverNodes = new HashMap<>();
 
     public Lib485BridgeHandler(Bridge lib485Bridge) {
         super(lib485Bridge);
@@ -157,5 +157,4 @@ public class Lib485BridgeHandler extends DmxBridgeHandler {
 
         updateConfiguration();
     }
-
 }

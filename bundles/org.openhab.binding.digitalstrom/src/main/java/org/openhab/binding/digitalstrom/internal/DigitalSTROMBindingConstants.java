@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.digitalstrom.internal;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.digitalstrom.internal.lib.structure.scene.constants.SceneTypes;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link DigitalSTROMBindingConstants} class defines common constants, which are
@@ -106,5 +106,4 @@ public class DigitalSTROMBindingConstants {
     public static final String API_VERSION = "apiVersion";
     public static final String DSP_SW_VERSION = "armSwVersion";
     public static final String ARM_SW_VERSION = "dspSwVersion";
-
 }

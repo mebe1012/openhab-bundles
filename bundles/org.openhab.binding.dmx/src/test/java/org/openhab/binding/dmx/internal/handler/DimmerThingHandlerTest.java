@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,31 +12,32 @@
  */
 package org.openhab.binding.dmx.internal.handler;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.openhab.binding.dmx.internal.DmxBindingConstants.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.binding.dmx.internal.handler.DimmerThingHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.dmx.test.AbstractDmxThingTestParent;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 
 /**
- * Tests cases for {@link DimmerThingHandler} in normal mode.
+ * Tests cases for {@link org.openhab.binding.dmx.internal.handler.DimmerThingHandler} in normal
+ * mode.
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -51,7 +52,7 @@ public class DimmerThingHandlerTest extends AbstractDmxThingTestParent {
     private final ThingUID THING_UID_DIMMER = new ThingUID(THING_TYPE_DIMMER, "testdimmer");
     private final ChannelUID CHANNEL_UID_BRIGHTNESS = new ChannelUID(THING_UID_DIMMER, CHANNEL_BRIGHTNESS);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setup();
 
@@ -152,5 +153,4 @@ public class DimmerThingHandlerTest extends AbstractDmxThingTestParent {
     public void testPercentTypeCommand() {
         assertPercentTypeCommands(dimmerThingHandler, CHANNEL_UID_BRIGHTNESS, TEST_FADE_TIME);
     }
-
 }

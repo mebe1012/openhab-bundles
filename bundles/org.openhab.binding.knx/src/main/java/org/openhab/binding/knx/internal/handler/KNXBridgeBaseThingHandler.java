@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,16 +18,15 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.knx.internal.client.KNXClient;
 import org.openhab.binding.knx.internal.client.StatusUpdateCallback;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 
 import tuwien.auto.calimero.IndividualAddress;
 import tuwien.auto.calimero.mgmt.Destination;
@@ -52,11 +51,6 @@ public abstract class KNXBridgeBaseThingHandler extends BaseBridgeHandler implem
     protected abstract KNXClient getClient();
 
     @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        // Nothing to do here
-    }
-
-    @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         // Nothing to do here
     }
@@ -78,5 +72,4 @@ public abstract class KNXBridgeBaseThingHandler extends BaseBridgeHandler implem
     public void updateStatus(ThingStatus status, ThingStatusDetail statusDetail, @Nullable String description) {
         super.updateStatus(status, statusDetail, description);
     }
-
 }

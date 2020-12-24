@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,10 @@
  */
 package org.openhab.binding.plugwise.internal;
 
-import static java.util.stream.Collectors.*;
-
-import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link PlugwiseBinding} class defines common constants, which are used across the whole binding.
@@ -65,9 +61,6 @@ public class PlugwiseBindingConstants {
     public static final ThingTypeUID THING_TYPE_STICK = new ThingTypeUID(BINDING_ID, "stick");
     public static final ThingTypeUID THING_TYPE_SWITCH = new ThingTypeUID(BINDING_ID, "switch");
 
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Stream
-            .of(THING_TYPE_CIRCLE, THING_TYPE_CIRCLE_PLUS, THING_TYPE_SCAN, THING_TYPE_SENSE, THING_TYPE_STEALTH,
-                    THING_TYPE_STICK, THING_TYPE_SWITCH)
-            .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_CIRCLE, THING_TYPE_CIRCLE_PLUS,
+            THING_TYPE_SCAN, THING_TYPE_SENSE, THING_TYPE_STEALTH, THING_TYPE_STICK, THING_TYPE_SWITCH);
 }

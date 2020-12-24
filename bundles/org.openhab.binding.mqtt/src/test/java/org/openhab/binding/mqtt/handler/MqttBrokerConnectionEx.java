@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,13 +14,15 @@ package org.openhab.binding.mqtt.handler;
 
 import static org.mockito.Mockito.spy;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.internal.Subscription;
+import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 
 /**
  * We need an extended MqttBrokerConnection to overwrite the protected `connectionCallbacks` with
@@ -41,7 +43,7 @@ public class MqttBrokerConnectionEx extends MqttBrokerConnection {
     public boolean connectSuccess = true;
     public boolean connectTimeout = false;
 
-    public MqttBrokerConnectionEx(String host, @Nullable Integer port, boolean secure, @Nullable String clientId) {
+    public MqttBrokerConnectionEx(String host, @Nullable Integer port, boolean secure, String clientId) {
         super(host, port, secure, clientId);
     }
 
@@ -49,10 +51,17 @@ public class MqttBrokerConnectionEx extends MqttBrokerConnection {
         connectionCallback = spy(new ConnectionCallback(o));
     }
 
+    public Map<String, Subscription> getSubscribers() {
+        return subscribers;
+    }
+
+    public ConnectionCallback getCallback() {
+        return connectionCallback;
+    }
+
     @Override
-    protected MqttAsyncClient createClient(String serverURI, String clientId, MqttClientPersistence dataStore)
-            throws org.eclipse.paho.client.mqttv3.MqttException {
-        return spy(new MqttAsyncClientEx(serverURI, clientId, dataStore, this));
+    protected MqttAsyncClientWrapper createClient() {
+        return new MqttAsyncClientWrapperEx(this);
     }
 
     @Override

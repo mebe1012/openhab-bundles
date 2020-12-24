@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,14 +22,14 @@ import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.ItemRegistryChangeListener;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemRegistryChangeListener;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.types.State;
 import org.openhab.io.imperihome.internal.ImperiHomeConfig;
 import org.openhab.io.imperihome.internal.action.ActionRegistry;
 import org.openhab.io.imperihome.internal.model.device.AbstractDevice;
@@ -349,7 +349,7 @@ public class ItemProcessor implements ItemRegistryChangeListener {
                     if (issTag.startsWith(tagType.getPrefix() + ':')) {
                         String tagValue = issTag.substring(tagType.getPrefix().length() + 1);
                         if (!tags.containsKey(tagType)) {
-                            tags.put(tagType, new LinkedList<String>());
+                            tags.put(tagType, new LinkedList<>());
                         } else if (!tagType.isMultiValue()) {
                             logger.error("Found multiple values for tag {} - only first value is used",
                                     tagType.getPrefix());
@@ -394,7 +394,7 @@ public class ItemProcessor implements ItemRegistryChangeListener {
 
     /**
      * Generates an unique device ID for the given item.
-     * 
+     *
      * @param item Item to get device ID for.
      * @return Device ID.
      */
@@ -404,7 +404,7 @@ public class ItemProcessor implements ItemRegistryChangeListener {
 
     /**
      * Generates an unique device ID for the given item name.
-     * 
+     *
      * @param itemName Item name.
      * @return Device ID.
      */
@@ -451,5 +451,4 @@ public class ItemProcessor implements ItemRegistryChangeListener {
             }
         }
     }
-
 }

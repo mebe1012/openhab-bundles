@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * The {@link AmazonEchoControlBindingConstants} class defines common constants, which are
@@ -28,7 +28,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  */
 @NonNullByDefault
 public class AmazonEchoControlBindingConstants {
-
     public static final String BINDING_ID = "amazonechocontrol";
     public static final String BINDING_NAME = "Amazon Echo Control";
 
@@ -42,9 +41,16 @@ public class AmazonEchoControlBindingConstants {
     public static final ThingTypeUID THING_TYPE_FLASH_BRIEFING_PROFILE = new ThingTypeUID(BINDING_ID,
             "flashbriefingprofile");
 
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(
+    public static final ThingTypeUID THING_TYPE_SMART_HOME_DEVICE = new ThingTypeUID(BINDING_ID, "smartHomeDevice");
+    public static final ThingTypeUID THING_TYPE_SMART_HOME_DEVICE_GROUP = new ThingTypeUID(BINDING_ID,
+            "smartHomeDeviceGroup");
+
+    public static final Set<ThingTypeUID> SUPPORTED_ECHO_THING_TYPES_UIDS = new HashSet<>(
             Arrays.asList(THING_TYPE_ACCOUNT, THING_TYPE_ECHO, THING_TYPE_ECHO_SPOT, THING_TYPE_ECHO_SHOW,
                     THING_TYPE_ECHO_WHA, THING_TYPE_FLASH_BRIEFING_PROFILE));
+
+    public static final Set<ThingTypeUID> SUPPORTED_SMART_HOME_THING_TYPES_UIDS = new HashSet<>(
+            Arrays.asList(THING_TYPE_SMART_HOME_DEVICE, THING_TYPE_SMART_HOME_DEVICE_GROUP));
 
     // List of all Channel ids
     public static final String CHANNEL_PLAYER = "player";
@@ -70,6 +76,7 @@ public class AmazonEchoControlBindingConstants {
     public static final String CHANNEL_AMAZON_MUSIC_PLAY_LIST_ID = "amazonMusicPlayListId";
     public static final String CHANNEL_TEXT_TO_SPEECH = "textToSpeech";
     public static final String CHANNEL_TEXT_TO_SPEECH_VOLUME = "textToSpeechVolume";
+    public static final String CHANNEL_TEXT_COMMAND = "textCommand";
     public static final String CHANNEL_REMIND = "remind";
     public static final String CHANNEL_PLAY_ALARM_SOUND = "playAlarmSound";
     public static final String CHANNEL_START_ROUTINE = "startRoutine";
@@ -106,6 +113,7 @@ public class AmazonEchoControlBindingConstants {
     public static final String DEVICE_PROPERTY_SERIAL_NUMBER = "serialNumber";
     public static final String DEVICE_PROPERTY_FAMILY = "deviceFamily";
     public static final String DEVICE_PROPERTY_FLASH_BRIEFING_PROFILE = "configurationJson";
+    public static final String DEVICE_PROPERTY_ID = "id";
 
     // Other
     public static final String FLASH_BRIEFING_COMMAND_PREFIX = "FlashBriefing.";

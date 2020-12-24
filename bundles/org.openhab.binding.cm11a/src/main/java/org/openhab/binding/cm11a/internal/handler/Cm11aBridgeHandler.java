@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,20 +14,20 @@ package org.openhab.binding.cm11a.internal.handler;
 
 import java.util.List;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.cm11a.internal.X10Interface;
 import org.openhab.binding.cm11a.internal.X10ReceivedData;
 import org.openhab.binding.cm11a.internal.X10ReceivedData.X10COMMAND;
 import org.openhab.binding.cm11a.internal.config.Cm11aConfig;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ import gnu.io.NoSuchPortException;
 
 /**
  * The {@link Cm11aBridgeHandler} is the Bridge (see
- * https://www.eclipse.org/smarthome/documentation/development/bindings/bridge-handler.html
+ * https://openhab.org/documentation/development/bindings/bridge-handler.html
  * for a description of OpenHAB bridges. This gets called first and is responsible for setting up the handler. Mostly it
  * loads the 10Interface class which does all of the heavy lifting.
  *
@@ -202,35 +202,25 @@ public class Cm11aBridgeHandler extends BaseBridgeHandler implements ReceivedDat
         // Perform appropriate update based on X10Command received
         // Handle ON/OFF commands
         if (cmd == X10ReceivedData.X10COMMAND.ON) {
-            handleUpdate(channelUid, OnOffType.ON);
+            updateState(channelUid, OnOffType.ON);
             handler.setCurrentState(OnOffType.ON);
         } else if (cmd == X10ReceivedData.X10COMMAND.OFF) {
-            handleUpdate(channelUid, OnOffType.OFF);
+            updateState(channelUid, OnOffType.OFF);
             handler.setCurrentState(OnOffType.OFF);
             // Handle DIM/Bright commands
         } else if (cmd == X10ReceivedData.X10COMMAND.DIM) {
             State newState = handler.addDimsToCurrentState(dims);
-            handleUpdate(channelUid, newState);
+            updateState(channelUid, newState);
             handler.setCurrentState(newState);
             logger.debug("Current state set to: {}", handler.getCurrentState().toFullString());
         } else if (cmd == X10ReceivedData.X10COMMAND.BRIGHT) {
             State newState = handler.addBrightsToCurrentState(dims);
-            handleUpdate(channelUid, newState);
+            updateState(channelUid, newState);
             handler.setCurrentState(newState);
             logger.debug("Current state set to: {}", handler.getCurrentState().toFullString());
         } else {
             logger.warn("Received unknown command from cm11a: {}", cmd);
         }
-    }
-
-    /**
-     * The default implementation of this method doesn't do anything. We need it to update the ui as done by the
-     * updateState function.
-     * And, update state can not be called directly because it is protected
-     */
-    @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        updateState(channelUID, newState);
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,21 +13,22 @@
 package org.openhab.binding.enocean.internal.eep.A5_38;
 
 import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.CHANNEL_DIMMER;
+import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.ZERO;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.enocean.internal.config.EnOceanChannelDimmerConfig;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * This class tries to combine the classic EEP A5-38-08 CMD 0x02 dimming with the Eltako interpretation of this EEP.
@@ -62,20 +63,20 @@ public class A5_38_08_Dimming extends _4BSMessage {
                 if (outputCommand instanceof DecimalType) {
                     dimmValue = ((DecimalType) outputCommand).byteValue();
                 } else if (outputCommand instanceof OnOffType) {
-                    dimmValue = ((OnOffType) outputCommand == OnOffType.ON) ? Switch100Percent : Zero;
+                    dimmValue = ((OnOffType) outputCommand == OnOffType.ON) ? Switch100Percent : ZERO;
                 } else if (outputCommand instanceof IncreaseDecreaseType) {
                     dimmValue = ((IncreaseDecreaseType) outputCommand == IncreaseDecreaseType.INCREASE)
                             ? Switch100Percent
-                            : Zero;
+                            : ZERO;
                 } else if (outputCommand instanceof UpDownType) {
-                    dimmValue = ((UpDownType) outputCommand == UpDownType.UP) ? Switch100Percent : Zero;
+                    dimmValue = ((UpDownType) outputCommand == UpDownType.UP) ? Switch100Percent : ZERO;
                 } else {
                     throw new IllegalArgumentException(outputCommand.toFullString() + " is no valid dimming command.");
                 }
 
                 EnOceanChannelDimmerConfig c = config.as(EnOceanChannelDimmerConfig.class);
 
-                byte storeByte = 0x00; // "Store final value" (standard) vs. "block value" (Eltako)
+                byte storeByte = ZERO; // "Store final value" (standard) vs. "block value" (Eltako)
 
                 if (!c.eltakoDimmer) {
                     dimmValue *= 2.55; // 0-100% = 0-255
@@ -90,7 +91,7 @@ public class A5_38_08_Dimming extends _4BSMessage {
                 }
 
                 byte rampingTime = Integer.valueOf(c.rampingTime).byteValue();
-                byte switchingCommand = (dimmValue == Zero) ? SwitchOff : SwitchOn;
+                byte switchingCommand = (dimmValue == ZERO) ? SwitchOff : SwitchOn;
 
                 setData(CommandId, dimmValue, rampingTime, (byte) (TeachInBit | storeByte | switchingCommand));
 
@@ -99,7 +100,8 @@ public class A5_38_08_Dimming extends _4BSMessage {
     }
 
     @Override
-    public State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc, Configuration config) {
+    public State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc,
+            Configuration config) {
         switch (channelId) {
             case CHANNEL_DIMMER:
                 if (!getBit(getDB_0(), 0)) {
@@ -110,10 +112,10 @@ public class A5_38_08_Dimming extends _4BSMessage {
                     int dimmValue = getDB_2Value();
 
                     EnOceanChannelDimmerConfig c = config.as(EnOceanChannelDimmerConfig.class);
-                    
-                    // if Standard dimmer and Dimming Range is absolute (DB0.2==0), 
-                    if (!c.eltakoDimmer && !getBit(getDB_0(),2)) {
-                        //  map range [0...255] to [0%...100%]
+
+                    // if Standard dimmer and Dimming Range is absolute (DB0.2==0),
+                    if (!c.eltakoDimmer && !getBit(getDB_0(), 2)) {
+                        // map range [0...255] to [0%...100%]
                         dimmValue /= 2.55;
                     }
 

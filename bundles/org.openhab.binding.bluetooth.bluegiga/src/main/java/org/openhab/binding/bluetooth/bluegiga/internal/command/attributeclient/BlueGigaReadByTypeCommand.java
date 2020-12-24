@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,8 @@ package org.openhab.binding.bluetooth.bluegiga.internal.command.attributeclient;
 
 import java.util.UUID;
 
-import org.openhab.binding.bluetooth.bluegiga.internal.BlueGigaCommand;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.bluetooth.bluegiga.internal.BlueGigaDeviceCommand;
 
 /**
  * Class to implement the BlueGiga command <b>readByType</b>.
@@ -29,16 +30,10 @@ import org.openhab.binding.bluetooth.bluegiga.internal.BlueGigaCommand;
  *
  * @author Chris Jackson - Initial contribution of Java code generator
  */
-public class BlueGigaReadByTypeCommand extends BlueGigaCommand {
+@NonNullByDefault
+public class BlueGigaReadByTypeCommand extends BlueGigaDeviceCommand {
     public static int COMMAND_CLASS = 0x04;
     public static int COMMAND_METHOD = 0x02;
-
-    /**
-     * Connection handle
-     * <p>
-     * BlueGiga API type is <i>uint8</i> - Java type is {@link int}
-     */
-    private int connection;
 
     /**
      * First attribute handle
@@ -59,16 +54,15 @@ public class BlueGigaReadByTypeCommand extends BlueGigaCommand {
      * <p>
      * BlueGiga API type is <i>uuid</i> - Java type is {@link UUID}
      */
-    private UUID uuid;
+    private UUID uuid = new UUID(0, 0);
 
-    /**
-     * Connection handle
-     *
-     * @param connection the connection to set as {@link int}
-     */
-    public void setConnection(int connection) {
-        this.connection = connection;
+    private BlueGigaReadByTypeCommand(CommandBuilder builder) {
+        this.connection = builder.connection;
+        this.start = builder.start;
+        this.end = builder.end;
+        this.uuid = builder.uuid;
     }
+
     /**
      * First attribute handle
      *
@@ -77,6 +71,7 @@ public class BlueGigaReadByTypeCommand extends BlueGigaCommand {
     public void setStart(int start) {
         this.start = start;
     }
+
     /**
      * Last attribute handle
      *
@@ -85,6 +80,7 @@ public class BlueGigaReadByTypeCommand extends BlueGigaCommand {
     public void setEnd(int end) {
         this.end = end;
     }
+
     /**
      * Attribute type (UUID)
      *
@@ -121,5 +117,56 @@ public class BlueGigaReadByTypeCommand extends BlueGigaCommand {
         builder.append(uuid);
         builder.append(']');
         return builder.toString();
+    }
+
+    public static class CommandBuilder {
+        private int connection;
+        private int start;
+        private int end;
+        private UUID uuid = new UUID(0, 0);
+
+        /**
+         * Set connection handle.
+         *
+         * @param connection the connection to set as {@link int}
+         */
+        public CommandBuilder withConnection(int connection) {
+            this.connection = connection;
+            return this;
+        }
+
+        /**
+         * First requested handle number
+         *
+         * @param start the start to set as {@link int}
+         */
+        public CommandBuilder withStart(int start) {
+            this.start = start;
+            return this;
+        }
+
+        /**
+         * Last requested handle number
+         *
+         * @param end the end to set as {@link int}
+         */
+        public CommandBuilder withEnd(int end) {
+            this.end = end;
+            return this;
+        }
+
+        /**
+         * Attribute type (UUID)
+         *
+         * @param uuid the uuid to set as {@link UUID}
+         */
+        public CommandBuilder withUUID(UUID uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public BlueGigaReadByTypeCommand build() {
+            return new BlueGigaReadByTypeCommand(this);
+        }
     }
 }

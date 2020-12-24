@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,12 +15,13 @@ package org.openhab.binding.rfxcom.internal.messages;
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 import static org.openhab.binding.rfxcom.internal.messages.ByteEnumUtil.fromByte;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 
 /**
  * RFXCOM data class for BBQ temperature message.
@@ -123,13 +124,13 @@ public class RFXComBBQTemperatureMessage extends RFXComBatteryDeviceMessage<RFXC
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         if (CHANNEL_FOOD_TEMPERATURE.equals(channelId)) {
             return new DecimalType(foodTemperature);
         } else if (CHANNEL_BBQ_TEMPERATURE.equals(channelId)) {
             return new DecimalType(bbqTemperature);
         } else {
-            return super.convertToState(channelId);
+            return super.convertToState(channelId, deviceState);
         }
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,9 +19,9 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.service.AbstractWatchService;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component()
 public class TransformationScriptWatcher extends AbstractWatchService {
 
-    public static final String TRANSFORM_FOLDER = ConfigConstants.getConfigFolder() + File.separator
+    public static final String TRANSFORM_FOLDER = OpenHAB.getConfigFolder() + File.separator
             + TransformationService.TRANSFORM_FOLDER_NAME;
 
     private JavaScriptEngineManager manager;

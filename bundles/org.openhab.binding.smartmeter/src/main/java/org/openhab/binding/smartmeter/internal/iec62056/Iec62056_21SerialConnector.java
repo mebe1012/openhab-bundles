@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,10 +18,10 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.smartmeter.connectors.ConnectorBase;
 import org.openhab.binding.smartmeter.internal.helper.Baudrate;
 import org.openhab.binding.smartmeter.internal.helper.ProtocolMode;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.openmuc.j62056.DataMessage;
 import org.openmuc.j62056.Iec21Port;
 import org.openmuc.j62056.Iec21Port.Builder;
@@ -132,5 +132,4 @@ public class Iec62056_21SerialConnector extends ConnectorBase<DataMessage> {
             iec21Port.close();
         }
     }
-
 }

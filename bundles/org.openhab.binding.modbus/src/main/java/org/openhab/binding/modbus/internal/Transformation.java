@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,15 +25,15 @@ import org.apache.commons.lang.builder.StandardToStringStyle;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationHelper;
-import org.eclipse.smarthome.core.transform.TransformationService;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.TypeParser;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.transform.TransformationService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +73,9 @@ public class Transformation {
         toStringStyle.setUseShortClassName(true);
     }
 
-    @Nullable
-    private final String transformation;
-    @Nullable
-    private final String transformationServiceName;
-    @Nullable
-    private final String transformationServiceParam;
+    private final @Nullable String transformation;
+    private final @Nullable String transformationServiceName;
+    private final @Nullable String transformationServiceParam;
 
     /**
      *

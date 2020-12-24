@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,28 +26,28 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.sleepiq.api.Configuration;
+import org.openhab.binding.sleepiq.api.LoginException;
+import org.openhab.binding.sleepiq.api.SleepIQ;
+import org.openhab.binding.sleepiq.api.UnauthorizedException;
+import org.openhab.binding.sleepiq.api.model.Bed;
+import org.openhab.binding.sleepiq.api.model.BedStatus;
+import org.openhab.binding.sleepiq.api.model.FamilyStatus;
 import org.openhab.binding.sleepiq.internal.SleepIQBindingConstants;
 import org.openhab.binding.sleepiq.internal.SleepIQConfigStatusMessage;
 import org.openhab.binding.sleepiq.internal.config.SleepIQCloudConfiguration;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ConfigStatusBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.syphr.sleepiq.api.Configuration;
-import org.syphr.sleepiq.api.LoginException;
-import org.syphr.sleepiq.api.SleepIQ;
-import org.syphr.sleepiq.api.UnauthorizedException;
-import org.syphr.sleepiq.api.model.Bed;
-import org.syphr.sleepiq.api.model.BedStatus;
-import org.syphr.sleepiq.api.model.FamilyStatus;
 
 /**
  * The {@link SleepIQCloudHandler} is responsible for handling commands, which are

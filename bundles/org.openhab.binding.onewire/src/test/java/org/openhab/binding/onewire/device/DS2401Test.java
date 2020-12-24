@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,33 +12,35 @@
  */
 package org.openhab.binding.onewire.device;
 
-import static org.openhab.binding.onewire.internal.OwBindingConstants.THING_TYPE_IBUTTON;
+import static org.openhab.binding.onewire.internal.OwBindingConstants.THING_TYPE_BASIC;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.device.DS2401;
+import org.openhab.core.library.types.OnOffType;
 
 /**
  * Tests cases for {@link DS2401}.
  *
  * @author Jan N. Klug - Initial contribution
  */
-public class DS2401Test extends DeviceTestParent {
+@NonNullByDefault
+public class DS2401Test extends DeviceTestParent<DS2401> {
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
-        setupMocks(THING_TYPE_IBUTTON);
-        deviceTestClazz = DS2401.class;
+        setupMocks(THING_TYPE_BASIC, DS2401.class);
     }
 
     @Test
-    public void presenceTestOn() {
+    public void presenceTestOn() throws OwException {
         presenceTest(OnOffType.ON);
     }
 
     @Test
-    public void presenceTestOff() {
+    public void presenceTestOff() throws OwException {
         presenceTest(OnOffType.OFF);
     }
 }

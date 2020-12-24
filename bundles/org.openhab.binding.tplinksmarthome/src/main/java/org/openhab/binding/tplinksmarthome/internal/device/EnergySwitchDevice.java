@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,13 +15,13 @@ package org.openhab.binding.tplinksmarthome.internal.device;
 import static org.openhab.binding.tplinksmarthome.internal.TPLinkSmartHomeBindingConstants.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.tplinksmarthome.internal.Commands;
 import org.openhab.binding.tplinksmarthome.internal.model.Realtime;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * TP-Link Smart Home Switch device that also can measure energy usage.
@@ -61,16 +61,16 @@ public class EnergySwitchDevice extends SwitchDevice {
 
         switch (channelId) {
             case CHANNEL_ENERGY_CURRENT:
-                value = new QuantityType<>(realtime.getCurrent(), SmartHomeUnits.AMPERE);
+                value = new QuantityType<>(realtime.getCurrent(), Units.AMPERE);
                 break;
             case CHANNEL_ENERGY_TOTAL:
-                value = new QuantityType<>(realtime.getTotal(), SmartHomeUnits.KILOWATT_HOUR);
+                value = new QuantityType<>(realtime.getTotal(), Units.KILOWATT_HOUR);
                 break;
             case CHANNEL_ENERGY_VOLTAGE:
-                value = new QuantityType<>(realtime.getVoltage(), SmartHomeUnits.VOLT);
+                value = new QuantityType<>(realtime.getVoltage(), Units.VOLT);
                 break;
             case CHANNEL_ENERGY_POWER:
-                value = new QuantityType<>(realtime.getPower(), SmartHomeUnits.WATT);
+                value = new QuantityType<>(realtime.getPower(), Units.WATT);
                 break;
             default:
                 value = UnDefType.UNDEF;

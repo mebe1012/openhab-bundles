@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,18 +15,19 @@ package org.openhab.binding.rfxcom.internal.messages;
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 import static org.openhab.binding.rfxcom.internal.messages.ByteEnumUtil.fromByte;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 
 /**
  * RFXCOM data class for temperature and humidity message.
  *
  * @author Marc SAUVEUR - Initial contribution
- * @author Pauli Anttila
+ * @author Pauli Anttila - Migrated for OH2
  * @author Mike Jagdis - Support all available data from sensors
  */
 public class RFXComWindMessage extends RFXComBatteryDeviceMessage<RFXComWindMessage.SubType> {
@@ -70,21 +71,22 @@ public class RFXComWindMessage extends RFXComBatteryDeviceMessage<RFXComWindMess
 
     @Override
     public String toString() {
+        //@formatter:off
         return super.toString()
-            + ", Sub type = " + subType
-            + ", Device Id = " + getDeviceId()
-            + ", Wind direction = " + windDirection
-            + ", Wind gust = " + windSpeed
-            + ", Average wind speed = " + avgWindSpeed
-            + ", Temperature = " + temperature
-            + ", Chill temperature = " + chillTemperature
-            + ", Signal level = " + signalLevel
-            + ", Battery level = " + batteryLevel;
+                + ", Sub type = " + subType
+                + ", Device Id = " + getDeviceId()
+                + ", Wind direction = " + windDirection
+                + ", Wind gust = " + windSpeed
+                + ", Average wind speed = " + avgWindSpeed
+                + ", Temperature = " + temperature
+                + ", Chill temperature = " + chillTemperature
+                + ", Signal level = " + signalLevel
+                + ", Battery level = " + batteryLevel;
+        //@formatter:on
     }
 
     @Override
     public void encodeMessage(byte[] data) throws RFXComException {
-
         super.encodeMessage(data);
 
         subType = fromByte(SubType.class, super.subType);
@@ -166,7 +168,7 @@ public class RFXComWindMessage extends RFXComBatteryDeviceMessage<RFXComWindMess
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         switch (channelId) {
             case CHANNEL_WIND_DIRECTION:
                 return new DecimalType(windDirection);
@@ -184,7 +186,7 @@ public class RFXComWindMessage extends RFXComBatteryDeviceMessage<RFXComWindMess
                 return new DecimalType(chillTemperature);
 
             default:
-                return super.convertToState(channelId);
+                return super.convertToState(channelId, deviceState);
         }
     }
 

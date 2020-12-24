@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,24 +19,23 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.openweathermap.internal.config.OpenWeatherMapAPIConfiguration;
 import org.openhab.binding.openweathermap.internal.connection.OpenWeatherMapConnection;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,20 +74,19 @@ public class OpenWeatherMapAPIHandler extends BaseBridgeHandler {
         config = getConfigAs(OpenWeatherMapAPIConfiguration.class);
 
         boolean configValid = true;
-        if (StringUtils.trimToNull(config.getApikey()) == null) {
+        if (config.apikey == null || config.apikey.trim().isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-missing-apikey");
             configValid = false;
         }
-        int refreshInterval = config.getRefreshInterval();
+        int refreshInterval = config.refreshInterval;
         if (refreshInterval < 10) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-not-supported-refreshInterval");
             configValid = false;
         }
-        String language = config.getLanguage();
-        if (language != null) {
-            language = StringUtils.trimToEmpty(language);
+        String language = config.language;
+        if (language != null && !(language = language.trim()).isEmpty()) {
             if (!OpenWeatherMapAPIConfiguration.SUPPORTED_LANGUAGES.contains(language.toLowerCase())) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                         "@text/offline.conf-error-not-supported-language");
@@ -109,7 +107,8 @@ public class OpenWeatherMapAPIHandler extends BaseBridgeHandler {
 
             updateStatus(ThingStatus.UNKNOWN);
 
-            if (refreshJob == null || refreshJob.isCancelled()) {
+            ScheduledFuture<?> localRefreshJob = refreshJob;
+            if (localRefreshJob == null || localRefreshJob.isCancelled()) {
                 logger.debug("Start refresh job at interval {} min.", refreshInterval);
                 refreshJob = scheduler.scheduleWithFixedDelay(this::updateThings, INITIAL_DELAY_IN_SECONDS,
                         TimeUnit.MINUTES.toSeconds(refreshInterval), TimeUnit.SECONDS);
@@ -120,9 +119,10 @@ public class OpenWeatherMapAPIHandler extends BaseBridgeHandler {
     @Override
     public void dispose() {
         logger.debug("Dispose OpenWeatherMap API handler '{}'.", getThing().getUID());
-        if (refreshJob != null && !refreshJob.isCancelled()) {
+        ScheduledFuture<?> localRefreshJob = refreshJob;
+        if (localRefreshJob != null && !localRefreshJob.isCancelled()) {
             logger.debug("Stop refresh job.");
-            if (refreshJob.cancel(true)) {
+            if (localRefreshJob.cancel(true)) {
                 refreshJob = null;
             }
         }

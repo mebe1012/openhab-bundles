@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,22 +14,16 @@ package org.openhab.binding.lametrictime.internal;
 
 import static org.openhab.binding.lametrictime.internal.LaMetricTimeBindingConstants.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import javax.ws.rs.client.ClientBuilder;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.lametrictime.internal.discovery.LaMetricTimeAppDiscoveryService;
 import org.openhab.binding.lametrictime.internal.handler.ClockAppHandler;
 import org.openhab.binding.lametrictime.internal.handler.CountdownAppHandler;
@@ -37,7 +31,16 @@ import org.openhab.binding.lametrictime.internal.handler.LaMetricTimeHandler;
 import org.openhab.binding.lametrictime.internal.handler.RadioAppHandler;
 import org.openhab.binding.lametrictime.internal.handler.StopwatchAppHandler;
 import org.openhab.binding.lametrictime.internal.handler.WeatherAppHandler;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -50,17 +53,31 @@ import org.slf4j.LoggerFactory;
  * @author Gregory Moyer - Initial contribution
  */
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.lametrictime")
+@NonNullByDefault
 public class LaMetricTimeHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPE_UIDS = Collections.unmodifiableSet(
-            Stream.of(THING_TYPE_DEVICE, THING_TYPE_CLOCK_APP, THING_TYPE_COUNTDOWN_APP, THING_TYPE_RADIO_APP,
-                    THING_TYPE_STOPWATCH_APP, THING_TYPE_WEATHER_APP).collect(Collectors.toSet()));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPE_UIDS = Set.of(THING_TYPE_DEVICE, THING_TYPE_CLOCK_APP,
+            THING_TYPE_COUNTDOWN_APP, THING_TYPE_RADIO_APP, THING_TYPE_STOPWATCH_APP, THING_TYPE_WEATHER_APP);
+
+    private static final int EVENT_STREAM_CONNECT_TIMEOUT = 10;
+    private static final int EVENT_STREAM_READ_TIMEOUT = 10;
 
     private final Logger logger = LoggerFactory.getLogger(LaMetricTimeHandlerFactory.class);
 
     private final Map<ThingUID, ServiceRegistration<?>> discoveryServiceReg = new HashMap<>();
 
-    private StateDescriptionOptionsProvider stateDescriptionProvider;
+    private final ClientBuilder clientBuilder;
+
+    private final StateDescriptionOptionsProvider stateDescriptionProvider;
+
+    @Activate
+    public LaMetricTimeHandlerFactory(@Reference ClientBuilder clientBuilder,
+            @Reference StateDescriptionOptionsProvider stateDescriptionProvider) {
+        this.clientBuilder = clientBuilder //
+                .connectTimeout(EVENT_STREAM_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(EVENT_STREAM_READ_TIMEOUT, TimeUnit.SECONDS);
+        this.stateDescriptionProvider = stateDescriptionProvider;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -68,13 +85,14 @@ public class LaMetricTimeHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_DEVICE.equals(thingTypeUID)) {
             logger.debug("Creating handler for LaMetric Time device {}", thing);
 
-            LaMetricTimeHandler deviceHandler = new LaMetricTimeHandler((Bridge) thing, stateDescriptionProvider);
+            LaMetricTimeHandler deviceHandler = new LaMetricTimeHandler((Bridge) thing, stateDescriptionProvider,
+                    clientBuilder);
             registerAppDiscoveryService(deviceHandler);
 
             return deviceHandler;
@@ -115,8 +133,8 @@ public class LaMetricTimeHandlerFactory extends BaseThingHandlerFactory {
     private synchronized void registerAppDiscoveryService(final LaMetricTimeHandler deviceHandler) {
         logger.debug("Registering app discovery service");
         LaMetricTimeAppDiscoveryService discoveryService = new LaMetricTimeAppDiscoveryService(deviceHandler);
-        discoveryServiceReg.put(deviceHandler.getThing().getUID(), bundleContext
-                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
+        discoveryServiceReg.put(deviceHandler.getThing().getUID(),
+                bundleContext.registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<>()));
     }
 
     /**
@@ -131,14 +149,5 @@ public class LaMetricTimeHandlerFactory extends BaseThingHandlerFactory {
             logger.debug("Unregistering app discovery service");
             serviceReg.unregister();
         }
-    }
-
-    @Reference
-    protected void setDynamicStateDescriptionProvider(StateDescriptionOptionsProvider provider) {
-        this.stateDescriptionProvider = provider;
-    }
-
-    protected void unsetDynamicStateDescriptionProvider(StateDescriptionOptionsProvider provider) {
-        this.stateDescriptionProvider = null;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,15 +21,15 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.satel.internal.config.IntRSConfig;
 import org.openhab.binding.satel.internal.protocol.IntRSModule;
 import org.openhab.binding.satel.internal.protocol.SatelModule;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,9 +57,11 @@ public class IntRSBridgeHandler extends SatelBridgeHandler {
     public void initialize() {
         logger.debug("Initializing handler");
 
-        IntRSConfig config = getConfigAs(IntRSConfig.class);
-        if (StringUtils.isNotBlank(config.getPort())) {
-            SatelModule satelModule = new IntRSModule(config.getPort(), serialPortManager, config.getTimeout());
+        final IntRSConfig config = getConfigAs(IntRSConfig.class);
+        final String port = config.getPort();
+        if (port != null && StringUtils.isNotBlank(port)) {
+            SatelModule satelModule = new IntRSModule(port, serialPortManager, config.getTimeout(),
+                    config.hasExtCommandsSupport());
             super.initialize(satelModule);
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
@@ -83,5 +85,4 @@ public class IntRSBridgeHandler extends SatelBridgeHandler {
 
         return configStatusMessages;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.enturno.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link EnturNoBindingConstants} class defines common constants, which are
@@ -52,5 +52,4 @@ public class EnturNoBindingConstants {
     public static final String ESTIMATED_FLAG_04 = "estimatedFlag04";
     public static final String ESTIMATED_FLAG_05 = "estimatedFlag05";
     public static final String CHANNEL_FRONT_DISPLAY = "frontDisplayText";
-
 }

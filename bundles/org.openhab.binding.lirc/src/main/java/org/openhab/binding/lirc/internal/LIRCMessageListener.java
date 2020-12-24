@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.lirc.internal;
 
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.lirc.internal.messages.LIRCButtonEvent;
 import org.openhab.binding.lirc.internal.messages.LIRCResponse;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Interface for listeners to receive messages from LIRC server

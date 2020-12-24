@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,18 +21,18 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ChannelGroupUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinitionBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.util.UIDUtils;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.binding.mqtt.generic.mapping.AbstractMqttAttributeClass;
 import org.openhab.binding.mqtt.generic.tools.ChildMap;
 import org.openhab.binding.mqtt.homie.generic.internal.MqttBindingConstants;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.ChannelGroupUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.type.ChannelDefinition;
+import org.openhab.core.thing.type.ChannelDefinitionBuilder;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelGroupTypeBuilder;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
+import org.openhab.core.util.UIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * Homie 3.x Node.
  *
  * A Homie Node contains Homie Properties ({@link Property}) but can also have attributes ({@link NodeAttributes}).
- * It corresponds to an ESH ChannelGroup.
+ * It corresponds to a ChannelGroup.
  *
  * @author David Graeff - Initial contribution
  */
@@ -53,7 +53,6 @@ public class Node implements AbstractMqttAttributeClass.AttributeChanged {
     public ChildMap<Property> properties;
     // Runtime
     public final DeviceCallback callback;
-    // ESH
     protected final ChannelGroupUID channelGroupUID;
     public final ChannelGroupTypeUID channelGroupTypeUID;
     private final String topic;
@@ -110,8 +109,8 @@ public class Node implements AbstractMqttAttributeClass.AttributeChanged {
      * @return Returns a future that completes as soon as all unsubscriptions have been performed.
      */
     public CompletableFuture<@Nullable Void> stop() {
-        return attributes.unsubscribe().thenCompose(
-                b -> CompletableFuture.allOf(properties.stream().map(p -> p.stop()).toArray(CompletableFuture[]::new)));
+        return attributes.unsubscribe().thenCompose(b -> CompletableFuture
+                .allOf(properties.stream().map(Property::stop).toArray(CompletableFuture[]::new)));
     }
 
     /**
@@ -184,7 +183,6 @@ public class Node implements AbstractMqttAttributeClass.AttributeChanged {
     @Override
     public void attributeChanged(String name, Object value, MqttBrokerConnection connection,
             ScheduledExecutorService scheduler, boolean allMandatoryFieldsReceived) {
-
         if (!initialized || !allMandatoryFieldsReceived) {
             return;
         }
@@ -209,8 +207,8 @@ public class Node implements AbstractMqttAttributeClass.AttributeChanged {
      *
      * @return Returns a list of relative topics
      */
-    public ArrayList<String> getRetainedTopics() {
-        ArrayList<String> topics = new ArrayList<String>();
+    public List<String> getRetainedTopics() {
+        List<String> topics = new ArrayList<>();
 
         topics.addAll(Stream.of(this.attributes.getClass().getDeclaredFields()).map(f -> {
             return String.format("%s/$%s", this.nodeID, f.getName());

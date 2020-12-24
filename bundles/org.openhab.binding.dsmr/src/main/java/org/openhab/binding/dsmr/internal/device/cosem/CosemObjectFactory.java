@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,17 +35,22 @@ public class CosemObjectFactory {
     /**
      * Lookup cache for fixed OBIS Identifiers
      */
-    private final Map<OBISIdentifier, CosemObjectType> obisLookupTableFixed;
+    private final Map<OBISIdentifier, CosemObjectType> obisLookupTableFixed = new HashMap<>();
+
+    /**
+     * Lookup cache for fixed OBIS Identifiers that has the same id for different data types
+     */
+    private final Map<OBISIdentifier, List<CosemObjectType>> obisLookupTableMultipleFixed = new HashMap<>();
 
     /**
      * Lookup cache for dynamic OBIS Identifiers
      */
-    private final HashMap<OBISIdentifier, CosemObjectType> obisLookupTableDynamic;
+    private final Map<OBISIdentifier, CosemObjectType> obisLookupTableDynamic = new HashMap<>();
 
     /**
      * Lookup cache for wild card Cosem Object types
      */
-    private final List<CosemObjectType> obisWildcardCosemTypeList;
+    private final List<CosemObjectType> obisWildcardCosemTypeList = new ArrayList<>();
 
     /**
      * Creates a new CosemObjectFactory
@@ -66,13 +71,11 @@ public class CosemObjectFactory {
          * To facilitate autodiscovery the list has all supported CosemObjectTypes. To improve performance once the
          * correct OBISIdentifier is discovered for a certain OBISMsgType this is added to the obisLookupTableDynamic.
          */
-        obisLookupTableFixed = new HashMap<>();
-        obisLookupTableDynamic = new HashMap<>();
-        obisWildcardCosemTypeList = new ArrayList<>();
-
         for (CosemObjectType msgType : CosemObjectType.values()) {
             if (msgType.obisId.reducedOBISIdentifierIsWildCard()) {
                 obisWildcardCosemTypeList.add(msgType);
+            } else if (msgType.obisId.isConflict()) {
+                obisLookupTableMultipleFixed.computeIfAbsent(msgType.obisId, r -> new ArrayList<>()).add(msgType);
             } else {
                 obisLookupTableFixed.put(msgType.obisId, msgType);
             }
@@ -90,44 +93,62 @@ public class CosemObjectFactory {
     public @Nullable CosemObject getCosemObject(String obisIdString, String cosemStringValues) {
         OBISIdentifier obisId;
         OBISIdentifier reducedObisId;
+        OBISIdentifier reducedObisIdGroupE;
 
         try {
             obisId = new OBISIdentifier(obisIdString);
             reducedObisId = obisId.getReducedOBISIdentifier();
-        } catch (ParseException pe) {
+            reducedObisIdGroupE = obisId.getReducedOBISIdentifierGroupE();
+        } catch (final ParseException pe) {
             logger.debug("Received invalid OBIS identifier: {}", obisIdString);
             return null;
         }
 
         logger.trace("Received obisIdString {}, obisId: {}, values: {}", obisIdString, obisId, cosemStringValues);
 
-        CosemObject cosemObject = null;
-
-        if (obisLookupTableFixed.containsKey(reducedObisId)) {
-            cosemObject = getCosemObjectInternal(obisLookupTableFixed.get(reducedObisId), obisId, cosemStringValues);
+        CosemObjectType objectType = obisLookupTableFixed.get(reducedObisId);
+        if (objectType != null) {
             logger.trace("Found obisId {} in the fixed lookup table", reducedObisId);
-        } else if (obisLookupTableDynamic.containsKey(reducedObisId)) {
-            logger.trace("Found obisId {} in the dynamic lookup table", reducedObisId);
-            cosemObject = getCosemObjectInternal(obisLookupTableDynamic.get(reducedObisId), obisId, cosemStringValues);
-        } else {
-            for (CosemObjectType obisMsgType : obisWildcardCosemTypeList) {
-                if (obisMsgType.obisId.equalsWildCard(reducedObisId)) {
-                    cosemObject = getCosemObjectInternal(obisMsgType, obisId, cosemStringValues);
-                    if (cosemObject != null) {
-                        logger.trace("Searched reducedObisId {} in the wild card type list, result: {}", reducedObisId,
-                                cosemObject);
-                        obisLookupTableDynamic.put(reducedObisId, obisMsgType);
-                        break;
-                    }
+            return getCosemObjectInternal(objectType, obisId, cosemStringValues);
+        }
+
+        List<CosemObjectType> objectTypeList = obisLookupTableMultipleFixed.get(reducedObisId);
+        if (objectTypeList != null) {
+            for (CosemObjectType cosemObjectType : objectTypeList) {
+                CosemObject cosemObject = getCosemObjectInternal(cosemObjectType, obisId, cosemStringValues);
+                if (cosemObject != null) {
+                    logger.trace("Found obisId {} in the fixed lookup table", reducedObisId);
+                    return cosemObject;
                 }
             }
         }
 
-        if (cosemObject == null) {
-            logger.debug("Received unknown Cosem Object(OBIS id: {})", obisId);
+        objectType = obisLookupTableDynamic.get(reducedObisId);
+        if (objectType != null) {
+            logger.trace("Found obisId {} in the dynamic lookup table", reducedObisId);
+            return getCosemObjectInternal(objectType, obisId, cosemStringValues);
         }
 
-        return cosemObject;
+        objectType = obisLookupTableFixed.get(reducedObisIdGroupE);
+        if (objectType != null) {
+            return getCosemObjectInternal(objectType, obisId, cosemStringValues);
+        }
+
+        for (CosemObjectType obisMsgType : obisWildcardCosemTypeList) {
+            if (obisMsgType.obisId.equalsWildCard(reducedObisId)) {
+                CosemObject cosemObject = getCosemObjectInternal(obisMsgType, obisId, cosemStringValues);
+                if (cosemObject != null) {
+                    logger.trace("Searched reducedObisId {} in the wild card type list, result: {}", reducedObisId,
+                            cosemObject);
+                    obisLookupTableDynamic.put(reducedObisId, obisMsgType);
+                    return cosemObject;
+                }
+            }
+        }
+
+        logger.debug("Received unknown Cosem Object(OBIS id: {})", obisId);
+
+        return null;
     }
 
     /**

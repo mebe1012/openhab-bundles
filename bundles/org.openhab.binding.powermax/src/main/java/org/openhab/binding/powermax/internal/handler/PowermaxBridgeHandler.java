@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.binding.powermax.internal.handler;
 
 import static org.openhab.binding.powermax.internal.PowermaxBindingConstants.*;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Map;
@@ -21,20 +23,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.powermax.internal.config.PowermaxIpConfiguration;
 import org.openhab.binding.powermax.internal.config.PowermaxSerialConfiguration;
+import org.openhab.binding.powermax.internal.discovery.PowermaxDiscoveryService;
 import org.openhab.binding.powermax.internal.message.PowermaxCommManager;
 import org.openhab.binding.powermax.internal.state.PowermaxArmMode;
 import org.openhab.binding.powermax.internal.state.PowermaxPanelSettings;
@@ -43,6 +34,18 @@ import org.openhab.binding.powermax.internal.state.PowermaxPanelType;
 import org.openhab.binding.powermax.internal.state.PowermaxState;
 import org.openhab.binding.powermax.internal.state.PowermaxStateEvent;
 import org.openhab.binding.powermax.internal.state.PowermaxStateEventListener;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +99,11 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
         this.serialPortManager = serialPortManager;
     }
 
+    @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return Collections.singleton(PowermaxDiscoveryService.class);
+    }
+
     public PowermaxState getCurrentState() {
         return currentState;
     }
@@ -110,11 +118,13 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
 
         commManager = null;
 
+        String threadName = "OH-binding-" + getThing().getUID().getAsString();
+
         String errorMsg = null;
         if (getThing().getThingTypeUID().equals(BRIDGE_TYPE_SERIAL)) {
-            errorMsg = initializeBridgeSerial(getConfigAs(PowermaxSerialConfiguration.class));
+            errorMsg = initializeBridgeSerial(getConfigAs(PowermaxSerialConfiguration.class), threadName);
         } else if (getThing().getThingTypeUID().equals(BRIDGE_TYPE_IP)) {
-            errorMsg = initializeBridgeIp(getConfigAs(PowermaxIpConfiguration.class));
+            errorMsg = initializeBridgeIp(getConfigAs(PowermaxIpConfiguration.class), threadName);
         } else {
             errorMsg = "Unexpected thing type " + getThing().getThingTypeUID();
         }
@@ -142,9 +152,10 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
         }
     }
 
-    private String initializeBridgeSerial(PowermaxSerialConfiguration config) {
+    private String initializeBridgeSerial(PowermaxSerialConfiguration config, String threadName) {
         String errorMsg = null;
-        if (StringUtils.isNotBlank(config.serialPort) && !config.serialPort.startsWith("rfc2217")) {
+        if (config.serialPort != null && !config.serialPort.trim().isEmpty()
+                && !config.serialPort.trim().startsWith("rfc2217")) {
             motionOffDelay = getMotionOffDelaySetting(config.motionOffDelay, DEFAULT_MOTION_OFF_DELAY);
             boolean allowArming = getBooleanSetting(config.allowArming, false);
             boolean allowDisarming = getBooleanSetting(config.allowDisarming, false);
@@ -162,9 +173,9 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
             PowermaxArmMode.ARMED_NIGHT_INSTANT.setAllowedCommand(allowArming);
 
             commManager = new PowermaxCommManager(config.serialPort, panelType, forceStandardMode, autoSyncTime,
-                    serialPortManager);
+                    serialPortManager, threadName);
         } else {
-            if (StringUtils.isNotBlank(config.serialPort) && config.serialPort.startsWith("rfc2217")) {
+            if (config.serialPort != null && config.serialPort.trim().startsWith("rfc2217")) {
                 errorMsg = "Please use the IP Connection thing type for a serial over IP connection.";
             } else {
                 errorMsg = "serialPort setting must be defined in thing configuration";
@@ -173,9 +184,9 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
         return errorMsg;
     }
 
-    private String initializeBridgeIp(PowermaxIpConfiguration config) {
+    private String initializeBridgeIp(PowermaxIpConfiguration config, String threadName) {
         String errorMsg = null;
-        if (StringUtils.isNotBlank(config.ip) && config.tcpPort != null) {
+        if (config.ip != null && !config.ip.trim().isEmpty() && config.tcpPort != null) {
             motionOffDelay = getMotionOffDelaySetting(config.motionOffDelay, DEFAULT_MOTION_OFF_DELAY);
             boolean allowArming = getBooleanSetting(config.allowArming, false);
             boolean allowDisarming = getBooleanSetting(config.allowDisarming, false);
@@ -192,8 +203,8 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
             PowermaxArmMode.ARMED_NIGHT.setAllowedCommand(allowArming);
             PowermaxArmMode.ARMED_NIGHT_INSTANT.setAllowedCommand(allowArming);
 
-            commManager = new PowermaxCommManager(config.ip, config.tcpPort, panelType, forceStandardMode,
-                    autoSyncTime);
+            commManager = new PowermaxCommManager(config.ip, config.tcpPort, panelType, forceStandardMode, autoSyncTime,
+                    threadName);
         } else {
             errorMsg = "ip and port settings must be defined in thing configuration";
         }
@@ -547,20 +558,10 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
                 PowermaxThingHandler handler = (PowermaxThingHandler) thing.getHandler();
                 if (handler != null) {
                     if (thing.getThingTypeUID().equals(THING_TYPE_ZONE)) {
-                        if ((channel == null) || channel.equals(TRIPPED)) {
-                            handler.updateChannelFromAlarmState(TRIPPED, state);
-                        }
-                        if ((channel == null) || channel.equals(LAST_TRIP)) {
-                            handler.updateChannelFromAlarmState(LAST_TRIP, state);
-                        }
-                        if ((channel == null) || channel.equals(BYPASSED)) {
-                            handler.updateChannelFromAlarmState(BYPASSED, state);
-                        }
-                        if ((channel == null) || channel.equals(ARMED)) {
-                            handler.updateChannelFromAlarmState(ARMED, state);
-                        }
-                        if ((channel == null) || channel.equals(LOW_BATTERY)) {
-                            handler.updateChannelFromAlarmState(LOW_BATTERY, state);
+                        for (String channelId : List.of(TRIPPED, LAST_TRIP, BYPASSED, ARMED, LOCKED, LOW_BATTERY)) {
+                            if ((channel == null) || channel.equals(channelId)) {
+                                handler.updateChannelFromAlarmState(channelId, state);
+                            }
                         }
                     } else if (thing.getThingTypeUID().equals(THING_TYPE_X10)) {
                         if ((channel == null) || channel.equals(X10_STATUS)) {
@@ -577,42 +578,25 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
      */
     private void updatePropertiesFromPanelSettings() {
         String value;
-        boolean update = false;
-
         Map<String, String> properties = editProperties();
         PowermaxPanelSettings panelSettings = getPanelSettings();
-
         value = (panelSettings.getPanelType() != null) ? panelSettings.getPanelType().getLabel() : null;
-        if (StringUtils.isNotEmpty(value) && ((properties.get(Thing.PROPERTY_MODEL_ID) == null)
-                || !properties.get(Thing.PROPERTY_MODEL_ID).equals(value))) {
-            update = true;
+        if (value != null && !value.isEmpty()) {
             properties.put(Thing.PROPERTY_MODEL_ID, value);
         }
-
         value = panelSettings.getPanelSerial();
-        if (StringUtils.isNotEmpty(value) && ((properties.get(Thing.PROPERTY_SERIAL_NUMBER) == null)
-                || !properties.get(Thing.PROPERTY_SERIAL_NUMBER).equals(value))) {
-            update = true;
+        if (value != null && !value.isEmpty()) {
             properties.put(Thing.PROPERTY_SERIAL_NUMBER, value);
         }
-
         value = panelSettings.getPanelEprom();
-        if (StringUtils.isNotEmpty(value) && ((properties.get(Thing.PROPERTY_HARDWARE_VERSION) == null)
-                || !properties.get(Thing.PROPERTY_HARDWARE_VERSION).equals(value))) {
-            update = true;
+        if (value != null && !value.isEmpty()) {
             properties.put(Thing.PROPERTY_HARDWARE_VERSION, value);
         }
-
         value = panelSettings.getPanelSoftware();
-        if (StringUtils.isNotEmpty(value) && ((properties.get(Thing.PROPERTY_FIRMWARE_VERSION) == null)
-                || !properties.get(Thing.PROPERTY_FIRMWARE_VERSION).equals(value))) {
-            update = true;
+        if (value != null && !value.isEmpty()) {
             properties.put(Thing.PROPERTY_FIRMWARE_VERSION, value);
         }
-
-        if (update) {
-            updateProperties(properties);
-        }
+        updateProperties(properties);
     }
 
     public boolean registerPanelSettingsListener(PowermaxPanelSettingsListener listener) {
@@ -649,5 +633,4 @@ public class PowermaxBridgeHandler extends BaseBridgeHandler implements Powermax
         }
         return result;
     }
-
 }

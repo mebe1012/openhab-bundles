@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.denonmarantz.internal;
 
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.denonmarantz.internal.handler.DenonMarantzHandler;
+import org.openhab.core.types.State;
 
 /**
  * Interface to notify the {@link DenonMarantzHandler} about state changes.
@@ -26,7 +26,7 @@ public interface DenonMarantzStateChangedListener {
      * Update was received.
      *
      * @param channelID the channel for which its state changed
-     * @param state     the new state of the channel
+     * @param state the new state of the channel
      */
     void stateChanged(String channelID, State state);
 

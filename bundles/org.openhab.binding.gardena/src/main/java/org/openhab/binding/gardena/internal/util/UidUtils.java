@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,26 +17,28 @@ import static org.openhab.binding.gardena.internal.GardenaBindingConstants.BINDI
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.gardena.internal.handler.GardenaDeviceConfig;
-import org.openhab.binding.gardena.internal.model.Device;
+import org.openhab.binding.gardena.internal.model.dto.Device;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Utility class for converting between a Thing and a Gardena device.
  *
  * @author Gerhard Riegler - Initial contribution
  */
+@NonNullByDefault
 public class UidUtils {
 
     /**
      * Generates the ThingUID for the given device in the given account.
      */
     public static ThingUID generateThingUID(Device device, Bridge account) {
-        ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID, device.getCategory());
-        return new ThingUID(thingTypeUID, account.getUID(), device.getId());
+        ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID, device.deviceType);
+        return new ThingUID(thingTypeUID, account.getUID(), device.id);
     }
 
     /**
@@ -49,7 +51,7 @@ public class UidUtils {
             if (deviceId == null) {
                 deviceId = thing.getUID().getId();
             }
-            if (deviceId.equals(device.getId())) {
+            if (deviceId.equals(device.id)) {
                 thingUIDs.add(thing.getUID());
             }
         }
@@ -67,5 +69,4 @@ public class UidUtils {
 
         return thing.getUID().getId();
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,11 @@
 package org.openhab.binding.max.internal.command;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.net.util.Base64;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.max.internal.Utils;
 
 /**
@@ -24,6 +25,7 @@ import org.openhab.binding.max.internal.Utils;
  *
  * @author Marcel Verpaalen - Initial Contribution
  */
+@NonNullByDefault
 public class TCommand extends CubeCommand {
 
     private static final int FORCE_UPDATE = 1;
@@ -51,15 +53,13 @@ public class TCommand extends CubeCommand {
         for (String rfAddress : rfAddresses) {
             commandArray = ArrayUtils.addAll(Utils.hexStringToByteArray(rfAddress), commandArray);
         }
-        String encodedString = Base64.encodeBase64StringUnChunked(commandArray);
+        String encodedString = Base64.getEncoder().encodeToString(commandArray);
 
-        return "t:" + String.format("%02d", rfAddresses.size()) + "," + updateForced + "," + encodedString + '\r'
-                + '\n';
+        return "t:" + String.format("%02d", rfAddresses.size()) + "," + updateForced + "," + encodedString + "\r\n";
     }
 
     @Override
     public String getReturnStrings() {
         return "A:";
     }
-
 }

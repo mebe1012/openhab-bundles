@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,25 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.digitalstrom.internal.DigitalSTROMBindingConstants;
 import org.openhab.binding.digitalstrom.internal.lib.climate.TemperatureControlSensorTransmitter;
 import org.openhab.binding.digitalstrom.internal.lib.climate.constants.ControlModes;
@@ -47,9 +28,29 @@ import org.openhab.binding.digitalstrom.internal.lib.climate.constants.ControlSt
 import org.openhab.binding.digitalstrom.internal.lib.climate.jsonresponsecontainer.impl.TemperatureControlStatus;
 import org.openhab.binding.digitalstrom.internal.lib.listener.TemperatureControlStatusListener;
 import org.openhab.binding.digitalstrom.internal.lib.manager.StructureManager;
+import org.openhab.binding.digitalstrom.internal.lib.manager.impl.TemperatureControlManager;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.constants.FunctionalColorGroupEnum;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.constants.OutputModeEnum;
 import org.openhab.binding.digitalstrom.internal.providers.DsChannelTypeProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,9 +186,6 @@ public class ZoneTemperatureControlHandler extends BaseThingHandler implements T
         if (bridgeStatusInfo.getStatus().equals(ThingStatus.OFFLINE)) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
         }
-        if (bridgeStatusInfo.getStatus().equals(ThingStatus.REMOVED)) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Bridge has been removed.");
-        }
         logger.debug("Set status to {}", getThing().getStatusInfo());
     }
 
@@ -230,7 +228,6 @@ public class ZoneTemperatureControlHandler extends BaseThingHandler implements T
         } else {
             logger.debug("Command sent to an unknown channel id: {}", channelUID);
         }
-
     }
 
     private boolean isTemperature() {
@@ -312,7 +309,7 @@ public class ZoneTemperatureControlHandler extends BaseThingHandler implements T
     }
 
     private synchronized void loadChannel() {
-        List<Channel> newChannelList = new ArrayList<Channel>(1);
+        List<Channel> newChannelList = new ArrayList<>(1);
         if (currentChannelID != null) {
             newChannelList.add(ChannelBuilder
                     .create(new ChannelUID(this.getThing().getUID(), currentChannelID),
@@ -355,5 +352,4 @@ public class ZoneTemperatureControlHandler extends BaseThingHandler implements T
     public Integer getTemperationControlStatusListenrID() {
         return zoneID;
     }
-
 }

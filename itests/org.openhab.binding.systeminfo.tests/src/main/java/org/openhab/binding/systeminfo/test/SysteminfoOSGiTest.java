@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,8 @@ package org.openhab.binding.systeminfo.test;
 import static java.lang.Thread.sleep;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -23,50 +24,50 @@ import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.config.discovery.inbox.InboxPredicates;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingProvider;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ManagedItemChannelLinkProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.systeminfo.internal.SysteminfoBindingConstants;
 import org.openhab.binding.systeminfo.internal.SysteminfoHandlerFactory;
 import org.openhab.binding.systeminfo.internal.discovery.SysteminfoDiscoveryService;
 import org.openhab.binding.systeminfo.internal.handler.SysteminfoHandler;
 import org.openhab.binding.systeminfo.internal.model.DeviceNotFoundException;
 import org.openhab.binding.systeminfo.internal.model.SysteminfoInterface;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.config.discovery.inbox.InboxPredicates;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingProvider;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * OSGi tests for the {@link SysteminfoHandler}
@@ -105,9 +106,8 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
     private ItemRegistry itemRegistry;
     private SysteminfoHandlerFactory systeminfoHandlerFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-
         VolatileStorageService volatileStorageService = new VolatileStorageService();
         registerService(volatileStorageService);
 
@@ -139,7 +139,7 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
         assertThat(itemRegistry, is(notNullValue()));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (systemInfoThing != null) {
             // Remove the systeminfo thing. The handler will be also disposed automatically
@@ -265,7 +265,6 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
             State itemState = item.getState();
             assertThat(itemState, is(equalTo(expectedState)));
         }, waitTime, DFL_SLEEP_TIME);
-
     }
 
     private void intializeItem(ChannelUID channelUID, String itemName, String acceptedItemType) {
@@ -660,7 +659,7 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
                 mockedDriveSerialNumber);
     }
 
-    @Ignore
+    @Disabled
     // There is a bug opened for this issue - https://github.com/dblock/oshi/issues/185
     @Test
     public void assertChannelSensorsCpuTempIsUpdated() {
@@ -929,10 +928,10 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> {
             List<DiscoveryResult> results = inbox.stream().filter(InboxPredicates.forThingUID(computerUID))
                     .collect(toList());
-            assertFalse("No Thing with UID " + computerUID.getAsString() + " in inbox", results.isEmpty());
+            assertFalse(results.isEmpty(), "No Thing with UID " + computerUID.getAsString() + " in inbox");
         });
 
-        inbox.approve(computerUID, SysteminfoDiscoveryService.DEFAULT_THING_LABEL);
+        inbox.approve(computerUID, SysteminfoDiscoveryService.DEFAULT_THING_LABEL, null);
 
         waitForAssert(() -> {
             systemInfoThing = thingRegistry.get(computerUID);
@@ -942,7 +941,6 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat("Thing is not initialized.", systemInfoThing.getStatus(), is(equalTo(ThingStatus.ONLINE)));
         });
-
     }
 
     @Test
@@ -1056,5 +1054,4 @@ public class SysteminfoOSGiTest extends JavaOSGiTest {
             assertThat(systemInfoHandler.getLowPriorityChannels().contains(channel.getUID()), is(true));
         });
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * The {@link ValueSet} holds a set of values and fade times
@@ -31,7 +31,7 @@ public class ValueSet {
     private int fadeTime;
     private int holdTime;
 
-    private final List<Integer> values = new ArrayList<Integer>();
+    private final List<Integer> values = new ArrayList<>();
 
     /**
      * constructor with fade times only

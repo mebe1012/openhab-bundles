@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,26 +24,28 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.allplay.internal.AllPlayBindingConstants;
 import org.openhab.binding.allplay.internal.AllPlayBindingProperties;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +76,8 @@ public class AllPlayHandler extends BaseThingHandler
         implements SpeakerChangedListener, SpeakerAnnouncedListener, SpeakerConnectionListener {
 
     private final Logger logger = LoggerFactory.getLogger(AllPlayHandler.class);
+
+    private final ThingRegistry localThingRegistry;
     private final AllPlay allPlay;
     private final AllPlayBindingProperties bindingProperties;
     private Speaker speaker;
@@ -83,8 +87,10 @@ public class AllPlayHandler extends BaseThingHandler
     private ScheduledFuture<?> reconnectionJob;
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(ALLPLAY_THREADPOOL_NAME);
 
-    public AllPlayHandler(Thing thing, AllPlay allPlay, AllPlayBindingProperties properties) {
+    public AllPlayHandler(ThingRegistry thingRegistry, Thing thing, AllPlay allPlay,
+            AllPlayBindingProperties properties) {
         super(thing);
+        this.localThingRegistry = thingRegistry;
         this.allPlay = allPlay;
         this.bindingProperties = properties;
     }
@@ -393,7 +399,6 @@ public class AllPlayHandler extends BaseThingHandler
     public void onLoopModeChanged(LoopMode loopMode) {
         logger.debug("{}: LoopMode changed to {}", speaker.getName(), loopMode);
         updateState(LOOP_MODE, new StringType(loopMode.toString()));
-
     }
 
     @Override
@@ -491,7 +496,10 @@ public class AllPlayHandler extends BaseThingHandler
             logger.debug("{}: Cover art URL changed to {}", speaker.getName(), coverArtUrl);
             updateState(COVER_ART_URL, new StringType(coverArtUrl));
             if (!coverArtUrl.isEmpty()) {
-                updateState(COVER_ART, new RawType(getRawDataFromUrl(coverArtUrl)));
+                byte[] bytes = getRawDataFromUrl(coverArtUrl);
+                String contentType = HttpUtil.guessContentTypeFromData(bytes);
+                updateState(COVER_ART, new RawType(bytes,
+                        contentType == null || contentType.isEmpty() ? RawType.DEFAULT_MIME_TYPE : contentType));
             } else {
                 updateState(COVER_ART, UnDefType.NULL);
             }
@@ -599,11 +607,9 @@ public class AllPlayHandler extends BaseThingHandler
     }
 
     private String getHandlerIdByLabel(String thingLabel) throws IllegalStateException {
-        if (thingRegistry != null) {
-            for (Thing thing : thingRegistry.getAll()) {
-                if (thingLabel.equals(thing.getLabel())) {
-                    return thing.getUID().getId();
-                }
+        for (Thing thing : localThingRegistry.getAll()) {
+            if (thingLabel.equals(thing.getLabel())) {
+                return thing.getUID().getId();
             }
         }
         throw new IllegalStateException("Could not find thing with label " + thingLabel);

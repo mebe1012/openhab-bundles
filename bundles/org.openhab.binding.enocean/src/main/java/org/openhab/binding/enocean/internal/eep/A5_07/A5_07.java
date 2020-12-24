@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,13 +16,13 @@ import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.*;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  *
@@ -41,19 +41,18 @@ public abstract class A5_07 extends _4BSMessage {
     protected abstract State getSupplyVoltage();
 
     protected State getSupplyVoltage(int value) {
-
         if (value > 250) {
             logger.warn("EEP A5-07 error code {}", value);
             return UnDefType.UNDEF;
         }
 
         double voltage = value / 50.0; // 0..250 = 0.0..5.0V
-        return new QuantityType<>(voltage, SmartHomeUnits.VOLT);
+        return new QuantityType<>(voltage, Units.VOLT);
     }
 
     @Override
-    protected State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc,
-            Configuration config) {
+    protected State convertToStateImpl(String channelId, String channelTypeId,
+            Function<String, State> getCurrentStateFunc, Configuration config) {
         if (!isValid()) {
             return UnDefType.UNDEF;
         }

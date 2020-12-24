@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,12 +16,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.folding.internal.FoldingBindingConstants;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Marius Bjoernstad - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.folding")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.folding")
 public class FoldingSlotDiscoveryService extends AbstractDiscoveryService {
 
     public FoldingSlotDiscoveryService() {

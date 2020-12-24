@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,8 +35,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.loxone.internal.security.LxWsSecurity;
 import org.openhab.binding.loxone.internal.types.LxConfig;
 import org.openhab.binding.loxone.internal.types.LxErrorCode;
@@ -44,6 +42,8 @@ import org.openhab.binding.loxone.internal.types.LxResponse;
 import org.openhab.binding.loxone.internal.types.LxUuid;
 import org.openhab.binding.loxone.internal.types.LxWsBinaryHeader;
 import org.openhab.binding.loxone.internal.types.LxWsSecurityType;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,7 +240,7 @@ public class LxWebSocket {
                         while (length > 0) {
                             Double value = ByteBuffer.wrap(data, offset + 16, 8).order(ByteOrder.LITTLE_ENDIAN)
                                     .getDouble();
-                            thingHandler.updateStateValue(new LxUuid(data, offset), value);
+                            thingHandler.queueStateUpdate(new LxUuid(data, offset), value);
                             offset += 24;
                             length -= 24;
                         }
@@ -251,7 +251,7 @@ public class LxWebSocket {
                             int textLen = ByteBuffer.wrap(data, offset + 32, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
                             String value = new String(data, offset + 36, textLen);
                             int size = 36 + (textLen % 4 > 0 ? textLen + 4 - (textLen % 4) : textLen);
-                            thingHandler.updateStateValue(new LxUuid(data, offset), value);
+                            thingHandler.queueStateUpdate(new LxUuid(data, offset), value);
                             offset += size;
                             length -= size;
                         }
@@ -594,6 +594,7 @@ public class LxWebSocket {
             }
             if (!awaitingCommand.equals(control)) {
                 logger.warn("[{}] Waiting for another response: {}", debugId, awaitingCommand);
+                return;
             }
             awaitedResponse.subResponse = resp.subResponse;
             if (syncRequest) {
@@ -622,7 +623,6 @@ public class LxWebSocket {
             awaitingConfiguration = true;
             if (sendCmdNoResp(CMD_GET_APP_CONFIG, false)) {
                 startResponseTimeout();
-                // startKeepAlive();
             } else {
                 disconnect(LxErrorCode.INTERNAL_ERROR, "Error sending get config command.");
             }

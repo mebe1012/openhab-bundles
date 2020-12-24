@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,20 +17,21 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.Pac
 
 import java.util.Arrays;
 
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageTooLongException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.util.HexUtils;
 
 /**
  * RFXCOM data class for undecoded messages.
  *
- * @author Ivan Martinez
- * @author James Hewitt-Thomas
+ * @author Ivan Martinez - Initial contribution
+ * @author James Hewitt-Thomas - Migrated for OH2
  */
 public class RFXComUndecodedRFMessage extends RFXComDeviceMessageImpl<RFXComUndecodedRFMessage.SubType> {
 
@@ -135,7 +136,7 @@ public class RFXComUndecodedRFMessage extends RFXComDeviceMessageImpl<RFXComUnde
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         switch (channelId) {
             case CHANNEL_RAW_MESSAGE:
                 return new StringType(HexUtils.bytesToHex(rawMessage));
@@ -154,12 +155,12 @@ public class RFXComUndecodedRFMessage extends RFXComDeviceMessageImpl<RFXComUnde
     }
 
     @Override
-    public void setDeviceId(String deviceId) throws RFXComException {
+    public void setDeviceId(String deviceId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void convertFromState(String channelId, Type type) throws RFXComUnsupportedChannelException {
+    public void convertFromState(String channelId, Type type) {
         throw new UnsupportedOperationException();
     }
 

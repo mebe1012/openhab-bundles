@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,16 +13,16 @@
 package org.openhab.binding.milight.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.milight.internal.MilightBindingConstants;
 import org.openhab.binding.milight.internal.MilightThingState;
 import org.openhab.binding.milight.internal.protocol.MilightV6SessionManager;
 import org.openhab.binding.milight.internal.protocol.ProtocolConstants;
 import org.openhab.binding.milight.internal.protocol.QueueItem;
 import org.openhab.binding.milight.internal.protocol.QueuedSend;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,5 +221,4 @@ public abstract class AbstractLedV6Handler extends AbstractLedHandler {
         sendQueue.queue(QueueItem.createRepeatable(socket, delayTimeMS, repeatTimes, address, port,
                 session.makeCommand(getAddr(), config.zone, data)));
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.minecraft.internal.handler.MinecraftPlayerHandler;
 import org.openhab.binding.minecraft.internal.handler.MinecraftServerHandler;
 import org.openhab.binding.minecraft.internal.handler.MinecraftSignHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class MinecraftHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinecraftHandlerFactory.class);
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<ThingTypeUID>();
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>();
 
     static {
         SUPPORTED_THING_TYPES_UIDS.add(MinecraftBindingConstants.THING_TYPE_SERVER);
@@ -49,7 +49,7 @@ public class MinecraftHandlerFactory extends BaseThingHandlerFactory {
         SUPPORTED_THING_TYPES_UIDS.add(MinecraftBindingConstants.THING_TYPE_SIGN);
     }
 
-    private static List<MinecraftServerHandler> minecraftServers = new ArrayList<MinecraftServerHandler>();
+    private static List<MinecraftServerHandler> minecraftServers = new ArrayList<>();
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -88,6 +88,6 @@ public class MinecraftHandlerFactory extends BaseThingHandlerFactory {
      */
     public static List<MinecraftServerHandler> getMinecraftServers() {
         LOGGER.debug("getMinecraftServers {}", minecraftServers.size());
-        return new ArrayList<MinecraftServerHandler>(minecraftServers);
+        return new ArrayList<>(minecraftServers);
     }
 }

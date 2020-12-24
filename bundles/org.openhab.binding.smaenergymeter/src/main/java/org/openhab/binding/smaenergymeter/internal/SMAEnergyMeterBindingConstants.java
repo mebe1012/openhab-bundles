@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link SMAEnergyMeterBinding} class defines common constants, which are
@@ -39,5 +39,16 @@ public class SMAEnergyMeterBindingConstants {
     public static final String CHANNEL_POWER_OUT = "powerOut";
     public static final String CHANNEL_ENERGY_IN = "energyIn";
     public static final String CHANNEL_ENERGY_OUT = "energyOut";
-
+    public static final String CHANNEL_POWER_IN_L1 = "powerInL1";
+    public static final String CHANNEL_POWER_OUT_L1 = "powerOutL1";
+    public static final String CHANNEL_ENERGY_IN_L1 = "energyInL1";
+    public static final String CHANNEL_ENERGY_OUT_L1 = "energyOutL1";
+    public static final String CHANNEL_POWER_IN_L2 = "powerInL2";
+    public static final String CHANNEL_POWER_OUT_L2 = "powerOutL2";
+    public static final String CHANNEL_ENERGY_IN_L2 = "energyInL2";
+    public static final String CHANNEL_ENERGY_OUT_L2 = "energyOutL2";
+    public static final String CHANNEL_POWER_IN_L3 = "powerInL3";
+    public static final String CHANNEL_POWER_OUT_L3 = "powerOutL3";
+    public static final String CHANNEL_ENERGY_IN_L3 = "energyInL3";
+    public static final String CHANNEL_ENERGY_OUT_L3 = "energyOutL3";
 }

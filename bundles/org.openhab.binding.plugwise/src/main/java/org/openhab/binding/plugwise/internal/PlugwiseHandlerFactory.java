@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,27 +14,21 @@ package org.openhab.binding.plugwise.internal;
 
 import static org.openhab.binding.plugwise.internal.PlugwiseBindingConstants.*;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.plugwise.internal.handler.PlugwiseRelayDeviceHandler;
 import org.openhab.binding.plugwise.internal.handler.PlugwiseScanHandler;
 import org.openhab.binding.plugwise.internal.handler.PlugwiseSenseHandler;
 import org.openhab.binding.plugwise.internal.handler.PlugwiseStickHandler;
 import org.openhab.binding.plugwise.internal.handler.PlugwiseSwitchHandler;
-import org.osgi.framework.ServiceRegistration;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -47,9 +41,12 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.plugwise")
 public class PlugwiseHandlerFactory extends BaseThingHandlerFactory {
 
-    private final Map<ThingUID, @Nullable ServiceRegistration<?>> discoveryServiceRegistrations = new HashMap<>();
+    private final SerialPortManager serialPortManager;
 
-    private @NonNullByDefault({}) SerialPortManager serialPortManager;
+    @Activate
+    public PlugwiseHandlerFactory(final @Reference SerialPortManager serialPortManager) {
+        this.serialPortManager = serialPortManager;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -61,9 +58,7 @@ public class PlugwiseHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_STICK)) {
-            PlugwiseStickHandler handler = new PlugwiseStickHandler((Bridge) thing, serialPortManager);
-            registerDiscoveryService(handler);
-            return handler;
+            return new PlugwiseStickHandler((Bridge) thing, serialPortManager);
         } else if (thingTypeUID.equals(THING_TYPE_CIRCLE) || thingTypeUID.equals(THING_TYPE_CIRCLE_PLUS)
                 || thingTypeUID.equals(THING_TYPE_STEALTH)) {
             return new PlugwiseRelayDeviceHandler(thing);
@@ -76,33 +71,5 @@ public class PlugwiseHandlerFactory extends BaseThingHandlerFactory {
         }
 
         return null;
-    }
-
-    private void registerDiscoveryService(PlugwiseStickHandler handler) {
-        PlugwiseThingDiscoveryService discoveryService = new PlugwiseThingDiscoveryService(handler);
-        discoveryService.activate();
-        this.discoveryServiceRegistrations.put(handler.getThing().getUID(),
-                bundleContext.registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<>()));
-    }
-
-    @Override
-    protected void removeHandler(ThingHandler thingHandler) {
-        ServiceRegistration<?> registration = this.discoveryServiceRegistrations.get(thingHandler.getThing().getUID());
-        if (registration != null) {
-            PlugwiseThingDiscoveryService discoveryService = (PlugwiseThingDiscoveryService) bundleContext
-                    .getService(registration.getReference());
-            discoveryService.deactivate();
-            registration.unregister();
-            discoveryServiceRegistrations.remove(thingHandler.getThing().getUID());
-        }
-    }
-
-    @Reference
-    protected void setSerialPortManager(SerialPortManager serialPortManager) {
-        this.serialPortManager = serialPortManager;
-    }
-
-    protected void unsetSerialPortManager(SerialPortManager serialPortManager) {
-        this.serialPortManager = null;
     }
 }

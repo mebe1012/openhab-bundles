@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,8 @@
 package org.openhab.binding.knx.internal.client;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 
 /**
  * Callback interface which enables the KNXClient implementations to update the thing status.
@@ -38,5 +38,4 @@ public interface StatusUpdateCallback {
      * @param status
      */
     void updateStatus(ThingStatus status, ThingStatusDetail thingStatusDetail, String message);
-
 }

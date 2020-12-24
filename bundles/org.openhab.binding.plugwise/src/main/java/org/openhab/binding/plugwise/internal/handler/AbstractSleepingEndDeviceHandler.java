@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,20 @@
  */
 package org.openhab.binding.plugwise.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.ThingStatus.*;
 import static org.openhab.binding.plugwise.internal.PlugwiseBindingConstants.CHANNEL_TRIGGERED;
+import static org.openhab.core.thing.ThingStatus.*;
 
 import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.plugwise.internal.protocol.AcknowledgementMessage;
 import org.openhab.binding.plugwise.internal.protocol.AnnounceAwakeRequestMessage;
 import org.openhab.binding.plugwise.internal.protocol.AnnounceAwakeRequestMessage.AwakeReason;
 import org.openhab.binding.plugwise.internal.protocol.BroadcastGroupSwitchResponseMessage;
 import org.openhab.binding.plugwise.internal.protocol.InformationResponseMessage;
 import org.openhab.binding.plugwise.internal.protocol.Message;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,5 +107,4 @@ public abstract class AbstractSleepingEndDeviceHandler extends AbstractPlugwiseT
             updateStatus(OFFLINE, getThingStatusDetail());
         }
     }
-
 }

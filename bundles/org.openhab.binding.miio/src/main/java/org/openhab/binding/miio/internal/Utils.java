@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,19 @@
 package org.openhab.binding.miio.internal;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
 
-import org.apache.commons.io.IOUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -29,7 +35,7 @@ import com.google.gson.JsonSyntaxException;
  * @author Marcel Verpaalen - Initial contribution
  *
  */
-
+@NonNullByDefault
 public final class Utils {
 
     /**
@@ -62,9 +68,6 @@ public final class Utils {
      * @return String equivalent to hex string
      **/
     public static String getSpacedHex(byte[] raw) {
-        if (raw == null) {
-            return "";
-        }
         final StringBuilder hex = new StringBuilder(3 * raw.length);
         for (final byte b : raw) {
             hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F))).append(" ");
@@ -74,9 +77,6 @@ public final class Utils {
     }
 
     public static String getHex(byte[] raw) {
-        if (raw == null) {
-            return "";
-        }
         final StringBuilder hex = new StringBuilder(2 * raw.length);
         for (final byte b : raw) {
             hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
@@ -84,11 +84,48 @@ public final class Utils {
         return hex.toString();
     }
 
-    public static JsonObject convertFileToJSON(URL fileName) throws JsonIOException, JsonSyntaxException, IOException {
+    public static String obfuscateToken(String tokenString) {
+        if (tokenString.length() > 8) {
+            String tokenText = tokenString.substring(0, 8)
+                    .concat((tokenString.length() < 24) ? tokenString.substring(8).replaceAll(".", "X")
+                            : tokenString.substring(8, 24).replaceAll(".", "X").concat(tokenString.substring(24)));
+            return tokenText;
+        } else {
+            return tokenString;
+        }
+    }
+
+    public static JsonObject convertFileToJSON(URL fileName) throws JsonIOException, JsonSyntaxException,
+            JsonParseException, IOException, URISyntaxException, NoSuchFileException {
         JsonObject jsonObject = new JsonObject();
         JsonParser parser = new JsonParser();
-        JsonElement jsonElement = parser.parse(IOUtils.toString(fileName));
-        jsonObject = jsonElement.getAsJsonObject();
-        return jsonObject;
+        try (InputStream inputStream = fileName.openStream();
+                InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            JsonElement jsonElement = parser.parse(reader);
+            jsonObject = jsonElement.getAsJsonObject();
+            return jsonObject;
+        }
+    }
+
+    public static String minLengthString(String string, int length) {
+        return String.format("%-" + length + "s", string);
+    }
+
+    public static String toHEX(String value) {
+        try {
+            return String.format("%08X", Long.parseUnsignedLong(value));
+        } catch (NumberFormatException e) {
+            //
+        }
+        return value;
+    }
+
+    public static String fromHEX(String value) {
+        try {
+            return String.format("%d", Long.parseUnsignedLong(value, 16));
+        } catch (NumberFormatException e) {
+            //
+        }
+        return value;
     }
 }

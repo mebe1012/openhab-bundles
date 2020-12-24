@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * ThingType enum with all supported TP-Link Smart Home devices.
@@ -41,6 +41,8 @@ public enum TPLinkSmartHomeThingType {
     LB130("lb130", DeviceType.BULB),
     LB200("lb200", DeviceType.BULB),
     LB230("lb230", DeviceType.BULB),
+    KL50("kl50", DeviceType.BULB),
+    KL60("kl60", DeviceType.BULB),
     KL110("kl110", DeviceType.BULB),
     KL120("kl120", DeviceType.BULB),
     KL130("kl130", DeviceType.BULB),
@@ -51,6 +53,7 @@ public enum TPLinkSmartHomeThingType {
     HS105("hs105", DeviceType.PLUG),
     HS110("hs110", DeviceType.PLUG),
     KP100("kp100", DeviceType.PLUG),
+    KP105("kp105", DeviceType.PLUG),
 
     // Switch Thing Type UIDs
     HS200("hs200", DeviceType.SWITCH),
@@ -60,10 +63,11 @@ public enum TPLinkSmartHomeThingType {
     HS220("hs220", DeviceType.DIMMER),
 
     // Power Strip Thing Type UIDs.
-    HS107("hs107", DeviceType.STRIP),
-    HS300("hs300", DeviceType.STRIP),
-    KP200("kp200", DeviceType.STRIP),
-    KP400("kp400", DeviceType.STRIP),
+    HS107("hs107", DeviceType.STRIP, 2),
+    HS300("hs300", DeviceType.STRIP, 6),
+    KP200("kp200", DeviceType.STRIP, 2),
+    KP303("kp303", DeviceType.STRIP, 3),
+    KP400("kp400", DeviceType.STRIP, 2),
 
     // Range Extender Thing Type UIDs
     RE270K("re270", DeviceType.RANGE_EXTENDER),
@@ -91,12 +95,18 @@ public enum TPLinkSmartHomeThingType {
     private static final List<TPLinkSmartHomeThingType> BULB_WITH_TEMPERATURE_COLOR_2 = Stream
             .of(KB130, KL130, LB130, LB230).collect(Collectors.toList());
 
-    private ThingTypeUID thingTypeUID;
-    private DeviceType type;
+    private final ThingTypeUID thingTypeUID;
+    private final DeviceType type;
+    private final int sockets;
 
     TPLinkSmartHomeThingType(final String name, final DeviceType type) {
+        this(name, type, 0);
+    }
+
+    TPLinkSmartHomeThingType(final String name, final DeviceType type, int sockets) {
         thingTypeUID = new ThingTypeUID(TPLinkSmartHomeBindingConstants.BINDING_ID, name);
         this.type = type;
+        this.sockets = sockets;
     }
 
     /**
@@ -111,6 +121,13 @@ public enum TPLinkSmartHomeThingType {
      */
     public ThingTypeUID thingTypeUID() {
         return thingTypeUID;
+    }
+
+    /**
+     * @return Returns the number of sockets. Only for Strip devices.
+     */
+    public int getSockets() {
+        return sockets;
     }
 
     /**

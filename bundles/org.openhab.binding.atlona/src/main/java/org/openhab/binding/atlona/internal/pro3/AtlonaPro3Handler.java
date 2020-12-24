@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,21 +18,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.atlona.internal.AtlonaHandlerCallback;
 import org.openhab.binding.atlona.internal.StatefulHandlerCallback;
 import org.openhab.binding.atlona.internal.handler.AtlonaHandler;
 import org.openhab.binding.atlona.internal.net.SocketChannelSession;
 import org.openhab.binding.atlona.internal.net.SocketSession;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,10 +96,10 @@ public class AtlonaPro3Handler extends AtlonaHandler<AtlonaPro3Capabilities> {
             .compile("^" + AtlonaPro3Constants.CMD_MATRIXPORTALL + "(\\d{1,2})$");
 
     /**
-     * Constructs the handler from the {@link org.eclipse.smarthome.core.thing.Thing} with the number of power ports and
+     * Constructs the handler from the {@link org.openhab.core.thing.Thing} with the number of power ports and
      * audio ports the switch supports.
      *
-     * @param thing a non-null {@link org.eclipse.smarthome.core.thing.Thing} the handler is for
+     * @param thing a non-null {@link org.openhab.core.thing.Thing} the handler is for
      * @param capabilities a non-null {@link org.openhab.binding.atlona.internal.pro3.AtlonaPro3Capabilities}
      */
     public AtlonaPro3Handler(Thing thing, AtlonaPro3Capabilities capabilities) {

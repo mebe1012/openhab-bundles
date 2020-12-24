@@ -29,7 +29,7 @@ The thing has the following properties:
 -   `os_family` - The family of the operating system
 
 If multiple storage or display devices support is needed, new thing type has to be defined.
-This is workaround until [this issue] (https://github.com/eclipse/smarthome/issues/588) is resolved and it is possible to add dynamically channels to DSL defined thing.
+This is workaround until [this issue](https://github.com/eclipse/smarthome/issues/588) is resolved and it is possible to add dynamically channels to DSL defined thing.
 
 ## Discovery
 
@@ -37,7 +37,7 @@ The discovery service implementation tries to resolve the computer name.
 If the resolving process fails, the computer name is set to "Unknown".
 In both cases it creates a Discovery Result with thing type  **computer**.
 
-When [this issue] (https://github.com/eclipse/smarthome/issues/1118) is resolved it will be possible to implement creation of dynamic channels (e.g. the binding will scan how much storage devices are present and create channel groups for them).
+When [this issue](https://github.com/eclipse/smarthome/issues/1118) is resolved it will be possible to implement creation of dynamic channels (e.g. the binding will scan how much storage devices are present and create channel groups for them).
 At the moment this is not supported.
 
 ## Binding configuration
@@ -101,7 +101,7 @@ This makes it possible to change the tracked process at runtime.
 The binding uses this index to get information about a specific device from a list of devices (e.g on a single computer several local disks could be installed with names C:\, D:\, E:\ - the first will have deviceIndex=0, the second deviceIndex=1 etc).
 If device with this index is not existing, the binding will display an error message on the console.
 
-Unfortunately this feature can't be used at the moment without manually adding these new channel groups to the thing description (located in ESH-INF/thing/computer.xml).
+Unfortunately this feature can't be used at the moment without manually adding these new channel groups to the thing description (located in OH-INF/thing/computer.xml).
 
 The table shows more detailed information about each Channel type.
 The binding introduces the following channels:
@@ -177,7 +177,7 @@ OSHI project has a good support and regularly updates the library with fixes to 
 
 In order to update the version used in the binding, follow these easy steps:
 
--   Go to the [OSHI github repo](https://github.com/oshi/oshi) and download the newest version available of the module oshi-core or download the jar from the [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Coshi-). Check if the versions of the OSHI dependencies as well (jna and jna-platform) are changed;
+-   Go to the [OSHI GitHub repo](https://github.com/oshi/oshi) and download the newest version available of the module oshi-core or download the jar from the [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Coshi-). Check if the versions of the OSHI dependencies as well (jna and jna-platform) are changed;
 -   Replace the jars in lib folder;
 -   Modify the .classpath file with the new versions of the jars;
 -   Modify the header Bundle-ClassPath in the META-INF/MANIFEST.MF.

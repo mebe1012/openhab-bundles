@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,8 @@
 package org.openhab.binding.rfxcom.internal.handler;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,15 +23,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.rfxcom.internal.DeviceMessageListener;
 import org.openhab.binding.rfxcom.internal.config.RFXComBridgeConfiguration;
 import org.openhab.binding.rfxcom.internal.connector.RFXComConnectorInterface;
@@ -37,6 +30,7 @@ import org.openhab.binding.rfxcom.internal.connector.RFXComEventListener;
 import org.openhab.binding.rfxcom.internal.connector.RFXComJD2XXConnector;
 import org.openhab.binding.rfxcom.internal.connector.RFXComSerialConnector;
 import org.openhab.binding.rfxcom.internal.connector.RFXComTcpConnector;
+import org.openhab.binding.rfxcom.internal.discovery.RFXComDeviceDiscoveryService;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage;
@@ -48,6 +42,16 @@ import org.openhab.binding.rfxcom.internal.messages.RFXComInterfaceMessage.SubTy
 import org.openhab.binding.rfxcom.internal.messages.RFXComMessage;
 import org.openhab.binding.rfxcom.internal.messages.RFXComMessageFactory;
 import org.openhab.binding.rfxcom.internal.messages.RFXComTransmitterMessage;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,6 +119,11 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
     }
 
     @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return Collections.singleton(RFXComDeviceDiscoveryService.class);
+    }
+
+    @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.debug("Bridge commands not supported.");
     }
@@ -157,7 +166,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
 
         if (connectorTask == null || connectorTask.isCancelled()) {
             connectorTask = scheduler.scheduleWithFixedDelay(() -> {
-                logger.debug("Checking RFXCOM transceiver connection, thing status = {}", thing.getStatus());
+                logger.trace("Checking RFXCOM transceiver connection, thing status = {}", thing.getStatus());
                 if (thing.getStatus() != ThingStatus.ONLINE) {
                     connect();
                 }
@@ -169,17 +178,18 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
         logger.debug("Connecting to RFXCOM transceiver");
 
         try {
+            String readerThreadName = "OH-binding-" + getThing().getUID().getAsString();
             if (configuration.serialPort != null) {
                 if (connector == null) {
-                    connector = new RFXComSerialConnector(serialPortManager);
+                    connector = new RFXComSerialConnector(serialPortManager, readerThreadName);
                 }
             } else if (configuration.bridgeId != null) {
                 if (connector == null) {
-                    connector = new RFXComJD2XXConnector();
+                    connector = new RFXComJD2XXConnector(readerThreadName);
                 }
             } else if (configuration.host != null) {
                 if (connector == null) {
-                    connector = new RFXComTcpConnector();
+                    connector = new RFXComTcpConnector(readerThreadName);
                 }
             }
 
@@ -218,7 +228,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
         }
     }
 
-    public void sendMessage(RFXComMessage msg) throws RFXComException {
+    public void sendMessage(RFXComMessage msg) {
         try {
             RFXComBaseMessage baseMsg = (RFXComBaseMessage) msg;
             transmitQueue.enqueue(baseMsg);
@@ -240,7 +250,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
                     RFXComInterfaceMessage msg = (RFXComInterfaceMessage) message;
                     if (msg.subType == SubType.RESPONSE) {
                         if (msg.command == Commands.GET_STATUS) {
-                            logger.info("RFXCOM transceiver/receiver type: {}, hw version: {}.{}, fw version: {}",
+                            logger.debug("RFXCOM transceiver/receiver type: {}, hw version: {}.{}, fw version: {}",
                                     msg.transceiverType, msg.hardwareVersion1, msg.hardwareVersion2,
                                     msg.firmwareVersion);
                             thing.setProperty(Thing.PROPERTY_HARDWARE_VERSION,
@@ -330,8 +340,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
         if (deviceStatusListener == null) {
             throw new IllegalArgumentException("It's not allowed to pass a null deviceStatusListener.");
         }
-        return deviceStatusListeners.contains(deviceStatusListener) ? false
-                : deviceStatusListeners.add(deviceStatusListener);
+        return !deviceStatusListeners.contains(deviceStatusListener) && deviceStatusListeners.add(deviceStatusListener);
     }
 
     public boolean unregisterDeviceStatusListener(DeviceMessageListener deviceStatusListener) {

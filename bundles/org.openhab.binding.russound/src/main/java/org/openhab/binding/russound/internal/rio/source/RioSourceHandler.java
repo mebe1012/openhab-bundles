@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.russound.internal.net.SocketSession;
 import org.openhab.binding.russound.internal.rio.AbstractRioHandlerCallback;
 import org.openhab.binding.russound.internal.rio.AbstractThingHandler;
@@ -34,6 +24,16 @@ import org.openhab.binding.russound.internal.rio.RioConstants;
 import org.openhab.binding.russound.internal.rio.RioNamedHandler;
 import org.openhab.binding.russound.internal.rio.StatefulHandlerCallback;
 import org.openhab.binding.russound.internal.rio.system.RioSystemHandler;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class RioSourceHandler extends AbstractThingHandler<RioSourceProtocol> im
     /**
      * The source name
      */
-    private final AtomicReference<String> sourceName = new AtomicReference<String>(null);
+    private final AtomicReference<String> sourceName = new AtomicReference<>(null);
 
     /**
      * Constructs the handler from the {@link Thing}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,16 @@
  */
 package org.openhab.binding.solaredge.internal.handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.openhab.binding.solaredge.internal.model.AggregateDataChannels;
-import org.openhab.binding.solaredge.internal.model.Channel;
-import org.openhab.binding.solaredge.internal.model.LiveDataChannels;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelGroupUID;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * generic thing handler for solaredge
@@ -37,9 +37,14 @@ public class GenericSolarEdgeHandler extends SolarEdgeBaseHandler {
 
     @Override
     public List<Channel> getChannels() {
-        List<Channel> result = new ArrayList<>();
-        Collections.addAll(result, LiveDataChannels.values());
-        Collections.addAll(result, AggregateDataChannels.values());
-        return result;
+        return getThing().getChannels();
+    }
+
+    @Override
+    public @Nullable Channel getChannel(String groupId, String channelId) {
+        ThingUID thingUID = this.getThing().getUID();
+        ChannelGroupUID channelGroupUID = new ChannelGroupUID(thingUID, groupId);
+        Channel channel = getThing().getChannel(new ChannelUID(channelGroupUID, channelId));
+        return channel;
     }
 }

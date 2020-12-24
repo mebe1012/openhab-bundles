@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,7 @@ package org.openhab.binding.ambientweather.internal.processor;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Thing;
 
 import com.google.gson.Gson;
 
@@ -37,8 +37,10 @@ public class ProcessorFactory {
     // Supported weather stations
     private @Nullable static Ws1400ipProcessor WS1400IP_PROCESSOR;
     private @Nullable static Ws2902aProcessor WS2902A_PROCESSOR;
+    private @Nullable static Ws2902bProcessor WS2902B_PROCESSOR;
     private @Nullable static Ws8482Processor WS8482_PROCESSOR;
     private @Nullable static Ws0900ipProcessor WS0900IP_PROCESSOR;
+    private @Nullable static Ws0265Processor WS0265_PROCESSOR;
 
     /**
      * Individual weather station processors use this one Gson instance,
@@ -77,6 +79,14 @@ public class ProcessorFactory {
                 }
                 return processor;
             }
+            case "ambientweather:ws2902b": {
+                Ws2902bProcessor processor = WS2902B_PROCESSOR;
+                if (processor == null) {
+                    processor = new Ws2902bProcessor();
+                    WS2902B_PROCESSOR = processor;
+                }
+                return processor;
+            }
             case "ambientweather:ws8482": {
                 Ws8482Processor processor = WS8482_PROCESSOR;
                 if (processor == null) {
@@ -90,6 +100,14 @@ public class ProcessorFactory {
                 if (processor == null) {
                     processor = new Ws0900ipProcessor();
                     WS0900IP_PROCESSOR = processor;
+                }
+                return processor;
+            }
+            case "ambientweather:ws0265": {
+                Ws0265Processor processor = WS0265_PROCESSOR;
+                if (processor == null) {
+                    processor = new Ws0265Processor();
+                    WS0265_PROCESSOR = processor;
                 }
                 return processor;
             }

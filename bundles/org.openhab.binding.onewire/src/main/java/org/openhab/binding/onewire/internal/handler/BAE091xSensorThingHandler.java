@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,22 +21,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.onewire.internal.OwDynamicStateDescriptionProvider;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.config.BAE091xHandlerConfiguration;
 import org.openhab.binding.onewire.internal.device.BAE0910;
 import org.openhab.binding.onewire.internal.device.OwChannelConfig;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class BAE091xSensorThingHandler extends OwBaseThingHandler {
         BAE091xHandlerConfiguration configuration = getConfig().as(BAE091xHandlerConfiguration.class);
 
         Set<OwChannelConfig> wantedChannel = new HashSet<>();
-        wantedChannel.addAll(SENSOR_TYPE_CHANNEL_MAP.get(sensorType));
+        wantedChannel.addAll(SENSOR_TYPE_CHANNEL_MAP.getOrDefault(sensorType, Set.of()));
 
         // Pin1:
         switch (configuration.pin1) {

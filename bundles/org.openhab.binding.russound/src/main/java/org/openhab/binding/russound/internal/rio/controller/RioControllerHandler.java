@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,15 +14,6 @@ package org.openhab.binding.russound.internal.rio.controller;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.russound.internal.net.SocketSession;
 import org.openhab.binding.russound.internal.rio.AbstractBridgeHandler;
 import org.openhab.binding.russound.internal.rio.AbstractRioHandlerCallback;
@@ -35,6 +26,15 @@ import org.openhab.binding.russound.internal.rio.models.GsonUtilities;
 import org.openhab.binding.russound.internal.rio.source.RioSourceHandler;
 import org.openhab.binding.russound.internal.rio.system.RioSystemHandler;
 import org.openhab.binding.russound.internal.rio.zone.RioZoneHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 
 import com.google.gson.Gson;
 
@@ -74,7 +74,6 @@ public class RioControllerHandler extends AbstractBridgeHandler<RioControllerPro
      */
     public RioControllerHandler(Bridge bridge) {
         super(bridge);
-
     }
 
     /**
@@ -203,7 +202,6 @@ public class RioControllerHandler extends AbstractBridgeHandler<RioControllerPro
         getProtocolHandler().postOnline();
 
         refreshNamedHandler(gson, RioZoneHandler.class, RioConstants.CHANNEL_CTLZONES);
-
     }
 
     /**

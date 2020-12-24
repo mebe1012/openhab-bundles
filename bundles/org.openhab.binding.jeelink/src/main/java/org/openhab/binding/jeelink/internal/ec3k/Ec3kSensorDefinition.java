@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.jeelink.internal.ec3k;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.jeelink.internal.JeeLinkBindingConstants;
 import org.openhab.binding.jeelink.internal.JeeLinkReadingConverter;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.SensorDefinition;
+import org.openhab.core.thing.Thing;
 
 /**
  * Sensor Defintion of a EC3000 Power Monitor.
@@ -41,7 +41,6 @@ public class Ec3kSensorDefinition extends SensorDefinition<Ec3kReading> {
 
     @Override
     public JeeLinkSensorHandler<Ec3kReading> createHandler(Thing thing) {
-        return new Ec3kSensorHandler(thing);
+        return new Ec3kSensorHandler(thing, type);
     }
-
 }

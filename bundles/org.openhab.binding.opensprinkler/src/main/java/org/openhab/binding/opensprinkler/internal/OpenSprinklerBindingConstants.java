@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.opensprinkler.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link OpenSprinklerBinding} class defines common constants, which are
@@ -36,11 +36,9 @@ public class OpenSprinklerBindingConstants {
     public static final ThingTypeUID OPENSPRINKLER_HTTP_BRIDGE = new ThingTypeUID(BINDING_ID, HTTP_BRIDGE);
     public static final ThingTypeUID OPENSPRINKLER_STATION = new ThingTypeUID(BINDING_ID, STATION_THING);
     public static final ThingTypeUID OPENSPRINKLER_DEVICE = new ThingTypeUID(BINDING_ID, DEVICE_THING);
-    public static final ThingTypeUID OPENSPRINKLER_PI_BRIDGE = new ThingTypeUID(BINDING_ID, PI_BRIDGE);
 
     public static final int DEFAULT_WAIT_BEFORE_INITIAL_REFRESH = 30;
     public static final int DEFAULT_REFRESH_RATE = 60;
-    public static final short DISCOVERY_SUBNET_MASK = 24;
     public static final int DISCOVERY_THREAD_POOL_SIZE = 15;
     public static final boolean DISCOVERY_DEFAULT_AUTO_DISCOVER = false;
     public static final int DISCOVERY_DEFAULT_TIMEOUT_RATE = 500;
@@ -48,6 +46,10 @@ public class OpenSprinklerBindingConstants {
 
     // List of all Channel ids
     public static final String SENSOR_RAIN = "rainsensor";
+    public static final String SENSOR_WATERLEVEL = "waterlevel";
+    public static final String SENSOR_CURRENT_DRAW = "currentDraw";
     public static final String STATION_STATE = "stationState";
+    public static final String STATION_QUEUED = "queued";
     public static final String REMAINING_WATER_TIME = "remainingWaterTime";
+    public static final String NEXT_DURATION = "nextDuration";
 }

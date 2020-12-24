@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,9 @@
  */
 package org.openhab.binding.loxone.internal.controls;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -24,16 +25,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.loxone.internal.types.LxCategory;
 import org.openhab.binding.loxone.internal.types.LxContainer;
 import org.openhab.binding.loxone.internal.types.LxState;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
 
 /**
  * Common test framework class for all (@link LxControl} objects

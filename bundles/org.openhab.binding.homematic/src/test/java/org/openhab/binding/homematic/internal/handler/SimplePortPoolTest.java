@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,21 +19,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.binding.homematic.internal.handler.SimplePortPool;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link SimplePortPool}.
- * 
- * @author Florian Stolte - Initial Contribution
+ * Tests for {@link org.openhab.binding.homematic.internal.handler.SimplePortPool}.
  *
+ * @author Florian Stolte - Initial Contribution
  */
 public class SimplePortPoolTest {
 
     private SimplePortPool simplePortPool;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.simplePortPool = new SimplePortPool();
     }

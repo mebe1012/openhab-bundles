@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,16 +22,16 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.openhab.binding.knx.internal.client.DeviceInspector;
-import org.openhab.binding.knx.internal.client.KNXClient;
 import org.openhab.binding.knx.internal.client.DeviceInspector.Result;
+import org.openhab.binding.knx.internal.client.KNXClient;
 import org.openhab.binding.knx.internal.config.DeviceConfig;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public abstract class AbstractKNXThingHandler extends BaseThingHandler implement
     private static final int INITIAL_PING_DELAY = 5;
     private final Logger logger = LoggerFactory.getLogger(AbstractKNXThingHandler.class);
 
-    private @Nullable IndividualAddress address;
+    protected @Nullable IndividualAddress address;
     private @Nullable Future<?> descriptionJob;
     private boolean filledDescription = false;
     private final Random random = new Random();
@@ -217,5 +217,4 @@ public abstract class AbstractKNXThingHandler extends BaseThingHandler implement
             }
         }
     }
-
 }

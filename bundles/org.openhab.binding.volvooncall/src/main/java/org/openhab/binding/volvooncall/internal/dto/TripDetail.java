@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,20 @@
  */
 package org.openhab.binding.volvooncall.internal.dto;
 
+import static org.openhab.binding.volvooncall.internal.VolvoOnCallBindingConstants.UNDEFINED;
+
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * The {@link TripDetail} is responsible for storing
@@ -31,12 +35,12 @@ import org.eclipse.smarthome.core.types.UnDefType;
  */
 @NonNullByDefault
 public class TripDetail {
-    public @Nullable Integer fuelConsumption;
-    public @Nullable Integer electricalConsumption;
-    public @Nullable Integer electricalRegeneration;
-    public int distance;
-    public int startOdometer;
-    public int endOdometer;
+    private @Nullable Integer fuelConsumption;
+    private @Nullable Integer electricalConsumption;
+    private @Nullable Integer electricalRegeneration;
+    public int distance = UNDEFINED;
+    public int startOdometer = UNDEFINED;
+    public int endOdometer = UNDEFINED;
     private @Nullable ZonedDateTime endTime;
     private @Nullable ZonedDateTime startTime;
     private @NonNullByDefault({}) PositionData startPosition;
@@ -50,9 +54,8 @@ public class TripDetail {
     private State getPositionAsState(PositionData details) {
         if (details.latitude != null && details.longitude != null) {
             return new PointType(details.latitude + "," + details.longitude);
-        } else {
-            return UnDefType.NULL;
         }
+        return UnDefType.NULL;
     }
 
     public State getStartTime() {
@@ -71,8 +74,37 @@ public class TripDetail {
         return getPositionAsState(endPosition);
     }
 
-    public long getDurationInMinutes() {
-        return Duration.between(startTime, endTime).toMinutes();
+    public Optional<Long> getDurationInMinutes() {
+        Temporal start = startTime;
+        Temporal end = endTime;
+        if (start == null || end == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(Duration.between(start, end).toMinutes());
+        }
     }
 
+    public Optional<Integer> getFuelConsumption() {
+        Integer fuelConsumption = this.fuelConsumption;
+        if (fuelConsumption != null) {
+            return Optional.of(fuelConsumption);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getElectricalConsumption() {
+        Integer electricalConsumption = this.electricalConsumption;
+        if (electricalConsumption != null) {
+            return Optional.of(electricalConsumption);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getElectricalRegeneration() {
+        Integer electricalRegeneration = this.electricalRegeneration;
+        if (electricalRegeneration != null) {
+            return Optional.of(electricalRegeneration);
+        }
+        return Optional.empty();
+    }
 }

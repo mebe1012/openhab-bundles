@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,15 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.io.transport.mqtt.MqttServiceObserver;
-import org.eclipse.smarthome.io.transport.mqtt.MqttWillAndTestament;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.io.transport.mqtt.MqttServiceObserver;
+import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
+import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 
 /**
  * This handler does not much except providing all information from a
@@ -50,6 +50,7 @@ public class SystemBrokerHandler extends AbstractBrokerHandler implements MqttSe
     protected final MqttService service;
 
     protected String brokerID = "";
+    protected boolean discoveryEnabled = true;
 
     public SystemBrokerHandler(Bridge thing, MqttService service) {
         super(thing);
@@ -68,7 +69,6 @@ public class SystemBrokerHandler extends AbstractBrokerHandler implements MqttSe
             properties.put(PROPERTY_PASSWORD, password);
         }
         properties.put(PROPERTY_QOS, String.valueOf(connection.getQos()));
-        properties.put(PROPERTY_RETAIN, String.valueOf(connection.isRetain()));
         final MqttWillAndTestament lastWill = connection.getLastWill();
         if (lastWill != null) {
             properties.put(PROPERTY_LAST_WILL, lastWill.toString());
@@ -105,7 +105,7 @@ public class SystemBrokerHandler extends AbstractBrokerHandler implements MqttSe
     @Override
     public void brokerRemoved(String connectionName, MqttBrokerConnection removedConnection) {
         final MqttBrokerConnection connection = this.connection;
-        if (removedConnection == connection) {
+        if (removedConnection.equals(connection)) {
             connection.removeConnectionObserver(this);
             this.connection = null;
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "@text/offline.sharedremoved");
@@ -116,6 +116,8 @@ public class SystemBrokerHandler extends AbstractBrokerHandler implements MqttSe
     @Override
     public void initialize() {
         this.brokerID = getThing().getConfiguration().get("brokerid").toString();
+        this.discoveryEnabled = (Boolean) getThing().getConfiguration().get("enableDiscovery");
+
         service.addBrokersListener(this);
 
         connection = service.getBrokerConnection(brokerID);
@@ -131,5 +133,10 @@ public class SystemBrokerHandler extends AbstractBrokerHandler implements MqttSe
     public void dispose() {
         service.removeBrokersListener(this);
         super.dispose();
+    }
+
+    @Override
+    public boolean discoveryEnabled() {
+        return discoveryEnabled;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.velbus.internal.packets;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link VelbusScanPacket} represents a Velbus packet that can be used to
  * check if a Velbus module exists on the given address and to request this module's
@@ -19,6 +21,7 @@ package org.openhab.binding.velbus.internal.packets;
  *
  * @author Cedric Boon - Initial contribution
  */
+@NonNullByDefault
 public class VelbusScanPacket extends VelbusPacket {
 
     public VelbusScanPacket(byte address) {
@@ -29,5 +32,4 @@ public class VelbusScanPacket extends VelbusPacket {
     protected byte[] getDataBytes() {
         return new byte[0];
     }
-
 }

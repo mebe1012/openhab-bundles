@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,10 @@ package org.openhab.binding.loxone.internal.controls;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
 
 /**
  * Test class for (@link LxControlTimedSwitch}
@@ -29,7 +29,7 @@ import org.junit.Test;
 public class LxControlTimedSwitchTest extends LxControlTest {
     private static final String DELAY_CHANNEL = " / Deactivation Delay";
 
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("1326771c-030e-3a7c-ffff403fb0c34b9e", "0b734138-037d-034e-ffff403fb0c34b9e",
                 "0fe650c2-0004-d446-ffff504f9410790f", "Stairwell Light Switch");

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,12 +19,12 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelType;
 import org.openhab.io.neeo.internal.NeeoUtil;
 
 /**
@@ -111,7 +111,6 @@ public class NeeoDeviceChannel {
         final ChannelUID uid = channel.getUID();
         return Arrays.asList(new NeeoDeviceChannel(NeeoDeviceChannelKind.get(channel.getKind()), uid.getId(), 1,
                 capabilityType, subType, NeeoUtil.getUniqueLabel(existingLabels, uid.getIdWithoutGroup()), "", null));
-
     }
 
     /**
@@ -154,7 +153,6 @@ public class NeeoDeviceChannel {
                             NeeoUtil.getUniqueLabel(existingLabels,
                                     NeeoUtil.getLabel(item, channelType) + " (Brightness)"),
                             NeeoUtil.getPattern(item, channelType), NeeoDeviceChannelRange.from(item)));
-
         } else {
             return Arrays.asList(new NeeoDeviceChannel(
                     NeeoDeviceChannelKind.get(channel == null ? ChannelKind.STATE : channel.getKind()), item.getName(),

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,8 +15,8 @@ package org.openhab.binding.sonyprojector.internal.communication.serial;
 import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.sonyprojector.internal.SonyProjectorException;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Represents the different error codes returned by the projector in serial mode

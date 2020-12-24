@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,18 +23,18 @@ import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.bluetooth.BeaconBluetoothHandler;
 import org.openhab.binding.bluetooth.notification.BluetoothScanNotification;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,19 +111,19 @@ public class RuuviTagHandler extends BeaconBluetoothHandler {
                         switch (channelUID.getId()) {
                             case CHANNEL_ID_ACCELERATIONX:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getAccelerationX(), SmartHomeUnits.STANDARD_GRAVITY);
+                                        ruuvitagData.getAccelerationX(), Units.STANDARD_GRAVITY);
                                 break;
                             case CHANNEL_ID_ACCELERATIONY:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getAccelerationY(), SmartHomeUnits.STANDARD_GRAVITY);
+                                        ruuvitagData.getAccelerationY(), Units.STANDARD_GRAVITY);
                                 break;
                             case CHANNEL_ID_ACCELERATIONZ:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getAccelerationZ(), SmartHomeUnits.STANDARD_GRAVITY);
+                                        ruuvitagData.getAccelerationZ(), Units.STANDARD_GRAVITY);
                                 break;
                             case CHANNEL_ID_BATTERY:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getBatteryVoltage(), SmartHomeUnits.VOLT);
+                                        ruuvitagData.getBatteryVoltage(), Units.VOLT);
                                 break;
                             case CHANNEL_ID_DATA_FORMAT:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
@@ -131,15 +131,15 @@ public class RuuviTagHandler extends BeaconBluetoothHandler {
                                 break;
                             case CHANNEL_ID_HUMIDITY:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getHumidity(), SmartHomeUnits.PERCENT);
+                                        ruuvitagData.getHumidity(), Units.PERCENT);
                                 break;
                             case CHANNEL_ID_MEASUREMENT_SEQUENCE_NUMBER:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getMeasurementSequenceNumber(), SmartHomeUnits.ONE);
+                                        ruuvitagData.getMeasurementSequenceNumber(), Units.ONE);
                                 break;
                             case CHANNEL_ID_MOVEMENT_COUNTER:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getMovementCounter(), SmartHomeUnits.ONE);
+                                        ruuvitagData.getMovementCounter(), Units.ONE);
                                 break;
                             case CHANNEL_ID_PRESSURE:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
@@ -151,7 +151,7 @@ public class RuuviTagHandler extends BeaconBluetoothHandler {
                                 break;
                             case CHANNEL_ID_TX_POWER:
                                 atLeastOneRuuviFieldPresent |= updateStateIfLinked(channelUID,
-                                        ruuvitagData.getTxPower(), SmartHomeUnits.DECIBEL_MILLIWATTS);
+                                        ruuvitagData.getTxPower(), Units.DECIBEL_MILLIWATTS);
                                 break;
                         }
                     }

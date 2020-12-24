@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,17 @@
  */
 package org.openhab.binding.elerotransmitterstick.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.elerotransmitterstick.internal.config.EleroTransmitterStickConfig;
 import org.openhab.binding.elerotransmitterstick.internal.stick.TransmitterStick;
 import org.openhab.binding.elerotransmitterstick.internal.stick.TransmitterStick.StickListener;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.BridgeHandler;
+import org.openhab.core.types.Command;
 
 /**
  * The {@link EleroTransmitterStickHandler} is responsible for managing the connection to an elero transmitter stick.
@@ -29,10 +30,12 @@ import org.openhab.binding.elerotransmitterstick.internal.stick.TransmitterStick
  * @author Volker Bier - Initial contribution
  */
 public class EleroTransmitterStickHandler extends BaseBridgeHandler implements BridgeHandler {
-    private TransmitterStick stick;
+    private final SerialPortManager serialPortManager;
+    private final TransmitterStick stick;
 
-    public EleroTransmitterStickHandler(Bridge bridge) {
+    public EleroTransmitterStickHandler(Bridge bridge, SerialPortManager serialPortManager) {
         super(bridge);
+        this.serialPortManager = serialPortManager;
 
         stick = new TransmitterStick(new StickListener() {
             @Override
@@ -62,7 +65,7 @@ public class EleroTransmitterStickHandler extends BaseBridgeHandler implements B
     public void initialize() {
         updateStatus(ThingStatus.UNKNOWN);
 
-        stick.initialize(getConfig().as(EleroTransmitterStickConfig.class), scheduler);
+        stick.initialize(getConfig().as(EleroTransmitterStickConfig.class), scheduler, serialPortManager);
     }
 
     public TransmitterStick getStick() {

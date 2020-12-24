@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,22 +21,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.DeviceClassObject;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.DeviceMetaData;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.DeviceOperation;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.DeviceProperty;
 import org.openhab.binding.miele.internal.handler.MieleBridgeHandler.HomeDevice;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +52,7 @@ import com.google.gson.JsonParser;
  * the {@link ApplianceChannelSelector} datapoints
  *
  * @author Karel Goderis - Initial contribution
+ * @author Martin Lepsy - Added check for JsonNull result
  */
 public abstract class MieleApplianceHandler<E extends Enum<E> & ApplianceChannelSelector> extends BaseThingHandler
         implements ApplianceStatusListener {
@@ -143,7 +144,8 @@ public abstract class MieleApplianceHandler<E extends Enum<E> & ApplianceChannel
 
     @Override
     public void onApplianceStateChanged(String UID, DeviceClassObject dco) {
-        String myUID = "hdm:ZigBee:" + (String) getThing().getConfiguration().getProperties().get(APPLIANCE_ID);
+        String myUID = ((String) getThing().getProperties().get(PROTOCOL_PROPERTY_NAME))
+                + (String) getThing().getConfiguration().getProperties().get(APPLIANCE_ID);
         String modelID = StringUtils.right(dco.DeviceClass,
                 dco.DeviceClass.length() - new String("com.miele.xgw3000.gateway.hdm.deviceclasses.Miele").length());
 
@@ -175,7 +177,8 @@ public abstract class MieleApplianceHandler<E extends Enum<E> & ApplianceChannel
 
     @Override
     public void onAppliancePropertyChanged(String UID, DeviceProperty dp) {
-        String myUID = "hdm:ZigBee:" + (String) getThing().getConfiguration().getProperties().get(APPLIANCE_ID);
+        String myUID = ((String) getThing().getProperties().get(PROTOCOL_PROPERTY_NAME))
+                + (String) getThing().getConfiguration().getProperties().get(APPLIANCE_ID);
 
         if (myUID.equals(UID)) {
             try {
@@ -269,5 +272,9 @@ public abstract class MieleApplianceHandler<E extends Enum<E> & ApplianceChannel
             }
         }
         return this.bridgeHandler;
+    }
+
+    protected boolean isResultProcessable(JsonElement result) {
+        return result != null && !result.isJsonNull();
     }
 }

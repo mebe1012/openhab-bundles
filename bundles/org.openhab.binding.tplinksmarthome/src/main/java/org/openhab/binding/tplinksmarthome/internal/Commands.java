@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,6 @@ package org.openhab.binding.tplinksmarthome.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.openhab.binding.tplinksmarthome.internal.model.GetRealtime;
 import org.openhab.binding.tplinksmarthome.internal.model.GetSysinfo;
 import org.openhab.binding.tplinksmarthome.internal.model.GsonUtil;
@@ -32,6 +30,8 @@ import org.openhab.binding.tplinksmarthome.internal.model.TransitionLightState.L
 import org.openhab.binding.tplinksmarthome.internal.model.TransitionLightState.LightStateColor;
 import org.openhab.binding.tplinksmarthome.internal.model.TransitionLightState.LightStateColorTemperature;
 import org.openhab.binding.tplinksmarthome.internal.model.TransitionLightStateResponse;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
 
 import com.google.gson.Gson;
 

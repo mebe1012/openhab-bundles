@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.russound.internal.RussoundHandlerFactory;
 import org.openhab.binding.russound.internal.net.SocketChannelSession;
 import org.openhab.binding.russound.internal.net.SocketSession;
@@ -31,6 +26,11 @@ import org.openhab.binding.russound.internal.rio.controller.RioControllerConfig;
 import org.openhab.binding.russound.internal.rio.source.RioSourceConfig;
 import org.openhab.binding.russound.internal.rio.system.RioSystemHandler;
 import org.openhab.binding.russound.internal.rio.zone.RioZoneConfig;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

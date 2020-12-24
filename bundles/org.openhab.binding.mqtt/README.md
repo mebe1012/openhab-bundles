@@ -7,7 +7,7 @@ MQTT is a server/client architecture.
 
 A server, also called broker is not provided within this binding.
 You can use any of the freely available MQTT Brokers like [Mosquitto](https://mosquitto.org/)
-or [Moquette](https://moquette-io.github.io/moquette/) or install the [included Moquette broker](https://www.openhab.org/addons/integrations/mqttembeddedbroker/) as addon.
+or [Moquette](https://moquette-io.github.io/moquette/) or install the [included Moquette broker](https://www.openhab.org/addons/integrations/mqttembeddedbroker/) as add-on.
 
 This particular binding allows to configure connections to brokers via openHAB Things.
 This binding does NOT allow you to link Channels to MQTT topics or perform auto-discovery of available
@@ -32,12 +32,11 @@ Additionally the following parameters can be set:
 
 * __qos__: Quality of Service. Can be 0, 1 or 2. Please read the MQTT specification for details. Defaults to 0.
 * __clientID__: Use a fixed client ID. Defaults to empty which means a user ID is generated for this connection.
-* __retainMessages__: Retain messages. Defaults to false.
 
 Reconnect parameters are:
 
 * __reconnectTime__: Reconnect time in ms. If a connection is lost, the binding will wait this time before it tries to reconnect. Defaults to 60000 (60s).
-* __keepAlive__: Keep alive / heartbeat timer in ms. It can take up to this time to determine if a server connection is lost. A lower value may keep the broker unnecessarily busy for no or little additional value. Defaults to 60000 (60s).
+* __keepAlive__: Keep alive / heartbeat timer in s. It can take up to this time to determine if a server connection is lost. A lower value may keep the broker unnecessarily busy for no or little additional value. Defaults to 60s.
 
 An MQTT last will and testament can be configured:
 
@@ -55,6 +54,11 @@ For more security, the following optional parameters can be altered:
 * __certificate__: The certificate hash. If **certificatepin** is set this hash is used to verify the connection. Clear to allow a new certificate pinning on the next connection attempt. If empty will be filled automatically by the next successful connection. An example input would be `SHA-256:83F9171E06A313118889F7D79302BD1B7A2042EE0CFD029ABF8DD06FFA6CD9D3`.
 * __publickey__: The public key hash. If **publickeypin** is set this hash is used to verify the connection. Clear to allow a new public key pinning on the next connection attempt. If empty will be filled automatically by the next successful connection. An example input would be `SHA-256:83F9171E06A313118889F7D79302BD1B7A2042EE0CFD029ABF8DD06FFA6CD9D3`.
 
+By default discovery services (like homie or homeassistant) are enabled on a broker.
+This behaviour can be controlled with a configuration parameter.
+
+* __enableDiscovery__:If set to true, enables discovery on this broker, if set to false, disables discovery services on this broker.
+
 ## Supported Channels
 
 You can extend your broker connection bridges with a channel:
@@ -66,3 +70,7 @@ Configuration parameters are:
 * __stateTopic__: This channel will trigger on this MQTT topic. This topic can contain wildcards like + and # for example "all/in/#" or "sensors/+/config".
 * __payload__: An optional condition on the value of the MQTT topic that must match before this channel is triggered.
 
+## Legacy MQTT1-Binding
+
+This binding is not supposed to run in parallel to the old mqtt1-binding.
+Please uninstall the old binding before installing this binding.

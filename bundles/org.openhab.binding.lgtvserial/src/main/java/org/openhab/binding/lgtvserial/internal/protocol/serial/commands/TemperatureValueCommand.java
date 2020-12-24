@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.lgtvserial.internal.protocol.serial.commands;
 
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialResponse;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.responses.QuantityResponse;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
 
 /**
  * This class handles the temperature value D/N command.
@@ -33,5 +33,4 @@ public class TemperatureValueCommand extends BaseDecimalCommand {
     protected LGSerialResponse createResponse(int set, boolean success, String data) {
         return new QuantityResponse(set, success, new QuantityType<>(Integer.parseInt(data, 16), SIUnits.CELSIUS));
     }
-
 }

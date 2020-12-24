@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,10 +19,10 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class MaryTTSService implements TTSService {
     /**
      * Set of supported voices
      */
-    private Set<org.eclipse.smarthome.core.voice.Voice> voices;
+    private Set<org.openhab.core.voice.Voice> voices;
 
     /**
      * Set of supported audio formats
@@ -67,7 +67,7 @@ public class MaryTTSService implements TTSService {
     }
 
     @Override
-    public Set<org.eclipse.smarthome.core.voice.Voice> getAvailableVoices() {
+    public Set<org.openhab.core.voice.Voice> getAvailableVoices() {
         return voices;
     }
 
@@ -77,8 +77,8 @@ public class MaryTTSService implements TTSService {
     }
 
     @Override
-    public AudioStream synthesize(String text, org.eclipse.smarthome.core.voice.Voice voice,
-            AudioFormat requestedFormat) throws TTSException {
+    public AudioStream synthesize(String text, org.openhab.core.voice.Voice voice, AudioFormat requestedFormat)
+            throws TTSException {
         // Validate arguments
         if (text == null || text.isEmpty()) {
             throw new TTSException("The passed text is null or empty");
@@ -133,8 +133,8 @@ public class MaryTTSService implements TTSService {
      *
      * @return The voices of this instance
      */
-    private Set<org.eclipse.smarthome.core.voice.Voice> initVoices() {
-        Set<org.eclipse.smarthome.core.voice.Voice> voices = new HashSet<>();
+    private Set<org.openhab.core.voice.Voice> initVoices() {
+        Set<org.openhab.core.voice.Voice> voices = new HashSet<>();
         for (Locale locale : marytts.getAvailableLocales()) {
             for (String voiceLabel : marytts.getAvailableVoices(locale)) {
                 voices.add(new MaryTTSVoice(locale, voiceLabel));
@@ -189,5 +189,4 @@ public class MaryTTSService implements TTSService {
     public String getLabel(Locale locale) {
         return "MaryTTS";
     }
-
 }

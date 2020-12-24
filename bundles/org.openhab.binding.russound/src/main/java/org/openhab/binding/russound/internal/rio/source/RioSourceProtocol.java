@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.russound.internal.net.SocketSession;
 import org.openhab.binding.russound.internal.net.SocketSessionListener;
 import org.openhab.binding.russound.internal.rio.AbstractRioProtocol;
@@ -34,6 +32,8 @@ import org.openhab.binding.russound.internal.rio.RioHandlerCallback;
 import org.openhab.binding.russound.internal.rio.StatefulHandlerCallback;
 import org.openhab.binding.russound.internal.rio.models.GsonUtilities;
 import org.openhab.binding.russound.internal.rio.models.RioBank;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -632,7 +632,6 @@ class RioSourceProtocol extends AbstractRioProtocol {
         } else {
             logger.warn("Invalid Source Notification response: '{}'", resp);
         }
-
     }
 
     /**
@@ -731,7 +730,7 @@ class RioSourceProtocol extends AbstractRioProtocol {
             try {
                 httpClient.stop();
             } catch (Exception e) {
-                logger.debug("Error stopping the httpclient: {}", e);
+                logger.debug("Error stopping the httpclient", e);
             }
         }
         super.dispose();
@@ -763,5 +762,4 @@ class RioSourceProtocol extends AbstractRioProtocol {
             this.value = value;
         }
     }
-
 }

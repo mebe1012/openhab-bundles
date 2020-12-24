@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,17 @@
  */
 package org.openhab.binding.synopanalyzer.internal;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.HECTO;
+import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Pressure;
-import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link SynopAnalyzerBinding} class defines common constants, which are
@@ -33,7 +32,6 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  */
 @NonNullByDefault
 public class SynopAnalyzerBindingConstants {
-
     public static final String BINDING_ID = "synopanalyzer";
 
     // List of all Thing Type UIDs
@@ -55,9 +53,10 @@ public class SynopAnalyzerBindingConstants {
     // Default units
     public static final Unit<Temperature> TEMPERATURE_UNIT = SIUnits.CELSIUS;
     public static final Unit<Pressure> PRESSURE_UNIT = HECTO(SIUnits.PASCAL);
-    public static final Unit<Speed> WIND_SPEED_UNIT_MS = SmartHomeUnits.METRE_PER_SECOND;
-    public static final Unit<Speed> WIND_SPEED_UNIT_KNOT = SmartHomeUnits.KNOT;
-    public static final Unit<Angle> WIND_DIRECTION_UNIT = SmartHomeUnits.DEGREE_ANGLE;
-    public static final String[] WIND_DIRECTIONS = new String[] { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S",
-            "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
+    public static final Unit<Angle> WIND_DIRECTION_UNIT = Units.DEGREE_ANGLE;
+
+    // Synop message origin station codes
+    public static final String LAND_STATION_CODE = "AAXX";
+    public static final String SHIP_STATION_CODE = "BBXX";
+    public static final String MOBILE_LAND_STATION_CODE = "OOXX";
 }

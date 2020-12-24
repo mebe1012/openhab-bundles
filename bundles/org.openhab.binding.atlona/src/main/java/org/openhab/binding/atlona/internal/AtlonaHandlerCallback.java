@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.atlona.internal;
 
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.atlona.internal.handler.AtlonaHandler;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.State;
 
 /**
  *
@@ -27,8 +27,8 @@ public interface AtlonaHandlerCallback {
     /**
      * Callback to the {@link AtlonaHandler} to update the status of the thing.
      *
-     * @param status a non-null {@link org.eclipse.smarthome.core.thing.ThingStatus}
-     * @param detail a non-null {@link org.eclipse.smarthome.core.thing.ThingStatusDetail}
+     * @param status a non-null {@link org.openhab.core.thing.ThingStatus}
+     * @param detail a non-null {@link org.openhab.core.thing.ThingStatusDetail}
      * @param msg a possibly null, possibly empty message
      */
     void statusChanged(ThingStatus status, ThingStatusDetail detail, String msg);

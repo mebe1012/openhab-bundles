@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,10 @@
 package org.openhab.persistence.mapdb;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,35 +24,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.library.items.ColorItem;
-import org.eclipse.smarthome.core.library.items.DimmerItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.persistence.FilterCriteria;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.types.State;
 import org.openhab.persistence.mapdb.internal.MapDbPersistenceService;
 
 /**
- * 
+ *
  * @author Martin Kühl - Initial contribution
  */
 public class MapDbPersistenceServiceOSGiTest extends JavaOSGiTest {
     private MapDbPersistenceService persistenceService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         persistenceService = getService(QueryablePersistenceService.class, MapDbPersistenceService.class);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws IOException {
         // clean up database files ...
         removeDirRecursive("userdata");
@@ -75,13 +75,11 @@ public class MapDbPersistenceServiceOSGiTest extends JavaOSGiTest {
         GenericItem item = new SwitchItem(name);
         item.setState(state);
 
-        assertThat(persistenceService.getItemInfo(),
-                not(hasItem(hasProperty("name", equalTo(name)))));
+        assertThat(persistenceService.getItemInfo(), not(hasItem(hasProperty("name", equalTo(name)))));
 
         persistenceService.store(item);
 
-        assertThat(persistenceService.getItemInfo(),
-                hasItem(hasProperty("name", equalTo(name))));
+        assertThat(persistenceService.getItemInfo(), hasItem(hasProperty("name", equalTo(name))));
 
         persistenceService.store(item, alias);
 

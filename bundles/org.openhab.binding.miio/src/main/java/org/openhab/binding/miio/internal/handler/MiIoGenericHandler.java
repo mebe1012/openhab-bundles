@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,13 +12,13 @@
  */
 package org.openhab.binding.miio.internal.handler;
 
-import static org.openhab.binding.miio.internal.MiIoBindingConstants.CHANNEL_COMMAND;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.miio.internal.basic.MiIoDatabaseWatchService;
+import org.openhab.binding.miio.internal.cloud.CloudConnector;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +28,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Marcel Verpaalen - Initial contribution
  */
+@NonNullByDefault
 public class MiIoGenericHandler extends MiIoAbstractHandler {
     private final Logger logger = LoggerFactory.getLogger(MiIoGenericHandler.class);
 
-    @NonNullByDefault
-    public MiIoGenericHandler(Thing thing) {
-        super(thing);
+    public MiIoGenericHandler(Thing thing, MiIoDatabaseWatchService miIoDatabaseWatchService,
+            CloudConnector cloudConnector) {
+        super(thing, miIoDatabaseWatchService, cloudConnector);
     }
 
     @Override
@@ -43,8 +44,8 @@ public class MiIoGenericHandler extends MiIoAbstractHandler {
             updateData();
             return;
         }
-        if (channelUID.getId().equals(CHANNEL_COMMAND)) {
-            cmds.put(sendCommand(command.toString()), command.toString());
+        if (handleCommandsChannels(channelUID, command)) {
+            return;
         }
     }
 

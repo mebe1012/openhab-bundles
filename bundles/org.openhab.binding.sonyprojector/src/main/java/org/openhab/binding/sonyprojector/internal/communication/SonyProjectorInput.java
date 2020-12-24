@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,9 +18,9 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.sonyprojector.internal.SonyProjectorException;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Represents the different video inputs available for the projector

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.lgtvserial.internal.protocol.serial.commands;
 
-import org.eclipse.smarthome.core.library.types.PercentType;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialResponse;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.responses.PercentResponse;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * This command is the base command to handle percent type commands (0-100) in hex format on the wire.
@@ -38,5 +38,4 @@ public abstract class BasePercentCommand extends BaseLGSerialCommand {
         String decimalValue = Integer.toString(Integer.parseInt(data, 16));
         return new PercentResponse(set, success, PercentType.valueOf(decimalValue));
     }
-
 }

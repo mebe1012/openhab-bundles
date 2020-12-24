@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,19 +21,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.hue.internal.FullSensor;
-import org.openhab.binding.hue.internal.HueBridge;
 import org.openhab.binding.hue.internal.LightLevelConfigUpdate;
 import org.openhab.binding.hue.internal.SensorConfigUpdate;
 import org.openhab.binding.hue.internal.handler.HueSensorHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * Light Level Sensor
@@ -67,7 +65,7 @@ public class LightLevelHandler extends HueSensorHandler {
     }
 
     @Override
-    protected void doSensorStateChanged(@Nullable HueBridge bridge, FullSensor sensor, Configuration config) {
+    protected void doSensorStateChanged(FullSensor sensor, Configuration config) {
         Object lightLevel = sensor.getState().get(STATE_LIGHT_LEVEL);
         if (lightLevel != null) {
             BigDecimal value = new BigDecimal(String.valueOf(lightLevel));
@@ -76,7 +74,7 @@ public class LightLevelHandler extends HueSensorHandler {
             // calculate lux, according to
             // https://developers.meethue.com/documentation/supported-sensors#clip_zll_lightlevel
             double lux = Math.pow(10, (value.subtract(BigDecimal.ONE).divide(new BigDecimal(10000))).doubleValue());
-            updateState(CHANNEL_ILLUMINANCE, new QuantityType<>(lux, SmartHomeUnits.LUX));
+            updateState(CHANNEL_ILLUMINANCE, new QuantityType<>(lux, Units.LUX));
         }
 
         Object dark = sensor.getState().get(STATE_DARK);

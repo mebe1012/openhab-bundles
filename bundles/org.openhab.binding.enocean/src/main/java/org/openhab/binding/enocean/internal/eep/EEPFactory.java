@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.enocean.internal.eep;
 
+import static org.openhab.binding.enocean.internal.messages.ESP3Packet.*;
+
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.enocean.internal.eep.Base.UTEResponse;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
 import org.openhab.binding.enocean.internal.eep.Base._4BSTeachInVariation3Response;
@@ -26,6 +27,7 @@ import org.openhab.binding.enocean.internal.eep.F6_10.F6_10_00_EltakoFPE;
 import org.openhab.binding.enocean.internal.eep.F6_10.F6_10_01;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
 import org.openhab.binding.enocean.internal.messages.ERP1Message.RORG;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,6 @@ public class EEPFactory {
     private static final Logger logger = LoggerFactory.getLogger(EEPFactory.class);
 
     public static EEP createEEP(EEPType eepType) {
-
         try {
             Class<? extends EEP> cl = eepType.getEEPClass();
             if (cl == null) {
@@ -147,14 +148,15 @@ public class EEPFactory {
             case UTE: {
                 byte[] payload = msg.getPayload();
 
-                byte rorg = payload[payload.length - 1 - EEP.StatusLength - EEP.SenderIdLength];
-                byte func = payload[payload.length - 1 - EEP.StatusLength - EEP.SenderIdLength - EEP.RORGLength];
-                byte type = payload[payload.length - 1 - EEP.StatusLength - EEP.SenderIdLength - EEP.RORGLength - 1];
+                byte rorg = payload[payload.length - 1 - ESP3_STATUS_LENGTH - ESP3_SENDERID_LENGTH];
+                byte func = payload[payload.length - 1 - ESP3_STATUS_LENGTH - ESP3_SENDERID_LENGTH - ESP3_RORG_LENGTH];
+                byte type = payload[payload.length - 1 - ESP3_STATUS_LENGTH - ESP3_SENDERID_LENGTH - ESP3_RORG_LENGTH
+                        - 1];
 
-                byte manufIdMSB = payload[payload.length - 1 - EEP.StatusLength - EEP.SenderIdLength - EEP.RORGLength
-                        - 2];
-                byte manufIdLSB = payload[payload.length - 1 - EEP.StatusLength - EEP.SenderIdLength - EEP.RORGLength
-                        - 3];
+                byte manufIdMSB = payload[payload.length - 1 - ESP3_STATUS_LENGTH - ESP3_SENDERID_LENGTH
+                        - ESP3_RORG_LENGTH - 2];
+                byte manufIdLSB = payload[payload.length - 1 - ESP3_STATUS_LENGTH - ESP3_SENDERID_LENGTH
+                        - ESP3_RORG_LENGTH - 3];
                 int manufId = ((manufIdMSB & 0b111) << 8) + (manufIdLSB & 0xff);
 
                 EEPType eepType = EEPType.getType(RORG.getRORG(rorg), func, type, manufId);
@@ -175,11 +177,11 @@ public class EEPFactory {
             case Unknown:
             case VLD:
             case MSC:
+            case SIG:
                 return null;
         }
 
         return null;
-
     }
 
     public static EEP buildResponseEEPFromTeachInERP1(ERP1Message msg, byte[] senderId) {

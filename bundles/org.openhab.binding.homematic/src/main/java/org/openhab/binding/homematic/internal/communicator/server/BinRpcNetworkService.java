@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,10 +17,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.openhab.binding.homematic.internal.common.HomematicConfig;
 import org.openhab.binding.homematic.internal.communicator.message.BinRpcMessage;
 import org.openhab.binding.homematic.internal.communicator.message.RpcRequest;
+import org.openhab.core.common.ThreadPoolManager;
 
 /**
  * Waits for a message from the Homematic gateway and starts the RpcCallbackHandler to handle the message.
@@ -100,5 +100,4 @@ public class BinRpcNetworkService implements Runnable {
             // ignore
         }
     }
-
 }

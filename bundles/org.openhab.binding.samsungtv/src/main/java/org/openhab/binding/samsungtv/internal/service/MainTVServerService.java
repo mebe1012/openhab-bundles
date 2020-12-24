@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,22 +21,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOParticipant;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.samsungtv.internal.service.api.EventListener;
 import org.openhab.binding.samsungtv.internal.service.api.SamsungTvService;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -53,36 +49,30 @@ import org.w3c.dom.NodeList;
 public class MainTVServerService implements UpnpIOParticipant, SamsungTvService {
 
     public static final String SERVICE_NAME = "MainTVServer2";
-    private static final List<String> SUPPORTEDCOMMANDS = Arrays.asList(SOURCE_NAME, BROWSER_URL, STOP_BROWSER);
+    private static final List<String> SUPPORTED_CHANNELS = Arrays.asList(CHANNEL_NAME, CHANNEL, SOURCE_NAME, SOURCE_ID,
+            PROGRAM_TITLE, BROWSER_URL, STOP_BROWSER);
 
     private final Logger logger = LoggerFactory.getLogger(MainTVServerService.class);
 
-    private UpnpIOService service;
+    private final UpnpIOService service;
 
-    private ScheduledExecutorService scheduler;
-    private @Nullable ScheduledFuture<?> pollingJob;
+    private final String udn;
 
-    private String udn;
-    private int pollingInterval;
-
-    private Map<String, String> stateMap = Collections.synchronizedMap(new HashMap<String, String>());
+    private Map<String, String> stateMap = Collections.synchronizedMap(new HashMap<>());
 
     private Set<EventListener> listeners = new CopyOnWriteArraySet<>();
 
-    public MainTVServerService(UpnpIOService upnpIOService, String udn, int pollingInterval) {
+    private boolean started;
+
+    public MainTVServerService(UpnpIOService upnpIOService, String udn) {
         logger.debug("Creating a Samsung TV MainTVServer service");
-
-        service = upnpIOService;
-
+        this.service = upnpIOService;
         this.udn = udn;
-        this.pollingInterval = pollingInterval;
-
-        scheduler = Executors.newScheduledThreadPool(1);
     }
 
     @Override
     public List<String> getSupportedChannelNames() {
-        return SUPPORTEDCOMMANDS;
+        return SUPPORTED_CHANNELS;
     }
 
     @Override
@@ -97,18 +87,14 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
 
     @Override
     public void start() {
-        if (pollingJob == null || pollingJob.isCancelled()) {
-            logger.debug("Start refresh task, interval={}", pollingInterval);
-            pollingJob = scheduler.scheduleWithFixedDelay(pollingRunnable, 0, pollingInterval, TimeUnit.MILLISECONDS);
-        }
+        service.registerParticipant(this);
+        started = true;
     }
 
     @Override
     public void stop() {
-        if (pollingJob != null && !pollingJob.isCancelled()) {
-            pollingJob.cancel(true);
-            pollingJob = null;
-        }
+        service.unregisterParticipant(this);
+        started = false;
     }
 
     @Override
@@ -121,18 +107,37 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
         return true;
     }
 
-    private Runnable pollingRunnable = () -> {
-        if (isRegistered()) {
-            updateResourceState("MainTVAgent2", "GetCurrentMainTVChannel", null);
-            updateResourceState("MainTVAgent2", "GetCurrentExternalSource", null);
-            updateResourceState("MainTVAgent2", "GetCurrentContentRecognition", null);
-            updateResourceState("MainTVAgent2", "GetCurrentBrowserURL", null);
-        }
-    };
-
     @Override
     public void handleCommand(String channel, Command command) {
         logger.debug("Received channel: {}, command: {}", channel, command);
+
+        if (!started) {
+            return;
+        }
+
+        if (command == RefreshType.REFRESH) {
+            if (isRegistered()) {
+                switch (channel) {
+                    case CHANNEL:
+                        updateResourceState("MainTVAgent2", "GetCurrentMainTVChannel", null);
+                        break;
+                    case SOURCE_NAME:
+                    case SOURCE_ID:
+                        updateResourceState("MainTVAgent2", "GetCurrentExternalSource", null);
+                        break;
+                    case PROGRAM_TITLE:
+                    case CHANNEL_NAME:
+                        updateResourceState("MainTVAgent2", "GetCurrentContentRecognition", null);
+                        break;
+                    case BROWSER_URL:
+                        updateResourceState("MainTVAgent2", "GetCurrentBrowserURL", null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return;
+        }
 
         switch (channel) {
             case SOURCE_NAME:
@@ -226,10 +231,8 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
 
         if (result.get("Result").equals("OK")) {
             String xml = result.get("SourceList");
-
-            Map<String, String> list = parseSourceList(xml);
-            if (list != null) {
-                id = list.get(source);
+            if (xml != null) {
+                id = parseSourceList(xml).get(source);
             }
         } else {
             logger.warn("Source list query failed, result='{}'", result.get("Result"));
@@ -289,7 +292,7 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
     }
 
     private Map<String, String> parseSourceList(String xml) {
-        Map<String, String> list = new HashMap<String, String>();
+        Map<String, String> list = new HashMap<>();
 
         Document dom = SamsungTvUtils.loadXMLFromString(xml);
 
@@ -325,11 +328,5 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
     @Override
     public void onStatusChanged(boolean status) {
         logger.debug("onStatusChanged: status={}", status);
-    }
-
-    private void reportError(String message, Throwable e) {
-        for (EventListener listener : listeners) {
-            listener.reportError(ThingStatusDetail.COMMUNICATION_ERROR, message, e);
-        }
     }
 }

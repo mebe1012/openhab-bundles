@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,14 +17,17 @@ import static org.openhab.binding.fsinternetradio.internal.FSInternetRadioBindin
 import java.util.Collections;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.fsinternetradio.internal.handler.FSInternetRadioHandler;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,10 +38,17 @@ import org.osgi.service.component.annotations.Reference;
  * @author Patrick Koenemann - Initial contribution
  */
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.fsinternetradio")
+@NonNullByDefault
 public class FSInternetRadioHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_RADIO);
-    private HttpClient httpClient;
+
+    private final HttpClient httpClient;
+
+    @Activate
+    public FSInternetRadioHandlerFactory(@Reference final HttpClientFactory httpClientFactory) {
+        this.httpClient = httpClientFactory.getCommonHttpClient();
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -46,7 +56,7 @@ public class FSInternetRadioHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_RADIO)) {
@@ -54,14 +64,5 @@ public class FSInternetRadioHandlerFactory extends BaseThingHandlerFactory {
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = httpClientFactory.getCommonHttpClient();
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = null;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,14 +24,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.binding.mqtt.generic.AbstractMQTTThingHandler;
 import org.openhab.binding.mqtt.generic.ChannelConfig;
 import org.openhab.binding.mqtt.generic.ChannelState;
@@ -38,8 +31,17 @@ import org.openhab.binding.mqtt.generic.ChannelStateTransformation;
 import org.openhab.binding.mqtt.generic.ChannelStateUpdateListener;
 import org.openhab.binding.mqtt.generic.MqttChannelStateDescriptionProvider;
 import org.openhab.binding.mqtt.generic.TransformationServiceProvider;
+import org.openhab.binding.mqtt.generic.utils.FutureCollector;
 import org.openhab.binding.mqtt.generic.values.Value;
 import org.openhab.binding.mqtt.generic.values.ValueFactory;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.StateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,30 +85,30 @@ public class GenericMQTTThingHandler extends AbstractMQTTThingHandler implements
      */
     @Override
     protected CompletableFuture<@Nullable Void> start(MqttBrokerConnection connection) {
-        List<CompletableFuture<@Nullable Void>> futures = channelStateByChannelUID.values().stream()
-                .map(c -> c.start(connection, scheduler, 0)).collect(Collectors.toList());
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).thenRun(() -> {
-            updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE);
-        });
+        return channelStateByChannelUID.values().stream().map(c -> c.start(connection, scheduler, 0))
+                .collect(FutureCollector.allOf()).thenRun(this::calculateThingStatus);
     }
 
     @Override
     protected void stop() {
         channelStateByChannelUID.values().forEach(c -> c.getCache().resetState());
+        super.stop();
     }
 
     @Override
     public void dispose() {
         // Remove all state descriptions of this handler
         channelStateByChannelUID.forEach((uid, state) -> stateDescProvider.remove(uid));
-        channelStateByChannelUID.clear();
         super.dispose();
+        // there is a design flaw, we can't clean up our stuff because it is needed by the super-class on disposal for
+        // unsubscribing
+        channelStateByChannelUID.clear();
     }
 
     @Override
     public CompletableFuture<Void> unsubscribeAll() {
-        return CompletableFuture.allOf(channelStateByChannelUID.values().stream().map(channel -> channel.stop())
-                .toArray(CompletableFuture[]::new));
+        return CompletableFuture.allOf(
+                channelStateByChannelUID.values().stream().map(ChannelState::stop).toArray(CompletableFuture[]::new));
     }
 
     /**
@@ -125,13 +127,13 @@ public class GenericMQTTThingHandler extends AbstractMQTTThingHandler implements
 
         // Incoming value transformations
         transformations = channelConfig.transformationPattern.split("∩");
-        Stream.of(transformations).filter(t -> StringUtils.isNotBlank(t))
+        Stream.of(transformations).filter(StringUtils::isNotBlank)
                 .map(t -> new ChannelStateTransformation(t, transformationServiceProvider))
                 .forEach(t -> state.addTransformation(t));
 
         // Outgoing value transformations
         transformations = channelConfig.transformationPatternOut.split("∩");
-        Stream.of(transformations).filter(t -> StringUtils.isNotBlank(t))
+        Stream.of(transformations).filter(StringUtils::isNotBlank)
                 .map(t -> new ChannelStateTransformation(t, transformationServiceProvider))
                 .forEach(t -> state.addTransformationOut(t));
 
@@ -140,6 +142,16 @@ public class GenericMQTTThingHandler extends AbstractMQTTThingHandler implements
 
     @Override
     public void initialize() {
+        GenericThingConfiguration config = getConfigAs(GenericThingConfiguration.class);
+
+        String availabilityTopic = config.availabilityTopic;
+
+        if (availabilityTopic != null) {
+            addAvailabilityTopic(availabilityTopic, config.payloadAvailable, config.payloadNotAvailable);
+        } else {
+            clearAllAvailabilityTopics();
+        }
+
         List<ChannelUID> configErrors = new ArrayList<>();
         for (Channel channel : thing.getChannels()) {
             final ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
@@ -152,9 +164,12 @@ public class GenericMQTTThingHandler extends AbstractMQTTThingHandler implements
                 Value value = ValueFactory.createValueState(channelConfig, channelTypeUID.getId());
                 ChannelState channelState = createChannelState(channelConfig, channel.getUID(), value);
                 channelStateByChannelUID.put(channel.getUID(), channelState);
-                StateDescription description = value.createStateDescription(channelConfig.unit,
-                        StringUtils.isBlank(channelConfig.commandTopic));
-                stateDescProvider.setDescription(channel.getUID(), description);
+                StateDescription description = value
+                        .createStateDescription(StringUtils.isBlank(channelConfig.commandTopic)).build()
+                        .toStateDescription();
+                if (description != null) {
+                    stateDescProvider.setDescription(channel.getUID(), description);
+                }
             } catch (IllegalArgumentException e) {
                 logger.warn("Channel configuration error", e);
                 configErrors.add(channel.getUID());
@@ -163,11 +178,20 @@ public class GenericMQTTThingHandler extends AbstractMQTTThingHandler implements
 
         // If some channels could not start up, put the entire thing offline and display the channels
         // in question to the user.
-        if (configErrors.isEmpty()) {
-            super.initialize();
-        } else {
+        if (!configErrors.isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Remove and recreate: "
-                    + configErrors.stream().map(e -> e.getAsString()).collect(Collectors.joining(",")));
+                    + configErrors.stream().map(ChannelUID::getAsString).collect(Collectors.joining(",")));
+            return;
+        }
+        super.initialize();
+    }
+
+    @Override
+    protected void updateThingStatus(boolean messageReceived, Optional<Boolean> availibilityTopicsSeen) {
+        if (availibilityTopicsSeen.orElse(true)) {
+            updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE);
+        } else {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE);
         }
     }
 }

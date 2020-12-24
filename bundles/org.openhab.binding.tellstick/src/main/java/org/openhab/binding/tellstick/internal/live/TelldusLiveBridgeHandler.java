@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,6 @@ import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.tellstick.internal.conf.TelldusLiveConfiguration;
 import org.openhab.binding.tellstick.internal.handler.DeviceStatusListener;
 import org.openhab.binding.tellstick.internal.handler.TelldusBridgeHandler;
@@ -37,6 +28,14 @@ import org.openhab.binding.tellstick.internal.live.xml.TellstickNetDevices;
 import org.openhab.binding.tellstick.internal.live.xml.TellstickNetSensor;
 import org.openhab.binding.tellstick.internal.live.xml.TellstickNetSensorEvent;
 import org.openhab.binding.tellstick.internal.live.xml.TellstickNetSensors;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tellstick.device.TellstickDeviceEvent;
@@ -57,7 +56,7 @@ public class TelldusLiveBridgeHandler extends BaseBridgeHandler implements Telld
     private TellstickNetDevices deviceList = null;
     private TellstickNetSensors sensorList = null;
     private TelldusLiveDeviceController controller = new TelldusLiveDeviceController();
-    private List<DeviceStatusListener> deviceStatusListeners = new Vector<DeviceStatusListener>();
+    private List<DeviceStatusListener> deviceStatusListeners = new Vector<>();
 
     private static final int REFRESH_DELAY = 10;
 
@@ -245,11 +244,6 @@ public class TelldusLiveBridgeHandler extends BaseBridgeHandler implements Telld
     @Override
     public void handleRemoval() {
         super.handleRemoval();
-    }
-
-    @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        super.handleUpdate(channelUID, newState);
     }
 
     @Override

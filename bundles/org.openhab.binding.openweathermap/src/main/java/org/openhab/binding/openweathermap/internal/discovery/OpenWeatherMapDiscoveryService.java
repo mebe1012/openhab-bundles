@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,15 +22,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.LocationProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.openweathermap.internal.handler.AbstractOpenWeatherMapHandler;
 import org.openhab.binding.openweathermap.internal.handler.OpenWeatherMapAPIHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.LocationProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
     }
 
     @Override
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
     }
 
@@ -79,7 +79,7 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
     @Override
     protected void startScan() {
         logger.debug("Start manual OpenWeatherMap Location discovery scan.");
-        scanForNewLocation();
+        scanForNewLocation(false);
     }
 
     @Override
@@ -93,8 +93,9 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
         if (discoveryJob == null || discoveryJob.isCancelled()) {
             logger.debug("Start OpenWeatherMap Location background discovery job at interval {} s.",
                     DISCOVERY_INTERVAL_SECONDS);
-            discoveryJob = scheduler.scheduleWithFixedDelay(this::scanForNewLocation, 0, DISCOVERY_INTERVAL_SECONDS,
-                    TimeUnit.SECONDS);
+            discoveryJob = scheduler.scheduleWithFixedDelay(() -> {
+                scanForNewLocation(true);
+            }, 0, DISCOVERY_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
 
@@ -108,7 +109,7 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
         }
     }
 
-    private void scanForNewLocation() {
+    private void scanForNewLocation(boolean updateOnlyIfNewLocation) {
         PointType currentLocation = locationProvider.getLocation();
         if (currentLocation == null) {
             logger.debug("Location is not set -> Will not provide any discovery results.");
@@ -117,7 +118,7 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
                     currentLocation);
             createResults(currentLocation);
             previousLocation = currentLocation;
-        } else {
+        } else if (!updateOnlyIfNewLocation) {
             createResults(currentLocation);
         }
     }
@@ -127,6 +128,8 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
         ThingUID bridgeUID = bridgeHandler.getThing().getUID();
         createWeatherAndForecastResult(locationString, bridgeUID);
         createUVIndexResult(locationString, bridgeUID);
+        createOneCallResult(locationString, bridgeUID);
+        createOneCallHistoryResult(locationString, bridgeUID);
     }
 
     private void createWeatherAndForecastResult(String location, ThingUID bridgeUID) {
@@ -138,6 +141,19 @@ public class OpenWeatherMapDiscoveryService extends AbstractDiscoveryService {
     private void createUVIndexResult(String location, ThingUID bridgeUID) {
         thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(THING_TYPE_UVINDEX, bridgeUID, LOCAL))
                 .withLabel("Local UV Index").withProperty(CONFIG_LOCATION, location)
+                .withRepresentationProperty(CONFIG_LOCATION).withBridge(bridgeUID).build());
+    }
+
+    private void createOneCallResult(String location, ThingUID bridgeUID) {
+        thingDiscovered(
+                DiscoveryResultBuilder.create(new ThingUID(THING_TYPE_ONECALL_WEATHER_AND_FORECAST, bridgeUID, LOCAL))
+                        .withLabel("One Call API weather and forecast").withProperty(CONFIG_LOCATION, location)
+                        .withRepresentationProperty(CONFIG_LOCATION).withBridge(bridgeUID).build());
+    }
+
+    private void createOneCallHistoryResult(String location, ThingUID bridgeUID) {
+        thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(THING_TYPE_ONECALL_HISTORY, bridgeUID, LOCAL))
+                .withLabel("One Call API history data").withProperty(CONFIG_LOCATION, location)
                 .withRepresentationProperty(CONFIG_LOCATION).withBridge(bridgeUID).build());
     }
 }

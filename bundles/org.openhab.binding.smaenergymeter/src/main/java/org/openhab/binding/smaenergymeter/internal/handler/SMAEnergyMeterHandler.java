@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,14 +18,14 @@ import java.io.IOException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.smaenergymeter.internal.configuration.EnergyMeterConfig;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +103,21 @@ public class SMAEnergyMeterHandler extends BaseThingHandler {
             updateState(CHANNEL_ENERGY_IN, energyMeter.getEnergyIn());
             updateState(CHANNEL_ENERGY_OUT, energyMeter.getEnergyOut());
 
+            updateState(CHANNEL_POWER_IN_L1, energyMeter.getPowerInL1());
+            updateState(CHANNEL_POWER_OUT_L1, energyMeter.getPowerOutL1());
+            updateState(CHANNEL_ENERGY_IN_L1, energyMeter.getEnergyInL1());
+            updateState(CHANNEL_ENERGY_OUT_L1, energyMeter.getEnergyOutL1());
+
+            updateState(CHANNEL_POWER_IN_L2, energyMeter.getPowerInL2());
+            updateState(CHANNEL_POWER_OUT_L2, energyMeter.getPowerOutL2());
+            updateState(CHANNEL_ENERGY_IN_L2, energyMeter.getEnergyInL2());
+            updateState(CHANNEL_ENERGY_OUT_L2, energyMeter.getEnergyOutL2());
+
+            updateState(CHANNEL_POWER_IN_L3, energyMeter.getPowerInL3());
+            updateState(CHANNEL_POWER_OUT_L3, energyMeter.getPowerOutL3());
+            updateState(CHANNEL_ENERGY_IN_L3, energyMeter.getEnergyInL3());
+            updateState(CHANNEL_ENERGY_OUT_L3, energyMeter.getEnergyOutL3());
+
             if (getThing().getStatus().equals(ThingStatus.OFFLINE)) {
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -110,5 +125,4 @@ public class SMAEnergyMeterHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, e.getMessage());
         }
     }
-
 }

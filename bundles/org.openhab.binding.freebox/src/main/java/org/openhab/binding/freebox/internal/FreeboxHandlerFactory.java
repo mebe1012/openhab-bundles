@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.binding.freebox.internal;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -21,24 +20,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.openhab.binding.freebox.internal.discovery.FreeboxDiscoveryService;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.freebox.internal.handler.FreeboxHandler;
 import org.openhab.binding.freebox.internal.handler.FreeboxThingHandler;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.net.HttpServiceUtil;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -51,25 +52,34 @@ import org.slf4j.LoggerFactory;
  * @author Gaël L'hopital - Initial contribution
  * @author Laurent Garnier - several thing types and handlers + discovery service
  */
+@NonNullByDefault
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.freebox")
 public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
-
-    private final Logger logger = LoggerFactory.getLogger(FreeboxHandlerFactory.class);
-
-    private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
-
-    private AudioHTTPServer audioHTTPServer;
-    private NetworkAddressService networkAddressService;
-
-    private Map<ThingUID, ServiceRegistration<AudioSink>> audioSinkRegistrations = new ConcurrentHashMap<>();
-
-    // url (scheme+server+port) to use for playing notification sounds
-    private String callbackUrl;
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Stream
             .concat(FreeboxBindingConstants.SUPPORTED_BRIDGE_TYPES_UIDS.stream(),
                     FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.stream())
             .collect(Collectors.toSet());
+
+    private final Logger logger = LoggerFactory.getLogger(FreeboxHandlerFactory.class);
+
+    private final Map<ThingUID, ServiceRegistration<AudioSink>> audioSinkRegistrations = new ConcurrentHashMap<>();
+
+    private final AudioHTTPServer audioHTTPServer;
+    private final NetworkAddressService networkAddressService;
+    private final TimeZoneProvider timeZoneProvider;
+
+    // url (scheme+server+port) to use for playing notification sounds
+    private @Nullable String callbackUrl;
+
+    @Activate
+    public FreeboxHandlerFactory(final @Reference AudioHTTPServer audioHTTPServer,
+            final @Reference NetworkAddressService networkAddressService,
+            final @Reference TimeZoneProvider timeZoneProvider) {
+        this.audioHTTPServer = audioHTTPServer;
+        this.networkAddressService = networkAddressService;
+        this.timeZoneProvider = timeZoneProvider;
+    }
 
     @Override
     protected void activate(ComponentContext componentContext) {
@@ -84,8 +94,8 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    public Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration, ThingUID thingUID,
-            ThingUID bridgeUID) {
+    public @Nullable Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration,
+            @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID) {
         if (thingTypeUID.equals(FreeboxBindingConstants.FREEBOX_BRIDGE_TYPE_SERVER)) {
             return super.createThing(thingTypeUID, configuration, thingUID, null);
         } else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
@@ -102,15 +112,13 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(FreeboxBindingConstants.FREEBOX_BRIDGE_TYPE_SERVER)) {
-            FreeboxHandler handler = new FreeboxHandler((Bridge) thing);
-            registerDiscoveryService(handler);
-            return handler;
+            return new FreeboxHandler((Bridge) thing);
         } else if (FreeboxBindingConstants.SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID)) {
-            FreeboxThingHandler handler = new FreeboxThingHandler(thing);
+            FreeboxThingHandler handler = new FreeboxThingHandler(thing, timeZoneProvider);
             if (FreeboxBindingConstants.FREEBOX_THING_TYPE_AIRPLAY.equals(thingTypeUID)) {
                 registerAudioSink(handler);
             }
@@ -122,30 +130,8 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     protected void removeHandler(ThingHandler thingHandler) {
-        if (thingHandler instanceof FreeboxHandler) {
-            unregisterDiscoveryService(thingHandler.getThing());
-        } else if (thingHandler instanceof FreeboxThingHandler) {
+        if (thingHandler instanceof FreeboxThingHandler) {
             unregisterAudioSink(thingHandler.getThing());
-        }
-    }
-
-    private synchronized void registerDiscoveryService(FreeboxHandler bridgeHandler) {
-        FreeboxDiscoveryService discoveryService = new FreeboxDiscoveryService(bridgeHandler);
-        discoveryService.activate(null);
-        discoveryServiceRegs.put(bridgeHandler.getThing().getUID(), bundleContext
-                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
-    }
-
-    private synchronized void unregisterDiscoveryService(Thing thing) {
-        ServiceRegistration<?> serviceReg = discoveryServiceRegs.remove(thing.getUID());
-        if (serviceReg != null) {
-            // remove discovery service, if bridge handler is removed
-            FreeboxDiscoveryService service = (FreeboxDiscoveryService) bundleContext
-                    .getService(serviceReg.getReference());
-            serviceReg.unregister();
-            if (service != null) {
-                service.deactivate();
-            }
         }
     }
 
@@ -154,7 +140,7 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
         FreeboxAirPlayAudioSink audioSink = new FreeboxAirPlayAudioSink(thingHandler, audioHTTPServer, callbackUrl);
         @SuppressWarnings("unchecked")
         ServiceRegistration<AudioSink> reg = (ServiceRegistration<AudioSink>) bundleContext
-                .registerService(AudioSink.class.getName(), audioSink, new Hashtable<String, Object>());
+                .registerService(AudioSink.class.getName(), audioSink, new Hashtable<>());
         audioSinkRegistrations.put(thingHandler.getThing().getUID(), reg);
     }
 
@@ -165,7 +151,7 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
         }
     }
 
-    private String createCallbackUrl() {
+    private @Nullable String createCallbackUrl() {
         if (callbackUrl != null) {
             return callbackUrl;
         } else {
@@ -185,23 +171,4 @@ public class FreeboxHandlerFactory extends BaseThingHandlerFactory {
             return "http://" + ipAddress + ":" + port;
         }
     }
-
-    @Reference
-    protected void setAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = audioHTTPServer;
-    }
-
-    protected void unsetAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = null;
-    }
-
-    @Reference
-    protected void setNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = networkAddressService;
-    }
-
-    protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = null;
-    }
-
 }

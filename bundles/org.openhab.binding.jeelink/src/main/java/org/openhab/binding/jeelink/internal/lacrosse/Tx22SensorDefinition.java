@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.jeelink.internal.lacrosse;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.jeelink.internal.JeeLinkBindingConstants;
 import org.openhab.binding.jeelink.internal.JeeLinkReadingConverter;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.SensorDefinition;
+import org.openhab.core.thing.Thing;
 
 /**
  * Sensor Defintion of a TX22 Temperature/Humidity Sensor.
@@ -41,6 +41,6 @@ public class Tx22SensorDefinition extends SensorDefinition<Tx22Reading> {
 
     @Override
     public JeeLinkSensorHandler<Tx22Reading> createHandler(Thing thing) {
-        return new Tx22SensorHandler(thing);
+        return new Tx22SensorHandler(thing, type);
     }
 }

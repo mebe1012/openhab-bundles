@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,20 +31,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.ihc.internal.ButtonPressDurationDetector;
 import org.openhab.binding.ihc.internal.ChannelUtils;
 import org.openhab.binding.ihc.internal.EnumDictionary;
@@ -69,6 +55,21 @@ import org.openhab.binding.ihc.internal.ws.projectfile.ProjectFileUtils;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSBooleanValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSEnumValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSResourceValue;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -167,11 +168,7 @@ public class IhcHandler extends BaseThingHandler implements IhcEventListener {
     }
 
     private String getFilePathInUserDataFolder(String fileName) {
-        String progArg = System.getProperty("smarthome.userdata");
-        if (progArg != null) {
-            return progArg + File.separator + fileName;
-        }
-        return fileName;
+        return OpenHAB.getUserDataFolder() + File.separator + fileName;
     }
 
     @Override
@@ -404,7 +401,7 @@ public class IhcHandler extends BaseThingHandler implements IhcEventListener {
         }
     }
 
-    private ArrayList<IhcEnumValue> getEnumValues(WSResourceValue value) {
+    private List<IhcEnumValue> getEnumValues(WSResourceValue value) {
         if (value instanceof WSEnumValue) {
             return enumDictionary.getEnumValues(((WSEnumValue) value).definitionTypeID);
         }
@@ -937,7 +934,7 @@ public class IhcHandler extends BaseThingHandler implements IhcEventListener {
             resourceIds.addAll(linkedResourceIds);
             resourceIds.addAll(getAllLinkedChannelsResourceIds());
             logger.debug("Enable runtime notfications for {} resources: {}", resourceIds.size(), resourceIds);
-            if (resourceIds.size() > 0) {
+            if (!resourceIds.isEmpty()) {
                 try {
                     ihc.enableRuntimeValueNotifications(resourceIds);
                 } catch (IhcExecption e) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,18 +15,20 @@ package org.openhab.binding.satel.internal.handler;
 import static org.openhab.binding.satel.internal.SatelBindingConstants.THING_TYPE_OUTPUT;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.satel.internal.command.ControlObjectCommand;
 import org.openhab.binding.satel.internal.command.SatelCommand;
 import org.openhab.binding.satel.internal.types.OutputControl;
 import org.openhab.binding.satel.internal.types.OutputState;
 import org.openhab.binding.satel.internal.types.StateType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
 
 /**
  * The {@link SatelOutputHandler} is responsible for handling commands, which are
@@ -34,6 +36,7 @@ import org.openhab.binding.satel.internal.types.StateType;
  *
  * @author Krzysztof Goworek - Initial contribution
  */
+@NonNullByDefault
 public class SatelOutputHandler extends WirelessChannelsHandler {
 
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_OUTPUT);
@@ -43,26 +46,26 @@ public class SatelOutputHandler extends WirelessChannelsHandler {
     }
 
     @Override
-    protected SatelCommand convertCommand(ChannelUID channel, Command command) {
+    protected Optional<SatelCommand> convertCommand(ChannelUID channel, Command command) {
         if (command instanceof OnOffType && getStateType(channel.getId()) == OutputState.STATE) {
+            final SatelBridgeHandler bridgeHandler = getBridgeHandler();
             boolean switchOn = (command == OnOffType.ON);
             int size = bridgeHandler.getIntegraType().hasExtPayload() ? 32 : 16;
-            byte[] outputs = getObjectBitset(size, thingConfig.getId());
-            boolean newState = switchOn ^ thingConfig.isStateInverted();
-            return new ControlObjectCommand(newState ? OutputControl.ON : OutputControl.OFF, outputs,
-                    bridgeHandler.getUserCode(), scheduler);
+            byte[] outputs = getObjectBitset(size, getThingConfig().getId());
+            boolean newState = switchOn ^ getThingConfig().isStateInverted();
+            return Optional.of(new ControlObjectCommand(newState ? OutputControl.ON : OutputControl.OFF, outputs,
+                    bridgeHandler.getUserCode(), scheduler));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
     protected StateType getStateType(String channelId) {
         StateType result = super.getStateType(channelId);
-        if (result == null) {
+        if (result == StateType.NONE) {
             result = OutputState.valueOf(channelId.toUpperCase());
         }
         return result;
     }
-
 }

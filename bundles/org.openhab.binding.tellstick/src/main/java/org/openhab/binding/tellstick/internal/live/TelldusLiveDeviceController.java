@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -34,15 +34,15 @@ import org.asynchttpclient.Response;
 import org.asynchttpclient.oauth.ConsumerKey;
 import org.asynchttpclient.oauth.OAuthSignatureCalculator;
 import org.asynchttpclient.oauth.RequestToken;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.tellstick.internal.TelldusBindingException;
 import org.openhab.binding.tellstick.internal.handler.TelldusDeviceController;
 import org.openhab.binding.tellstick.internal.live.xml.TelldusLiveResponse;
 import org.openhab.binding.tellstick.internal.live.xml.TellstickNetDevice;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tellstick.JNA;
@@ -137,7 +137,6 @@ public class TelldusLiveDeviceController implements DeviceChangeListener, Sensor
         } else {
             logger.warn("Cannot send to {}", device);
         }
-
     }
 
     private void increaseDecrease(Device dev, IncreaseDecreaseType increaseDecreaseType) throws TellstickException {
@@ -273,7 +272,6 @@ public class TelldusLiveDeviceController implements DeviceChangeListener, Sensor
     @Override
     public void onRequest(TellstickDeviceEvent newDevices) {
         setLastSend(newDevices.getTimestamp());
-
     }
 
     <T> T callRestMethod(String uri, Class<T> response) throws TelldusLiveException {

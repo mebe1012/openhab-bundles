@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.onewire.internal.DS2438Configuration;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.OwPageBuffer;
 import org.openhab.binding.onewire.internal.SensorId;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
 import org.openhab.binding.onewire.internal.handler.OwserverBridgeHandler;
+import org.openhab.core.thing.ThingTypeUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,8 +118,8 @@ public class OwDiscoveryItem {
      * @return ThingTypeUID if mapping successful
      */
     public ThingTypeUID getThingTypeUID() throws OwException {
-        if (THING_TYPE_MAP.containsKey(sensorType)) {
-            thingTypeUID = THING_TYPE_MAP.get(sensorType);
+        ThingTypeUID thingTypeUID = THING_TYPE_MAP.get(sensorType);
+        if (thingTypeUID != null) {
             return thingTypeUID;
         } else {
             throw new OwException(sensorType + " cannot be mapped to thing type");

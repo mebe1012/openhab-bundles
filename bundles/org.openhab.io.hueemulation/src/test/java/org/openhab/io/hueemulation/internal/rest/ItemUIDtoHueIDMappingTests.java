@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.io.hueemulation.internal.rest;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
@@ -21,15 +21,15 @@ import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.hamcrest.CoreMatchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.io.hueemulation.internal.ConfigStore;
 import org.openhab.io.hueemulation.internal.dto.HueLightEntry;
 import org.openhab.io.hueemulation.internal.dto.HueStatePlug;
@@ -47,7 +47,7 @@ public class ItemUIDtoHueIDMappingTests {
 
     LightsAndGroups lightsAndGroups = new LightsAndGroups();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         commonSetup = new CommonSetup(true);
         commonSetup.start(new ResourceConfig());
@@ -61,8 +61,8 @@ public class ItemUIDtoHueIDMappingTests {
         lightsAndGroups.activate();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    public void tearDown() throws Exception {
         commonSetup.dispose();
     }
 

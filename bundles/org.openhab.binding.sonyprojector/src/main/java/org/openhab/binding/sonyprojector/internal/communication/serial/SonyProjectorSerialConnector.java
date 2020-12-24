@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,18 +22,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
 import org.openhab.binding.sonyprojector.internal.SonyProjectorException;
 import org.openhab.binding.sonyprojector.internal.SonyProjectorModel;
 import org.openhab.binding.sonyprojector.internal.communication.SonyProjectorConnector;
 import org.openhab.binding.sonyprojector.internal.communication.SonyProjectorItem;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -304,5 +304,4 @@ public class SonyProjectorSerialConnector extends SonyProjectorConnector impleme
         } catch (InterruptedException e) {
         }
     }
-
 }

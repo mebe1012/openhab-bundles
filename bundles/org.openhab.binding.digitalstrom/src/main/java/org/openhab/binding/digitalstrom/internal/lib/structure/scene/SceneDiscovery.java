@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.openhab.binding.digitalstrom.internal.lib.config.Config;
 import org.openhab.binding.digitalstrom.internal.lib.listener.SceneStatusListener;
 import org.openhab.binding.digitalstrom.internal.lib.manager.ConnectionManager;
@@ -31,6 +30,7 @@ import org.openhab.binding.digitalstrom.internal.lib.structure.devices.devicepar
 import org.openhab.binding.digitalstrom.internal.lib.structure.scene.constants.ApartmentSceneEnum;
 import org.openhab.binding.digitalstrom.internal.lib.structure.scene.constants.SceneEnum;
 import org.openhab.binding.digitalstrom.internal.lib.structure.scene.constants.ZoneSceneEnum;
+import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class SceneDiscovery {
     // fields: 0 = namedScenes, 1 = apartmentScenes, 2 = zoneScenes, 3 = reachableScenes
     private final char[] scenesGenerated = "0000".toCharArray();
 
-    private final List<InternalScene> namedScenes = new LinkedList<InternalScene>();
+    private final List<InternalScene> namedScenes = new LinkedList<>();
     private boolean genList = false;
     ScheduledFuture<?> generateReachableScenesScheduledFuture;
 
@@ -347,14 +347,14 @@ public class SceneDiscovery {
                 JsonObject resultJsonObj = JSONResponseHandler.getResultJsonObject(responsJsonObj);
                 if (resultJsonObj.get(JSONApiResponseKeysEnum.ZONES.getKey()) instanceof JsonArray) {
                     JsonArray zones = (JsonArray) resultJsonObj.get(JSONApiResponseKeysEnum.ZONES.getKey());
-                    reachableGroupsMap = new HashMap<Integer, List<Short>>(zones.size());
+                    reachableGroupsMap = new HashMap<>(zones.size());
                     List<Short> groupList;
                     for (int i = 0; i < zones.size(); i++) {
                         if (((JsonObject) zones.get(i))
                                 .get(JSONApiResponseKeysEnum.GROUPS.getKey()) instanceof JsonArray) {
                             JsonArray groups = (JsonArray) ((JsonObject) zones.get(i))
                                     .get(JSONApiResponseKeysEnum.GROUPS.getKey());
-                            groupList = new LinkedList<Short>();
+                            groupList = new LinkedList<>();
                             for (int k = 0; k < groups.size(); k++) {
                                 groupList.add(groups.get(k).getAsShort());
                             }

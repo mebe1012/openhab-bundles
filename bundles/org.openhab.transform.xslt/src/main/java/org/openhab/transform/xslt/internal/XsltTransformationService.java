@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,9 +24,9 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  */
 @NonNullByDefault
-@Component(immediate = true, property = { "smarthome.transform=XSLT" })
+@Component(property = { "openhab.transform=XSLT" })
 public class XsltTransformationService implements TransformationService {
 
     private final Logger logger = LoggerFactory.getLogger(XsltTransformationService.class);
@@ -63,8 +63,8 @@ public class XsltTransformationService implements TransformationService {
         Source xsl = null;
 
         try {
-            String path = ConfigConstants.getConfigFolder() + File.separator
-                    + TransformationService.TRANSFORM_FOLDER_NAME + File.separator + filename;
+            String path = OpenHAB.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
+                    + File.separator + filename;
             xsl = new StreamSource(new File(path));
         } catch (Exception e) {
             String message = "opening file '" + filename + "' throws exception";
@@ -92,5 +92,4 @@ public class XsltTransformationService implements TransformationService {
 
         return out.toString();
     }
-
 }

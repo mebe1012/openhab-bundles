@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,11 @@
  */
 package org.openhab.transform.xpath.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.transform.xpath.internal.XPathTransformationService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.transform.TransformationException;
 
 /**
  * @author Thomas.Eichstaedt-Engelen
@@ -26,19 +25,17 @@ public class XPathTransformationServiceTest extends AbstractTransformationServic
 
     private XPathTransformationService processor;
 
-    @Before
+    @BeforeEach
     public void init() {
         processor = new XPathTransformationService();
     }
 
     @Test
     public void testTransformByXPath() throws TransformationException {
-
         // method under test
         String transformedResponse = processor.transform("//current_conditions/temp_c/@data", source);
 
         // Asserts
         assertEquals("8", transformedResponse);
     }
-
 }

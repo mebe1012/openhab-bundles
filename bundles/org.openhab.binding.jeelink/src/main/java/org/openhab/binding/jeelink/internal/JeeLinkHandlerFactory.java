@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,17 +18,20 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.jeelink.internal.discovery.SensorDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +44,13 @@ import org.slf4j.LoggerFactory;
 public class JeeLinkHandlerFactory extends BaseThingHandlerFactory {
     private final Logger logger = LoggerFactory.getLogger(JeeLinkHandlerFactory.class);
 
-    private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
+    private final Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
+    private final SerialPortManager serialPortManager;
+
+    @Activate
+    public JeeLinkHandlerFactory(final @Reference SerialPortManager serialPortManager) {
+        this.serialPortManager = serialPortManager;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUid) {
@@ -57,7 +66,7 @@ public class JeeLinkHandlerFactory extends BaseThingHandlerFactory {
                 || thingTypeUid.equals(LGW_TCP_STICK_THING_TYPE) || thingTypeUid.equals(LGW_USB_STICK_THING_TYPE)) {
             logger.debug("creating JeeLinkHandler for thing {}...", thing.getUID().getId());
 
-            handler = new JeeLinkHandler((Bridge) thing);
+            handler = new JeeLinkHandler((Bridge) thing, serialPortManager);
             registerSensorDiscoveryService((JeeLinkHandler) handler);
         } else {
             handler = SensorDefinition.createHandler(thingTypeUid, thing);

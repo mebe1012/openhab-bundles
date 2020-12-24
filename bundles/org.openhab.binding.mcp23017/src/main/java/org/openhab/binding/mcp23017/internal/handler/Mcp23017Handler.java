@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,18 +15,19 @@ package org.openhab.binding.mcp23017.internal.handler;
 import static org.openhab.binding.mcp23017.internal.Mcp23017BindingConstants.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.mcp23017.internal.GPIODataHolder;
 import org.openhab.binding.mcp23017.internal.PinMapper;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,6 @@ public class Mcp23017Handler extends BaseThingHandler implements GpioPinListener
 
     public Mcp23017Handler(Thing thing) {
         super(thing);
-
     }
 
     @Override
@@ -113,7 +113,8 @@ public class Mcp23017Handler extends BaseThingHandler implements GpioPinListener
             Configuration configuration = this.getThing().getChannel(channelUID.getId()).getConfiguration();
 
             // invertLogic is null if not configured
-            boolean activeLowFlag = ACTIVE_LOW_ENABLED.equalsIgnoreCase(configuration.get(ACTIVE_LOW).toString());
+            String activeLowStr = Objects.toString(configuration.get(ACTIVE_LOW), null);
+            boolean activeLowFlag = ACTIVE_LOW_ENABLED.equalsIgnoreCase(activeLowStr);
             PinState pinState = command == OnOffType.ON ^ activeLowFlag ? PinState.HIGH : PinState.LOW;
             logger.debug("got output pin {} for channel {} and command {} [active_low={}, new_state={}]", outputPin,
                     channelUID, command, activeLowFlag, pinState);
@@ -183,7 +184,12 @@ public class Mcp23017Handler extends BaseThingHandler implements GpioPinListener
 
     @Override
     public void dispose() {
-        pinStateHolder.unBindGpioPins();
+        final Mcp23017PinStateHolder holder = pinStateHolder;
+
+        if (holder != null) {
+            holder.unBindGpioPins();
+        }
+
         super.dispose();
     }
 

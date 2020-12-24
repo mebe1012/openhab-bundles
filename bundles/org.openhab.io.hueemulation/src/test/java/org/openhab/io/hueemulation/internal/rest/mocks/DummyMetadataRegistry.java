@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,10 +21,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 
 /**
  * @author David Graeff - Initial contribution
@@ -65,14 +65,16 @@ public class DummyMetadataRegistry implements MetadataRegistry {
         for (RegistryChangeListener<Metadata> l : listeners) {
             l.added(element);
         }
-        return put;
+        return element;
     }
 
     @Override
     public @Nullable Metadata update(Metadata element) {
         Metadata put = items.put(element.getUID(), element);
-        for (RegistryChangeListener<Metadata> l : listeners) {
-            l.updated(put, element);
+        if (put != null) {
+            for (RegistryChangeListener<Metadata> l : listeners) {
+                l.updated(put, element);
+            }
         }
         return put;
     }
@@ -80,8 +82,10 @@ public class DummyMetadataRegistry implements MetadataRegistry {
     @Override
     public @Nullable Metadata remove(MetadataKey key) {
         Metadata put = items.remove(key);
-        for (RegistryChangeListener<Metadata> l : listeners) {
-            l.removed(put);
+        if (put != null) {
+            for (RegistryChangeListener<Metadata> l : listeners) {
+                l.removed(put);
+            }
         }
         return put;
     }
@@ -93,7 +97,5 @@ public class DummyMetadataRegistry implements MetadataRegistry {
 
     @Override
     public void removeItemMetadata(String name) {
-
     }
-
 }

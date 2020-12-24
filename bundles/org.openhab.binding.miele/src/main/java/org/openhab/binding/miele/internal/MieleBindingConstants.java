@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,14 @@
 package org.openhab.binding.miele.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link MieleBinding} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Karel Goderis - Initial contribution
+ * @author Martin Lepsy - added constants for support of WiFi devices & protocol
  */
 @NonNullByDefault
 public class MieleBindingConstants {
@@ -27,6 +28,9 @@ public class MieleBindingConstants {
     public static final String BINDING_ID = "miele";
     public static final String APPLIANCE_ID = "uid";
     public static final String DEVICE_CLASS = "dc";
+    public static final String HDM_LAN = "hdm:LAN:";
+    public static final String HDM_ZIGBEE = "hdm:ZigBee:";
+    public static final String PROTOCOL_PROPERTY_NAME = "protocol";
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_XGW3000 = new ThingTypeUID(BINDING_ID, "xgw3000");
@@ -45,5 +49,4 @@ public class MieleBindingConstants {
     public static final String INTERFACE = "interface";
     public static final String USER_NAME = "userName";
     public static final String PASSWORD = "password";
-
 }

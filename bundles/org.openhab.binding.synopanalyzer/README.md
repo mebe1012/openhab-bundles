@@ -10,9 +10,13 @@ The binding has no configuration options itself, all configuration is done at 'T
 
 There is exactly one supported thing, which represents a Synop message. It has the id `synopanalyzer`.
 
+## Discovery
+
+If a system location is set, the nearest availabble Synop station be automatically discovered for this location.
+
 ## Thing Configuration
 
-Besides the Synop Station Number (as ```synopID``` as a [StationID](http://www.ogimet.com/gsynop_nav.phtml.en) string), the second configuration parameter is ```refreshInterval``` which defines the refresh interval in minutes.
+Besides the Synop Station Number (as ```synopID``` as a [StationID](https://www.ogimet.com/gsynop_nav.phtml.en) string), the second configuration parameter is ```refreshInterval``` which defines the refresh interval in minutes.
 Synop message are typically updated every hour.
 
 
@@ -43,7 +47,7 @@ The weather information that is retrieved is available as these channels:
 Here is an example of thing definition :
 
 ```
-synopanalyzer:synopanalyzer:orly [ stationId="07149"]
+synopanalyzer:synopanalyzer:orly [ stationId=7149 ]
 ```
 
 ### Items

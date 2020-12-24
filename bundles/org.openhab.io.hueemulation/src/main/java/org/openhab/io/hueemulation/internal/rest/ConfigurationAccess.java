@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,9 @@
  */
 package org.openhab.io.hueemulation.internal.rest;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.io.hueemulation.internal.ConfigStore;
+import org.openhab.io.hueemulation.internal.HueEmulationService;
 import org.openhab.io.hueemulation.internal.NetworkUtils;
 import org.openhab.io.hueemulation.internal.dto.HueUnauthorizedConfig;
 import org.openhab.io.hueemulation.internal.dto.changerequest.HueChangeRequest;
@@ -37,19 +36,22 @@ import org.openhab.io.hueemulation.internal.dto.response.HueResponse.HueErrorMes
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import com.google.gson.reflect.TypeToken;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 /**
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = false, service = {
-        ConfigurationAccess.class }, property = "com.eclipsesource.jaxrs.publish=false")
+@Component(immediate = false, service = ConfigurationAccess.class)
+@JaxrsResource
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + HueEmulationService.REST_APP_NAME + ")")
 @NonNullByDefault
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,8 +66,8 @@ public class ConfigurationAccess {
     @GET
     @Path("config")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Return the reduced configuration")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Return the reduced configuration", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response getReducedConfigApi() {
         return Response.ok(cs.gson.toJson(cs.ds.config, new TypeToken<HueUnauthorizedConfig>() {
         }.getType())).build();
@@ -74,10 +76,10 @@ public class ConfigurationAccess {
     @GET
     @Path("{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Return the full data store")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Return the full data store", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response getAllApi(@Context UriInfo uri,
-            @PathParam("username") @ApiParam(value = "username") String username) {
+            @PathParam("username") @Parameter(description = "username") String username) {
         if (!userManagement.authorizeUser(username)) {
             return NetworkUtils.singleError(cs.gson, uri, HueResponse.UNAUTHORIZED, "Not Authorized");
         }
@@ -87,10 +89,10 @@ public class ConfigurationAccess {
     @GET
     @Path("{username}/config")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Return the configuration")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Return the configuration", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response getFullConfigApi(@Context UriInfo uri,
-            @PathParam("username") @ApiParam(value = "username") String username) {
+            @PathParam("username") @Parameter(description = "username") String username) {
         if (!userManagement.authorizeUser(username)) {
             return NetworkUtils.singleError(cs.gson, uri, HueResponse.UNAUTHORIZED, "Not Authorized");
         }
@@ -100,10 +102,10 @@ public class ConfigurationAccess {
     @PUT
     @Path("{username}/config")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Return the reduced configuration")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Return the reduced configuration", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response putFullConfigApi(@Context UriInfo uri,
-            @PathParam("username") @ApiParam(value = "username") String username, String body) {
+            @PathParam("username") @Parameter(description = "username") String username, String body) {
         if (!userManagement.authorizeUser(username)) {
             return NetworkUtils.singleError(cs.gson, uri, HueResponse.UNAUTHORIZED, "Not Authorized");
         }

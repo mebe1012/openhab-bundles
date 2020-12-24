@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.ihc.internal.ws.services;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.ihc.internal.ws.IhcClient;
 import org.openhab.binding.ihc.internal.ws.ResourceFileUtils;
 import org.openhab.binding.ihc.internal.ws.datatypes.WSControllerState;
@@ -41,11 +41,11 @@ public class IhcControllerServiceTest {
     private IhcControllerService ihcControllerService;
     private final String host = "1.1.1.1";
     private final String url = "https://1.1.1.1/ws/ControllerService";
-    private Map<String, String> requestProps = new HashMap<String, String>();
+    private Map<String, String> requestProps = new HashMap<>();
     private String query;
     private final int timeout = 100;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IhcExecption, SocketTimeoutException {
         ihcControllerService = spy(new IhcControllerService(host, timeout, new IhcConnectionPool()));
 
@@ -138,7 +138,6 @@ public class IhcControllerServiceTest {
         final byte[] expectedResult = "LvVF4VWSi0WqRKps7lGH6U....OBCl1gwKGbvYM1SDh".getBytes();
         final WSFile result = ihcControllerService.getProjectSegment(1, 1001, 2002);
 
-        assertTrue("Result bytes doesn't match to expected bytes", Arrays.equals(expectedResult, result.getData()));
+        assertTrue(Arrays.equals(expectedResult, result.getData()), "Result bytes doesn't match to expected bytes");
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,15 +18,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.bosesoundtouch.internal.handler.BoseSoundTouchHandler;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,9 +82,9 @@ public class CommandExecutor implements AvailableSources {
     /**
      * Adds a ContentItem to the PresetContainer
      *
-     * @param id          the id the ContentItem should be reached
+     * @param id the id the ContentItem should be reached
      * @param contentItem the contentItem that should be saved as PRESET. Note that a eventually set presetID of the
-     *                        ContentItem will be overwritten with id
+     *            ContentItem will be overwritten with id
      */
     public void addContentItemToPresetContainer(int id, ContentItem contentItem) {
         contentItem.setPresetID(id);
@@ -100,7 +100,7 @@ public class CommandExecutor implements AvailableSources {
      * Adds the current selected ContentItem to the PresetContainer
      *
      * @param command the command is a DecimalType, thats intValue will be used as id. The id the ContentItem should be
-     *                    reached
+     *            reached
      */
     public void addCurrentContentItemToPresetContainer(DecimalType command) {
         if (command.intValue() > 6) {

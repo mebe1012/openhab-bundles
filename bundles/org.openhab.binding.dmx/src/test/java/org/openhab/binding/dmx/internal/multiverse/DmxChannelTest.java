@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,17 +13,16 @@
 package org.openhab.binding.dmx.internal.multiverse;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.openhab.binding.dmx.internal.DmxBindingConstants.ListenerType;
 import org.openhab.binding.dmx.internal.action.FadeAction;
 import org.openhab.binding.dmx.internal.action.ResumeAction;
 import org.openhab.binding.dmx.internal.handler.DimmerThingHandler;
-import org.openhab.binding.dmx.internal.multiverse.DmxChannel;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * Tests cases for Channel
@@ -38,7 +37,7 @@ public class DmxChannelTest {
     DimmerThingHandler dimmerThingHandler;
     long currentTime;
 
-    @Before
+    @BeforeEach
     public void setup() {
         dimmerThingHandler = Mockito.mock(DimmerThingHandler.class);
         dmxChannel = new DmxChannel(0, 1, 0);
@@ -143,5 +142,4 @@ public class DmxChannelTest {
         assertThat(dmxChannel.hasRunningActions(), is(false));
         Mockito.verify(dimmerThingHandler).updateChannelValue(valueChannelUID, 127);
     }
-
 }

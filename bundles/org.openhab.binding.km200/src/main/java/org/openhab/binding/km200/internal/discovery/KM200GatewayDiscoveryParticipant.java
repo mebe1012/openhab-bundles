@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,12 +20,14 @@ import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.km200.internal.handler.KM200GatewayHandler;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +37,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Eckhardt - Initial contribution
  */
-@Component(immediate = true, configurationPid = "binding.km200")
+@NonNullByDefault
+@Component(configurationPid = "binding.km200")
 public class KM200GatewayDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
-    private final Logger logger = LoggerFactory.getLogger(KM200GatewayDiscoveryParticipant.class);
+    private static final Set<ThingTypeUID> SUPPORTED_ALL_THING_TYPES_UIDS = KM200GatewayHandler.SUPPORTED_THING_TYPES_UIDS;
+    private static final String IP4_ADDRESS = "ip4Address";
 
-    public static final Set<ThingTypeUID> SUPPORTED_ALL_THING_TYPES_UIDS = KM200GatewayHandler.SUPPORTED_THING_TYPES_UIDS;
+    private final Logger logger = LoggerFactory.getLogger(KM200GatewayDiscoveryParticipant.class);
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
@@ -48,40 +52,39 @@ public class KM200GatewayDiscoveryParticipant implements MDNSDiscoveryParticipan
     }
 
     @Override
-    public DiscoveryResult createResult(ServiceInfo info) {
-        logger.debug("createResult: {}", info);
-        DiscoveryResult discoveryResult = null;
+    public @Nullable DiscoveryResult createResult(ServiceInfo info) {
         ThingUID uid = getThingUID(info);
-        logger.debug("uid: {}", uid);
+        logger.debug("MDNS info: {}, uid: {}", info, uid);
         if (uid != null) {
             InetAddress[] addrs = info.getInetAddresses();
             logger.debug("ip: {} id:{}", addrs[0].getHostAddress(), uid.getId());
-            discoveryResult = DiscoveryResultBuilder.create(uid).withProperty("ip4Address", addrs[0].getHostAddress())
-                    .withProperty("deviceId", uid.getId()).withRepresentationProperty(addrs[0].getHostAddress())
+            return DiscoveryResultBuilder.create(uid).withProperty(IP4_ADDRESS, addrs[0].getHostAddress())
+                    .withProperty("deviceId", uid.getId()).withRepresentationProperty(IP4_ADDRESS)
                     .withLabel("KM50/100/200 Gateway (" + addrs[0].getHostAddress() + ")").build();
-
-            return discoveryResult;
         }
         return null;
     }
 
     @Override
-    public ThingUID getThingUID(ServiceInfo info) {
+    public @Nullable ThingUID getThingUID(ServiceInfo info) {
         ThingTypeUID typeUID = getThingTypeUID(info);
         if (typeUID != null) {
             logger.debug("getType: {}", info.getType());
             if (info.getType() != null) {
                 if (info.getType().equalsIgnoreCase(getServiceType())) {
                     String devId = info.getPropertyString("uuid");
-                    logger.info("Discovered a KMXXX gateway with name: '{}' id: '{}'", info.getName(), devId);
-                    if (devId.isEmpty()) {
-                        /* If something is wrong then we are generating a random UUID */
-                        logger.debug("Error in automatic device-id detection. Using random value");
-                        Random rnd = new Random();
-                        devId = String.valueOf(rnd.nextLong());
+                    if (null != devId) {
+                        logger.info("Discovered a KMXXX gateway with name: '{}' id: '{}'", info.getName(), devId);
+                        if (devId.isEmpty()) {
+                            /* If something is wrong then we are generating a random UUID */
+                            logger.debug("Error in automatic device-id detection. Using random value");
+                            Random rnd = new Random();
+                            devId = String.valueOf(rnd.nextLong());
+                        }
+                        return new ThingUID(typeUID, devId);
+                    } else {
+                        logger.debug("No uuid property found");
                     }
-                    ThingUID thinguid = new ThingUID(typeUID, devId);
-                    return thinguid;
                 }
             }
         }
@@ -93,11 +96,10 @@ public class KM200GatewayDiscoveryParticipant implements MDNSDiscoveryParticipan
         return "_http._tcp.local.";
     }
 
-    private ThingTypeUID getThingTypeUID(ServiceInfo info) {
+    private @Nullable ThingTypeUID getThingTypeUID(ServiceInfo info) {
         InetAddress[] addrs = info.getInetAddresses();
         if (addrs.length > 0) {
-            String hardwareID;
-            hardwareID = info.getPropertyString("hwversion");
+            String hardwareID = info.getPropertyString("hwversion");
             logger.debug("hardwareID: {}", hardwareID);
             if (hardwareID != null && hardwareID.contains("iCom_Low")) {
                 return THING_TYPE_KMDEVICE;

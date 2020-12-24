@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,10 +26,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.transform.AbstractFileTransformationService;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.transform.AbstractFileTransformationService;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Gaël L'hopital
  * @author Markus Rathgeb - drop usage of Guava
  */
-@Component(immediate = true, service = TransformationService.class, property = { "smarthome.transform=SCALE" })
+@Component(service = TransformationService.class, property = { "openhab.transform=SCALE" })
 public class ScaleTransformationService extends AbstractFileTransformationService<Map<Range, String>> {
 
     private final Logger logger = LoggerFactory.getLogger(ScaleTransformationService.class);
@@ -94,7 +94,7 @@ public class ScaleTransformationService extends AbstractFileTransformationServic
      * the range where it fits i.e. [min..max]=value or ]min..max]=value
      *
      * @param properties the list of properties defining all the available ranges
-     * @param source     the input to transform
+     * @param source the input to transform
      *
      */
     @Override
@@ -129,8 +129,8 @@ public class ScaleTransformationService extends AbstractFileTransformationServic
 
     private String getScaleResult(Map<Range, String> data, String source, final BigDecimal value)
             throws TransformationException {
-        return data.entrySet().stream().filter(entry -> entry.getKey().contains(value)).findFirst()
-                .map(Map.Entry::getValue)
+        return data.entrySet().stream().filter(entry -> entry.getKey() != null && entry.getKey().contains(value))
+                .findFirst().map(Map.Entry::getValue)
                 .orElseThrow(() -> new TransformationException("No matching range for '" + source + "'"));
     }
 
@@ -179,5 +179,4 @@ public class ScaleTransformationService extends AbstractFileTransformationServic
             throw new TransformationException("An error occurred while opening file.", ex);
         }
     }
-
 }

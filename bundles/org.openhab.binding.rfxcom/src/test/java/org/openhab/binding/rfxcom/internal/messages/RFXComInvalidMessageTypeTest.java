@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,21 +12,24 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.junit.Test;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Test for RFXCom-binding
  *
- * @author James Hewitt-Thomas
+ * @author James Hewitt-Thomas - Initial contribution
  */
+@NonNullByDefault
 public class RFXComInvalidMessageTypeTest {
 
-    @Test(expected = RFXComUnsupportedValueException.class)
-    public void testMessage() throws RFXComException {
+    @Test
+    public void testMessage() {
         byte[] message = HexUtils.hexToBytes("07CC01271356ECC0");
-        final RFXComMessage msg = RFXComMessageFactory.createMessage(message);
+        assertThrows(RFXComUnsupportedValueException.class, () -> RFXComMessageFactory.createMessage(message));
     }
 }

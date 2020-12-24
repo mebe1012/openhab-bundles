@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,9 @@
 package org.openhab.binding.wemo.internal.discovery.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,20 +23,20 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.config.discovery.inbox.InboxFilterCriteria;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.jupnp.model.meta.Device;
 import org.openhab.binding.wemo.internal.WemoBindingConstants;
 import org.openhab.binding.wemo.internal.discovery.WemoDiscoveryService;
 import org.openhab.binding.wemo.internal.test.GenericWemoOSGiTest;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Tests for {@link WemoDiscoveryService}.
@@ -42,15 +44,16 @@ import org.openhab.binding.wemo.internal.test.GenericWemoOSGiTest;
  * @author Svilen Valkanov - Initial contribution
  * @author Stefan Triller - Ported Tests from Groovy to Java
  */
+@NonNullByDefault
 public class WemoDiscoveryOSGiTest extends GenericWemoOSGiTest {
 
     // UpnP service information
-    private final String SERVICE_ID = "basicevent";
-    private final String SERVICE_NUMBER = "1";
+    private static final String SERVICE_ID = "basicevent";
+    private static final String SERVICE_NUMBER = "1";
 
-    private Inbox inbox;
+    private @NonNullByDefault({}) Inbox inbox;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         setUpServices();
 
@@ -58,7 +61,7 @@ public class WemoDiscoveryOSGiTest extends GenericWemoOSGiTest {
         assertThat(inbox, is(notNullValue()));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         List<DiscoveryResult> results = inbox.getAll();
         assertThat(results.size(), is(0));
@@ -75,22 +78,17 @@ public class WemoDiscoveryOSGiTest extends GenericWemoOSGiTest {
         waitForAssert(() -> {
             Collection<Device> devices = mockUpnpService.getRegistry().getDevices();
             assertThat(devices.size(), is(1));
-            Device device = null;
-            for (Device d : devices) {
-                device = d;
-                break;
-            }
+            Device device = devices.iterator().next();
             assertThat(device.getDetails().getModelDetails().getModelName(), is(model));
         });
 
         ThingUID thingUID = new ThingUID(thingType, DEVICE_UDN);
 
         waitForAssert(() -> {
-            List<DiscoveryResult> results = inbox.get(new InboxFilterCriteria(thingUID, null));
-            assertFalse(results.isEmpty());
+            assertTrue(inbox.stream().anyMatch(forThingUID(thingUID)));
         });
 
-        inbox.approve(thingUID, DEVICE_FRIENDLY_NAME);
+        inbox.approve(thingUID, DEVICE_FRIENDLY_NAME, null);
 
         waitForAssert(() -> {
             Thing thing = thingRegistry.get(thingUID);

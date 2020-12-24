@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,18 @@
  */
 package org.openhab.binding.hdpowerview.internal.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
- * Basic configuration for an HD Power View Shade
+ * Basic configuration for an HD PowerView Shade
  *
  * @author Andy Lintner - Initial contribution
  */
+@NonNullByDefault
 public class HDPowerViewShadeConfiguration {
 
     public static final String ID = "id";
 
-    public String id;
-
+    public @Nullable String id;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,23 @@
  */
 package org.openhab.binding.buienradar;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.buienradar.internal.buienradarapi.BuienradarParseException;
 import org.openhab.binding.buienradar.internal.buienradarapi.BuienradarPredictionAPI;
 import org.openhab.binding.buienradar.internal.buienradarapi.Prediction;
 
+/**
+ * Tests {@link BuienradarPredictionAPI}.
+ *
+ * @author Edwin de Jong - Initial contribution
+ */
 public class BuienradarPredictionAPITest {
     private static final ZonedDateTime NOW = ZonedDateTime.of(2019, 3, 10, 20, 37, 0, 0, ZoneId.of("Europe/Amsterdam"));
 
@@ -80,5 +85,4 @@ public class BuienradarPredictionAPITest {
                 parsed.getDateTimeOfPrediction());
         assertEquals(BigDecimal.valueOf(0, 2), parsed.getIntensity());
     }
-
 }

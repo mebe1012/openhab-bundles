@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.knx.internal.dpt;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DecimalType;
 
 /**
  *
@@ -29,5 +29,4 @@ public class KNXCoreTypeMapperTest {
         assertEquals("3", new KNXCoreTypeMapper().toDPTValue(new DecimalType("3"), "17.001"));
         assertEquals("3", new KNXCoreTypeMapper().toDPTValue(new DecimalType("3.0"), "17.001"));
     }
-
 }

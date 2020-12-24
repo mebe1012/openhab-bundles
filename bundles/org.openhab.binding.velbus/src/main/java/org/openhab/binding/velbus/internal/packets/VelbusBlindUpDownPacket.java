@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.velbus.internal.packets;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.velbus.internal.VelbusChannelIdentifier;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.binding.velbus.internal.VelbusChannelIdentifier;
  *
  * @author Cedric Boon - Initial contribution
  */
+@NonNullByDefault
 public class VelbusBlindUpDownPacket extends VelbusPacket {
     private final byte timeoutHighByte = 0x00;
     private final byte timeoutMidByte = 0x00;
@@ -39,5 +41,4 @@ public class VelbusBlindUpDownPacket extends VelbusPacket {
     protected byte[] getDataBytes() {
         return new byte[] { command, channel, timeoutHighByte, timeoutMidByte, timeoutLowByte };
     }
-
 }

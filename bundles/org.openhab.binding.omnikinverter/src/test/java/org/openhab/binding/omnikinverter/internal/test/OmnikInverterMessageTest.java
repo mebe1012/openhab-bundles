@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,21 +12,24 @@
  */
 package org.openhab.binding.omnikinverter.internal.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.omnikinverter.internal.OmnikInverterMessage;
 
+/**
+ * @author Hans van den Bogert - Initial contribution
+ */
 public class OmnikInverterMessageTest {
 
     private OmnikInverterMessage message;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         File file = new File("src/test/resources/omnik.output");
         message = new OmnikInverterMessage(Files.readAllBytes(file.toPath()));
@@ -46,5 +49,4 @@ public class OmnikInverterMessageTest {
     public void testGetEnergyToday() {
         assertEquals(11.13, message.getEnergyToday(), 0.01);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,8 +18,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.samsungtv.internal.service.api.SamsungTvService;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
 
 /**
  * The {@link ServiceFactory} is helper class for creating Samsung TV related
@@ -46,21 +46,20 @@ public class ServiceFactory {
      * @param type
      * @param upnpIOService
      * @param udn
-     * @param pollingInterval
      * @param host
      * @param port
      * @return
      */
     public static @Nullable SamsungTvService createService(String type, UpnpIOService upnpIOService, String udn,
-            int pollingInterval, String host, int port) {
+            String host, int port) {
         SamsungTvService service = null;
 
         switch (type) {
             case MainTVServerService.SERVICE_NAME:
-                service = new MainTVServerService(upnpIOService, udn, pollingInterval);
+                service = new MainTVServerService(upnpIOService, udn);
                 break;
             case MediaRendererService.SERVICE_NAME:
-                service = new MediaRendererService(upnpIOService, udn, pollingInterval);
+                service = new MediaRendererService(upnpIOService, udn);
                 break;
             // will not be created automatically
             case RemoteControllerService.SERVICE_NAME:
@@ -87,7 +86,7 @@ public class ServiceFactory {
      * @param serviceName Name of the service
      * @return Class of the service
      */
-    public static Class<? extends SamsungTvService> getClassByServiceName(String serviceName) {
+    public static @Nullable Class<? extends SamsungTvService> getClassByServiceName(String serviceName) {
         return SERVICEMAP.get(serviceName);
     }
 }

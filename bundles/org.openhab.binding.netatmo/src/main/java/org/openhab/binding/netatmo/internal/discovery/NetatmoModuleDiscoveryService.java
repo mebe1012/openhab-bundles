@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,30 +12,29 @@
  */
 package org.openhab.binding.netatmo.internal.discovery;
 
+import static org.openhab.binding.netatmo.internal.APIUtils.*;
 import static org.openhab.binding.netatmo.internal.NetatmoBindingConstants.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.netatmo.internal.handler.NetatmoBridgeHandler;
 import org.openhab.binding.netatmo.internal.handler.NetatmoDataListener;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
-import io.swagger.client.model.NAHealthyHomeCoach;
-import io.swagger.client.model.NAHealthyHomeCoachDataBody;
-import io.swagger.client.model.NAMain;
-import io.swagger.client.model.NAPlug;
-import io.swagger.client.model.NAStationDataBody;
-import io.swagger.client.model.NAThermostatDataBody;
-import io.swagger.client.model.NAWelcomeHome;
-import io.swagger.client.model.NAWelcomeHomeData;
+import io.swagger.client.model.*;
 
 /**
  * The {@link NetatmoModuleDiscoveryService} searches for available Netatmo
@@ -45,18 +44,21 @@ import io.swagger.client.model.NAWelcomeHomeData;
  * @author Ing. Peter Weiss - Welcome camera implementation
  *
  */
+@NonNullByDefault
 public class NetatmoModuleDiscoveryService extends AbstractDiscoveryService implements NetatmoDataListener {
-    private static final int SEARCH_TIME = 2;
-    @NonNull
+    private static final int SEARCH_TIME = 5;
     private final NetatmoBridgeHandler netatmoBridgeHandler;
 
-    public NetatmoModuleDiscoveryService(@NonNull NetatmoBridgeHandler netatmoBridgeHandler) {
+    public NetatmoModuleDiscoveryService(NetatmoBridgeHandler netatmoBridgeHandler, LocaleProvider localeProvider,
+            TranslationProvider translationProvider) {
         super(SUPPORTED_DEVICE_THING_TYPES_UIDS, SEARCH_TIME);
         this.netatmoBridgeHandler = netatmoBridgeHandler;
+        this.localeProvider = localeProvider;
+        this.i18nProvider = translationProvider;
     }
 
     @Override
-    public void activate(@Nullable Map<@NonNull String, @Nullable Object> configProperties) {
+    public void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
         netatmoBridgeHandler.registerDataListener(this);
     }
@@ -70,42 +72,46 @@ public class NetatmoModuleDiscoveryService extends AbstractDiscoveryService impl
     @Override
     public void startScan() {
         if (netatmoBridgeHandler.configuration.readStation) {
-            NAStationDataBody stationDataBody = netatmoBridgeHandler.getStationsDataBody(null);
-            if (stationDataBody != null) {
-                stationDataBody.getDevices().forEach(station -> {
+            netatmoBridgeHandler.getStationsDataBody(null).ifPresent(dataBody -> {
+                nonNullList(dataBody.getDevices()).forEach(station -> {
                     discoverWeatherStation(station);
                 });
-            }
+            });
         }
         if (netatmoBridgeHandler.configuration.readHealthyHomeCoach) {
-            NAHealthyHomeCoachDataBody homecoachDataBody = netatmoBridgeHandler.getHomecoachDataBody(null);
-            if (homecoachDataBody != null) {
-                homecoachDataBody.getDevices().forEach(homecoach -> {
+            netatmoBridgeHandler.getHomecoachDataBody(null).ifPresent(dataBody -> {
+                nonNullList(dataBody.getDevices()).forEach(homecoach -> {
                     discoverHomeCoach(homecoach);
                 });
-            }
+            });
         }
         if (netatmoBridgeHandler.configuration.readThermostat) {
-            NAThermostatDataBody thermostatsDataBody = netatmoBridgeHandler.getThermostatsDataBody(null);
-            if (thermostatsDataBody != null) {
-                thermostatsDataBody.getDevices().forEach(plug -> {
+            netatmoBridgeHandler.getThermostatsDataBody(null).ifPresent(dataBody -> {
+                nonNullList(dataBody.getDevices()).forEach(plug -> {
                     discoverThermostat(plug);
                 });
-            }
+            });
         }
-        if (netatmoBridgeHandler.configuration.readWelcome) {
-            NAWelcomeHomeData welcomeHomeData = netatmoBridgeHandler.getWelcomeDataBody(null);
-            if (welcomeHomeData != null) {
-                welcomeHomeData.getHomes().forEach(home -> {
+        if (netatmoBridgeHandler.configuration.readWelcome || netatmoBridgeHandler.configuration.readPresence) {
+            netatmoBridgeHandler.getWelcomeDataBody(null).ifPresent(dataBody -> {
+                nonNullList(dataBody.getHomes()).forEach(home -> {
                     discoverWelcomeHome(home);
                 });
-            }
+            });
         }
-        stopScan();
+    }
+
+    @Override
+    protected synchronized void stopScan() {
+        super.stopScan();
+        removeOlderResults(getTimestampOfLastScan(), netatmoBridgeHandler.getThing().getUID());
     }
 
     @Override
     public void onDataRefreshed(Object data) {
+        if (!isBackgroundDiscoveryEnabled()) {
+            return;
+        }
         if (data instanceof NAMain) {
             discoverWeatherStation((NAMain) data);
         } else if (data instanceof NAPlug) {
@@ -119,7 +125,7 @@ public class NetatmoModuleDiscoveryService extends AbstractDiscoveryService impl
 
     private void discoverThermostat(NAPlug plug) {
         onDeviceAddedInternal(plug.getId(), null, plug.getType(), plug.getStationName(), plug.getFirmware());
-        plug.getModules().forEach(thermostat -> {
+        nonNullList(plug.getModules()).forEach(thermostat -> {
             onDeviceAddedInternal(thermostat.getId(), plug.getId(), thermostat.getType(), thermostat.getModuleName(),
                     thermostat.getFirmware());
         });
@@ -131,33 +137,37 @@ public class NetatmoModuleDiscoveryService extends AbstractDiscoveryService impl
     }
 
     private void discoverWeatherStation(NAMain station) {
-        onDeviceAddedInternal(station.getId(), null, station.getType(), station.getStationName(),
-                station.getFirmware());
-        station.getModules().forEach(module -> {
-            onDeviceAddedInternal(module.getId(), station.getId(), module.getType(), module.getModuleName(),
-                    module.getFirmware());
+        final boolean isFavorite = station.isFavorite() != null && station.isFavorite();
+        final String weatherStationName = createWeatherStationName(station, isFavorite);
+
+        onDeviceAddedInternal(station.getId(), null, station.getType(), weatherStationName, station.getFirmware());
+        nonNullList(station.getModules()).forEach(module -> {
+            onDeviceAddedInternal(module.getId(), station.getId(), module.getType(),
+                    createWeatherModuleName(station, module, isFavorite), module.getFirmware());
         });
     }
 
     private void discoverWelcomeHome(NAWelcomeHome home) {
         // I observed that Thermostat homes are also reported here by Netatmo API
         // So I ignore homes that have an empty list of cameras
-        if (home.getCameras().size() > 0) {
+        List<NAWelcomeCamera> cameras = nonNullList(home.getCameras());
+        if (!cameras.isEmpty()) {
             onDeviceAddedInternal(home.getId(), null, WELCOME_HOME_THING_TYPE.getId(), home.getName(), null);
             // Discover Cameras
-            home.getCameras().forEach(camera -> {
+            cameras.forEach(camera -> {
                 onDeviceAddedInternal(camera.getId(), home.getId(), camera.getType(), camera.getName(), null);
             });
 
             // Discover Known Persons
-            home.getPersons().stream().filter(person -> person.getPseudo() != null).forEach(person -> {
+            nonNullStream(home.getPersons()).filter(person -> person.getPseudo() != null).forEach(person -> {
                 onDeviceAddedInternal(person.getId(), home.getId(), WELCOME_PERSON_THING_TYPE.getId(),
                         person.getPseudo(), null);
             });
         }
     }
 
-    private void onDeviceAddedInternal(String id, String parentId, String type, String name, Integer firmwareVersion) {
+    private void onDeviceAddedInternal(String id, @Nullable String parentId, String type, String name,
+            @Nullable Integer firmwareVersion) {
         ThingUID thingUID = findThingUID(type, id);
         Map<String, Object> properties = new HashMap<>();
 
@@ -195,4 +205,44 @@ public class NetatmoModuleDiscoveryService extends AbstractDiscoveryService impl
         throw new IllegalArgumentException("Unsupported device type discovered : " + thingType);
     }
 
+    private String createWeatherStationName(NAMain station, boolean isFavorite) {
+        StringBuilder nameBuilder = new StringBuilder();
+        nameBuilder.append(localizeType(station.getType()));
+        if (station.getStationName() != null) {
+            nameBuilder.append(' ');
+            nameBuilder.append(station.getStationName());
+        }
+        if (isFavorite) {
+            nameBuilder.append(" (favorite)");
+        }
+        return nameBuilder.toString();
+    }
+
+    private String createWeatherModuleName(NAMain station, NAStationModule module, boolean isFavorite) {
+        StringBuilder nameBuilder = new StringBuilder();
+        if (module.getModuleName() != null) {
+            nameBuilder.append(module.getModuleName());
+        } else {
+            nameBuilder.append(localizeType(module.getType()));
+        }
+        if (station.getStationName() != null) {
+            nameBuilder.append(' ');
+            nameBuilder.append(station.getStationName());
+        }
+        if (isFavorite) {
+            nameBuilder.append(" (favorite)");
+        }
+        return nameBuilder.toString();
+    }
+
+    private String localizeType(String typeName) {
+        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+        @Nullable
+        String localizedType = i18nProvider.getText(bundle, "thing-type.netatmo." + typeName + ".label", typeName,
+                localeProvider.getLocale());
+        if (localizedType != null) {
+            return localizedType;
+        }
+        return typeName;
+    }
 }

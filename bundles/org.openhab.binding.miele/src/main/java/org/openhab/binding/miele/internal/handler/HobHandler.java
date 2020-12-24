@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.miele.internal.handler;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
 
 /**
  * The {@link HobHandler} is responsible for handling commands,
@@ -33,5 +33,4 @@ public class HobHandler extends MieleApplianceHandler<HobChannelSelector> {
     public void handleCommand(ChannelUID channelUID, Command command) {
         super.handleCommand(channelUID, command);
     }
-
 }

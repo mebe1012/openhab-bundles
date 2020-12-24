@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,18 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.hyperion.internal.connection.JsonTcpConnection;
 import org.openhab.binding.hyperion.internal.protocol.ColorCommand;
 import org.openhab.binding.hyperion.internal.protocol.CommandUnsuccessfulException;
@@ -50,6 +38,18 @@ import org.openhab.binding.hyperion.internal.protocol.v1.Transform;
 import org.openhab.binding.hyperion.internal.protocol.v1.TransformCommand;
 import org.openhab.binding.hyperion.internal.protocol.v1.V1Info;
 import org.openhab.binding.hyperion.internal.protocol.v1.V1Response;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +139,6 @@ public class HyperionHandler extends BaseThingHandler {
                 .findFirst();
 
         if (defaultTransform.isPresent()) {
-
             double luminanceGain = defaultTransform.get().getLuminanceGain();
             if (luminanceGain >= 0.0 && luminanceGain <= 1.0) {
                 PercentType luminanceGainPercentType = new PercentType((int) (luminanceGain * 100));

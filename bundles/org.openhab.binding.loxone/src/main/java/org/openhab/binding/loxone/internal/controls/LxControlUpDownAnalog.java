@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,14 +17,14 @@ import static org.openhab.binding.loxone.internal.LxBindingConstants.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,10 +78,11 @@ class LxControlUpDownAnalog extends LxControl {
                 minValue = details.min;
                 maxValue = details.max;
                 if (details.step != null) {
-                    addChannelStateDescription(channelId,
-                            new StateDescription(new BigDecimal(minValue), new BigDecimal(maxValue),
-                                    new BigDecimal(details.step), details.format != null ? details.format : "%.1f",
-                                    false, null));
+                    addChannelStateDescriptionFragment(channelId,
+                            StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(minValue))
+                                    .withMaximum(new BigDecimal(maxValue)).withStep(new BigDecimal(details.step))
+                                    .withPattern(details.format != null ? details.format : "%.1f").withReadOnly(false)
+                                    .build());
                 }
             } else {
                 logger.warn("Received min value > max value: {}, {}", minValue, maxValue);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,14 +24,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.evohome.internal.RunnableWithTimeout;
 import org.openhab.binding.evohome.internal.api.EvohomeApiClient;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Gateway;
@@ -45,6 +37,14 @@ import org.openhab.binding.evohome.internal.api.models.v2.response.TemperatureCo
 import org.openhab.binding.evohome.internal.api.models.v2.response.Zone;
 import org.openhab.binding.evohome.internal.api.models.v2.response.ZoneStatus;
 import org.openhab.binding.evohome.internal.configuration.EvohomeAccountConfiguration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,7 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
     private final HttpClient httpClient;
     private EvohomeAccountConfiguration configuration;
     private EvohomeApiClient apiClient;
-    private List<AccountStatusListener> listeners = new CopyOnWriteArrayList<AccountStatusListener>();
+    private List<AccountStatusListener> listeners = new CopyOnWriteArrayList<>();
 
     protected ScheduledFuture<?> refreshTask;
 
@@ -155,7 +155,7 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
         boolean result = true;
 
         // Make sure that there are no duplicate IDs
-        Set<String> ids = new HashSet<String>();
+        Set<String> ids = new HashSet<>();
 
         for (Location location : locations) {
             result &= ids.add(location.getLocationInfo().getLocationId());
@@ -275,5 +275,4 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
             }
         }
     }
-
 }

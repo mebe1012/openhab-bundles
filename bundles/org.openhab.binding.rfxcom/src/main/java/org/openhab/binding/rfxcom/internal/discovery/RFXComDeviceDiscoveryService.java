@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,17 +16,19 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.ID_
 
 import java.util.Set;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceCallback;
-import org.eclipse.smarthome.config.discovery.ExtendedDiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.rfxcom.internal.DeviceMessageListener;
 import org.openhab.binding.rfxcom.internal.RFXComBindingConstants;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.handler.RFXComBridgeHandler;
 import org.openhab.binding.rfxcom.internal.messages.RFXComDeviceMessage;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,26 +37,48 @@ import org.slf4j.LoggerFactory;
  * devices that send messages to RFXCOM bridge.
  *
  * @author Pauli Anttila - Initial contribution
+ * @author Laurent Garnier - use ThingHandlerService
  */
+@NonNullByDefault
 public class RFXComDeviceDiscoveryService extends AbstractDiscoveryService
-        implements ExtendedDiscoveryService, DeviceMessageListener {
+        implements DeviceMessageListener, ThingHandlerService {
     private final Logger logger = LoggerFactory.getLogger(RFXComDeviceDiscoveryService.class);
+    private final int DISCOVERY_TTL = 3600;
 
-    private RFXComBridgeHandler bridgeHandler;
-    private DiscoveryServiceCallback callback;
+    private @Nullable RFXComBridgeHandler bridgeHandler;
 
-    public RFXComDeviceDiscoveryService(RFXComBridgeHandler rfxcomBridgeHandler) {
+    public RFXComDeviceDiscoveryService() {
         super(null, 1, false);
-        this.bridgeHandler = rfxcomBridgeHandler;
     }
 
+    @Override
+    public void setThingHandler(ThingHandler handler) {
+        if (handler instanceof RFXComBridgeHandler) {
+            bridgeHandler = (RFXComBridgeHandler) handler;
+        }
+    }
+
+    @Override
+    public @Nullable ThingHandler getThingHandler() {
+        return bridgeHandler;
+    }
+
+    @Override
     public void activate() {
-        bridgeHandler.registerDeviceStatusListener(this);
+        super.activate(null);
+        RFXComBridgeHandler handler = bridgeHandler;
+        if (handler != null) {
+            handler.registerDeviceStatusListener(this);
+        }
     }
 
     @Override
     public void deactivate() {
-        bridgeHandler.unregisterDeviceStatusListener(this);
+        RFXComBridgeHandler handler = bridgeHandler;
+        if (handler != null) {
+            handler.unregisterDeviceStatusListener(this);
+        }
+        super.deactivate();
     }
 
     @Override
@@ -68,22 +92,24 @@ public class RFXComDeviceDiscoveryService extends AbstractDiscoveryService
     }
 
     @Override
-    public void setDiscoveryServiceCallback(DiscoveryServiceCallback callback) {
-        this.callback = callback;
-    }
-
-    @Override
     public void onDeviceMessageReceived(ThingUID bridge, RFXComDeviceMessage message) throws RFXComException {
         logger.trace("Received: bridge: {} message: {}", bridge, message);
 
         String id = message.getDeviceId();
         ThingTypeUID uid = RFXComBindingConstants.PACKET_TYPE_THING_TYPE_UID_MAP.get(message.getPacketType());
+        if (uid == null) {
+            logger.debug("cannot find uid for message {}", message);
+            return;
+        }
         ThingUID thingUID = new ThingUID(uid, bridge, id.replace(ID_DELIMITER, "_"));
 
-        if (!bridgeHandler.getConfiguration().disableDiscovery) {
-            logger.trace("Adding new RFXCOM {} with id '{}' to smarthome inbox", thingUID, id);
-            DiscoveryResultBuilder discoveryResultBuilder = DiscoveryResultBuilder.create(thingUID)
-                    .withBridge(bridge);
+        RFXComBridgeHandler handler = bridgeHandler;
+        if (handler == null) {
+            logger.trace("Ignoring RFXCOM {} with id '{}' - bridge handler is null", thingUID, id);
+        } else if (!handler.getConfiguration().disableDiscovery) {
+            logger.trace("Adding new RFXCOM {} with id '{}' to inbox", thingUID, id);
+            DiscoveryResultBuilder discoveryResultBuilder = DiscoveryResultBuilder.create(thingUID).withBridge(bridge)
+                    .withTTL(DISCOVERY_TTL);
             message.addDevicePropertiesTo(discoveryResultBuilder);
 
             thingDiscovered(discoveryResultBuilder.build());

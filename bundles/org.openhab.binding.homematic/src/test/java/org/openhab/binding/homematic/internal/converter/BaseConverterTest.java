@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.homematic.internal.converter;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.openhab.binding.homematic.internal.model.HmChannel;
 import org.openhab.binding.homematic.internal.model.HmDatapoint;
 import org.openhab.binding.homematic.internal.model.HmDevice;
@@ -20,6 +20,9 @@ import org.openhab.binding.homematic.internal.model.HmInterface;
 import org.openhab.binding.homematic.internal.model.HmParamsetType;
 import org.openhab.binding.homematic.internal.model.HmValueType;
 
+/**
+ * @author Michael Reitler - Initial contribution
+ */
 public class BaseConverterTest {
 
     protected final HmDatapoint floatDp = new HmDatapoint("floatDp", "", HmValueType.FLOAT, null, false,
@@ -31,11 +34,10 @@ public class BaseConverterTest {
     protected final HmDatapoint integerQuantityDp = new HmDatapoint("floatIntegerDp", "", HmValueType.INTEGER, null,
             false, HmParamsetType.VALUES);
 
-    @Before
+    @BeforeEach
     public void setup() {
         HmChannel stubChannel = new HmChannel("stubChannel", 0);
         stubChannel.setDevice(new HmDevice("LEQ123456", HmInterface.RF, "HM-STUB-DEVICE", "", "", ""));
         floatDp.setChannel(stubChannel);
     }
-
 }

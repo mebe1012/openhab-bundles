@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,18 +37,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.denonmarantz.internal.DenonMarantzState;
 import org.openhab.binding.denonmarantz.internal.DenonMarantzStateChangedListener;
 import org.openhab.binding.denonmarantz.internal.UnsupportedCommandTypeException;
@@ -56,6 +44,18 @@ import org.openhab.binding.denonmarantz.internal.config.DenonMarantzConfiguratio
 import org.openhab.binding.denonmarantz.internal.connector.DenonMarantzConnector;
 import org.openhab.binding.denonmarantz.internal.connector.DenonMarantzConnectorFactory;
 import org.openhab.binding.denonmarantz.internal.connector.http.DenonMarantzHttpConnector;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -134,7 +134,7 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
                     connector.sendVolumeCommand(command, 2);
                     break;
                 case CHANNEL_ZONE2_VOLUME_DB:
-                    connector.sendVolumeCommand(command, 2);
+                    connector.sendVolumeDbCommand(command, 2);
                     break;
                 case CHANNEL_ZONE2_INPUT:
                     connector.sendInputCommand(command, 2);
@@ -150,10 +150,26 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
                     connector.sendVolumeCommand(command, 3);
                     break;
                 case CHANNEL_ZONE3_VOLUME_DB:
-                    connector.sendVolumeCommand(command, 3);
+                    connector.sendVolumeDbCommand(command, 3);
                     break;
                 case CHANNEL_ZONE3_INPUT:
                     connector.sendInputCommand(command, 3);
+                    break;
+
+                case CHANNEL_ZONE4_POWER:
+                    connector.sendPowerCommand(command, 4);
+                    break;
+                case CHANNEL_ZONE4_MUTE:
+                    connector.sendMuteCommand(command, 4);
+                    break;
+                case CHANNEL_ZONE4_VOLUME:
+                    connector.sendVolumeCommand(command, 4);
+                    break;
+                case CHANNEL_ZONE4_VOLUME_DB:
+                    connector.sendVolumeDbCommand(command, 4);
+                    break;
+                case CHANNEL_ZONE4_INPUT:
+                    connector.sendInputCommand(command, 4);
                     break;
 
                 default:
@@ -172,9 +188,9 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
             return false;
         }
         // Check zone count is within supported range
-        if (config.getZoneCount() < 1 || config.getZoneCount() > 3) {
+        if (config.getZoneCount() < 1 || config.getZoneCount() > 4) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                    "This binding supports 1 to 3 zones. Please update the zone count.");
+                    "This binding supports 1 to 4 zones. Please update the zone count.");
             return false;
         }
         return true;
@@ -208,7 +224,7 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
                     httpApiUsable = true;
                 }
             } catch (InterruptedException | TimeoutException | ExecutionException e) {
-                logger.debug("Error when trying to access AVR using HTTP on port 80: {}, reverting to Telnet mode.", e);
+                logger.debug("Error when trying to access AVR using HTTP on port 80, reverting to Telnet mode.", e);
             }
 
             if (telnetEnable) {
@@ -224,7 +240,7 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
                         httpApiUsable = true;
                     }
                 } catch (InterruptedException | TimeoutException | ExecutionException e) {
-                    logger.debug("Additionally tried to connect to port 8080, this also failed: {}", e);
+                    logger.debug("Additionally tried to connect to port 8080, this also failed", e);
                 }
             }
 
@@ -240,7 +256,7 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
                             .timeout(3, TimeUnit.SECONDS).send();
                     status = response.getStatus();
                 } catch (InterruptedException | TimeoutException | ExecutionException e) {
-                    logger.debug("Failed in fetching the Deviceinfo.xml to determine zone count: {}", e);
+                    logger.debug("Failed in fetching the Deviceinfo.xml to determine zone count", e);
                 }
 
                 if (status == HttpURLConnection.HTTP_OK && response != null) {
@@ -325,10 +341,17 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
             List<Entry<String, ChannelTypeUID>> channelsToAdd = new ArrayList<>(ZONE2_CHANNEL_TYPES.entrySet());
 
             if (zoneCount > 2) {
-                // add channels for zone 3 (more zones currently not supported)
+                // add channels for zone 3
                 channelsToAdd.addAll(ZONE3_CHANNEL_TYPES.entrySet());
+                if (zoneCount > 3) {
+                    // add channels for zone 4 (more zones currently not supported)
+                    channelsToAdd.addAll(ZONE4_CHANNEL_TYPES.entrySet());
+                } else {
+                    channelsToRemove.addAll(ZONE4_CHANNEL_TYPES.entrySet());
+                }
             } else {
                 channelsToRemove.addAll(ZONE3_CHANNEL_TYPES.entrySet());
+                channelsToRemove.addAll(ZONE4_CHANNEL_TYPES.entrySet());
             }
 
             // filter out the already existing channels
@@ -350,6 +373,7 @@ public class DenonMarantzHandler extends BaseThingHandler implements DenonMarant
         } else {
             channelsToRemove.addAll(ZONE2_CHANNEL_TYPES.entrySet());
             channelsToRemove.addAll(ZONE3_CHANNEL_TYPES.entrySet());
+            channelsToRemove.addAll(ZONE4_CHANNEL_TYPES.entrySet());
         }
 
         // filter out the non-existing channels

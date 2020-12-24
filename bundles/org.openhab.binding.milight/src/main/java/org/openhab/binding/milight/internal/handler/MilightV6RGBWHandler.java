@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,10 @@
 package org.openhab.binding.milight.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.milight.internal.MilightThingState;
 import org.openhab.binding.milight.internal.protocol.ProtocolConstants;
 import org.openhab.binding.milight.internal.protocol.QueuedSend;
+import org.openhab.core.thing.Thing;
 
 /**
  * Implements the RGB white bulb. Both leds cannot be on at the same time, so no saturation or colour temperature

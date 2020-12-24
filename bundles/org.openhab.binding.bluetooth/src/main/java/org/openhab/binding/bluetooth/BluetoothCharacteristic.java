@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -79,7 +79,7 @@ public class BluetoothCharacteristic {
     /**
      * A map of {@link BluetoothDescriptor}s applicable to this characteristic
      */
-    protected Map<UUID, BluetoothDescriptor> gattDescriptors = new HashMap<UUID, BluetoothDescriptor>();
+    protected Map<UUID, BluetoothDescriptor> gattDescriptors = new HashMap<>();
     protected int instance;
     protected int properties;
     protected int permissions;
@@ -208,7 +208,7 @@ public class BluetoothCharacteristic {
      *
      */
     public List<BluetoothDescriptor> getDescriptors() {
-        return new ArrayList<BluetoothDescriptor>(gattDescriptors.values());
+        return new ArrayList<>(gattDescriptors.values());
     }
 
     /**
@@ -219,6 +219,48 @@ public class BluetoothCharacteristic {
      */
     public BluetoothDescriptor getDescriptor(UUID uuid) {
         return gattDescriptors.get(uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + instance;
+        result = prime * result + ((service == null) ? 0 : service.hashCode());
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        BluetoothCharacteristic other = (BluetoothCharacteristic) obj;
+        if (instance != other.instance) {
+            return false;
+        }
+        if (service == null) {
+            if (other.service != null) {
+                return false;
+            }
+        } else if (!service.equals(other.service)) {
+            return false;
+        }
+        if (uuid == null) {
+            if (other.uuid != null) {
+                return false;
+            }
+        } else if (!uuid.equals(other.uuid)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -630,11 +672,11 @@ public class BluetoothCharacteristic {
         private UUID uuid;
 
         private GattCharacteristic(long key) {
-            this.uuid = new UUID((key << 32) | 0x1000, BluetoothBindingConstants.BLUETOOTH_BASE_UUID);
+            this.uuid = BluetoothBindingConstants.createBluetoothUUID(key);
         }
 
         private static void initMapping() {
-            uuidToServiceMapping = new HashMap<UUID, GattCharacteristic>();
+            uuidToServiceMapping = new HashMap<>();
             for (GattCharacteristic s : values()) {
                 uuidToServiceMapping.put(s.uuid, s);
             }
@@ -654,5 +696,4 @@ public class BluetoothCharacteristic {
             return uuid;
         }
     }
-
 }

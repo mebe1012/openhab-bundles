@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,21 +38,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationHelper;
-import org.eclipse.smarthome.core.transform.TransformationService;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.globalcache.internal.GlobalCacheBindingConstants.CommandType;
 import org.openhab.binding.globalcache.internal.command.CommandGetstate;
 import org.openhab.binding.globalcache.internal.command.CommandGetversion;
@@ -61,6 +46,23 @@ import org.openhab.binding.globalcache.internal.command.CommandSendserial;
 import org.openhab.binding.globalcache.internal.command.CommandSetstate;
 import org.openhab.binding.globalcache.internal.command.RequestMessage;
 import org.openhab.binding.globalcache.internal.command.ResponseMessage;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.transform.TransformationService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +74,8 @@ import org.slf4j.LoggerFactory;
  */
 public class GlobalCacheHandler extends BaseThingHandler {
     private Logger logger = LoggerFactory.getLogger(GlobalCacheHandler.class);
+
+    private final BundleContext bundleContext;
 
     private static final String GLOBALCACHE_THREAD_POOL = "globalCacheHandler";
 
@@ -97,6 +101,7 @@ public class GlobalCacheHandler extends BaseThingHandler {
         commandProcessor = new CommandProcessor();
         scheduledFuture = null;
         this.ipv4Address = ipv4Address;
+        this.bundleContext = FrameworkUtil.getBundle(GlobalCacheHandler.class).getBundleContext();
     }
 
     @Override
@@ -457,7 +462,7 @@ public class GlobalCacheHandler extends BaseThingHandler {
 
         public CommandProcessor() {
             super("GlobalCache Command Processor");
-            sendQueue = new LinkedBlockingQueue<RequestMessage>(SEND_QUEUE_MAX_DEPTH);
+            sendQueue = new LinkedBlockingQueue<>(SEND_QUEUE_MAX_DEPTH);
             logger.debug("Processor for thing {} created request queue, depth={}", thingID(), SEND_QUEUE_MAX_DEPTH);
         }
 

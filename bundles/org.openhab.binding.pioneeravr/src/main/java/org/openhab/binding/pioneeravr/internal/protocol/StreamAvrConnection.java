@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,13 +24,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.pioneeravr.internal.protocol.ParameterizedCommand.ParameterizedCommandType;
 import org.openhab.binding.pioneeravr.internal.protocol.SimpleCommand.SimpleCommandType;
 import org.openhab.binding.pioneeravr.internal.protocol.avr.AvrCommand;
@@ -41,6 +34,13 @@ import org.openhab.binding.pioneeravr.internal.protocol.event.AvrDisconnectionLi
 import org.openhab.binding.pioneeravr.internal.protocol.event.AvrStatusUpdateEvent;
 import org.openhab.binding.pioneeravr.internal.protocol.event.AvrUpdateListener;
 import org.openhab.binding.pioneeravr.internal.protocol.utils.VolumeConverter;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,7 +186,7 @@ public abstract class StreamAvrConnection implements AvrConnection {
     }
 
     @Override
-    public boolean sendSourceInputQuery(int zone) {
+    public boolean sendInputSourceQuery(int zone) {
         return sendCommand(RequestResponseFactory.getIpControlCommand(SimpleCommandType.INPUT_QUERY, zone));
     }
 
@@ -278,10 +278,12 @@ public abstract class StreamAvrConnection implements AvrConnection {
         AvrCommand commandToSend = null;
 
         if (command == IncreaseDecreaseType.INCREASE) {
-            commandToSend = RequestResponseFactory.getIpControlCommand(SimpleCommandType.LISTENING_MODE_CHANGE_CYCLIC, zone);
+            commandToSend = RequestResponseFactory.getIpControlCommand(SimpleCommandType.LISTENING_MODE_CHANGE_CYCLIC,
+                    zone);
         } else if (command instanceof StringType) {
             String listeningModeValue = ((StringType) command).toString();
-            commandToSend = RequestResponseFactory.getIpControlCommand(ParameterizedCommandType.LISTENING_MODE_SET, zone)
+            commandToSend = RequestResponseFactory
+                    .getIpControlCommand(ParameterizedCommandType.LISTENING_MODE_SET, zone)
                     .setParameter(listeningModeValue);
         } else {
             throw new CommandTypeNotSupportedException("Command type not supported.");
@@ -380,7 +382,5 @@ public abstract class StreamAvrConnection implements AvrConnection {
                 // This exception should never happen.
             }
         }
-
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,19 +12,7 @@
  */
 package org.openhab.binding.linuxinput.internal;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.linuxinput.internal.evdev4j.EvdevDevice;
-import org.openhab.binding.linuxinput.internal.evdev4j.LastErrorException;
-import org.openhab.binding.linuxinput.internal.evdev4j.jnr.EvdevLibrary;
-import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.openhab.binding.linuxinput.internal.LinuxInputBindingConstants.THING_TYPE_DEVICE;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +23,26 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
-import static org.openhab.binding.linuxinput.internal.LinuxInputBindingConstants.THING_TYPE_DEVICE;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.linuxinput.internal.evdev4j.EvdevDevice;
+import org.openhab.binding.linuxinput.internal.evdev4j.LastErrorException;
+import org.openhab.binding.linuxinput.internal.evdev4j.jnr.EvdevLibrary;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Discovery service for LinuxInputHandlers based on the /dev/input directory.
  *
  * @author Thomas Weißschuh - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.linuxinput")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.linuxinput")
 @NonNullByDefault
 public class LinuxInputDiscoveryService extends AbstractDiscoveryService {
 

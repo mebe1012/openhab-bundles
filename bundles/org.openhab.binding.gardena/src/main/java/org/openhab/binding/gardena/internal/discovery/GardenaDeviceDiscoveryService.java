@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,43 +20,63 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.gardena.internal.GardenaSmart;
 import org.openhab.binding.gardena.internal.exception.GardenaException;
 import org.openhab.binding.gardena.internal.handler.GardenaAccountHandler;
-import org.openhab.binding.gardena.internal.model.Device;
-import org.openhab.binding.gardena.internal.model.Location;
+import org.openhab.binding.gardena.internal.model.dto.Device;
+import org.openhab.binding.gardena.internal.util.PropertyUtils;
 import org.openhab.binding.gardena.internal.util.UidUtils;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link GardenaDeviceDiscoveryService} is used to discover devices that are connected to Gardena Smart Home.
+ * The {@link GardenaDeviceDiscoveryService} is used to discover devices that are connected to Gardena smart system.
  *
  * @author Gerhard Riegler - Initial contribution
  */
-public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
+@NonNullByDefault
+public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService
+        implements DiscoveryService, ThingHandlerService {
 
     private final Logger logger = LoggerFactory.getLogger(GardenaDeviceDiscoveryService.class);
-    private static final int DISCOVER_TIMEOUT_SECONDS = 30;
+    private static final int DISCOVER_TIMEOUT_SECONDS = 5;
 
-    private GardenaAccountHandler accountHandler;
-    private Future<?> scanFuture;
+    private @NonNullByDefault({}) GardenaAccountHandler accountHandler;
+    private @Nullable Future<?> scanFuture;
 
-    public GardenaDeviceDiscoveryService(GardenaAccountHandler accountHandler) {
+    public GardenaDeviceDiscoveryService() {
         super(Collections.unmodifiableSet(Stream.of(new ThingTypeUID(BINDING_ID, "-")).collect(Collectors.toSet())),
                 DISCOVER_TIMEOUT_SECONDS, false);
-        this.accountHandler = accountHandler;
+    }
+
+    @Override
+    public void setThingHandler(@Nullable ThingHandler handler) {
+        if (handler instanceof GardenaAccountHandler) {
+            this.accountHandler = (GardenaAccountHandler) handler;
+            this.accountHandler.setDiscoveryService(this);
+        }
+    }
+
+    @Override
+    public @Nullable ThingHandler getThingHandler() {
+        return accountHandler;
     }
 
     /**
      * Called on component activation.
      */
+    @Override
     public void activate() {
         super.activate(null);
     }
@@ -75,6 +95,7 @@ public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
     @Override
     public void stopScan() {
         logger.debug("Stopping Gardena discovery scan");
+        final Future<?> scanFuture = this.scanFuture;
         if (scanFuture != null) {
             scanFuture.cancel(true);
         }
@@ -82,18 +103,15 @@ public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
     }
 
     /**
-     * Starts a thread which loads all Gardena devices registered in the account
+     * Starts a thread which loads all Gardena devices registered in the account.
      */
-    public void loadDevices() {
+    private void loadDevices() {
         if (scanFuture == null) {
             scanFuture = scheduler.submit(() -> {
-                try {
-                    GardenaSmart gardena = accountHandler.getGardenaSmart();
-                    gardena.loadAllDevices();
-                    for (Location location : gardena.getLocations()) {
-                        for (String deviceId : location.getDeviceIds()) {
-                            deviceDiscovered(gardena.getDevice(deviceId));
-                        }
+                GardenaSmart gardena = accountHandler.getGardenaSmart();
+                if (gardena != null) {
+                    for (Device device : gardena.getAllDevices()) {
+                        deviceDiscovered(device);
                     }
 
                     for (Thing thing : accountHandler.getThing().getThings()) {
@@ -104,11 +122,7 @@ public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
                         }
                     }
 
-                    logger.debug("Finished Gardena device discovery scan on gateway '{}'",
-                            accountHandler.getGardenaSmart().getId());
-                } catch (GardenaException ex) {
-                    logger.error("{}", ex.getMessage(), ex);
-                } finally {
+                    logger.debug("Finished Gardena device discovery scan on gateway '{}'", gardena.getId());
                     scanFuture = null;
                     removeOlderResults(getTimestampOfLastScan());
                 }
@@ -122,6 +136,7 @@ public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
      * Waits for the discovery scan to finish and then returns.
      */
     public void waitForScanFinishing() {
+        final Future<?> scanFuture = this.scanFuture;
         if (scanFuture != null) {
             logger.debug("Waiting for finishing Gardena device discovery scan");
             try {
@@ -139,20 +154,19 @@ public class GardenaDeviceDiscoveryService extends AbstractDiscoveryService {
      * Generates the DiscoveryResult from a Gardena device.
      */
     public void deviceDiscovered(Device device) {
-        ThingUID accountUID = accountHandler.getThing().getUID();
-        ThingUID thingUID = UidUtils.generateThingUID(device, accountHandler.getThing());
+        if (device.active) {
+            ThingUID accountUID = accountHandler.getThing().getUID();
+            ThingUID thingUID = UidUtils.generateThingUID(device, accountHandler.getThing());
 
-        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(accountUID)
-                .withLabel(device.getName()).build();
-        thingDiscovered(discoveryResult);
+            try {
+                DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withBridge(accountUID)
+                        .withLabel(PropertyUtils.getPropertyValue(device, "common.attributes.name.value", String.class))
+                        .withProperty("id", device.id).withProperty("type", device.deviceType)
+                        .withRepresentationProperty("id").build();
+                thingDiscovered(discoveryResult);
+            } catch (GardenaException ex) {
+                logger.warn("{}", ex.getMessage());
+            }
+        }
     }
-
-    /**
-     * Removes the Gardena device.
-     */
-    public void deviceRemoved(Device device) {
-        ThingUID thingUID = UidUtils.generateThingUID(device, accountHandler.getThing());
-        thingRemoved(thingUID);
-    }
-
 }

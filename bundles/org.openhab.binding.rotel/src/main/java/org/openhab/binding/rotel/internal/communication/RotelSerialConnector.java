@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,13 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
 import org.openhab.binding.rotel.internal.RotelException;
 import org.openhab.binding.rotel.internal.RotelModel;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +52,11 @@ public class RotelSerialConnector extends RotelConnector {
      * @param serialPortName the serial port name to be used
      * @param model the projector model in use
      * @param protocol the protocol to be used
+     * @param readerThreadName the name of thread to be created
      */
     public RotelSerialConnector(SerialPortManager serialPortManager, String serialPortName, RotelModel model,
-            RotelProtocol protocol, Map<RotelSource, String> sourcesLabels) {
-        super(model, protocol, sourcesLabels, false);
+            RotelProtocol protocol, Map<RotelSource, String> sourcesLabels, String readerThreadName) {
+        super(model, protocol, sourcesLabels, false, readerThreadName);
 
         this.serialPortManager = serialPortManager;
         this.serialPortName = serialPortName;
@@ -93,7 +94,7 @@ public class RotelSerialConnector extends RotelConnector {
                 }
             }
 
-            Thread thread = new RotelReaderThread(this);
+            Thread thread = new RotelReaderThread(this, readerThreadName);
             setReaderThread(thread);
             thread.start();
 

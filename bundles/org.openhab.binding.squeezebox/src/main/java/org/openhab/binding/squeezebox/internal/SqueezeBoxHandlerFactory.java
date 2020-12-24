@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,24 +23,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.squeezebox.internal.discovery.SqueezeBoxPlayerDiscoveryParticipant;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxPlayerEventListener;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxPlayerHandler;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxServerHandler;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.net.HttpServiceUtil;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -65,15 +66,23 @@ public class SqueezeBoxHandlerFactory extends BaseThingHandlerFactory {
 
     private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
 
-    private AudioHTTPServer audioHTTPServer;
-    private NetworkAddressService networkAddressService;
+    private final AudioHTTPServer audioHTTPServer;
+    private final NetworkAddressService networkAddressService;
+    private final SqueezeBoxStateDescriptionOptionsProvider stateDescriptionProvider;
 
     private Map<String, ServiceRegistration<AudioSink>> audioSinkRegistrations = new ConcurrentHashMap<>();
 
-    private SqueezeBoxStateDescriptionOptionsProvider stateDescriptionProvider;
-
     // Callback url (scheme+server+port) to use for playing notification sounds
     private String callbackUrl = null;
+
+    @Activate
+    public SqueezeBoxHandlerFactory(@Reference AudioHTTPServer audioHTTPServer,
+            @Reference NetworkAddressService networkAddressService,
+            @Reference SqueezeBoxStateDescriptionOptionsProvider stateDescriptionProvider) {
+        this.audioHTTPServer = audioHTTPServer;
+        this.networkAddressService = networkAddressService;
+        this.stateDescriptionProvider = stateDescriptionProvider;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -108,7 +117,7 @@ public class SqueezeBoxHandlerFactory extends BaseThingHandlerFactory {
             SqueezeBoxAudioSink audioSink = new SqueezeBoxAudioSink(playerHandler, audioHTTPServer, callbackUrl);
             @SuppressWarnings("unchecked")
             ServiceRegistration<AudioSink> reg = (ServiceRegistration<AudioSink>) bundleContext
-                    .registerService(AudioSink.class.getName(), audioSink, new Hashtable<String, Object>());
+                    .registerService(AudioSink.class.getName(), audioSink, new Hashtable<>());
             audioSinkRegistrations.put(thing.getUID().toString(), reg);
 
             return playerHandler;
@@ -134,8 +143,8 @@ public class SqueezeBoxHandlerFactory extends BaseThingHandlerFactory {
         squeezeBoxServerHandler.registerSqueezeBoxPlayerListener(discoveryService);
 
         // Register the service, then add the service to the ServiceRegistration map
-        discoveryServiceRegs.put(squeezeBoxServerHandler.getThing().getUID(), bundleContext
-                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
+        discoveryServiceRegs.put(squeezeBoxServerHandler.getThing().getUID(),
+                bundleContext.registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<>()));
     }
 
     @Override
@@ -196,32 +205,5 @@ public class SqueezeBoxHandlerFactory extends BaseThingHandlerFactory {
         }
 
         return "http://" + ipAddress + ":" + port;
-    }
-
-    @Reference
-    protected void setAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = audioHTTPServer;
-    }
-
-    protected void unsetAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = null;
-    }
-
-    @Reference
-    protected void setNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = networkAddressService;
-    }
-
-    protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = null;
-    }
-
-    @Reference
-    protected void setDynamicStateDescriptionProvider(SqueezeBoxStateDescriptionOptionsProvider provider) {
-        this.stateDescriptionProvider = provider;
-    }
-
-    protected void unsetDynamicStateDescriptionProvider(SqueezeBoxStateDescriptionOptionsProvider provider) {
-        this.stateDescriptionProvider = null;
     }
 }

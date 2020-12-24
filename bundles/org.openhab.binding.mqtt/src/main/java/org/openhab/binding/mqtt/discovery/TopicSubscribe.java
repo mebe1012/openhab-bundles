@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,10 @@ package org.openhab.binding.mqtt.discovery;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttMessageSubscriber;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttMessageSubscriber;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Represents a MQTT subscription for one specific topic. This is an immutable class.
@@ -26,10 +27,12 @@ import org.eclipse.smarthome.io.transport.mqtt.MqttMessageSubscriber;
  */
 @NonNullByDefault
 public class TopicSubscribe implements MqttMessageSubscriber {
-    final MqttBrokerConnection connection;
+    final @Nullable MqttBrokerConnection connection;
     final ThingUID thing;
     final String topic;
     final MQTTTopicDiscoveryParticipant topicDiscoveredListener;
+
+    private boolean isStarted = false;
 
     /**
      * Creates a {@link TopicSubscribe} object.
@@ -39,7 +42,7 @@ public class TopicSubscribe implements MqttMessageSubscriber {
      * @param topicDiscoveredListener A listener
      * @param thing A thing, used as an argument to the listener callback.
      */
-    public TopicSubscribe(MqttBrokerConnection connection, String topic,
+    public TopicSubscribe(@Nullable MqttBrokerConnection connection, String topic,
             MQTTTopicDiscoveryParticipant topicDiscoveredListener, ThingUID thing) {
         this.connection = connection;
         this.thing = thing;
@@ -49,6 +52,9 @@ public class TopicSubscribe implements MqttMessageSubscriber {
 
     @Override
     public void processMessage(String topic, byte[] payload) {
+        final MqttBrokerConnection connection = this.connection;
+        if (connection == null)
+            return;
         if (payload.length > 0) {
             topicDiscoveredListener.receivedMessage(thing, connection, topic, payload);
         } else {
@@ -62,7 +68,10 @@ public class TopicSubscribe implements MqttMessageSubscriber {
      * @return Completes with true if successful. Completes with false if not connected yet. Exceptionally otherwise.
      */
     public CompletableFuture<Boolean> start() {
-        return connection.subscribe(topic, this);
+        CompletableFuture<Boolean> startFuture = connection == null ? CompletableFuture.completedFuture(true)
+                : connection.subscribe(topic, this);
+        isStarted = true;
+        return startFuture;
     }
 
     /**
@@ -71,6 +80,18 @@ public class TopicSubscribe implements MqttMessageSubscriber {
      * @return Completes with true if successful. Exceptionally otherwise.
      */
     public CompletableFuture<Boolean> stop() {
-        return connection.unsubscribe(topic, this);
+        CompletableFuture<Boolean> stopFuture = connection == null ? CompletableFuture.completedFuture(true)
+                : connection.unsubscribe(topic, this);
+        isStarted = false;
+        return stopFuture;
+    }
+
+    /**
+     * status of this topic subscription
+     *
+     * @return true if started
+     */
+    public boolean isStarted() {
+        return isStarted;
     }
 }

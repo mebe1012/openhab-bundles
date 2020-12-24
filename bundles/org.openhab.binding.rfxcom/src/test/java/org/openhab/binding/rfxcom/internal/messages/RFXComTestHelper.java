@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,31 +12,34 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Helper class for testing the RFXCom-binding
  *
- * @author Martin van Wingerden
+ * @author Martin van Wingerden - Initial contribution
  */
-public class RFXComTestHelper {
+@NonNullByDefault
+class RFXComTestHelper {
     static void basicBoundaryCheck(PacketType packetType, RFXComMessage message) throws RFXComException {
         // This is a place where its easy to make mistakes in coding, and can result in errors, normally
         // array bounds errors
         byte[] binaryMessage = message.decodeMessage();
-        assertEquals("Wrong packet length", binaryMessage[0], binaryMessage.length - 1);
-        assertEquals("Wrong packet type", packetType.toByte(), binaryMessage[1]);
+        assertEquals(binaryMessage[0], binaryMessage.length - 1, "Wrong packet length");
+        assertEquals(packetType.toByte(), binaryMessage[1], "Wrong packet type");
     }
 
-    static void checkDiscoveryResult(RFXComDeviceMessage msg, String deviceId, Integer pulse, String subType,
+    static void checkDiscoveryResult(RFXComDeviceMessage msg, String deviceId, @Nullable Integer pulse, String subType,
             int offCommand, int onCommand) throws RFXComException {
         String thingUID = "homeduino:rfxcom:fssfsd:thing";
         DiscoveryResultBuilder builder = DiscoveryResultBuilder.create(new ThingUID(thingUID));
@@ -45,16 +48,16 @@ public class RFXComTestHelper {
         msg.addDevicePropertiesTo(builder);
 
         Map<String, Object> properties = builder.build().getProperties();
-        assertEquals("Device Id", deviceId, properties.get("deviceId"));
-        assertEquals("Sub type", subType, properties.get("subType"));
+        assertEquals(deviceId, properties.get("deviceId"), "Device Id");
+        assertEquals(subType, properties.get("subType"), "Sub type");
         if (pulse != null) {
-            assertEquals("Pulse", pulse, properties.get("pulse"));
+            assertEquals(pulse, properties.get("pulse"), "Pulse");
         }
-        assertEquals("On command", onCommand, properties.get("onCommandId"));
-        assertEquals("Off command", offCommand, properties.get("offCommandId"));
+        assertEquals(onCommand, properties.get("onCommandId"), "On command");
+        assertEquals(offCommand, properties.get("offCommandId"), "Off command");
     }
 
     static int getActualIntValue(RFXComDeviceMessage msg, String channelId) throws RFXComException {
-        return ((DecimalType) msg.convertToState(channelId)).intValue();
+        return ((DecimalType) msg.convertToState(channelId, new MockDeviceState())).intValue();
     }
 }

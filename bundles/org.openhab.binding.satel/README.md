@@ -1,9 +1,14 @@
 # Satel Integra Alarm System Binding
 
-The Satel Integra Alarm System allows openHAB to connect to your alarm system via TCP/IP network with ETHM-1/ETHM-1 Plus module installed, or via RS-232 serial port with INT-RS/INT-RS Plus module installed. For ETHM-1 the binding uses integration protocol, so it must be enabled and properly configured.  
-Also it is always a good idea to update module/mainboard firmware to the latest version. For ETHM-1 and INT-RS modules it is a must. For "Plus" modules however it is not required.
+The Satel Integra Alarm System allows openHAB to connect to your alarm system via TCP/IP network with ETHM-1/ETHM-1 Plus module installed, or via RS-232 serial port with INT-RS/INT-RS Plus module installed.
+For ETHM-1 the binding uses integration protocol, so it must be enabled and properly configured.
+Also it is always a good idea to update module/mainboard firmware to the latest version.
+For ETHM-1 and INT-RS modules it is a must.
+For "Plus" modules however it is not required.
 
-In order to use encryption with ETHM-1/ETHM-1 Plus, Java Runtime Environment must support 192 bit AES keys. Oracle Java by default supports only 128 bit keys, therefore ["Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files"](http://www.oracle.com/technetwork/java/javase/downloads/index.html) must be installed. OpenJDK supports unlimited AES keys by default (but OpenJDK is sometimes discouraged for openHAB).
+In order to use encryption with ETHM-1/ETHM-1 Plus, Java Runtime Environment must support 192 bit AES keys.
+Oracle Java by default supports only 128 bit keys, therefore ["Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files"](https://www.oracle.com/technetwork/java/javase/downloads/index.html) must be installed.
+OpenJDK supports unlimited AES keys by default (but OpenJDK is sometimes discouraged for openHAB).
 
 More details and all documentation about Integra system you can find on their site: [satel.pl](https://www.satel.pl/pl/cat/2#cat15)
 
@@ -36,13 +41,14 @@ You can configure the following settings for this bridge:
 
 | Name          | Required | Description                                                                                                                                                                                                                                                                  |
 |---------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| host          | yes      | Host name or IP addres of ETHM-1 module                                                                                                                                                                                                                                      |
-| port          | no       | TCP port for the integration protocol, defaults to 7094                                                                                                                                                                                                                      |
-| timeout       | no       | Timeout value in milliseconds for connect, read and write operations, defaults to 5000 (5secs)                                                                                                                                                                               |
+| host          | yes      | Host name or IP addres of ETHM-1 module.                                                                                                                                                                                                                                     |
+| port          | no       | TCP port for the integration protocol, defaults to 7094.                                                                                                                                                                                                                     |
+| timeout       | no       | Timeout value in milliseconds for connect, read and write operations, defaults to 5000 (5secs).                                                                                                                                                                              |
 | refresh       | no       | Polling interval in milliseconds, defaults to 5000 (5secs). As of version 2.03 ETHM-1 Plus firmware the module disconnects after 25 seconds of inactivity. Setting this parameter to value greater than 25000 will cause inability to correctly communicate with the module. |
-| userCode      | no       | Security code of the user in behalf of all operations will be executed. If empty, only read operations are allowed                                                                                                                                                           |
-| encryptionKey | no       | Encryption key used to encrypt data sent and received, if empty communication is not encrypted                                                                                                                                                                               |
-| encoding      | no       | Encoding for all the texts received from the module                                                                                                                                                                                                                          |
+| userCode      | no       | Security code of the user in behalf of all operations will be executed. If empty, only read operations are allowed.                                                                                                                                                          |
+| encryptionKey | no       | Encryption key used to encrypt data sent and received. If empty, communication is not encrypted.                                                                                                                                                                             |
+| encoding      | no       | Encoding for all the texts received from the module.                                                                                                                                                                                                                         |
+| extCommands   | no       | Check this option to enable extended commands, supported by ETHM-1 Plus and newer versions of ETHM-1. Enabled by default, turn off in case of communication timeouts.                                                                                                        |
 
 Example:
 
@@ -50,17 +56,22 @@ Example:
 Bridge satel:ethm-1:home [ host="192.168.0.2", refresh=1000, userCode="1234", encryptionKey="abcdefgh" ]
 ```
 
+**NOTE:** There can be only one client connected to ETHM-1 module. 
+It does not accept new connections if there is already a connection established. 
+In case you have troubles connecting to the system using this module, please make sure there is no other client (for example installed 1.x version of the binding) already connected to it.
+
 ### int-rs bridge
 
 You can configure the following settings for this bridge:
 
-| Name     | Required | Description                                                                                                        |
-|----------|----------|--------------------------------------------------------------------------------------------------------------------|
-| port     | yes      | Serial port connected to the module                                                                                |
-| timeout  | no       | Timeout value in milliseconds for connect, read and write operations, defaults to 5000 (5secs)                     |
-| refresh  | no       | Polling interval in milliseconds, defaults to 5000 (5secs)                                                         |
-| userCode | no       | Security code of the user in behalf of all operations will be executed. If empty, only read operations are allowed |
-| encoding | no       | Encoding for all the texts received from the module                                                                |
+| Name        | Required | Description                                                                                                                                         |
+|-------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| port        | yes      | Serial port connected to the module.                                                                                                                |
+| timeout     | no       | Timeout value in milliseconds for connect, read and write operations, defaults to 5000 (5secs).                                                     |
+| refresh     | no       | Polling interval in milliseconds, defaults to 5000 (5secs).                                                                                         |
+| userCode    | no       | Security code of the user in behalf of all operations will be executed. If empty, only read operations are allowed.                                 |
+| encoding    | no       | Encoding for all the texts received from the module.                                                                                                |
+| extCommands | no       | Check this option to enable extended commands, supported by version 2.xx of INT-RS. Enabled by default, turn off in case of communication timeouts. |
 
 Example:
 
@@ -213,6 +224,8 @@ Thing atd-100 KitchenTemp [ id=10, refresh=30 ]
 
 ### output
 
+**NOTE:** You can change state of mono/bistable outputs only.
+
 | Name          | Type   | Description                                               |
 |---------------|--------|-----------------------------------------------------------|
 | state         | Switch | State of the output                                       |
@@ -230,7 +243,7 @@ Thing atd-100 KitchenTemp [ id=10, refresh=30 ]
 | Name            | Type     | Description                                                                                                                        |
 |-----------------|----------|------------------------------------------------------------------------------------------------------------------------------------|
 | date_time       | DateTime | Date and time on the alarm system                                                                                                  |
-| troubles        | Switch   | Active when the system has troubles (trouble led is blinking on a panel)                                                           |
+| troubles        | Switch   | Active when the system has troubles (trouble LED is blinking on a panel)                                                           |
 | troubles_memory | Switch   | Memorized state of system troubles                                                                                                 |
 | service_mode    | Switch   | Active when the system is in service mode                                                                                          |
 | acu100_present  | Switch   | Active when there is an ACU-100 module installed in the system                                                                     |
@@ -238,7 +251,9 @@ Thing atd-100 KitchenTemp [ id=10, refresh=30 ]
 | grade23_set     | Switch   | Active when Grade2/Grade3 option is set in the system                                                                              |
 | user_code       | String   | Accepts string commands that override configured user code. Send empty string to revert user code to the one in the configuration. |
 
-### event-log
+### event-log (deprecated)
+
+These channels and the thing will be removed in the future release of the binding. Please use `readEvent` rule action instead.
 
 | Name        | Type     | Description                                                                            |
 |-------------|----------|----------------------------------------------------------------------------------------|
@@ -256,6 +271,31 @@ Thing atd-100 KitchenTemp [ id=10, refresh=30 ]
 | device_lobatt | Switch             | Indicates low battery level in the wireless device        |
 | device_nocomm | Switch             | Indicates communication troubles with the wireless device |
 
+## Rule Actions
+
+### readEvent
+
+This action allows you to read one record from the event log placed at index given by input parameter. 
+The result of this action is compatible with channels of `event-log` thing and contains following values:
+
+| Name        | Type          | Description                                                                            |
+|-------------|---------------|----------------------------------------------------------------------------------------|
+| index       | Number        | Index of this record in the event log.                                                 |
+| prev_index  | Number        | Index of the previous record in the event log. Use this value to iterate over the log. |
+| timestamp   | ZonedDateTime | Date and time when the event happened.                                                 |
+| description | String        | Textual description of the event.                                                      |
+| details     | String        | Details about the event, usually list of objects related to the event.                 |
+
+Usage:
+
+```
+    val actions = getActions("satel", "satel:event-log:home")
+    val eventRec = actions.readEvent(-1)
+    logInfo("EventLog", eventRec.get("description"))
+```
+
+**NOTE:** To have this action available, you must have `event-log` thing configured in openHAB.
+
 ## Full Example
 
 ### satel.things
@@ -267,11 +307,12 @@ Bridge satel:ethm-1:home [ host="192.168.0.2", refresh=1000, userCode="1234", en
     Thing zone BedroomPIR [ id=2 ]
     Thing output KitchenLamp [ id=1 ]
     Thing shutter KitchenWindow [ upId=2, downId=3 ]
-    Thing system System [ ]
-    Thing event-log EventLog [ ]
     Thing output Siren [ id=17, wireless=true ]
     Thing atd-100 KitchenTemp [ id=10, refresh=30 ]
 }
+Thing satel:system:home "System" (satel:ethm-1:home) []
+Thing satel:event-log:home "Event log" (satel:ethm-1:home) []
+
 ```
 
 ### satel.items
@@ -287,14 +328,9 @@ Switch BEDROOM_TAMPER "Bedroom PIR tampered" (Satel) { channel="satel:zone:home:
 Switch BEDROOM_TAMPER_M "Bedroom PIR tamper memory" (Satel) { channel="satel:zone:home:BedroomPIR:tamper_alarm_memory" }
 Switch KITCHEN_LAMP "Kitchen lamp" (Satel) { channel="satel:output:home:KitchenLamp:state" }
 Rollershutter KITCHEN_BLIND "Kitchen blind" (Satel) { channel="satel:shutter:home:KitchenWindow:shutter_state" }
-Switch SYSTEM_TROUBLES "Troubles in the system" (Satel) { channel="satel:system:home:System:troubles" }
+Switch SYSTEM_TROUBLES "Troubles in the system" (Satel) { channel="satel:system:home:troubles" }
 String KEYPAD_CHAR ">" <none> (Satel)
-String USER_CODE "User code" (Satel) { channel="satel:system:home:System:user_code" }
-Number EVENT_LOG_IDX "Event log - current index [%d]" (Satel) { channel="satel:event-log:home:EventLog:index" }
-Number EVENT_LOG_PREV "Event log - previous index [%d]" (Satel) { channel="satel:event-log:home:EventLog:prev_index" }
-DateTime EVENT_LOG_TIME "Event log - time [%1$tF %1$tR]" (Satel) { channel="satel:event-log:home:EventLog:timestamp" }
-String EVENT_LOG_DESCR "Event log - description [%s]" (Satel) { channel="satel:event-log:home:EventLog:description" }
-String EVENT_LOG_DET "Event log - details [%s]" (Satel) { channel="satel:event-log:home:EventLog:details" }
+String USER_CODE "User code" (Satel) { channel="satel:system:home:user_code" }
 Switch SIREN_LOBATT "Siren: low battery level" (Satel) { channel="satel:output:home:Siren:device_lobatt" }
 Switch SIREN_NOCOMM "Siren: no communication" (Satel) { channel="satel:output:home:Siren:device_nocomm" }
 Number:Temperature KITCHEN_TEMP "Kitchen temperature [%.1f °C]" <temperature> (Satel) { channel="satel:atd-100:home:KitchenTemp:temperature" }
@@ -339,8 +375,6 @@ Frame label="Alarm system" {
 var String userCode = ""
 var Timer keypadTimer = null
 var Timer userCodeTimer = null
-var int eventLogCounter = 0
-var String eventLogMsgBody = ""
 
 rule "Keypad char entered"
 when
@@ -376,34 +410,30 @@ then
     ]
 end
 
-rule "Send event log start"
+rule "Send event log"
 when
     Item Alarms changed to ON
 then
-    eventLogCounter = 0
-    eventLogMsgBody = ""
-    EVENT_LOG_PREV.postUpdate(NULL)
-    EVENT_LOG_IDX.sendCommand(-1)
-end
-
-rule "Send event log next"
-when
-    Item EVENT_LOG_PREV changed
-then
-    if (EVENT_LOG_PREV.state == NULL) {
-        
-    } else if (eventLogCounter == 30) {
-        sendMail("my@address.net", "Alarm system log", eventLogMsgBody)
-        // prevent initiating reading when index item is restored during OH startup
-        EVENT_LOG_IDX.postUpdate(NULL)
-    } else {
-		eventLogMsgBody += "\n" + (EVENT_LOG_TIME.state as DateTimeType).format("%1$tF %1$tR") + ": " + EVENT_LOG_DESCR.state
-		if (EVENT_LOG_DET.state != NULL && EVENT_LOG_DET.state != "") {
-			 eventLogMsgBody += " - " + EVENT_LOG_DET.state
-		}
-        eventLogCounter += 1
-        EVENT_LOG_IDX.sendCommand(EVENT_LOG_PREV.state)
+    val actions = getActions("satel", "satel:event-log:home")
+    if (null === actions) {
+        logInfo("EventLog", "Actions not found, check thing ID")
+        return
     }
+    logInfo("EventLog", "Start")
+    var msgBody = ""
+    var eventIdx = -1
+    (1..10).forEach[
+        val eventRec = actions.readEvent(eventIdx)
+        val details = eventRec.get("details")
+        msgBody += "\n" + String::format("%1$tF %1$tR", eventRec.get("timestamp")) + ": " + eventRec.get("description")
+        if (details != NULL && details != "") {
+             msgBody += " - " + details
+        }
+        eventIdx = eventRec.get("prev_index")
+    ]
+    logInfo("EventLog", "End")
+    // sending notifications via mail requires the mail binding
+    getActions("mail","mail:smtp:local").sendMail("you@email.net", "Event log", msgBody)
 end
 ```
 
@@ -411,13 +441,14 @@ end
 
 ### binary items
 
-In OH2.x all channels have strict types, which means you cannot use other type then designated for a channel. 
+In openHAB all channels have strict types, which means you cannot use other type then designated for a channel. 
 In Satel binding all binary items are now of 'Switch' type. Using other item types, like 'Contact' is not possible in this version of the binding.
-For this reason, when migrating 1.x item files, besides changing binding configuration for each item, you must replace all 'Contact' items to 'Switch' type.  
+For this reason, when migrating 1.x item files, besides changing binding configuration for each item, you must replace all 'Contact' items to 'Switch' type.
 
 ### 'module' channels
 
-In version 2.x of the binding all 'module' channels have been removed. You can easily replace them with the following configuration:
+In version 2.x of the binding all 'module' channels have been removed.
+You can easily replace them with the following configuration:
 
 #### satel.items
 
@@ -458,11 +489,16 @@ end
 
 ### User for openHAB integration
 
-To control Integra partitions and outputs, you need to provide security code of a user in behalf of all those operations will be executed. It is highly recommended to use a separate user for openHAB integration with only required access rights set in Integra configuration, like access to certain partitions, etc. This allows you to distinguish actions made by openHAB and a user using Integra panel, also it will block unwanted operations in case someone breaks into your local network.
+To control Integra partitions and outputs, you need to provide security code of a user in behalf of all those operations will be executed.
+It is highly recommended to use a separate user for openHAB integration with only required access rights set in Integra configuration, like access to certain partitions, etc.
+This allows you to distinguish actions made by openHAB and a user using Integra panel, also it will block unwanted operations in case someone breaks into your local network.
 
 ### Disarming and clearing alarms
 
-Although this binding allows you to configure disarming a partition and clearing alarms for a partition, this should be used only in cases when security is not the priority. Don't forget both these operations can be executed in openHAB without specifying a user code, which is required to disarm or clear alarms using Integra panel. Consider adding a keypad in your sitemap to temporarily change user code to execute sensitive operations. You can find such keypad in the [Full Example](#full-example) section.
+Although this binding allows you to configure disarming a partition and clearing alarms for a partition, this should be used only in cases when security is not the priority.
+Don't forget both these operations can be executed in openHAB without specifying a user code, which is required to disarm or clear alarms using Integra panel.
+Consider adding a keypad in your sitemap to temporarily change user code to execute sensitive operations.
+You can find such keypad in the [Full Example](#full-example) section.
 
 ## Media
 

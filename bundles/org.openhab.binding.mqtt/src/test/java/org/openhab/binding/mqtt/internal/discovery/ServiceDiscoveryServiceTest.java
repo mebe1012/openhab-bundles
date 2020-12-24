@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.mqtt.internal.discovery;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -21,35 +21,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.naming.ConfigurationException;
-
-import org.eclipse.smarthome.config.discovery.DiscoveryListener;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.mqtt.MqttBindingConstants;
-import org.openhab.binding.mqtt.internal.discovery.MqttServiceDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttService;
 
 /**
- * Tests cases for {@link MqttServiceDiscoveryService}.
+ * Tests cases for {@link org.openhab.binding.mqtt.internal.discovery.MqttServiceDiscoveryService}.
  *
  * @author David Graeff - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ServiceDiscoveryServiceTest {
-    @Mock
-    private MqttService service;
 
-    @Mock
-    private DiscoveryListener discoverListener;
+    private @Mock MqttService service;
+    private @Mock DiscoveryListener discoverListener;
 
-    @Before
-    public void initMocks() throws ConfigurationException {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    public void initMocks() {
         Map<String, MqttBrokerConnection> brokers = new TreeMap<>();
         brokers.put("testname", new MqttBrokerConnection("tcp://123.123.123.123", null, false, null));
         brokers.put("textual", new MqttBrokerConnection("tcp://123.123.123.123", null, true, null));
@@ -57,7 +56,7 @@ public class ServiceDiscoveryServiceTest {
     }
 
     @Test
-    public void testDiscovery() throws ConfigurationException {
+    public void testDiscovery() {
         // Setting the MqttService will enable the background scanner
         MqttServiceDiscoveryService d = new MqttServiceDiscoveryService();
         d.addDiscoveryListener(discoverListener);

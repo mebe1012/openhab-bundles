@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,21 +22,21 @@ import java.util.concurrent.TimeUnit;
 
 import javax.measure.Unit;
 
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,20 +52,20 @@ public class WebscrapeHandler extends BaseThingHandler {
 
     public WebscrapeHandler(Thing thing) {
         super(thing);
-        channelConfigs.add(new ChannelConfig("acPower", "td", 4, SmartHomeUnits.WATT));
-        channelConfigs.add(new ChannelConfig("totalEnergy", "td", 7, SmartHomeUnits.KILOWATT_HOUR));
-        channelConfigs.add(new ChannelConfig("dayEnergy", "td", 10, SmartHomeUnits.KILOWATT_HOUR));
+        channelConfigs.add(new ChannelConfig("acPower", "td", 4, Units.WATT));
+        channelConfigs.add(new ChannelConfig("totalEnergy", "td", 7, Units.KILOWATT_HOUR));
+        channelConfigs.add(new ChannelConfig("dayEnergy", "td", 10, Units.KILOWATT_HOUR));
         channelConfigs.add(new ChannelConfig("status", "td", 13, null));
-        channelConfigs.add(new ChannelConfig("str1Voltage", "td", 19, SmartHomeUnits.VOLT));
-        channelConfigs.add(new ChannelConfig("str1Current", "td", 25, SmartHomeUnits.AMPERE));
-        channelConfigs.add(new ChannelConfig("str2Voltage", "td", 33, SmartHomeUnits.VOLT));
-        channelConfigs.add(new ChannelConfig("str2Current", "td", 39, SmartHomeUnits.AMPERE));
-        channelConfigs.add(new ChannelConfig("l1Voltage", "td", 22, SmartHomeUnits.VOLT));
-        channelConfigs.add(new ChannelConfig("l1Power", "td", 28, SmartHomeUnits.WATT));
-        channelConfigs.add(new ChannelConfig("l2Voltage", "td", 36, SmartHomeUnits.VOLT));
-        channelConfigs.add(new ChannelConfig("l2Power", "td", 42, SmartHomeUnits.WATT));
-        channelConfigs.add(new ChannelConfig("l3Voltage", "td", 46, SmartHomeUnits.VOLT));
-        channelConfigs.add(new ChannelConfig("l3Power", "td", 49, SmartHomeUnits.WATT));
+        channelConfigs.add(new ChannelConfig("str1Voltage", "td", 19, Units.VOLT));
+        channelConfigs.add(new ChannelConfig("str1Current", "td", 25, Units.AMPERE));
+        channelConfigs.add(new ChannelConfig("str2Voltage", "td", 33, Units.VOLT));
+        channelConfigs.add(new ChannelConfig("str2Current", "td", 39, Units.AMPERE));
+        channelConfigs.add(new ChannelConfig("l1Voltage", "td", 22, Units.VOLT));
+        channelConfigs.add(new ChannelConfig("l1Power", "td", 28, Units.WATT));
+        channelConfigs.add(new ChannelConfig("l2Voltage", "td", 36, Units.VOLT));
+        channelConfigs.add(new ChannelConfig("l2Power", "td", 42, Units.WATT));
+        channelConfigs.add(new ChannelConfig("l3Voltage", "td", 46, Units.VOLT));
+        channelConfigs.add(new ChannelConfig("l3Power", "td", 49, Units.WATT));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class WebscrapeHandler extends BaseThingHandler {
     }
 
     private static List<String> getTag(Document doc, String tag) {
-        ArrayList<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         Iterator<Element> elIt = doc.getElementsByTag(tag).iterator();
         while (elIt.hasNext()) {
             String content = elIt.next().text();
@@ -130,5 +130,4 @@ public class WebscrapeHandler extends BaseThingHandler {
             }
         }
     }
-
 }

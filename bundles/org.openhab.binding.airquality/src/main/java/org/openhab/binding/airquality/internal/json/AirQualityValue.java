@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.airquality.internal.json;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -19,16 +21,13 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
-public class AirQualityValue<T extends Number> {
+@NonNullByDefault
+public class AirQualityValue {
 
     @SerializedName("v")
-    private T value;
+    private double value;
 
-    public void setValue(T value) {
-        this.value = value;
-    }
-
-    public T getValue() {
+    public double getValue() {
         return value;
     }
 }

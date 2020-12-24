@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.binding.netatmo.internal.webhook;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Scanner;
 
 import javax.servlet.ServletException;
@@ -20,6 +21,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.netatmo.internal.handler.NetatmoBridgeHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -33,17 +36,19 @@ import com.google.gson.Gson;
  *
  * @author Gaël L'hopital - Initial contribution
  */
+@NonNullByDefault
 public class WelcomeWebHookServlet extends HttpServlet {
     private static final long serialVersionUID = 1288539782077957954L;
     private static final String PATH = "/netatmo/%s/camera";
     private static final String APPLICATION_JSON = "application/json";
     private static final String CHARSET = "utf-8";
+
     private final Gson gson = new Gson();
 
     private final Logger logger = LoggerFactory.getLogger(WelcomeWebHookServlet.class);
 
     private HttpService httpService;
-    private NetatmoBridgeHandler bridgeHandler;
+    private @Nullable NetatmoBridgeHandler bridgeHandler;
     private String path;
 
     public WelcomeWebHookServlet(HttpService httpService, String id) {
@@ -76,12 +81,18 @@ public class WelcomeWebHookServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+            throws ServletException, IOException {
+        if (req == null || resp == null) {
+            return;
+        }
+
         String data = inputStreamToString(req);
-        if (data != null && bridgeHandler != null) {
+        NetatmoBridgeHandler handler = bridgeHandler;
+        if (!data.isEmpty() && handler != null) {
             NAWebhookCameraEvent event = gson.fromJson(data, NAWebhookCameraEvent.class);
             logger.debug("Event transmitted from restService");
-            bridgeHandler.webHookEvent(event);
+            handler.webHookEvent(Objects.requireNonNull(event));
         }
 
         setHeaders(resp);
@@ -109,5 +120,4 @@ public class WelcomeWebHookServlet extends HttpServlet {
     public String getPath() {
         return path;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,20 +17,19 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.neeo.internal.NeeoBrainApi;
 import org.openhab.binding.neeo.internal.NeeoBrainConfig;
 import org.openhab.binding.neeo.internal.NeeoConstants;
 import org.openhab.binding.neeo.internal.handler.NeeoBrainHandler;
 import org.openhab.binding.neeo.internal.models.NeeoBrain;
 import org.openhab.binding.neeo.internal.models.NeeoRoom;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,19 +90,19 @@ public class NeeoRoomDiscoveryService extends AbstractDiscoveryService {
             logger.debug("Brain {} ({}) found, scanning {} rooms in it", brain.getName(), brainId, rooms.length);
             for (NeeoRoom room : rooms) {
                 final String roomKey = room.getKey();
-                if (roomKey == null || StringUtils.isEmpty(roomKey)) {
+                if (roomKey == null || roomKey.isEmpty()) {
                     logger.debug("Room didn't have a room key: {}", room);
                     continue;
                 }
 
                 if (room.getDevices().getDevices().length == 0 && room.getRecipes().getRecipes().length == 0
                         && !config.isDiscoverEmptyRooms()) {
-                    logger.debug("Room {} ({}) found but has no devices or recipes, ignoring - {}", room.getKey(),
-                            brainId, room.getName());
+                    logger.debug("Room {} ({}) found but has no devices or recipes, ignoring - {}", roomKey, brainId,
+                            room.getName());
                     continue;
                 }
 
-                final ThingUID thingUID = new ThingUID(NeeoConstants.BRIDGE_TYPE_ROOM, brainUid, room.getKey());
+                final ThingUID thingUID = new ThingUID(NeeoConstants.BRIDGE_TYPE_ROOM, brainUid, roomKey);
 
                 final DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
                         .withProperty(NeeoConstants.CONFIG_ROOMKEY, roomKey)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,17 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.russound.internal.discovery.RioSystemDeviceDiscoveryService;
 import org.openhab.binding.russound.internal.net.SocketChannelSession;
 import org.openhab.binding.russound.internal.net.SocketSession;
@@ -43,6 +32,17 @@ import org.openhab.binding.russound.internal.rio.StatefulHandlerCallback;
 import org.openhab.binding.russound.internal.rio.controller.RioControllerHandler;
 import org.openhab.binding.russound.internal.rio.models.GsonUtilities;
 import org.openhab.binding.russound.internal.rio.source.RioSourceHandler;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,20 +119,18 @@ public class RioSystemHandler extends AbstractBridgeHandler<RioSystemProtocol> {
     /**
      * The protocol for favorites handling
      */
-    private final AtomicReference<RioSystemFavoritesProtocol> favoritesProtocol = new AtomicReference<RioSystemFavoritesProtocol>(
-            null);
+    private final AtomicReference<RioSystemFavoritesProtocol> favoritesProtocol = new AtomicReference<>(null);
 
     /**
      * The protocol for presets handling
      */
-    private final AtomicReference<RioPresetsProtocol> presetsProtocol = new AtomicReference<RioPresetsProtocol>(null);
+    private final AtomicReference<RioPresetsProtocol> presetsProtocol = new AtomicReference<>(null);
 
     /**
      * The discovery service to discover the zones/sources, etc
      * Will be null if not active.
      */
-    private final AtomicReference<RioSystemDeviceDiscoveryService> discoveryService = new AtomicReference<RioSystemDeviceDiscoveryService>(
-            null);
+    private final AtomicReference<RioSystemDeviceDiscoveryService> discoveryService = new AtomicReference<>(null);
 
     /**
      * Constructs the handler from the {@link Bridge}
@@ -299,7 +297,6 @@ public class RioSystemHandler extends AbstractBridgeHandler<RioSystemProtocol> {
                 public void setProperty(String propertyName, String propertyValue) {
                     getThing().setProperty(propertyName, propertyValue);
                 }
-
             });
 
             setProtocolHandler(new RioSystemProtocol(session, callback));
@@ -505,7 +502,6 @@ public class RioSystemHandler extends AbstractBridgeHandler<RioSystemProtocol> {
         } else if (childHandler instanceof RioControllerHandler) {
             refreshNamedHandler(gson, RioControllerHandler.class, RioConstants.CHANNEL_SYSCONTROLLERS);
         }
-
     }
 
     /**

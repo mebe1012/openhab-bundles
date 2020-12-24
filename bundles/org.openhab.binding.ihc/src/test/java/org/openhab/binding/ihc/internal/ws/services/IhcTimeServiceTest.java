@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.ihc.internal.ws.services;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -22,8 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.ihc.internal.ws.ResourceFileUtils;
 import org.openhab.binding.ihc.internal.ws.datatypes.WSTimeManagerSettings;
 import org.openhab.binding.ihc.internal.ws.exeptions.IhcExecption;
@@ -39,10 +39,10 @@ public class IhcTimeServiceTest {
     private IhcTimeService ihcTimeService;
     private final String host = "1.1.1.1";
     private final String url = "https://1.1.1.1/ws/TimeManagerService";
-    private Map<String, String> requestProps = new HashMap<String, String>();
+    private Map<String, String> requestProps = new HashMap<>();
     private final int timeout = 100;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IhcExecption, SocketTimeoutException {
         ihcTimeService = spy(new IhcTimeService(host, timeout, new IhcConnectionPool()));
 
@@ -66,6 +66,5 @@ public class IhcTimeServiceTest {
         assertEquals(24, result.getSyncIntervalInHours());
         assertEquals(LocalDateTime.parse("2018-12-07T08:20:10", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
                 result.getTimeAndDateInUTC().getAsLocalDateTime());
-
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,13 +17,13 @@ import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.tellstick.internal.TelldusBindingException;
 import org.openhab.binding.tellstick.internal.handler.TelldusDeviceController;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tellstick.JNA;
@@ -56,7 +56,7 @@ public class TelldusCoreDeviceController implements DeviceChangeListener, Sensor
 
     public TelldusCoreDeviceController(long resendInterval) {
         this.resendInterval = resendInterval;
-        messageQue = Collections.synchronizedSortedMap(new TreeMap<Device, TelldusCoreSendEvent>());
+        messageQue = Collections.synchronizedSortedMap(new TreeMap<>());
         telldusCoreWorker = new TelldusCoreWorker(messageQue);
         workerThread = new Thread(telldusCoreWorker);
     }
@@ -143,7 +143,6 @@ public class TelldusCoreDeviceController implements DeviceChangeListener, Sensor
     @Override
     public void onRequest(TellstickDeviceEvent newDevices) {
         setLastSend(newDevices.getTimestamp());
-
     }
 
     private void sendEvent(Device device, int resendCount, boolean isdimmer, Command command)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.avmfritz.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Thing;
 
 /**
  * Handler for a FRITZ! device. Handles commands, which are sent to one of the channels.
@@ -25,11 +25,6 @@ import org.eclipse.smarthome.core.thing.Thing;
 @NonNullByDefault
 public class DeviceHandler extends AVMFritzBaseThingHandler {
 
-    /**
-     * Constructor
-     *
-     * @param thing Thing object representing a FRITZ! device
-     */
     public DeviceHandler(Thing thing) {
         super(thing);
     }

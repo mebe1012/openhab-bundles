@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.binding.homematic.internal.communicator.virtual.ButtonVirtualDatapointHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.homematic.internal.misc.HomematicClientException;
 import org.openhab.binding.homematic.internal.misc.HomematicConstants;
 import org.openhab.binding.homematic.internal.misc.MiscUtils;
@@ -31,6 +28,8 @@ import org.openhab.binding.homematic.internal.model.HmDevice;
 import org.openhab.binding.homematic.internal.model.HmInterface;
 import org.openhab.binding.homematic.internal.model.HmParamsetType;
 import org.openhab.binding.homematic.internal.model.HmValueType;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.CommonTriggerEvents;
 
 /**
  * Tests for {@link ButtonVirtualDatapointHandler}.
@@ -45,7 +44,7 @@ public class ButtonDatapointTest extends JavaTest {
     private MockEventReceiver mockEventReceiver;
     private final ButtonVirtualDatapointHandler bvdpHandler = new ButtonVirtualDatapointHandler();
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         this.mockEventReceiver = new MockEventReceiver();
     }
@@ -138,14 +137,12 @@ public class ButtonDatapointTest extends JavaTest {
     private class MockEventReceiver {
 
         public void eventReceived(HmDatapoint dp) throws IOException, HomematicClientException {
-
             if (bvdpHandler.canHandleEvent(dp)) {
                 bvdpHandler.handleEvent(null, dp);
             }
             if (dp.isPressDatapoint() && MiscUtils.isTrueValue(dp.getValue())) {
                 disableDatapoint(dp);
             }
-
         }
 
         private void disableDatapoint(HmDatapoint dp) {
@@ -154,11 +151,8 @@ public class ButtonDatapointTest extends JavaTest {
                     Thread.sleep(DISABLE_DATAPOINT_DELAY);
                     dp.setValue(Boolean.FALSE);
                 } catch (InterruptedException e) {
-
                 }
             }).start();
         }
-
     }
-
 }

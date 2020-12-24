@@ -1,4 +1,4 @@
-# Binding for Spotify and Spotify Connect Devices
+# Spotify Binding
 
 This binding implements a bridge to the Spotify Player Web API and makes it possible to discover Spotify Connect Devices available on your Spotify Premium account.
 
@@ -20,7 +20,7 @@ Follow instructions under:
 When registering your new Spotify Application for openHAB Spotify Bridge you have to specify the allowed "Redirect URIs" aka white-listed addresses.
 Here you have to specify the URL to the Bridge Authorization Servlet on your server.
 
-For example if you run your openHAB server on `http://openhabianpi:8080` you should add [http://openhabianpi:8080/connectspotify](http://openhabianpi:8080/connectspotify) as the redirect URIs.
+For example if you run your openHAB server on `http://openhab:8080` you should add [http://openhab:8080/connectspotify](http://openhab:8080/connectspotify) as the redirect URIs.
 
 This is important since the authorize process with Spotify takes place using your client web browser and Spotify will have to know the right URLs to your openHAB server for the authorization to be completed.
 When you have authorized with Spotify, this Redirect URI is where authorization tokens for your openHAB Spotify Brigde will be sent and they have to be received by the servlet on `/connectspotify`.
@@ -30,13 +30,13 @@ When you have authorized with Spotify, this Redirect URI is where authorization 
 1. Install the binding and make sure the _Spotify Binding_ is listed on your server
 1. Complete the Spotify Application Registation if you have not already done so, see above.
 1. Make sure you have your Spotify Application _Client ID_ and _Client Secret_ identities available.
-1. Go to to your preferred openHAB admin UI and add a new Thing. Select the **"Spotify Player Bridge"**. Choose new Id for the player, unless you like the generated one, put in the _Client ID_ and _Client Secret_ from the Spotify Application registration in their respective fields of the bridge configuration. You can leave the _refreshPeriod_ as is. Save the bridge.
+1. Add a new **"Spotify Player Bridge"** thing. Choose new Id for the player, unless you like the generated one, put in the _Client ID_ and _Client Secret_ from the Spotify Application registration in their respective fields of the bridge configuration. You can leave the _refreshPeriod_ as is. Save the bridge.
 1. The bridge thing will stay in state _INITIALIZING_ and eventually go _OFFLINE_ - this is fine. You have to authorize this bridge with Spotify.
 1. Go to the authorization page of your server. `http://<your openHAB address>:8080/connectspotify`. Your newly added bridge should be listed there.
 1. Press the _"Authorize Player"_ button. This will take you either to the login page of Spotify or directly to the authorization screen. Login and/or authorize the application. If the Redirect URIs are correct you will be returned and the entry should show you are authorized with you Spotify user name/id. If not, go back to your Spotify Application and ensure you have the right Redirect URIs.
 1. The binding will be updated with a refresh token and go _ONLINE_. The refresh token is used to re-authorize the bridge with Spotify Connect Web API whenever required.
 
-Now that you have got your bridge _ONLINE_ it is time to discover your devices! Go to Paper UI Inbox and search for Spotify Connect Devices. Any device currently available on your account should show up immediately.
+Now that you have got your bridge _ONLINE_ you can now start a scan with the binding to auto discover your devices.
 
 If no devices show up you can start Spotify App on your PC/Mac/iOS/Android and start playing on your devices as you run discovery.
 This should make any Spotify Connect devices and Spotify Apps discoverable.
@@ -127,6 +127,7 @@ __Advanced Channels:__
 | trackNumber     | String    | Read-only  | Number of the track on the album/record.                    |
 | trackDiscNumber | String    | Read-only  | Disc Number of the track on the album/record.               |
 | trackPopularity | Number    | Read-only  | Currently playing track popularity.                         |
+| trackExplicit   | Switch    | Read-only  | Whether or not the track has explicit lyrics.               |
 | albumId         | String    | Read-only  | Album Id of the currently playing track.                    |
 | albumUri        | String    | Read-only  | Album URI of the currently playing track.                   |
 | albumHref       | String    | Read-only  | Album URL of the currently playing track.                   |
@@ -179,18 +180,18 @@ Bridge spotify:player:user1 "Me" [clientId="<your client id>", clientSecret="<yo
 spotify.items:
 
 ```
-Player spotifyTrackPlayer   label="Player"               {channel="spotify:player:user1:trackPlayer"}
-String spotifyDevices       label="Active device [%s]"   {channel="spotify:player:user1:devices"}
-Switch spotifyDeviceShuffle label="Shuffle mode"         {channel="spotify:player:user1:deviceShuffle"}
-String spotifyTrackRepeat   label="Repeat mode: [%s]"    {channel="spotify:player:user1:trackRepeat"}
-String spotifyTrackProgress label="Track progress: [%s]" {channel="spotify:player:user1:trackProgress"}
-String spotifyTrackDuration label="Track duration: [%s]" {channel="spotify:player:user1:tackDuration"}
-String spotifyTrackName     label="Track Name: [%s]"     {channel="spotify:player:user1:trackName"}
-String spotifyAlbumName     label="Album Name: [%s]"     {channel="spotify:player:user1:albumName"}
-String spotifyArtistName    label="Artist Name: [%s]"    {channel="spotify:player:user1:artistName"}
-Image  spotifyAlbumImage    label="Album Art"            {channel="spotify:player:user1:albumImage"}
-String spotifyPlaylists     label="Playlists [%s]"       {channel="spotify:player:user1:playlists"}
-String spotifyPlayName      label="Playlist [%s]"        {channel="spotify:player:user1:playlistName"}
+Player spotifyTrackPlayer   "Player"               {channel="spotify:player:user1:trackPlayer"}
+String spotifyDevices       "Active device [%s]"   {channel="spotify:player:user1:devices"}
+Switch spotifyDeviceShuffle "Shuffle mode"         {channel="spotify:player:user1:deviceShuffle"}
+String spotifyTrackRepeat   "Repeat mode: [%s]"    {channel="spotify:player:user1:trackRepeat"}
+String spotifyTrackProgress "Track progress: [%s]" {channel="spotify:player:user1:trackProgress"}
+String spotifyTrackDuration "Track duration: [%s]" {channel="spotify:player:user1:trackDuration"}
+String spotifyTrackName     "Track Name: [%s]"     {channel="spotify:player:user1:trackName"}
+String spotifyAlbumName     "Album Name: [%s]"     {channel="spotify:player:user1:albumName"}
+String spotifyArtistName    "Artist Name: [%s]"    {channel="spotify:player:user1:artistName"}
+Image  spotifyAlbumImage    "Album Art"            {channel="spotify:player:user1:albumImage"}
+String spotifyPlaylists     "Playlists [%s]"       {channel="spotify:player:user1:playlists"}
+String spotifyPlayName      "Playlist [%s]"        {channel="spotify:player:user1:playlistName"}
 
 String device1DeviceName    {channel="spotify:device:user1:device1:deviceName"}
 Player device1Player        {channel="spotify:device:user1:device1:devicePlayer"}
@@ -218,8 +219,8 @@ sitemap spotify label="Spotify Sitemap" {
     Text      item=spotifyTrackName     label="Track Name: [%s]"
     Image     item=spotifyAlbumImage    label="Album Art"
     Text      item=spotifyAlbumName     label="Currently Played Album Name: [%s]"
-    Text      item=spotifyTrtistName    label="Currently Played Artist Name: [%s]"
-    Selection item=spotifyTrackPlay     label="Playlist" icon="music"
+    Text      item=spotifyArtistName    label="Currently Played Artist Name: [%s]"
+    Selection item=spotifyPlaylists     label="Playlist" icon="music"
   }
 
   Frame label="My Spotify Device 1" {

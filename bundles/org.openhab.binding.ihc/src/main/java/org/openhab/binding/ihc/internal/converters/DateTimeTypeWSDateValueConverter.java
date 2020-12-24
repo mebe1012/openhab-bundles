@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,10 +18,10 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.openhab.binding.ihc.internal.ws.exeptions.ConversionException;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSDateValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSTimeValue;
+import org.openhab.core.library.types.DateTimeType;
 
 /**
  * DateTimeType <-> WSDateValue converter.

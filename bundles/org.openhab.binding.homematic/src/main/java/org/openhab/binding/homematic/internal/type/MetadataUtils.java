@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,9 +31,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.binding.homematic.internal.model.HmDatapoint;
 import org.openhab.binding.homematic.internal.model.HmDevice;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
 public class MetadataUtils {
     private static final Logger logger = LoggerFactory.getLogger(MetadataUtils.class);
     private static ResourceBundle descriptionsBundle;
-    private static Map<String, String> descriptions = new HashMap<String, String>();
-    private static Map<String, Set<String>> standardDatapoints = new HashMap<String, Set<String>>();
+    private static Map<String, String> descriptions = new HashMap<>();
+    private static Map<String, Set<String>> standardDatapoints = new HashMap<>();
 
     protected static void initialize() {
         // loads all Homematic device names
@@ -62,7 +62,7 @@ public class MetadataUtils {
     private static void loadBundle(String filename) {
         descriptionsBundle = ResourceBundle.getBundle(filename, Locale.getDefault());
         for (String key : descriptionsBundle.keySet()) {
-            descriptions.put(key, descriptionsBundle.getString(key));
+            descriptions.put(key.toUpperCase(), descriptionsBundle.getString(key));
         }
         ResourceBundle.clearCache();
         descriptionsBundle = null;
@@ -75,7 +75,6 @@ public class MetadataUtils {
         Bundle bundle = FrameworkUtil.getBundle(MetadataUtils.class);
         try (InputStream stream = bundle.getResource("homematic/standard-datapoints.properties").openStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
-
             String line;
             while ((line = reader.readLine()) != null) {
                 if (StringUtils.trimToNull(line) != null && !StringUtils.startsWith(line, "#")) {
@@ -84,7 +83,7 @@ public class MetadataUtils {
 
                     Set<String> channelDatapoints = standardDatapoints.get(channelType);
                     if (channelDatapoints == null) {
-                        channelDatapoints = new HashSet<String>();
+                        channelDatapoints = new HashSet<>();
                         standardDatapoints.put(channelType, channelDatapoints);
                     }
 
@@ -108,7 +107,7 @@ public class MetadataUtils {
         if (dp.getOptions() == null) {
             logger.warn("No options for ENUM datapoint {}", dp);
         } else {
-            options = new ArrayList<T>();
+            options = new ArrayList<>();
             for (int i = 0; i < dp.getOptions().length; i++) {
                 String description = null;
                 if (!dp.isVariable() && !dp.isScript()) {
@@ -167,6 +166,9 @@ public class MetadataUtils {
      */
     public static String getStatePattern(HmDatapoint dp) {
         String unit = getUnit(dp);
+        if ("%%".equals(unit)) {
+            return "%d %%";
+        }
         if (unit != null && unit != "") {
             String pattern = getPattern(dp);
             if (pattern != null) {
@@ -200,7 +202,7 @@ public class MetadataUtils {
             if (key.endsWith("|")) {
                 key = key.substring(0, key.length() - 1);
             }
-            String description = descriptions.get(key);
+            String description = descriptions.get(key.toUpperCase());
             if (description != null) {
                 return description;
             }
@@ -278,7 +280,8 @@ public class MetadataUtils {
 
         if (dp.isBooleanType()) {
             if (((dpName.equals(DATAPOINT_NAME_STATE) || dpName.equals(VIRTUAL_DATAPOINT_NAME_STATE_CONTACT))
-                    && channelType.equals(CHANNEL_TYPE_SHUTTER_CONTACT))
+                    && (channelType.equals(CHANNEL_TYPE_SHUTTER_CONTACT)
+                            || channelType.contentEquals(CHANNEL_TYPE_TILT_SENSOR)))
                     || (dpName.equals(DATAPOINT_NAME_SENSOR) && channelType.equals(CHANNEL_TYPE_SENSOR))) {
                 return ITEM_TYPE_CONTACT;
             } else {
@@ -345,8 +348,10 @@ public class MetadataUtils {
     public static boolean isRollerShutter(HmDatapoint dp) {
         String channelType = dp.getChannel().getType();
         return channelType.equals(CHANNEL_TYPE_BLIND) || channelType.equals(CHANNEL_TYPE_JALOUSIE)
+                || channelType.equals(CHANNEL_TYPE_BLIND_TRANSMITTER)
                 || channelType.equals(CHANNEL_TYPE_SHUTTER_TRANSMITTER)
-                || channelType.equals(CHANNEL_TYPE_SHUTTER_VIRTUAL_RECEIVER);
+                || channelType.equals(CHANNEL_TYPE_SHUTTER_VIRTUAL_RECEIVER)
+                || channelType.contentEquals(CHANNEL_TYPE_BLIND_VIRTUAL_RECEIVER);
     }
 
     /**
@@ -386,12 +391,11 @@ public class MetadataUtils {
         } else if (itemType.equals(ITEM_TYPE_CONTACT)) {
             return CATEGORY_CONTACT;
         } else if (itemType.equals(ITEM_TYPE_DIMMER)) {
-            return CATEGORY_DIMMABLE_LIGHT;
+            return "";
         } else if (itemType.equals(ITEM_TYPE_SWITCH)) {
             return CATEGORY_SWITCH;
         } else {
             return null;
         }
     }
-
 }

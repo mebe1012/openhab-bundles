@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,13 +14,8 @@ package org.openhab.binding.minecraft.internal.discovery;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.minecraft.internal.MinecraftBindingConstants;
 import org.openhab.binding.minecraft.internal.MinecraftHandlerFactory;
 import org.openhab.binding.minecraft.internal.config.ServerConfig;
@@ -29,6 +24,10 @@ import org.openhab.binding.minecraft.internal.message.data.PlayerData;
 import org.openhab.binding.minecraft.internal.message.data.SignData;
 import org.openhab.binding.minecraft.internal.server.ServerConnection;
 import org.openhab.binding.minecraft.internal.util.Pair;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ import rx.subscriptions.CompositeSubscription;
  *
  * @author Mattias Markehed - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.minecraft")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.minecraft")
 public class MinecraftDiscoveryService extends AbstractDiscoveryService {
 
     private final Logger logger = LoggerFactory.getLogger(MinecraftDiscoveryService.class);
@@ -94,7 +93,7 @@ public class MinecraftDiscoveryService extends AbstractDiscoveryService {
     private Subscription subscribeSignsRx(Observable<ServerConnection> serverRx) {
         return serverRx
                 .flatMap(connection -> connection.getSocketHandler().getSignsRx().distinct(), (connection, signs) -> {
-                    return new Pair<ServerConnection, List<SignData>>(connection, signs);
+                    return new Pair<>(connection, signs);
                 }).subscribe(conectionSignPair -> {
                     for (SignData sign : conectionSignPair.second) {
                         submitSignDiscoveryResults(conectionSignPair.first.getThingUID(), sign);
@@ -111,7 +110,7 @@ public class MinecraftDiscoveryService extends AbstractDiscoveryService {
     private Subscription subscribePlayersRx(Observable<ServerConnection> serverRx) {
         return serverRx
                 .flatMap(socketHandler -> socketHandler.getSocketHandler().getPlayersRx().distinct(),
-                        (connection, players) -> new Pair<ServerConnection, List<PlayerData>>(connection, players))
+                        (connection, players) -> new Pair<>(connection, players))
                 .subscribeOn(Schedulers.newThread()).subscribe(conectionPlayerPair -> {
                     for (PlayerData player : conectionPlayerPair.second) {
                         submitPlayerDiscoveryResults(conectionPlayerPair.first.getThingUID(), player.getName());
@@ -146,7 +145,7 @@ public class MinecraftDiscoveryService extends AbstractDiscoveryService {
     }
 
     /**
-     * Submit the discovered Devices to the Smarthome inbox,
+     * Submit the discovered Devices to the inbox.
      *
      * @param bridgeUID
      * @param name name of the player
@@ -162,7 +161,7 @@ public class MinecraftDiscoveryService extends AbstractDiscoveryService {
     }
 
     /**
-     * Submit the discovered Signs to the Smarthome inbox,
+     * Submit the discovered Signs to the inbox.
      *
      * @param bridgeUID
      * @param sign data describing sign

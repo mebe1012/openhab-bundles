@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.onewire.internal.OwDynamicStateDescriptionProvider;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.OwPageBuffer;
 import org.openhab.binding.onewire.internal.device.EDS006x;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link EDSSensorThingHandler} is responsible for handling EDS multisensors

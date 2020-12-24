@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,42 +26,41 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.ClientBuilder;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.glassfish.jersey.client.ClientProperties;
+import org.openhab.binding.lametrictime.api.Configuration;
+import org.openhab.binding.lametrictime.api.LaMetricTime;
+import org.openhab.binding.lametrictime.api.local.ApplicationActivationException;
+import org.openhab.binding.lametrictime.api.local.LaMetricTimeLocal;
+import org.openhab.binding.lametrictime.api.local.NotificationCreationException;
+import org.openhab.binding.lametrictime.api.local.UpdateException;
+import org.openhab.binding.lametrictime.api.local.model.Application;
+import org.openhab.binding.lametrictime.api.local.model.Audio;
+import org.openhab.binding.lametrictime.api.local.model.Bluetooth;
+import org.openhab.binding.lametrictime.api.local.model.Device;
+import org.openhab.binding.lametrictime.api.local.model.Display;
+import org.openhab.binding.lametrictime.api.local.model.Widget;
+import org.openhab.binding.lametrictime.api.model.enums.BrightnessMode;
 import org.openhab.binding.lametrictime.internal.LaMetricTimeBindingConstants;
 import org.openhab.binding.lametrictime.internal.LaMetricTimeConfigStatusMessage;
 import org.openhab.binding.lametrictime.internal.LaMetricTimeUtil;
 import org.openhab.binding.lametrictime.internal.StateDescriptionOptionsProvider;
 import org.openhab.binding.lametrictime.internal.WidgetRef;
 import org.openhab.binding.lametrictime.internal.config.LaMetricTimeConfiguration;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ConfigStatusBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.syphr.lametrictime.api.Configuration;
-import org.syphr.lametrictime.api.LaMetricTime;
-import org.syphr.lametrictime.api.local.ApplicationActivationException;
-import org.syphr.lametrictime.api.local.LaMetricTimeLocal;
-import org.syphr.lametrictime.api.local.NotificationCreationException;
-import org.syphr.lametrictime.api.local.UpdateException;
-import org.syphr.lametrictime.api.local.model.Application;
-import org.syphr.lametrictime.api.local.model.Audio;
-import org.syphr.lametrictime.api.local.model.Bluetooth;
-import org.syphr.lametrictime.api.local.model.Device;
-import org.syphr.lametrictime.api.local.model.Display;
-import org.syphr.lametrictime.api.local.model.Widget;
-import org.syphr.lametrictime.api.model.enums.BrightnessMode;
 
 /**
  * The {@link LaMetricTimeHandler} is responsible for handling commands, which are
@@ -78,12 +77,16 @@ public class LaMetricTimeHandler extends ConfigStatusBridgeHandler {
 
     private final StateDescriptionOptionsProvider stateDescriptionProvider;
 
+    private final ClientBuilder clientBuilder;
+
     private LaMetricTime clock;
 
     private ScheduledFuture<?> connectionJob;
 
-    public LaMetricTimeHandler(Bridge bridge, StateDescriptionOptionsProvider stateDescriptionProvider) {
+    public LaMetricTimeHandler(Bridge bridge, StateDescriptionOptionsProvider stateDescriptionProvider,
+            ClientBuilder clientBuilder) {
         super(bridge);
+        this.clientBuilder = clientBuilder;
         this.stateDescriptionProvider = stateDescriptionProvider;
 
         if (stateDescriptionProvider == null) {
@@ -99,8 +102,6 @@ public class LaMetricTimeHandler extends ConfigStatusBridgeHandler {
         logger.debug("Creating LaMetric Time client");
         Configuration clockConfig = new Configuration().withDeviceHost(bindingConfig.host)
                 .withDeviceApiKey(bindingConfig.apiKey).withLogging(logger.isDebugEnabled());
-        ClientBuilder clientBuilder = ClientBuilder.newBuilder().property(ClientProperties.CONNECT_TIMEOUT, 10000)
-                .property(ClientProperties.READ_TIMEOUT, 10000);
         clock = LaMetricTime.create(clockConfig, clientBuilder);
 
         connectionJob = scheduler.scheduleWithFixedDelay(() -> {

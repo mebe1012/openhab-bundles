@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,21 +18,22 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.FixedLengthAudioStream;
-import org.eclipse.smarthome.core.audio.URLAudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOParticipant;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.onkyo.internal.OnkyoBindingConstants;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,8 +170,13 @@ public abstract class UpnpAudioSinkHandler extends BaseThingHandler implements A
     }
 
     @Override
-    public void process(AudioStream audioStream)
+    public void process(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+        if (audioStream == null) {
+            stop();
+            return;
+        }
+
         String url = null;
         if (audioStream instanceof URLAudioStream) {
             // it is an external URL, the speaker can access it itself and play it.
@@ -191,6 +197,7 @@ public abstract class UpnpAudioSinkHandler extends BaseThingHandler implements A
                 return;
             }
         }
+
         playMedia(url);
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.openhab.binding.homematic.type.HomematicThingTypeExcluder;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -35,20 +35,20 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Gerhard Riegler - Initial contribution
  * @author Michael Reitler - Added HomematicThingTypeExcluder
  */
-@Component(service = { HomematicConfigDescriptionProvider.class, ConfigDescriptionProvider.class }, immediate = true)
+@Component(service = { HomematicConfigDescriptionProvider.class, ConfigDescriptionProvider.class })
 public class HomematicConfigDescriptionProviderImpl implements HomematicConfigDescriptionProvider {
-    private Map<URI, ConfigDescription> configDescriptionsByURI = new HashMap<URI, ConfigDescription>();
+    private Map<URI, ConfigDescription> configDescriptionsByURI = new HashMap<>();
     protected List<HomematicThingTypeExcluder> homematicThingTypeExcluders = new CopyOnWriteArrayList<>();
-    
+
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addHomematicThingTypeExcluder(HomematicThingTypeExcluder homematicThingTypeExcluder){
-        if(homematicThingTypeExcluders != null){
+    protected void addHomematicThingTypeExcluder(HomematicThingTypeExcluder homematicThingTypeExcluder) {
+        if (homematicThingTypeExcluders != null) {
             homematicThingTypeExcluders.add(homematicThingTypeExcluder);
         }
     }
-     
-    protected void removeHomematicThingTypeExcluder(HomematicThingTypeExcluder homematicThingTypeExcluder){
-        if(homematicThingTypeExcluders != null){
+
+    protected void removeHomematicThingTypeExcluder(HomematicThingTypeExcluder homematicThingTypeExcluder) {
+        if (homematicThingTypeExcluders != null) {
             homematicThingTypeExcluders.remove(homematicThingTypeExcluder);
         }
     }
@@ -62,7 +62,7 @@ public class HomematicConfigDescriptionProviderImpl implements HomematicConfigDe
         }
         return false;
     }
-    
+
     @Override
     public Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
         Collection<ConfigDescription> result = new ArrayList<>();
@@ -78,7 +78,7 @@ public class HomematicConfigDescriptionProviderImpl implements HomematicConfigDe
     public ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
         return isConfigDescriptionExcluded(uri) ? null : configDescriptionsByURI.get(uri);
     }
-    
+
     @Override
     public ConfigDescription getInternalConfigDescription(URI uri) {
         return configDescriptionsByURI.get(uri);
@@ -88,5 +88,4 @@ public class HomematicConfigDescriptionProviderImpl implements HomematicConfigDe
     public void addConfigDescription(ConfigDescription configDescription) {
         configDescriptionsByURI.put(configDescription.getUID(), configDescription);
     }
-
 }

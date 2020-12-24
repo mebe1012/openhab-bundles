@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,12 +32,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.net.util.SubnetUtils;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.opensprinkler.internal.api.OpenSprinklerApiFactory;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Graham - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.opensprinkler")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.opensprinkler")
 public class OpenSprinklerDiscoveryService extends AbstractDiscoveryService {
     private final Logger logger = LoggerFactory.getLogger(OpenSprinklerDiscoveryService.class);
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(
@@ -132,7 +132,7 @@ public class OpenSprinklerDiscoveryService extends AbstractDiscoveryService {
         for (InterfaceAddress address : networkInterface.getInterfaceAddresses()) {
             InetAddress ipAddress = address.getAddress();
 
-            String cidrSubnet = ipAddress.getHostAddress() + "/" + DISCOVERY_SUBNET_MASK;
+            String cidrSubnet = ipAddress.getHostAddress() + "/" + address.getNetworkPrefixLength();
 
             /* Apache Subnet Utils only supports IP v4 for creating string list of IP's */
             if (ipAddress instanceof Inet4Address) {

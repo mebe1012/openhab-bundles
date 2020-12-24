@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,14 @@
  */
 package org.openhab.binding.fsinternetradio.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.jupnp.model.meta.DeviceDetails;
 import org.jupnp.model.meta.ManufacturerDetails;
@@ -34,6 +31,9 @@ import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.UDN;
 import org.openhab.binding.fsinternetradio.internal.FSInternetRadioBindingConstants;
 import org.openhab.binding.fsinternetradio.internal.FSInternetRadioDiscoveryParticipant;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * OSGi tests for the {@link FSInternetRadioDiscoveryParticipant}.
@@ -80,7 +80,7 @@ public class FSInternetRadioDiscoveryParticipantJavaTest {
     String DEFAULT_RADIO_THING_UID = String.format("%s:%s:%s", RADIO_BINDING_ID, RADIO_THING_TYPE_ID,
             DEFAULT_RADIO_SERIAL_NUMBER);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         discoveryParticipant = new FSInternetRadioDiscoveryParticipant();
     }
@@ -100,7 +100,6 @@ public class FSInternetRadioDiscoveryParticipantJavaTest {
      *
      * @throws ValidationException
      */
-    @SuppressWarnings("null")
     @Test
     public void validDiscoveryResultWithComplete() throws ValidationException {
         RemoteDevice completeFSInternetRadioDevice = createDefaultFSInternetRadioDevice(DEFAULT_RADIO_BASE_URL);
@@ -111,17 +110,6 @@ public class FSInternetRadioDiscoveryParticipantJavaTest {
                 result.getProperties().get(FSInternetRadioBindingConstants.PROPERTY_MANUFACTURER));
         assertEquals(DEFAULT_RADIO_MODEL_NUMBER,
                 result.getProperties().get(FSInternetRadioBindingConstants.PROPERTY_MODEL));
-    }
-
-    /**
-     * Verify no discovery result for FSInternetRadio device with null details.
-     *
-     * @throws ValidationException
-     */
-    @Test
-    public void noDiscoveryResultIfNullDetails() throws ValidationException {
-        RemoteDevice fsInterntRadioDeviceWithNullDetails = new RemoteDevice(null);
-        assertNull(discoveryParticipant.createResult(fsInterntRadioDeviceWithNullDetails));
     }
 
     /**
@@ -141,7 +129,6 @@ public class FSInternetRadioDiscoveryParticipantJavaTest {
      *
      * @throws ValidationException
      */
-    @SuppressWarnings("null")
     @Test
     public void validDiscoveryResultIfWithoutBaseUrl() throws ValidationException {
         RemoteDevice fsInternetRadioDeviceWithoutUrl = createDefaultFSInternetRadioDevice(null);

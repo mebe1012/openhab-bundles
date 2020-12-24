@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,11 +30,6 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthClientService;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthException;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
-import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.openhab.binding.spotify.internal.api.exception.SpotifyAuthorizationException;
 import org.openhab.binding.spotify.internal.api.exception.SpotifyException;
 import org.openhab.binding.spotify.internal.api.exception.SpotifyTokenExpiredException;
@@ -44,6 +40,11 @@ import org.openhab.binding.spotify.internal.api.model.Me;
 import org.openhab.binding.spotify.internal.api.model.ModelUtil;
 import org.openhab.binding.spotify.internal.api.model.Playlist;
 import org.openhab.binding.spotify.internal.api.model.Playlists;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.OAuthClientService;
+import org.openhab.core.auth.client.oauth2.OAuthException;
+import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.library.types.OnOffType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +89,7 @@ public class SpotifyApi {
     public Me getMe() {
         final ContentResponse response = request(GET, SPOTIFY_API_URL, "");
 
-        return ModelUtil.gsonInstance().fromJson(response.getContentAsString(), Me.class);
+        return Objects.requireNonNull(ModelUtil.gsonInstance().fromJson(response.getContentAsString(), Me.class));
     }
 
     /**

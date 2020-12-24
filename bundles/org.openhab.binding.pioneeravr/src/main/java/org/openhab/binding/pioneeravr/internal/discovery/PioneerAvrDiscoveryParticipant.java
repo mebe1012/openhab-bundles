@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,13 +18,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.jupnp.model.meta.RemoteDevice;
 import org.openhab.binding.pioneeravr.internal.PioneerAvrBindingConstants;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Antoine Besnard - Initial contribution
  */
-@Component(immediate = true)
+@Component
 public class PioneerAvrDiscoveryParticipant implements UpnpDiscoveryParticipant {
 
     private final Logger logger = LoggerFactory.getLogger(PioneerAvrDiscoveryParticipant.class);
@@ -109,7 +109,19 @@ public class PioneerAvrDiscoveryParticipant implements UpnpDiscoveryParticipant 
 
                     ThingTypeUID thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE;
 
-                    if (isSupportedDeviceModel(deviceModel, PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2016)) {
+                    if (isSupportedDeviceModel(deviceModel, PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2020)) {
+                        thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE2020;
+                    } else if (isSupportedDeviceModel(deviceModel,
+                            PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2019)) {
+                        thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE2019;
+                    } else if (isSupportedDeviceModel(deviceModel,
+                            PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2018)) {
+                        thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE2018;
+                    } else if (isSupportedDeviceModel(deviceModel,
+                            PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2017)) {
+                        thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE2017;
+                    } else if (isSupportedDeviceModel(deviceModel,
+                            PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2016)) {
                         thingTypeUID = PioneerAvrBindingConstants.IP_AVR_THING_TYPE2016;
                     } else if (isSupportedDeviceModel(deviceModel,
                             PioneerAvrBindingConstants.SUPPORTED_DEVICE_MODELS2015)) {

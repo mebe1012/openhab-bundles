@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,57 +12,49 @@
  */
 package org.openhab.binding.max.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.max.internal.device.Device;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link DeviceStatusListener} is notified when a device status has changed
  * or a device has been removed or added.
  *
  * @author Marcel Verpaalen - Initial contribution
- *
  */
+@NonNullByDefault
 public interface DeviceStatusListener {
 
     /**
      * This method is called whenever the state of the given device has changed.
      *
-     * @param bridge
-     *            The MAX! Cube bridge the changed device is connected to.
-     * @param device
-     *            The device which received the state update.
+     * @param bridge The MAX! Cube bridge the changed device is connected to
+     * @param device The device which received the state update
      */
-    public void onDeviceStateChanged(ThingUID bridge, Device device);
+    void onDeviceStateChanged(ThingUID bridge, Device device);
 
     /**
-     * This method us called whenever a device is removed.
+     * This method is called whenever a device is removed.
      *
-     * @param bridge
-     *            The MAX! Cube bridge the removed device was connected to.
-     * @param device
-     *            The device which is removed.
+     * @param bridge The MAX! Cube bridge the removed device was connected to
+     * @param device The device which is removed
      */
-    public void onDeviceRemoved(MaxCubeBridgeHandler bridge, Device device);
+    void onDeviceRemoved(MaxCubeBridgeHandler bridge, Device device);
 
     /**
-     * This method us called whenever a device is added.
+     * This method is called whenever a device is added.
      *
-     * @param bridge
-     *            The MAX! Cube bridge the added device was connected to.
-     * @param device
-     *            The device which is added.
+     * @param bridge The MAX! Cube bridge the added device was connected to
+     * @param device The device which is added
      */
-    public void onDeviceAdded(Bridge bridge, Device device);
+    void onDeviceAdded(Bridge bridge, Device device);
 
     /**
-     * This method us called whenever a device config is updated.
+     * This method is called whenever a device config is updated.
      *
-     * @param bridge
-     *            The MAX! Cube bridge the device was connected to.
-     * @param device
-     *            The device which config is changed.
+     * @param bridgeThe MAX! Cube bridge the device was connected to
+     * @param device The device which config is changed
      */
-    public void onDeviceConfigUpdate(Bridge bridge, Device device);
-
+    void onDeviceConfigUpdate(Bridge bridge, Device device);
 }

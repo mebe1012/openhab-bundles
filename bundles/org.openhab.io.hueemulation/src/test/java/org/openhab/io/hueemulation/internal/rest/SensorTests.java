@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,34 +13,33 @@
 package org.openhab.io.hueemulation.internal.rest;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.ColorItem;
-import org.eclipse.smarthome.core.library.items.ContactItem;
-import org.eclipse.smarthome.core.library.items.DimmerItem;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.RollershutterItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.State;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.items.ContactItem;
+import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.RollershutterItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.State;
 import org.openhab.io.hueemulation.internal.ConfigStore;
 import org.openhab.io.hueemulation.internal.rest.mocks.DummyItemRegistry;
 
@@ -63,7 +62,7 @@ public class SensorTests {
         itemRegistry.add(item);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         commonSetup = new CommonSetup(false);
         itemRegistry = new DummyItemRegistry();
@@ -86,14 +85,13 @@ public class SensorTests {
         commonSetup.start(new ResourceConfig().registerInstances(subject));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    public void tearDown() throws Exception {
         commonSetup.dispose();
     }
 
     @Test
     public void renameSensor() {
-
         assertThat(cs.ds.sensors.get("switch1").name, is("name1"));
 
         String body = "{'name':'name2'}";

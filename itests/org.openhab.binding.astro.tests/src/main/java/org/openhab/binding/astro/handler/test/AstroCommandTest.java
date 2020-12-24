@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,20 +17,23 @@ import static org.mockito.Mockito.*;
 import static org.openhab.binding.astro.internal.AstroBindingConstants.THING_TYPE_SUN;
 import static org.openhab.binding.astro.test.cases.AstroBindingTestsData.*;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.junit.Test;
+import java.time.ZoneId;
+
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.astro.internal.handler.AstroThingHandler;
 import org.openhab.binding.astro.internal.handler.SunHandler;
 import org.openhab.binding.astro.internal.model.Sun;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.scheduler.CronScheduler;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 
 /**
  * OSGi test for the {@link AstroThingHandler}
@@ -60,7 +63,9 @@ public class AstroCommandTest {
 
         ThingHandlerCallback callback = mock(ThingHandlerCallback.class);
         CronScheduler cronScheduler = mock(CronScheduler.class);
-        AstroThingHandler sunHandler = spy(new SunHandler(thing, cronScheduler));
+        TimeZoneProvider timeZoneProvider = mock(TimeZoneProvider.class);
+        when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
+        AstroThingHandler sunHandler = spy(new SunHandler(thing, cronScheduler, timeZoneProvider));
 
         // Required from the AstroThingHandler to send the status update
         doReturn(true).when(callback).isChannelLinked(eq(channelUID));

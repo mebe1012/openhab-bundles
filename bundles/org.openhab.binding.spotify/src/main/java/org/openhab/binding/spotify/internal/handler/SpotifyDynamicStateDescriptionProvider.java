@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.binding.BaseDynamicStateDescriptionProvider;
-import org.eclipse.smarthome.core.thing.type.DynamicStateDescriptionProvider;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.spotify.internal.api.model.Device;
 import org.openhab.binding.spotify.internal.api.model.Playlist;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.binding.BaseDynamicStateDescriptionProvider;
+import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
+import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.io.imperihome.internal.model.param;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.openhab.core.library.types.DecimalType;
 
 /**
  * Numeric value param
@@ -84,5 +84,4 @@ public class NumericValueParam extends DeviceParam {
         return "NumericValueParam{" + "super=" + super.toString() + ", unit='" + unit + '\'' + ", graphable="
                 + graphable + '}';
     }
-
 }

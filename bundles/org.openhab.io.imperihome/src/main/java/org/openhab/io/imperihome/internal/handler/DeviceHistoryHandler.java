@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,9 @@ package org.openhab.io.imperihome.internal.handler;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,13 +24,13 @@ import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.persistence.FilterCriteria;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.types.State;
 import org.openhab.io.imperihome.internal.model.HistoryItem;
 import org.openhab.io.imperihome.internal.model.HistoryList;
 import org.openhab.io.imperihome.internal.model.device.AbstractDevice;
@@ -92,8 +94,9 @@ public class DeviceHistoryHandler {
             long end) {
         logger.info("Querying persistence for history of Item {}, from {} to {}", device.getItemName(), start, end);
 
-        FilterCriteria criteria = new FilterCriteria().setItemName(device.getItemName()).setBeginDate(new Date(start))
-                .setEndDate(new Date(end));
+        FilterCriteria criteria = new FilterCriteria().setItemName(device.getItemName())
+                .setBeginDate(ZonedDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault()))
+                .setEndDate(ZonedDateTime.ofInstant(Instant.ofEpochMilli(end), ZoneId.systemDefault()));
 
         List<HistoryItem> resultItems = new LinkedList<>();
         Iterable<HistoricItem> historicItems = persistence.query(criteria);
@@ -107,7 +110,7 @@ public class DeviceHistoryHandler {
                 State state = historicItem.getState();
                 if (state instanceof DecimalType) {
                     Number value = ((DecimalType) state).toBigDecimal();
-                    resultItems.add(new HistoryItem(historicItem.getTimestamp(), value));
+                    resultItems.add(new HistoryItem(historicItem.getTimestamp().toInstant().toEpochMilli(), value));
                 }
             }
 
@@ -119,5 +122,4 @@ public class DeviceHistoryHandler {
 
         return new HistoryList(resultItems);
     }
-
 }

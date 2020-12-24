@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,24 +13,24 @@
 package org.openhab.binding.wemo.internal.handler.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.wemo.internal.WemoBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.types.State;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.wemo.internal.WemoBindingConstants;
 import org.openhab.binding.wemo.internal.handler.WemoHandler;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.types.State;
 
 /**
  * Tests for {@link WemoHandler}.
@@ -60,7 +60,7 @@ public class WemoHandlerTest {
 
     private final Thing thing = mock(Thing.class);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         insightParams = new WemoInsightParams();
         when(thing.getUID()).thenReturn(new ThingUID(THING_TYPE, THING_ID));
@@ -68,7 +68,7 @@ public class WemoHandlerTest {
         when(thing.getStatus()).thenReturn(ThingStatus.ONLINE);
     }
 
-    @After
+    @AfterEach
     public void clear() {
         handler.channelState = null;
         handler.channelToWatch = null;

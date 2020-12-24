@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.dsmr.internal.device.DSMRDevice;
 import org.openhab.binding.dsmr.internal.device.DSMRDeviceConfiguration;
 import org.openhab.binding.dsmr.internal.device.DSMRDeviceRunnable;
@@ -38,6 +31,13 @@ import org.openhab.binding.dsmr.internal.device.connector.DSMRConnectorErrorEven
 import org.openhab.binding.dsmr.internal.device.connector.DSMRSerialSettings;
 import org.openhab.binding.dsmr.internal.device.p1telegram.P1Telegram;
 import org.openhab.binding.dsmr.internal.device.p1telegram.P1TelegramListener;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +149,8 @@ public class DSMRBridgeHandler extends BaseBridgeHandler implements DSMREventLis
         this.dsmrDevice = dsmrDevice; // otherwise Eclipse will give a null pointer error on the next line :-(
         dsmrDeviceRunnable = new DSMRDeviceRunnable(dsmrDevice, this);
         dsmrDeviceThread = new Thread(dsmrDeviceRunnable);
+        dsmrDeviceThread.setName("OH-binding-" + getThing().getUID());
+        dsmrDeviceThread.setDaemon(true);
         dsmrDeviceThread.start();
         watchdog = scheduler.scheduleWithFixedDelay(this::alive, receivedTimeoutNanos, receivedTimeoutNanos,
                 TimeUnit.NANOSECONDS);

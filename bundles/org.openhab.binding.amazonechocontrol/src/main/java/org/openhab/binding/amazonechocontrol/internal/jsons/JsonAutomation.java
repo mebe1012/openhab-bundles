@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,7 @@ public class JsonAutomation {
     public @Nullable String automationId;
     public @Nullable String name;
     public @Nullable Trigger @Nullable [] triggers;
-    public @Nullable TreeMap<String, @Nullable Object> sequence;
+    public @Nullable TreeMap<String, Object> sequence;
     public @Nullable String status;
     public long creationTimeEpochMillis;
     public long lastUpdatedTimeEpochMillis;

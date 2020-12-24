@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,18 +20,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.solaredge.internal.AtomicReferenceTrait;
 import org.openhab.binding.solaredge.internal.config.SolarEdgeConfiguration;
 import org.openhab.binding.solaredge.internal.connector.WebInterface;
-import org.openhab.binding.solaredge.internal.model.Channel;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +66,8 @@ public abstract class SolarEdgeBaseHandler extends BaseThingHandler implements S
     public SolarEdgeBaseHandler(Thing thing, HttpClient httpClient) {
         super(thing);
         this.webInterface = new WebInterface(scheduler, this, httpClient);
-        this.liveDataPollingJobReference = new AtomicReference<@Nullable Future<?>>(null);
-        this.aggregateDataPollingJobReference = new AtomicReference<@Nullable Future<?>>(null);
+        this.liveDataPollingJobReference = new AtomicReference<>(null);
+        this.aggregateDataPollingJobReference = new AtomicReference<>(null);
     }
 
     @Override
@@ -123,21 +123,22 @@ public abstract class SolarEdgeBaseHandler extends BaseThingHandler implements S
      * will update all channels provided in the map
      */
     @Override
-    public void updateChannelStatus(Map<Channel, @Nullable State> values) {
+    public void updateChannelStatus(Map<Channel, State> values) {
         logger.debug("Handling channel update.");
 
         for (Channel channel : values.keySet()) {
             if (getChannels().contains(channel)) {
                 State value = values.get(channel);
-                logger.debug("Channel is to be updated: {}: {}", channel.getFQName(), value);
                 if (value != null) {
-                    updateState(channel.getFQName(), value);
+                    logger.debug("Channel is to be updated: {}: {}", channel.getUID().getAsString(), value);
+                    updateState(channel.getUID(), value);
                 } else {
-                    logger.debug("Value is null or not provided by solaredge (channel: {})", channel.getFQName());
-                    updateState(channel.getFQName(), UnDefType.UNDEF);
+                    logger.debug("Value is null or not provided by solaredge (channel: {})",
+                            channel.getUID().getAsString());
+                    updateState(channel.getUID(), UnDefType.UNDEF);
                 }
             } else {
-                logger.debug("Could not identify channel: {} for model {}", channel.getFQName(),
+                logger.debug("Could not identify channel: {} for model {}", channel.getUID().getAsString(),
                         getThing().getThingTypeUID().getAsString());
             }
         }
@@ -152,5 +153,4 @@ public abstract class SolarEdgeBaseHandler extends BaseThingHandler implements S
     public SolarEdgeConfiguration getConfiguration() {
         return this.getConfigAs(SolarEdgeConfiguration.class);
     }
-
 }

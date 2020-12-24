@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,10 @@
 package org.openhab.binding.ihc.internal.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeBuilder;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.thing.profiles.ProfileTypeBuilder;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.TriggerProfileType;
 
 /**
  * IHC / ELKO profile constants.
@@ -34,5 +34,4 @@ public interface IhcProfiles {
             .withSupportedItemTypes(CoreItemFactory.DIMMER, CoreItemFactory.ROLLERSHUTTER, CoreItemFactory.CONTACT,
                     CoreItemFactory.SWITCH, CoreItemFactory.PLAYER)
             .build();
-
 }

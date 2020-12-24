@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.binding.tado.internal;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.tado.internal.TadoBindingConstants.FanSpeed;
 import org.openhab.binding.tado.internal.TadoBindingConstants.HvacMode;
 import org.openhab.binding.tado.internal.TadoBindingConstants.OperationMode;
@@ -27,6 +26,7 @@ import org.openhab.binding.tado.internal.builder.TerminationConditionBuilder;
 import org.openhab.binding.tado.internal.builder.ZoneSettingsBuilder;
 import org.openhab.binding.tado.internal.builder.ZoneStateProvider;
 import org.openhab.binding.tado.internal.handler.TadoZoneHandler;
+import org.openhab.core.thing.Thing;
 
 /**
  * Builder for incremental creation of zone overlays.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,21 +17,22 @@ import static org.openhab.binding.dscalarm.internal.DSCAlarmBindingConstants.PAN
 import java.util.EventObject;
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.dscalarm.internal.DSCAlarmCode;
 import org.openhab.binding.dscalarm.internal.DSCAlarmMessage;
 import org.openhab.binding.dscalarm.internal.DSCAlarmMessage.DSCAlarmMessageInfoType;
 import org.openhab.binding.dscalarm.internal.config.DSCAlarmPanelConfiguration;
 import org.openhab.binding.dscalarm.internal.config.DSCAlarmPartitionConfiguration;
 import org.openhab.binding.dscalarm.internal.config.DSCAlarmZoneConfiguration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,25 +83,24 @@ public abstract class DSCAlarmBaseThingHandler extends BaseThingHandler {
 
         getConfiguration(dscAlarmThingType);
 
-        // set the Thing offline for now
-        updateStatus(ThingStatus.OFFLINE);
+        Bridge bridge = getBridge();
+        initializeThingHandler(bridge != null ? bridge.getStatus() : null);
+        this.setThingHandlerInitialized(true);
     }
 
     @Override
     public void dispose() {
         logger.debug("Thing {} disposed.", getThing().getUID());
-
         this.setThingHandlerInitialized(false);
-
         super.dispose();
     }
 
     /**
      * Method to Initialize Thing Handler.
      */
-    public void initializeThingHandler() {
-        if (getDSCAlarmBridgeHandler() != null) {
-            if (getThing().getStatus().equals(ThingStatus.ONLINE)) {
+    private void initializeThingHandler(ThingStatus bridgeStatus) {
+        if (getDSCAlarmBridgeHandler() != null && bridgeStatus != null) {
+            if (bridgeStatus == ThingStatus.ONLINE) {
                 Thing thing = getThing();
                 List<Channel> channels = thing.getChannels();
                 logger.debug("initializeThingHandler(): Initialize Thing Handler - {}", thing.getUID());
@@ -117,13 +117,18 @@ public abstract class DSCAlarmBaseThingHandler extends BaseThingHandler {
                     dscAlarmBridgeHandler.setUserCode(getUserCode());
                 }
 
-                this.setThingHandlerInitialized(true);
+                updateStatus(ThingStatus.ONLINE);
 
                 logger.debug("initializeThingHandler(): Thing Handler Initialized - {}", thing.getUID());
             } else {
-                logger.debug("initializeThingHandler(): Thing '{}' Unable To Initialize Thing Handler!: Status - {}",
-                        thing.getUID(), thing.getStatus());
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
+                logger.debug("initializeThingHandler(): Thing '{}' is set to OFFLINE because bridge is OFFLINE",
+                        thing.getUID());
             }
+        } else {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED);
+            logger.debug("initializeThingHandler(): Thing '{}' is set to OFFLINE because bridge is uninitialized",
+                    thing.getUID());
         }
     }
 
@@ -165,16 +170,6 @@ public abstract class DSCAlarmBaseThingHandler extends BaseThingHandler {
     public abstract void updateChannel(ChannelUID channel, int state, String description);
 
     /**
-     * Method to Update Device Properties.
-     *
-     * @param channelUID
-     * @param state
-     * @param description
-     */
-    // public abstract void updateProperties(ChannelUID channelUID, int state,
-    // String description);
-
-    /**
      * Receives DSC Alarm Events from the bridge.
      *
      * @param event.
@@ -188,15 +183,9 @@ public abstract class DSCAlarmBaseThingHandler extends BaseThingHandler {
 
     @Override
     public void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo) {
-        if (bridgeStatusInfo.getStatus().equals(ThingStatus.ONLINE)) {
-            updateStatus(bridgeStatusInfo.getStatus());
-            this.initializeThingHandler();
-        } else {
-            this.setThingHandlerInitialized(false);
-        }
-
         logger.debug("bridgeStatusChanged(): Bridge Status: '{}' - Thing '{}' Status: '{}'!", bridgeStatusInfo,
                 getThing().getUID(), getThing().getStatus());
+        initializeThingHandler(bridgeStatusInfo.getStatus());
     }
 
     /**
@@ -379,5 +368,4 @@ public abstract class DSCAlarmBaseThingHandler extends BaseThingHandler {
             logger.debug("setPanelMessage(): Panel Message Set to - {}", message);
         }
     }
-
 }

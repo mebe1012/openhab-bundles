@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,8 @@
 package org.openhab.binding.wemo.internal.handler.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,16 +23,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -39,6 +33,13 @@ import org.openhab.binding.wemo.internal.WemoBindingConstants;
 import org.openhab.binding.wemo.internal.handler.WemoHandler;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
 import org.openhab.binding.wemo.internal.test.GenericWemoOSGiTest;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 
 /**
  * Tests for {@link WemoHandler}.
@@ -58,12 +59,12 @@ public class WemoHandlerOSGiTest extends GenericWemoOSGiTest {
     private final String SERVICE_ID = "basicevent";
     private final String SERVICE_NUMBER = "1";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         setUpServices();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         removeThing();
     }

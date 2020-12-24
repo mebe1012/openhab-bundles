@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,11 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.smartmeter.connectors.IMeterReaderConnector;
 import org.openhab.binding.smartmeter.internal.MeterDevice;
 import org.openhab.binding.smartmeter.internal.MeterValue;
 import org.openhab.binding.smartmeter.internal.helper.ProtocolMode;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.openmuc.jsml.structures.ASNObject;
 import org.openmuc.jsml.structures.EMessageBody;
 import org.openmuc.jsml.structures.SmlFile;
@@ -134,7 +134,6 @@ public final class SmlMeterReader extends MeterDevice<SmlFile> {
                     addObisCache(smlValue);
                 }
             }
-
         } else {
             logger.warn("{}: no valid SML messages list retrieved.", this.toString());
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.io.imperihome.internal.action.ActionRegistry;
 import org.openhab.io.imperihome.internal.handler.DeviceActionHandler;
 import org.openhab.io.imperihome.internal.handler.DeviceHistoryHandler;
@@ -61,11 +61,9 @@ import com.google.gson.GsonBuilder;
  *
  * @author Pepijn de Geus - Initial contribution
  */
-@Component(immediate = true, service = HttpServlet.class, configurationPid = "org.openhab.imperihome", property = {
-        Constants.SERVICE_PID + "=org.openhab.imperihome",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=io:imperihome",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=io",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=ImperiHome Integration" })
+@Component(service = HttpServlet.class, configurationPid = "org.openhab.imperihome", //
+        property = Constants.SERVICE_PID + "=org.openhab.imperihome")
+@ConfigurableService(category = "io", label = "ImperiHome Integration", description_uri = "io:imperihome")
 public class ImperiHomeApiServlet extends HttpServlet {
 
     private static final long serialVersionUID = -1966364789075448441L;
@@ -134,7 +132,7 @@ public class ImperiHomeApiServlet extends HttpServlet {
         deviceHistoryHandler = new DeviceHistoryHandler(deviceRegistry, persistenceServiceRegistry);
 
         try {
-            Dictionary<String, String> servletParams = new Hashtable<String, String>();
+            Dictionary<String, String> servletParams = new Hashtable<>();
             httpService.registerServlet(PATH, this, servletParams, httpService.createDefaultHttpContext());
             logger.info("Started ImperiHome integration service at " + PATH);
         } catch (Exception e) {
@@ -247,5 +245,4 @@ public class ImperiHomeApiServlet extends HttpServlet {
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     }
-
 }

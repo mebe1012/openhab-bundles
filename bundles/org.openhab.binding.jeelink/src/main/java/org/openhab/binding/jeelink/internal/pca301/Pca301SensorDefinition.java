@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.jeelink.internal.pca301;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.jeelink.internal.JeeLinkBindingConstants;
 import org.openhab.binding.jeelink.internal.JeeLinkReadingConverter;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.SensorDefinition;
+import org.openhab.core.thing.Thing;
 
 /**
  * Sensor Defintion of a PCA301 power switchable outlet.
@@ -41,7 +41,6 @@ public class Pca301SensorDefinition extends SensorDefinition<Pca301Reading> {
 
     @Override
     public JeeLinkSensorHandler<Pca301Reading> createHandler(Thing thing) {
-        return new Pca301SensorHandler(thing);
+        return new Pca301SensorHandler(thing, type);
     }
-
 }

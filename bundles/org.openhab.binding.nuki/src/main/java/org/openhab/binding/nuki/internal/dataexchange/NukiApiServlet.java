@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,16 +26,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.nuki.internal.NukiBindingConstants;
 import org.openhab.binding.nuki.internal.dto.BridgeApiLockStateRequestDto;
 import org.openhab.binding.nuki.internal.dto.NukiHttpServerStatusResponseDto;
 import org.openhab.binding.nuki.internal.handler.NukiBridgeHandler;
 import org.openhab.binding.nuki.internal.handler.NukiSmartLockHandler;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.State;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -47,6 +47,7 @@ import com.google.gson.Gson;
  * The {@link NukiApiServlet} class is responsible for handling the callbacks from the Nuki Bridge.
  *
  * @author Markus Katter - Initial contribution
+ * @contributer Christian Hoefler - Door sensor integration
  */
 public class NukiApiServlet extends HttpServlet {
 
@@ -75,7 +76,7 @@ public class NukiApiServlet extends HttpServlet {
                     nukiBridgeHandler.getThing().getUID());
             return;
         }
-        if (nukiBridgeHandlers.size() == 0) {
+        if (nukiBridgeHandlers.isEmpty()) {
             this.activate();
         }
         nukiBridgeHandlers.add(nukiBridgeHandler);
@@ -86,7 +87,7 @@ public class NukiApiServlet extends HttpServlet {
                 nukiBridgeHandler.getThing().getUID(),
                 nukiBridgeHandler.getThing().getConfiguration().get(NukiBindingConstants.CONFIG_IP));
         nukiBridgeHandlers.remove(nukiBridgeHandler);
-        if (nukiBridgeHandlers.size() == 0) {
+        if (nukiBridgeHandlers.isEmpty()) {
             this.deactivate();
         }
     }
@@ -98,7 +99,7 @@ public class NukiApiServlet extends HttpServlet {
     private void activate() {
         logger.debug("Activating NukiApiServlet.");
         path = NukiBindingConstants.CALLBACK_ENDPOINT;
-        Dictionary<String, String> servletParams = new Hashtable<String, String>();
+        Dictionary<String, String> servletParams = new Hashtable<>();
         try {
             httpService.registerServlet(path, this, servletParams, httpService.createDefaultHttpContext());
             logger.debug("Started NukiApiServlet at path[{}]", path);
@@ -161,6 +162,11 @@ public class NukiApiServlet extends HttpServlet {
                         State state = bridgeApiLockStateRequestDto.isBatteryCritical() ? OnOffType.ON : OnOffType.OFF;
                         nsh.handleApiServletUpdate(channel.getUID(), state);
                     }
+                    channel = thing.getChannel(NukiBindingConstants.CHANNEL_SMARTLOCK_DOOR_STATE);
+                    if (channel != null) {
+                        State state = new DecimalType(bridgeApiLockStateRequestDto.getDoorsensorState());
+                        nsh.handleApiServletUpdate(channel.getUID(), state);
+                    }
                     setHeaders(response);
                     response.getWriter().println(gson.toJson(new NukiHttpServerStatusResponseDto("OK")));
                     return;
@@ -210,5 +216,4 @@ public class NukiApiServlet extends HttpServlet {
         response.setCharacterEncoding(CHARSET);
         response.setContentType(APPLICATION_JSON);
     }
-
 }

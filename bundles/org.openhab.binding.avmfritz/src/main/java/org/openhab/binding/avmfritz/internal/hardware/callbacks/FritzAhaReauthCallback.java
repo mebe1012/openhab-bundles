@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,7 @@
  */
 package org.openhab.binding.avmfritz.internal.hardware.callbacks;
 
-import static org.eclipse.jetty.http.HttpMethod.*;
-
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.binding.avmfritz.internal.hardware.FritzAhaWebInterface;
 
@@ -22,37 +21,38 @@ import org.openhab.binding.avmfritz.internal.hardware.FritzAhaWebInterface;
  *
  * @author Robert Bausdorf, Christian Brauers - Initial contribution
  */
+@NonNullByDefault
 public class FritzAhaReauthCallback implements FritzAhaCallback {
 
     public static final String WEBSERVICE_PATH = "webservices/homeautoswitch.lua";
     /**
      * Path to HTTP interface
      */
-    private String path;
+    private final String path;
     /**
      * Arguments to use
      */
-    private String args;
+    private final String args;
     /**
      * Web interface to use
      */
-    private FritzAhaWebInterface webIface;
+    private final FritzAhaWebInterface webIface;
     /**
      * Method used
      */
-    private HttpMethod httpMethod;
+    private final HttpMethod httpMethod;
     /**
      * Number of remaining retries
      */
     private int retries;
     /**
-     * Whether the request returned a valid response
-     */
-    private boolean validRequest;
-    /**
      * Callback to execute on next retry
      */
     private FritzAhaCallback retryCallback;
+    /**
+     * Whether the request returned a valid response
+     */
+    private boolean validRequest;
 
     /**
      * Returns whether the request returned a valid response
@@ -73,14 +73,12 @@ public class FritzAhaReauthCallback implements FritzAhaCallback {
     }
 
     /**
-     * Sets different Callback to use on retry (initial value: same callback
-     * after decremented retry counter)
+     * Sets different Callback to use on retry (initial value: same callback after decremented retry counter)
      *
-     * @param newRetryCallback
-     *                             Callback to retry with
+     * @param retryCallback Callback to retry with
      */
-    public void setRetryCallback(FritzAhaCallback newRetryCallback) {
-        retryCallback = newRetryCallback;
+    public void setRetryCallback(FritzAhaCallback retryCallback) {
+        this.retryCallback = retryCallback;
     }
 
     @Override
@@ -104,10 +102,15 @@ public class FritzAhaReauthCallback implements FritzAhaCallback {
             if (retries >= 1) {
                 webIface.authenticate();
                 retries--;
-                if (httpMethod == GET) {
-                    webIface.asyncGet(path, args, retryCallback);
-                } else if (httpMethod == POST) {
-                    webIface.asyncPost(path, args, retryCallback);
+                switch (httpMethod) {
+                    case GET:
+                        webIface.asyncGet(path, args, retryCallback);
+                        break;
+                    case POST:
+                        webIface.asyncPost(path, args, retryCallback);
+                        break;
+                    default:
+                        break;
                 }
             }
         } else {
@@ -119,15 +122,15 @@ public class FritzAhaReauthCallback implements FritzAhaCallback {
      * Constructor for retryable authentication
      *
      * @param path
-     *                       Path to HTTP interface
+     *            Path to HTTP interface
      * @param args
-     *                       Arguments to use
+     *            Arguments to use
      * @param webIface
-     *                       Web interface to use
+     *            Web interface to use
      * @param httpMethod
-     *                       Method used
+     *            Method used
      * @param retries
-     *                       Number of retries
+     *            Number of retries
      */
     public FritzAhaReauthCallback(String path, String args, FritzAhaWebInterface webIface, HttpMethod httpMethod,
             int retries) {

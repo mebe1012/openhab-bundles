@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.pentair.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.openhab.binding.pentair.internal.PentairPacket;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.BaseThingHandler;
 
 /**
  * Abstract class for all Pentair Things.

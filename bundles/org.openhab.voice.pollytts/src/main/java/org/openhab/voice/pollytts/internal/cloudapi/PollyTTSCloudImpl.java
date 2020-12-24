@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.voice.pollytts.internal.cloudapi;
 
 import static java.util.stream.Collectors.*;
-import static org.eclipse.smarthome.core.audio.AudioFormat.*;
+import static org.openhab.core.audio.AudioFormat.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,5 +130,4 @@ public class PollyTTSCloudImpl {
                 .withVoiceId(voiceID).withOutputFormat(OutputFormat.fromValue(format));
         return client.synthesizeSpeech(request).getAudioStream();
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
+import org.openhab.core.io.net.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,29 +34,33 @@ public class DwdWarningDataAccess {
 
     /**
      * Returns the raw Data from the Endpoint.
-     * In case of errors or empty cellId hValue the Method returns an {@link StringUtils#EMPTY Empty String}.
+     * In case of errors or empty cellId value, returns an empty String.
      *
      * @param cellId The warnCell-Id for which the warnings should be returned
-     * @return The raw data.
+     * @return The raw data received or an empty string.
      */
     public String getDataFromEndpoint(String cellId) {
         try {
-            if (StringUtils.isBlank(cellId)) {
+            if (cellId == null || cellId.isBlank()) {
                 logger.warn("No cellId provided");
-                return StringUtils.EMPTY;
+                return "";
             }
+
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(DWD_URL);
             stringBuilder.append("&CQL_FILTER=");
-            stringBuilder
-                    .append(URLEncoder.encode("WARNCELLID LIKE '" + cellId + "'", StandardCharsets.UTF_8.toString()));
-            logger.debug("Refreshing Data: {}", stringBuilder);
+            stringBuilder.append(URLEncoder.encode("WARNCELLID LIKE '" + cellId + "'", StandardCharsets.UTF_8));
+            logger.debug("Refreshing Data for cell {}", cellId);
             String rawData = HttpUtil.executeUrl("GET", stringBuilder.toString(), 5000);
+            logger.trace("Raw request: {}", stringBuilder);
+            logger.trace("Raw response: {}", rawData);
+
             return rawData;
         } catch (IOException e) {
-            logger.debug("Communication error occurred while getting data", e);
+            logger.warn("Communication error occurred while getting data: {}", e.getMessage());
+            logger.debug("Communication error trace", e);
         }
-        return StringUtils.EMPTY;
-    }
 
+        return "";
+    }
 }

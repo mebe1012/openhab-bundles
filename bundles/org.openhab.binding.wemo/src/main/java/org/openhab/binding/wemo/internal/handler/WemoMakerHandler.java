@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,19 +27,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOParticipant;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.CharacterData;
@@ -78,7 +78,7 @@ public class WemoMakerHandler extends AbstractWemoHandler implements UpnpIOParti
             try {
                 updateWemoState();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
             }
         }
@@ -129,7 +129,7 @@ public class WemoMakerHandler extends AbstractWemoHandler implements UpnpIOParti
             try {
                 updateWemoState();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
             }
         } else if (channelUID.getId().equals(CHANNEL_RELAY)) {
             if (command instanceof OnOffType) {
@@ -193,6 +193,7 @@ public class WemoMakerHandler extends AbstractWemoHandler implements UpnpIOParti
     /**
      * The {@link updateWemoState} polls the actual state of a WeMo Maker.
      */
+    @SuppressWarnings("null")
     protected void updateWemoState() {
         String action = "GetAttributes";
         String actionService = "deviceevent";
@@ -302,5 +303,4 @@ public class WemoMakerHandler extends AbstractWemoHandler implements UpnpIOParti
     @Override
     public void onValueReceived(String variable, String value, String service) {
     }
-
 }

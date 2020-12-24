@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class NetworkHandlerConfiguration {
     public String hostname = "";
+    public String macAddress = "";
     public @Nullable Integer port;
     public Integer retry = 1;
     public Integer refreshInterval = 60000;

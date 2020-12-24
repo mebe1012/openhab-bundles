@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,11 @@
  */
 package org.openhab.binding.opensprinkler.internal.api;
 
+import java.math.BigDecimal;
+
 import org.openhab.binding.opensprinkler.internal.api.exception.CommunicationApiException;
 import org.openhab.binding.opensprinkler.internal.api.exception.GeneralApiException;
+import org.openhab.binding.opensprinkler.internal.model.NoCurrentDrawSensorException;
 import org.openhab.binding.opensprinkler.internal.model.StationProgram;
 
 /**
@@ -24,7 +27,7 @@ import org.openhab.binding.opensprinkler.internal.model.StationProgram;
  */
 public interface OpenSprinklerApi {
     /**
-     * Whether the devie entered manual mode and accepts API requests to control the stations.
+     * Whether the device entered manual mode and accepts API requests to control the stations.
      *
      * @return True if this API interface is connected to the Open Sprinkler API. False otherwise.
      */
@@ -45,12 +48,14 @@ public interface OpenSprinklerApi {
     public abstract void leaveManualMode() throws CommunicationApiException;
 
     /**
-     * Starts a station on the OpenSprinkler device.
+     * Starts a station on the OpenSprinkler device for the specified duration.
      *
      * @param station Index of the station to open starting at 0.
+     * @param duration The duration in seconds for how long the station should be turned on.
      * @throws Exception
      */
-    public abstract void openStation(int station) throws Exception;
+    public abstract void openStation(int station, BigDecimal duration)
+            throws CommunicationApiException, GeneralApiException;
 
     /**
      * Closes a station on the OpenSprinkler device.
@@ -58,7 +63,7 @@ public interface OpenSprinklerApi {
      * @param station Index of the station to open starting at 0.
      * @throws Exception
      */
-    public abstract void closeStation(int station) throws Exception;
+    public abstract void closeStation(int station) throws CommunicationApiException, GeneralApiException;
 
     /**
      * Returns the state of a station on the OpenSprinkler device.
@@ -85,6 +90,24 @@ public interface OpenSprinklerApi {
      * @throws Exception
      */
     public abstract boolean isRainDetected() throws CommunicationApiException;
+
+    /**
+     * Returns the current draw of all connected zones of the OpenSprinkler device in milliamperes.
+     *
+     * @return current draw in milliamperes
+     * @throws CommunicationApiException
+     * @throws
+     */
+    public abstract int currentDraw() throws CommunicationApiException, NoCurrentDrawSensorException;
+
+    /**
+     * Returns the water level in %.
+     *
+     * @return waterLevel in %
+     * @throws CommunicationApiException
+     * @throws
+     */
+    public abstract int waterLevel() throws CommunicationApiException;
 
     /**
      * Returns the number of total stations that are controllable from the OpenSprinkler

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.nest.internal.handler;
 
-import static org.eclipse.smarthome.core.library.unit.SIUnits.CELSIUS;
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
-import static org.eclipse.smarthome.core.types.RefreshType.REFRESH;
 import static org.openhab.binding.nest.internal.NestBindingConstants.*;
+import static org.openhab.core.library.unit.SIUnits.CELSIUS;
+import static org.openhab.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
+import static org.openhab.core.types.RefreshType.REFRESH;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,18 +26,18 @@ import javax.measure.quantity.Time;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.nest.internal.data.Thermostat;
 import org.openhab.binding.nest.internal.data.Thermostat.Mode;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class NestThermostatHandler extends NestBaseHandler<Thermostat> {
             case CHANNEL_FAN_TIMER_ACTIVE:
                 return getAsOnOffTypeOrNull(thermostat.isFanTimerActive());
             case CHANNEL_FAN_TIMER_DURATION:
-                return getAsQuantityTypeOrNull(thermostat.getFanTimerDuration(), SmartHomeUnits.MINUTE);
+                return getAsQuantityTypeOrNull(thermostat.getFanTimerDuration(), Units.MINUTE);
             case CHANNEL_FAN_TIMER_TIMEOUT:
                 return getAsDateTimeTypeOrNull(thermostat.getFanTimerTimeout());
             case CHANNEL_HAS_FAN:
@@ -78,7 +78,7 @@ public class NestThermostatHandler extends NestBaseHandler<Thermostat> {
             case CHANNEL_HAS_LEAF:
                 return getAsOnOffTypeOrNull(thermostat.isHasLeaf());
             case CHANNEL_HUMIDITY:
-                return getAsQuantityTypeOrNull(thermostat.getHumidity(), SmartHomeUnits.PERCENT);
+                return getAsQuantityTypeOrNull(thermostat.getHumidity(), Units.PERCENT);
             case CHANNEL_LAST_CONNECTION:
                 return getAsDateTimeTypeOrNull(thermostat.getLastConnection());
             case CHANNEL_LOCKED:
@@ -108,7 +108,7 @@ public class NestThermostatHandler extends NestBaseHandler<Thermostat> {
             case CHANNEL_TEMPERATURE:
                 return getAsQuantityTypeOrNull(thermostat.getAmbientTemperature(), thermostat.getTemperatureUnit());
             case CHANNEL_TIME_TO_TARGET:
-                return getAsQuantityTypeOrNull(thermostat.getTimeToTarget(), SmartHomeUnits.MINUTE);
+                return getAsQuantityTypeOrNull(thermostat.getTimeToTarget(), Units.MINUTE);
             case CHANNEL_USING_EMERGENCY_HEAT:
                 return getAsOnOffTypeOrNull(thermostat.isUsingEmergencyHeat());
             default:
@@ -137,7 +137,7 @@ public class NestThermostatHandler extends NestBaseHandler<Thermostat> {
         } else if (CHANNEL_FAN_TIMER_DURATION.equals(channelUID.getId())) {
             if (command instanceof QuantityType) {
                 // Update fan timer duration to the command value
-                QuantityType<Time> minuteQuantity = ((QuantityType<Time>) command).toUnit(SmartHomeUnits.MINUTE);
+                QuantityType<Time> minuteQuantity = ((QuantityType<Time>) command).toUnit(Units.MINUTE);
                 if (minuteQuantity != null) {
                     addUpdateRequest("fan_timer_duration", minuteQuantity.intValue());
                 }
@@ -216,5 +216,4 @@ public class NestThermostatHandler extends NestBaseHandler<Thermostat> {
             updateStatus(newStatus);
         }
     }
-
 }

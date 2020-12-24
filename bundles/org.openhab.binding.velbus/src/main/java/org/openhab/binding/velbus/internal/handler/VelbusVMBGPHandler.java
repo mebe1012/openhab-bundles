@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,9 +18,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link VelbusVMBGPHandler} is responsible for handling commands, which are
@@ -28,11 +29,13 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  *
  * @author Cedric Boon - Initial contribution
  */
-public class VelbusVMBGPHandler extends VelbusTemperatureSensorHandler {
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_VMBGP1,
-            THING_TYPE_VMBGP2, THING_TYPE_VMBGP4, THING_TYPE_VMBGP4, THING_TYPE_VMBGP4PIR));
+@NonNullByDefault
+public class VelbusVMBGPHandler extends VelbusThermostatHandler {
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(
+            Arrays.asList(THING_TYPE_VMBGP1, THING_TYPE_VMBGP1_2, THING_TYPE_VMBGP2, THING_TYPE_VMBGP2_2,
+                    THING_TYPE_VMBGP4, THING_TYPE_VMBGP4_2, THING_TYPE_VMBGP4PIR, THING_TYPE_VMBGP4PIR_2));
 
     public VelbusVMBGPHandler(Thing thing) {
-        super(thing, 4, new ChannelUID(thing.getUID(), "CH9"));
+        super(thing, 4, new ChannelUID(thing.getUID(), "input", "CH9"));
     }
 }

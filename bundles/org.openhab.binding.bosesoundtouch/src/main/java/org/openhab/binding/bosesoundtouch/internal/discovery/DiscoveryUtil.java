@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,7 @@ package org.openhab.binding.bosesoundtouch.internal.discovery;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.io.net.http.HttpUtil;
+import org.openhab.core.io.net.http.HttpUtil;
 
 /**
  * The {@link DiscoveryUtil} is a static helper class, to get infos from a XML

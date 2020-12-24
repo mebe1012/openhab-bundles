@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.homematic.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * Defines common constants, which are used across the binding.
@@ -26,7 +26,7 @@ public class HomematicBindingConstants {
     public static final String BINDING_ID = "homematic";
     public static final ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
     public static final String CONFIG_DESCRIPTION_URI_CHANNEL = "channel-type:homematic:config";
-    
+
     /**
      * A thing's config-description-uri is generally composed as follows:<br>
      * {@link #CONFIG_DESCRIPTION_URI_THING_PREFIX}:{@link ThingTypeUID}
@@ -58,13 +58,12 @@ public class HomematicBindingConstants {
     public static final String CATEGORY_ENERGY = "Energy";
     public static final String CATEGORY_BLINDS = "Blinds";
     public static final String CATEGORY_CONTACT = "Contact";
-    public static final String CATEGORY_DIMMABLE_LIGHT = "DimmableLight";
     public static final String CATEGORY_SWITCH = "Switch";
 
     public static final String PROPERTY_BATTERY_TYPE = "batteryType";
     public static final String PROPERTY_AES_KEY = "aesKey";
     public static final String PROPERTY_DYNAMIC_FUNCTION_FORMAT = "dynamicFunction-%d";
-    
+
     public static final int INSTALL_MODE_NORMAL = 1;
 
     public static final int CONFIGURATION_CHANNEL_NUMBER = -1;

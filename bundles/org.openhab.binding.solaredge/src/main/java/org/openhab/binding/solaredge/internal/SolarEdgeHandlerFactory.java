@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,17 @@ package org.openhab.binding.solaredge.internal;
 
 import static org.openhab.binding.solaredge.internal.SolarEdgeBindingConstants.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.solaredge.internal.handler.GenericSolarEdgeHandler;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -33,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alexander Friese - Initial contribution
  */
+@NonNullByDefault
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.solaredge")
 public class SolarEdgeHandlerFactory extends BaseThingHandlerFactory {
 
@@ -41,7 +45,12 @@ public class SolarEdgeHandlerFactory extends BaseThingHandlerFactory {
     /**
      * the shared http client
      */
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
+
+    @Activate
+    public SolarEdgeHandlerFactory(@Reference HttpClientFactory httpClientFactory) {
+        this.httpClient = httpClientFactory.getCommonHttpClient();
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -49,7 +58,7 @@ public class SolarEdgeHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_GENERIC)) {
@@ -60,16 +69,4 @@ public class SolarEdgeHandlerFactory extends BaseThingHandlerFactory {
 
         return null;
     }
-
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        logger.debug("setHttpClientFactory");
-        this.httpClient = httpClientFactory.getCommonHttpClient();
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        logger.debug("unsetHttpClientFactory");
-        this.httpClient = null;
-    }
-
 }

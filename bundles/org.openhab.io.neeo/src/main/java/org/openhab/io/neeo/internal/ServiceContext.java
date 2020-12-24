@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,15 @@ import java.util.UUID;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
-import org.eclipse.smarthome.io.transport.mdns.MDNSClient;
+import org.openhab.core.binding.BindingInfoRegistry;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.io.transport.mdns.MDNSClient;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.io.neeo.internal.models.NeeoThingUID;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;

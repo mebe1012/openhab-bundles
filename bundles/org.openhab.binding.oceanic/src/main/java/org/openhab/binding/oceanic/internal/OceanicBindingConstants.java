@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,12 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Type;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Type;
 
 /**
  * The {@link OceanicBinding} class defines common constants, which are used
@@ -291,7 +291,6 @@ public class OceanicBindingConstants {
             }
 
             throw new IllegalArgumentException("Not valid value selector");
-
         }
 
         public String convertValue(String value) {
@@ -302,7 +301,5 @@ public class OceanicBindingConstants {
             GET,
             SET
         }
-
     }
-
 }

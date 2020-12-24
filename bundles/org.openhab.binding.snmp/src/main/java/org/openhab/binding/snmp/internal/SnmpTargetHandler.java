@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,26 +22,29 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.snmp.internal.config.SnmpChannelConfiguration;
 import org.openhab.binding.snmp.internal.config.SnmpInternalChannelConfiguration;
 import org.openhab.binding.snmp.internal.config.SnmpTargetConfiguration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.util.ThingHandlerHelper;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.AbstractTarget;
@@ -49,6 +52,8 @@ import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
+import org.snmp4j.PDUv1;
+import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
@@ -70,6 +75,9 @@ import org.snmp4j.smi.VariableBinding;
  */
 @NonNullByDefault
 public class SnmpTargetHandler extends BaseThingHandler implements ResponseListener, CommandResponder {
+    private static final Pattern HEXSTRING_VALIDITY = Pattern.compile("([a-f0-9]{2}[ :-]?)+");
+    private static final Pattern HEXSTRING_EXTRACTOR = Pattern.compile("[^a-f0-9]");
+
     private final Logger logger = LoggerFactory.getLogger(SnmpTargetHandler.class);
 
     private @NonNullByDefault({}) SnmpTargetConfiguration config;
@@ -91,6 +99,11 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+        if (target.getAddress() == null && !renewTargetAddress()) {
+            logger.info("failed to renew target address, can't process '{}' to '{}'.", command, channelUID);
+            return;
+        }
+
         try {
             if (command instanceof RefreshType) {
                 SnmpInternalChannelConfiguration channel = readChannelSet.stream()
@@ -164,6 +177,15 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
         if (event == null) {
             return;
         }
+
+        if (event.getSource() instanceof Snmp) {
+            // Always cancel async request when response has been received
+            // otherwise a memory leak is created! Not canceling a request
+            // immediately can be useful when sending a request to a broadcast
+            // address (Comment is taken from the snmp4j API doc).
+            ((Snmp) event.getSource()).cancel(event.getRequest(), this);
+        }
+
         PDU response = event.getResponse();
         if (response == null) {
             Exception e = event.getError();
@@ -179,12 +201,15 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
             return;
         }
         timeoutCounter = 0;
+        if (ThingHandlerHelper.isHandlerInitialized(this)) {
+            updateStatus(ThingStatus.ONLINE);
+        }
         logger.trace("{} received {}", thing.getUID(), response);
 
         response.getVariableBindings().forEach(variable -> {
-            OID oid = variable.getOid();
-            Variable value = variable.getVariable();
-            updateChannels(oid, value, readChannelSet);
+            if (variable != null) {
+                updateChannels(variable.getOid(), variable.getVariable(), readChannelSet);
+            }
         });
     }
 
@@ -199,12 +224,22 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
         final String address = ((UdpAddress) event.getPeerAddress()).getInetAddress().getHostAddress();
         final String community = new String(event.getSecurityName());
 
+        if ((pdu.getType() == PDU.V1TRAP) && config.community.equals(community) && (pdu instanceof PDUv1)) {
+            logger.trace("{} received trap is PDUv1.", thing.getUID());
+            PDUv1 pduv1 = (PDUv1) pdu;
+            OID oidEnterprise = pduv1.getEnterprise();
+            int trapValue = pduv1.getGenericTrap();
+            if (trapValue == PDUv1.ENTERPRISE_SPECIFIC) {
+                trapValue = pduv1.getSpecificTrap();
+            }
+            updateChannels(oidEnterprise, new UnsignedInteger32(trapValue), trapChannelSet);
+        }
         if ((pdu.getType() == PDU.TRAP || pdu.getType() == PDU.V1TRAP) && config.community.equals(community)
                 && targetAddressString.equals(address)) {
             pdu.getVariableBindings().forEach(variable -> {
-                OID oid = variable.getOid();
-                Variable value = variable.getVariable();
-                updateChannels(oid, value, trapChannelSet);
+                if (variable != null) {
+                    updateChannels(variable.getOid(), variable.getVariable(), trapChannelSet);
+                }
             });
         }
     }
@@ -212,59 +247,65 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
     private @Nullable SnmpInternalChannelConfiguration getChannelConfigFromChannel(Channel channel) {
         SnmpChannelConfiguration config = channel.getConfiguration().as(SnmpChannelConfiguration.class);
 
-        SnmpDatatype datatype;
+        String oid = config.oid;
+        if (oid == null) {
+            logger.warn("oid must not be null");
+            return null;
+        }
+
+        SnmpDatatype datatype = config.datatype; // maybe null, override later
         Variable onValue = null;
         Variable offValue = null;
         State exceptionValue = UnDefType.UNDEF;
 
         if (CHANNEL_TYPE_UID_NUMBER.equals(channel.getChannelTypeUID())) {
-            if (config.datatype == null) {
+            if (datatype == null) {
                 datatype = SnmpDatatype.INT32;
-            } else if (config.datatype == SnmpDatatype.IPADDRESS || config.datatype == SnmpDatatype.STRING) {
+            } else if (datatype == SnmpDatatype.IPADDRESS || datatype == SnmpDatatype.STRING) {
                 return null;
-            } else {
-                datatype = config.datatype;
             }
-            if (config.exceptionValue != null) {
-                exceptionValue = DecimalType.valueOf(config.exceptionValue);
+            String configExceptionValue = config.exceptionValue;
+            if (configExceptionValue != null) {
+                exceptionValue = DecimalType.valueOf(configExceptionValue);
             }
         } else if (CHANNEL_TYPE_UID_STRING.equals(channel.getChannelTypeUID())) {
-            if (config.datatype == null) {
+            if (datatype == null) {
                 datatype = SnmpDatatype.STRING;
-            } else if (config.datatype != SnmpDatatype.IPADDRESS && config.datatype != SnmpDatatype.STRING) {
+            } else if (datatype != SnmpDatatype.IPADDRESS && datatype != SnmpDatatype.STRING
+                    && datatype != SnmpDatatype.HEXSTRING) {
                 return null;
-            } else {
-                datatype = config.datatype;
             }
-            if (config.exceptionValue != null) {
-                exceptionValue = StringType.valueOf(config.exceptionValue);
+            String configExceptionValue = config.exceptionValue;
+            if (configExceptionValue != null) {
+                exceptionValue = StringType.valueOf(configExceptionValue);
             }
         } else if (CHANNEL_TYPE_UID_SWITCH.equals(channel.getChannelTypeUID())) {
-            if (config.datatype == null) {
+            if (datatype == null) {
                 datatype = SnmpDatatype.UINT32;
-            } else {
-                datatype = config.datatype;
             }
             try {
-                if (config.onvalue != null) {
-                    onValue = convertDatatype(new StringType(config.onvalue), config.datatype);
+                final String configOnValue = config.onvalue;
+                if (configOnValue != null) {
+                    onValue = convertDatatype(new StringType(configOnValue), datatype);
                 }
-                if (config.offvalue != null) {
-                    offValue = convertDatatype(new StringType(config.offvalue), config.datatype);
+                final String configOffValue = config.offvalue;
+                if (configOffValue != null) {
+                    offValue = convertDatatype(new StringType(configOffValue), datatype);
                 }
             } catch (IllegalArgumentException e) {
                 logger.warn("illegal value configuration for channel {}", channel.getUID());
                 return null;
             }
-            if (config.exceptionValue != null) {
-                exceptionValue = OnOffType.from(config.exceptionValue);
+            String configExceptionValue = config.exceptionValue;
+            if (configExceptionValue != null) {
+                exceptionValue = OnOffType.from(configExceptionValue);
             }
         } else {
             logger.warn("unknown channel type found for channel {}", channel.getUID());
             return null;
         }
-        return new SnmpInternalChannelConfiguration(channel.getUID(), new OID(config.oid), config.mode, datatype,
-                onValue, offValue, exceptionValue, config.doNotLogException);
+        return new SnmpInternalChannelConfiguration(channel.getUID(), new OID(oid), config.mode, datatype, onValue,
+                offValue, exceptionValue, config.doNotLogException);
     }
 
     private void generateChannelConfigs() {
@@ -310,7 +351,12 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
                         return;
                     }
                 } else if (CHANNEL_TYPE_UID_STRING.equals(channel.getChannelTypeUID())) {
-                    state = new StringType(value.toString());
+                    if (channelConfig.datatype == SnmpDatatype.HEXSTRING) {
+                        String rawString = ((OctetString) value).toHexString(' ');
+                        state = new StringType(rawString.toLowerCase());
+                    } else {
+                        state = new StringType(value.toString());
+                    }
                 } else if (CHANNEL_TYPE_UID_SWITCH.equals(channel.getChannelTypeUID())) {
                     if (value.equals(channelConfig.onValue)) {
                         state = OnOffType.ON;
@@ -362,6 +408,16 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
                     return new OctetString(((StringType) command).toString());
                 }
                 break;
+            case HEXSTRING:
+                if (command instanceof StringType) {
+                    String commandString = ((StringType) command).toString().toLowerCase();
+                    Matcher commandMatcher = HEXSTRING_VALIDITY.matcher(commandString);
+                    if (commandMatcher.matches()) {
+                        commandString = HEXSTRING_EXTRACTOR.matcher(commandString).replaceAll("");
+                        return OctetString.fromHexStringPairs(commandString);
+                    }
+                }
+                break;
             case IPADDRESS:
                 if (command instanceof StringType) {
                     return new IpAddress(((StringType) command).toString());
@@ -376,7 +432,6 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
         try {
             target.setAddress(new UdpAddress(InetAddress.getByName(config.hostname), config.port));
             targetAddressString = ((UdpAddress) target.getAddress()).getInetAddress().getHostAddress();
-            updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE);
             return true;
         } catch (UnknownHostException e) {
             target.setAddress(null);
@@ -398,9 +453,8 @@ public class SnmpTargetHandler extends BaseThingHandler implements ResponseListe
             try {
                 snmpService.send(pdu, target, null, this);
             } catch (IOException e) {
-                logger.info("Could not send PDU: {}", e);
+                logger.info("Could not send PDU", e);
             }
         }
     }
-
 }

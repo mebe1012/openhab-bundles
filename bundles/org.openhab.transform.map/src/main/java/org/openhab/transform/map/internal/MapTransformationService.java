@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,9 +16,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.eclipse.smarthome.core.transform.AbstractFileTransformationService;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.transform.AbstractFileTransformationService;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution and API
  * @author Gaël L'hopital - Make it localizable
  */
-@Component(immediate = true, service = TransformationService.class, property = { "smarthome.transform=MAP" })
+@Component(service = TransformationService.class, property = { "openhab.transform=MAP" })
 public class MapTransformationService extends AbstractFileTransformationService<Properties> {
 
     private final Logger logger = LoggerFactory.getLogger(MapTransformationService.class);
@@ -69,5 +69,4 @@ public class MapTransformationService extends AbstractFileTransformationService<
             throw new TransformationException("An error occurred while opening file.", e);
         }
     }
-
 }

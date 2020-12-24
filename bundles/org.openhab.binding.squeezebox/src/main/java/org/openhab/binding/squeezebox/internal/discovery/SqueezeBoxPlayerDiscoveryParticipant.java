@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,15 +20,15 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxPlayer;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxPlayerEventListener;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxPlayerHandler;
 import org.openhab.binding.squeezebox.internal.handler.SqueezeBoxServerHandler;
 import org.openhab.binding.squeezebox.internal.model.Favorite;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +67,7 @@ public class SqueezeBoxPlayerDiscoveryParticipant extends AbstractDiscoveryServi
     protected void startScan() {
         logger.debug("startScan invoked in SqueezeBoxPlayerDiscoveryParticipant");
         this.squeezeBoxServerHandler.requestPlayers();
+        this.squeezeBoxServerHandler.requestFavorites();
     }
 
     /*
@@ -91,7 +92,8 @@ public class SqueezeBoxPlayerDiscoveryParticipant extends AbstractDiscoveryServi
             logger.debug("player added {} : {} ", player.getMacAddress(), player.getName());
 
             Map<String, Object> properties = new HashMap<>(1);
-            properties.put("mac", player.getMacAddress());
+            String representationPropertyName = "mac";
+            properties.put(representationPropertyName, player.getMacAddress());
 
             // Added other properties
             properties.put("modelId", player.getModel());
@@ -100,14 +102,15 @@ public class SqueezeBoxPlayerDiscoveryParticipant extends AbstractDiscoveryServi
             properties.put("ip", player.getIpAddr());
 
             DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
-                    .withBridge(bridgeUID).withLabel(player.getName()).build();
+                    .withRepresentationProperty(representationPropertyName).withBridge(bridgeUID)
+                    .withLabel(player.getName()).build();
 
             thingDiscovered(discoveryResult);
         }
     }
 
     private boolean playerThingExists(ThingUID newThingUID) {
-        return squeezeBoxServerHandler.getThingByUID(newThingUID) != null ? true : false;
+        return squeezeBoxServerHandler.getThing().getThing(newThingUID) != null ? true : false;
     }
 
     /**
@@ -199,5 +202,13 @@ public class SqueezeBoxPlayerDiscoveryParticipant extends AbstractDiscoveryServi
 
     @Override
     public void updateFavoritesListEvent(List<Favorite> favorites) {
+    }
+
+    @Override
+    public void sourceChangeEvent(String mac, String source) {
+    }
+
+    @Override
+    public void buttonsChangeEvent(String mac, String likeCommand, String unlikeCommand) {
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.openhab.binding.atlona.internal.AtlonaHandlerCallback;
 import org.openhab.binding.atlona.internal.net.SocketSession;
 import org.openhab.binding.atlona.internal.net.SocketSessionListener;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1111,7 +1111,6 @@ class AtlonaPro3PortocolHandler {
             callback.statusChanged(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                     "Exception occurred reading from Atlona: " + e);
         }
-
     }
 
     /**
@@ -1162,8 +1161,6 @@ class AtlonaPro3PortocolHandler {
                 responses.put(e);
             } catch (InterruptedException e1) {
             }
-
         }
-
     }
 }

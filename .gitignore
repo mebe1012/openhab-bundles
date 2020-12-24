@@ -1,5 +1,7 @@
 .antlr*
+.classpath
 .idea
+.project
 .DS_Store
 *.iml
 npm-debug.log
@@ -10,6 +12,7 @@ bin/
 target/
 src-gen/
 xtend-gen/
+.history/
 
 */plugin.xml_gen
 **/.settings/org.eclipse.*
@@ -20,3 +23,4 @@ features/**/src/main/feature
 
 .vscode
 .factorypath
+pom.xml.versionsBackup

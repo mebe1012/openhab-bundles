@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.dmx.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.dmx.test.TestBridgeHandler.THING_TYPE_TEST_BRIDGE;
@@ -23,21 +24,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaTest;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
+import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
+import org.openhab.core.types.State;
 
 /**
  * Common utilities for DMX thing handler tests.
@@ -142,5 +143,4 @@ public class AbstractDmxThingTestParent extends JavaTest {
         State value = captor.getValue();
         stateAssertion.accept(value);
     }
-
 }

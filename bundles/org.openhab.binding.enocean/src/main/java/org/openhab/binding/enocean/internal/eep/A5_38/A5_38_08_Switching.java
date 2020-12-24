@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,16 @@
  */
 package org.openhab.binding.enocean.internal.eep.A5_38;
 
+import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.ZERO;
+
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  *
@@ -42,11 +44,10 @@ public class A5_38_08_Switching extends _4BSMessage {
     @Override
     protected void convertFromCommandImpl(String channelId, String channelTypeId, Command outputCommand,
             Function<String, State> getCurrentStateFunc, Configuration config) {
-
         if ((OnOffType) outputCommand == OnOffType.ON) {
-            setData(CommandId, Zero, Zero, (byte) (TeachInBit | SwitchOn));
+            setData(CommandId, ZERO, ZERO, (byte) (TeachInBit | SwitchOn));
         } else {
-            setData(CommandId, Zero, Zero, (byte) (TeachInBit | SwitchOff));
+            setData(CommandId, ZERO, ZERO, (byte) (TeachInBit | SwitchOff));
         }
     }
 }

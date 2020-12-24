@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,19 +12,25 @@
  */
 package org.openhab.binding.bluetooth;
 
-import org.junit.Test;
-import org.openhab.binding.bluetooth.BluetoothAddress;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Test;
+
+/**
+ * Tests {@link BluetoothAddress}.
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class BluetoothAddressTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithNullParam() {
-        new BluetoothAddress(null);
+        assertThrows(IllegalArgumentException.class, () -> new BluetoothAddress(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithoutColons() {
-        new BluetoothAddress("123456789ABC");
+        assertThrows(IllegalArgumentException.class, () -> new BluetoothAddress("123456789ABC"));
     }
 
     @Test

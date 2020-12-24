@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.loxone.internal.controls;
 
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.StringType;
 
 /**
  * Test class for (@link LxControlTextState}
@@ -23,7 +23,7 @@ import org.junit.Test;
  *
  */
 public class LxControlTextStateTest extends LxControlTest {
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("106bed36-016d-6dd8-ffffffe6109fb656", "0b734138-038c-0386-ffff403fb0c34b9e",
                 "0fe665f4-0161-4773-ffff403fb0c34b9e", "Gate");

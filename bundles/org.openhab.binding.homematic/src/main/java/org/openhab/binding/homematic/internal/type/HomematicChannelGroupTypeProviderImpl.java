@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,10 +20,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
 import org.openhab.binding.homematic.type.HomematicThingTypeExcluder;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelGroupTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -34,9 +34,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Michael Reitler - Initial contribution
  */
-@Component(service = { HomematicChannelGroupTypeProvider.class, ChannelGroupTypeProvider.class }, immediate = true)
+@Component(service = { HomematicChannelGroupTypeProvider.class, ChannelGroupTypeProvider.class })
 public class HomematicChannelGroupTypeProviderImpl implements HomematicChannelGroupTypeProvider {
-    private final Map<ChannelGroupTypeUID, ChannelGroupType> channelGroupTypesByUID = new HashMap<ChannelGroupTypeUID, ChannelGroupType>();
+    private final Map<ChannelGroupTypeUID, ChannelGroupType> channelGroupTypesByUID = new HashMap<>();
     protected List<HomematicThingTypeExcluder> homematicThingTypeExcluders = new CopyOnWriteArrayList<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -87,5 +87,4 @@ public class HomematicChannelGroupTypeProviderImpl implements HomematicChannelGr
     public void addChannelGroupType(ChannelGroupType channelGroupType) {
         channelGroupTypesByUID.put(channelGroupType.getUID(), channelGroupType);
     }
-
 }

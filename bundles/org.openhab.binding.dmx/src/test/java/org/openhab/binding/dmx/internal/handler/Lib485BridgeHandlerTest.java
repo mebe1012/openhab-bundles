@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.dmx.internal.handler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.dmx.internal.DmxBindingConstants.*;
@@ -20,23 +20,22 @@ import static org.openhab.binding.dmx.internal.DmxBindingConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.binding.dmx.internal.handler.Lib485BridgeHandler;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
 
 /**
- * Tests cases for {@link Lib485BridgeHandler}.
+ * Tests cases for {@link org.openhab.binding.dmx.internal.handler.Lib485BridgeHandler}.
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -52,7 +51,7 @@ public class Lib485BridgeHandlerTest extends JavaTest {
     private Bridge bridge;
     private Lib485BridgeHandler bridgeHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         bridgeProperties = new HashMap<>();
         bridgeProperties.put(CONFIG_ADDRESS, TEST_ADDRESS);
@@ -77,7 +76,7 @@ public class Lib485BridgeHandlerTest extends JavaTest {
         bridgeHandler.initialize();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         bridgeHandler.dispose();
     }
@@ -86,5 +85,4 @@ public class Lib485BridgeHandlerTest extends JavaTest {
     public void assertBridgeStatus() {
         waitForAssert(() -> assertEquals(ThingStatus.OFFLINE, bridge.getStatusInfo().getStatus()));
     }
-
 }

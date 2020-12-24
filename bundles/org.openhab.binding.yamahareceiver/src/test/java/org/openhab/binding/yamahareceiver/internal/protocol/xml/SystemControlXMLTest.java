@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.yamahareceiver.internal.protocol.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.binding.yamahareceiver.internal.TestModels;
@@ -35,8 +35,7 @@ public class SystemControlXMLTest extends AbstractXMLProtocolTest {
 
     private DeviceInformationState deviceInformationState;
 
-    @Mock
-    private SystemControlStateListener systemControlStateListener;
+    private @Mock SystemControlStateListener systemControlStateListener;
 
     protected void setupFor(String model) throws Exception {
         ctx.prepareForModel(model);
@@ -118,5 +117,4 @@ public class SystemControlXMLTest extends AbstractXMLProtocolTest {
         assertTrue(state.power);
         assertFalse(state.partyMode);
     }
-
 }

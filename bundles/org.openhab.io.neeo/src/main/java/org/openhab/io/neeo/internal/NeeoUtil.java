@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,15 +27,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.items.Item;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.type.ChannelGroupDefinition;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.StateDescription;
 import org.openhab.io.neeo.NeeoService;
 import org.openhab.io.neeo.internal.models.ItemSubType;
 import org.openhab.io.neeo.internal.models.ListUiAction;
@@ -155,9 +155,12 @@ public class NeeoUtil {
      * @param s The UTF-8 encoded String to be decoded
      * @return the decoded String
      */
-    public static String decodeURIComponent(String s) {
-        String result = null;
+    public static String decodeURIComponent(@Nullable String s) {
+        if (s == null) {
+            return "";
+        }
 
+        String result = null;
         try {
             result = URLDecoder.decode(s, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
@@ -196,7 +199,7 @@ public class NeeoUtil {
      * Write a response out to the {@link HttpServletResponse}
      *
      * @param resp the non-null {@link HttpServletResponse}
-     * @param str  the possibly null, possibly empty string content to write
+     * @param str the possibly null, possibly empty string content to write
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(HttpServletResponse resp, String str) throws IOException {
@@ -259,7 +262,7 @@ public class NeeoUtil {
      * Require the specified value to be a non-null, non-empty string
      *
      * @param value the value to check
-     * @param msg   the msg to use when throwing an {@link IllegalArgumentException}
+     * @param msg the msg to use when throwing an {@link IllegalArgumentException}
      * @throws IllegalArgumentException if value is null or an empty string
      */
     public static void requireNotEmpty(String value, String msg) {
@@ -272,7 +275,7 @@ public class NeeoUtil {
     /**
      * Converts a JSON property to a string
      *
-     * @param jo           the non-null {@link JsonObject} to use
+     * @param jo the non-null {@link JsonObject} to use
      * @param propertyName the non-empty property name
      * @return the possibly null string representation
      */
@@ -288,7 +291,7 @@ public class NeeoUtil {
     /**
      * Converts a JSON property to an integer
      *
-     * @param jo           the non-null {@link JsonObject} to use
+     * @param jo the non-null {@link JsonObject} to use
      * @param propertyName the non-empty property name
      * @return the possibly null integer
      */
@@ -304,7 +307,7 @@ public class NeeoUtil {
     /**
      * Gets the {@link Command} for the specified enum name - ignoring case
      *
-     * @param cmd      the non-null {@link Command}
+     * @param cmd the non-null {@link Command}
      * @param enumName the non-empty enum name to search for
      * @return the {@link Command} or null if not found (or null if cmd's class is not an enum)
      */
@@ -337,7 +340,7 @@ public class NeeoUtil {
     /**
      * Gets the label to use from the item or channelType
      *
-     * @param item        the possibly null item
+     * @param item the possibly null item
      * @param channelType the possibly null channel type
      * @return the label to use (or null if no label)
      */
@@ -362,7 +365,7 @@ public class NeeoUtil {
     /**
      * Gets the pattern to use from the item or channelType
      *
-     * @param item        the possibly null item
+     * @param item the possibly null item
      * @param channelType the possibly null channel type
      * @return the pattern to use (or null if no pattern to use)
      */
@@ -396,7 +399,7 @@ public class NeeoUtil {
     /**
      * Returns the unique label name given a set of labels. The unique label will be added to the set of labels.
      *
-     * @param labels    the non-null, possibly empty set of labels
+     * @param labels the non-null, possibly empty set of labels
      * @param itemLabel the possibly null, possibly empty item label to get a unique name for
      * @return the unique label
      */
@@ -420,7 +423,7 @@ public class NeeoUtil {
      * Returns the group label for the given {@link ThingType} and groupId
      *
      * @param thingType a non null thingType
-     * @param groupId   a possibly empty, possibly null group ID
+     * @param groupId a possibly empty, possibly null group ID
      * @return the group label or null if none
      */
     @Nullable

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
 import org.openhab.binding.plugwise.internal.protocol.AcknowledgementMessage;
 import org.openhab.binding.plugwise.internal.protocol.Message;
+import org.openhab.core.io.transport.serial.SerialPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class PlugwiseMessageSender {
         private int messageWaitTime;
 
         public MessageSenderThread(int messageWaitTime) {
-            super("Plugwise MessageSenderThread");
+            super("OH-binding-" + context.getBridgeUID() + "-message-sender");
             this.messageWaitTime = messageWaitTime;
             setDaemon(true);
         }
@@ -66,7 +66,6 @@ public class PlugwiseMessageSender {
                 }
             }
         }
-
     }
 
     /** Default maximum number of attempts to send a message */
@@ -199,5 +198,4 @@ public class PlugwiseMessageSender {
             }
         }
     }
-
 }

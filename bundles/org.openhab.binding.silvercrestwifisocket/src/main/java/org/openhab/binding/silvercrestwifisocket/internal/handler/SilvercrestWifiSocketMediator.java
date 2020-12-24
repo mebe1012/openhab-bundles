@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.silvercrestwifisocket.internal.handler;
 
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.silvercrestwifisocket.internal.discovery.SilvercrestWifiSocketDiscoveryService;
 import org.openhab.binding.silvercrestwifisocket.internal.entities.SilvercrestWifiSocketResponse;
 import org.openhab.binding.silvercrestwifisocket.internal.runnable.SilvercrestWifiSocketUpdateReceiverRunnable;
+import org.openhab.core.thing.Thing;
 
 /**
  * The {@link SilvercrestWifiSocketMediator} is responsible for receiving all the UDP packets and route correctly to

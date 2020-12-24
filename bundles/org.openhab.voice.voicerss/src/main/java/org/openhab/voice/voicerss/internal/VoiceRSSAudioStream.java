@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.voice.voicerss.internal;
 
 import java.io.File;
 
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.FileAudioStream;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FileAudioStream;
 
 /**
  * Implementation of the {@link AudioStream} interface for the
@@ -32,5 +32,4 @@ class VoiceRSSAudioStream extends FileAudioStream {
     public VoiceRSSAudioStream(File audioFile, AudioFormat format) throws AudioException {
         super(audioFile, format);
     }
-
 }

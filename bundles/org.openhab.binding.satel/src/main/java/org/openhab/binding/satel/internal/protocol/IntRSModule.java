@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,14 +18,13 @@ import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,16 +46,14 @@ public class IntRSModule extends SatelModule {
     /**
      * Creates new instance with port and timeout set to specified values.
      *
-     * @param port
-     *                              serial port the module is connected to
-     * @param serialPortManager
-     *                              serial port manager object
-     * @param timeout
-     *                              timeout value in milliseconds for connect/read/write
-     *                              operations
+     * @param port serial port the module is connected to
+     * @param serialPortManager serial port manager object
+     * @param timeout timeout value in milliseconds for connect/read/write operations
+     * @param extPayloadSupport if <code>true</code>, the module supports extended command payload for reading
+     *            INTEGRA 256 state
      */
-    public IntRSModule(String port, SerialPortManager serialPortManager, int timeout) {
-        super(timeout);
+    public IntRSModule(String port, SerialPortManager serialPortManager, int timeout, boolean extPayloadSupport) {
+        super(timeout, extPayloadSupport);
 
         this.port = port;
         this.serialPortManager = serialPortManager;
@@ -72,8 +69,19 @@ public class IntRSModule extends SatelModule {
                 throw new ConnectionFailureException(String.format("Port %s does not exist", this.port));
             }
             SerialPort serialPort = portIdentifier.open("org.openhab.binding.satel", 2000);
+            boolean supportsReceiveTimeout = false;
             serialPort.setSerialPortParams(19200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-            serialPort.enableReceiveTimeout(this.getTimeout());
+            try {
+                serialPort.enableReceiveTimeout(this.getTimeout());
+                supportsReceiveTimeout = true;
+            } catch (UnsupportedCommOperationException e) {
+                logger.debug("Receive timeout is unsupported for port {}", this.port);
+            }
+            try {
+                serialPort.enableReceiveThreshold(1);
+            } catch (UnsupportedCommOperationException e) {
+                logger.debug("Receive threshold is unsupported for port {}", this.port);
+            }
             // RXTX serial port library causes high CPU load
             // Start event listener, which will just sleep and slow down event
             // loop
@@ -87,10 +95,10 @@ public class IntRSModule extends SatelModule {
                     }
                 }
             });
-            serialPort.notifyOnDataAvailable(true);
+            serialPort.notifyOnDataAvailable(false);
 
             logger.info("INT-RS module connected successfuly");
-            return new SerialCommunicationChannel(serialPort);
+            return new SerialCommunicationChannel(serialPort, supportsReceiveTimeout);
         } catch (PortInUseException e) {
             throw new ConnectionFailureException(String.format("Port %s in use", this.port), e);
         } catch (UnsupportedCommOperationException e) {
@@ -102,22 +110,31 @@ public class IntRSModule extends SatelModule {
 
     private class SerialCommunicationChannel implements CommunicationChannel {
 
-        private SerialPort serialPort;
+        private final SerialPort serialPort;
 
-        public SerialCommunicationChannel(SerialPort serialPort) {
+        private final boolean supportsReceiveTimeout;
+
+        public SerialCommunicationChannel(SerialPort serialPort, boolean supportsReceiveTimeout) {
             this.serialPort = serialPort;
+            this.supportsReceiveTimeout = supportsReceiveTimeout;
         }
 
         @Override
-        @Nullable
         public InputStream getInputStream() throws IOException {
-            return this.serialPort.getInputStream();
+            final InputStream stream = this.serialPort.getInputStream();
+            if (stream != null) {
+                return stream;
+            }
+            throw new IOException("Selected port doesn't support receiving data: " + this.serialPort.getName());
         }
 
         @Override
-        @Nullable
         public OutputStream getOutputStream() throws IOException {
-            return this.serialPort.getOutputStream();
+            final OutputStream stream = this.serialPort.getOutputStream();
+            if (stream != null) {
+                return stream;
+            }
+            throw new IOException("Selected port doesn't support sending data: " + this.serialPort.getName());
         }
 
         @Override
@@ -129,6 +146,11 @@ public class IntRSModule extends SatelModule {
             } catch (Exception e) {
                 logger.error("An error occurred during closing serial port", e);
             }
+        }
+
+        @Override
+        public boolean supportsReceiveTimeout() {
+            return supportsReceiveTimeout;
         }
     }
 }

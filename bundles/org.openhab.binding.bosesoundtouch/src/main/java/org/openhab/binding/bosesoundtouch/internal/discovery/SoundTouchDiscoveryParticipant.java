@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,13 +26,13 @@ import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.bosesoundtouch.internal.BoseSoundTouchConfiguration;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Christian Niessner - Initial contribution
  * @author Thomas Traunbauer - Initial contribution
  */
-@Component(immediate = true, configurationPid = "discovery.bosesoundtouch")
+@Component(configurationPid = "discovery.bosesoundtouch")
 public class SoundTouchDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
     private final Logger logger = LoggerFactory.getLogger(SoundTouchDiscoveryParticipant.class);
@@ -55,22 +55,19 @@ public class SoundTouchDiscoveryParticipant implements MDNSDiscoveryParticipant 
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public DiscoveryResult createResult(ServiceInfo info) {
         DiscoveryResult result = null;
         ThingUID uid = getThingUID(info);
         if (uid != null) {
-
             // remove the domain from the name
             InetAddress[] addrs = info.getInetAddresses();
 
             Map<String, Object> properties = new HashMap<>(2);
-            
+
             String label = null;
-            if (BST_10_THING_TYPE_UID.equals(uid.getThingTypeUID())) {
+            if (BST_10_THING_TYPE_UID.equals(getThingTypeUID(info))) {
                 try {
-                    String group = DiscoveryUtil
-                            .executeUrl("http://" + addrs[0].getHostAddress() + ":8090/getGroup");
+                    String group = DiscoveryUtil.executeUrl("http://" + addrs[0].getHostAddress() + ":8090/getGroup");
                     label = DiscoveryUtil.getContentOfFirstElement(group, "name");
                 } catch (IOException e) {
                     logger.debug("Can't obtain label for group. Will use the default one");
@@ -80,7 +77,7 @@ public class SoundTouchDiscoveryParticipant implements MDNSDiscoveryParticipant 
             if (label == null || label.isEmpty()) {
                 label = info.getName();
             }
-            
+
             if (label == null || label.isEmpty()) {
                 label = "Bose SoundTouch";
             }
@@ -93,9 +90,10 @@ public class SoundTouchDiscoveryParticipant implements MDNSDiscoveryParticipant 
 
             properties.put(BoseSoundTouchConfiguration.HOST, addrs[0].getHostAddress());
             if (getMacAddress(info) != null) {
-                properties.put(BoseSoundTouchConfiguration.MAC_ADDRESS, new String(getMacAddress(info), StandardCharsets.UTF_8));
+                properties.put(BoseSoundTouchConfiguration.MAC_ADDRESS,
+                        new String(getMacAddress(info), StandardCharsets.UTF_8));
             }
-            
+
             // Set manufacturer as thing property (if available)
             byte[] manufacturer = info.getPropertyBytes("MANUFACTURER");
             if (manufacturer != null) {

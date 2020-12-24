@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,8 +19,8 @@ import java.util.Map;
 
 import javax.measure.Unit;
 
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
 
 /**
  * The {@link RegoRegisterMapper} is responsible for mapping rego 6xx registers into channels.
@@ -36,6 +36,8 @@ public class RegoRegisterMapper {
         public double scaleFactor();
 
         public Unit<?> unit();
+
+        public int convertValue(short value);
     }
 
     private static class ChannelFactory {
@@ -64,6 +66,11 @@ public class RegoRegisterMapper {
             public Unit<?> unit() {
                 return unit;
             }
+
+            @Override
+            public int convertValue(short value) {
+                return value;
+            }
         }
 
         private ChannelFactory() {
@@ -74,11 +81,16 @@ public class RegoRegisterMapper {
         }
 
         static Channel hours(short address) {
-            return new ChannelImpl(address, 1, SmartHomeUnits.HOUR);
+            return new ChannelImpl(address, 1, Units.HOUR) {
+                @Override
+                public int convertValue(short value) {
+                    return Short.toUnsignedInt(value);
+                }
+            };
         }
 
         static Channel percent(short address) {
-            return new ChannelImpl(address, 0.1, SmartHomeUnits.PERCENT);
+            return new ChannelImpl(address, 0.1, Units.PERCENT);
         }
 
         static Channel unitless(short address, double scaleFactor) {

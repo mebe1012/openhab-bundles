@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,23 +21,23 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.eclipse.smarthome.core.types.Command;
-import org.openhab.binding.dmx.action.DmxActions;
+import org.openhab.binding.dmx.internal.action.DmxActions;
 import org.openhab.binding.dmx.internal.action.FadeAction;
 import org.openhab.binding.dmx.internal.action.ResumeAction;
 import org.openhab.binding.dmx.internal.config.DmxBridgeHandlerConfiguration;
 import org.openhab.binding.dmx.internal.multiverse.BaseDmxChannel;
 import org.openhab.binding.dmx.internal.multiverse.DmxChannel;
 import org.openhab.binding.dmx.internal.multiverse.Universe;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

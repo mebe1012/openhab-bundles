@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle.Listener;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.io.net.http.WebSocketFactory;
 import org.openhab.binding.samsungtv.internal.config.SamsungTvConfiguration;
+import org.openhab.core.io.net.http.WebSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class RemoteControllerWebSocket extends RemoteController implements Liste
      * @param port TCP port of the remote controller protocol.
      * @param appName Application name used to send key codes.
      * @param uniqueId Unique Id used to send key codes.
-     * @param remoteControllerService
+     * @param remoteControllerWebsocketCallback callback
      * @throws RemoteControllerException
      */
     public RemoteControllerWebSocket(String host, int port, String appName, String uniqueId,
@@ -123,7 +123,7 @@ public class RemoteControllerWebSocket extends RemoteController implements Liste
             throw new RemoteControllerException("No WebSocketFactory available");
         }
 
-        client = webSocketFactory.createWebSocketClient("samtungtv");
+        client = webSocketFactory.createWebSocketClient("samsungtv");
 
         client.addLifeCycleListener(this);
 
@@ -194,10 +194,10 @@ public class RemoteControllerWebSocket extends RemoteController implements Liste
     private void closeConnection() throws RemoteControllerException {
         logger.debug("RemoteControllerWebSocket closeConnection");
 
-        webSocketRemote.close();
-        webSocketArt.close();
-        webSocketV2.close();
         try {
+            webSocketRemote.close();
+            webSocketArt.close();
+            webSocketV2.close();
             client.stop();
         } catch (Exception e) {
             throw new RemoteControllerException(e);
@@ -379,5 +379,4 @@ public class RemoteControllerWebSocket extends RemoteController implements Liste
     public void lifeCycleStopping(@Nullable LifeCycle arg0) {
         logger.trace("WebSocketClient stopping");
     }
-
 }

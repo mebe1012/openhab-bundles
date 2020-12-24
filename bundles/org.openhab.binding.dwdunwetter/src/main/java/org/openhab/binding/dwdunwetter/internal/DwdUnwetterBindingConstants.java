@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.dwdunwetter.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link DwdUnwetterBindingConstants} class defines common constants, which are
@@ -46,5 +46,4 @@ public class DwdUnwetterBindingConstants {
     public static final String CHANNEL_CEILING = "ceiling";
     public static final String CHANNEL_INSTRUCTION = "instruction";
     public static final String CHANNEL_URGENCY = "urgency";
-
 }

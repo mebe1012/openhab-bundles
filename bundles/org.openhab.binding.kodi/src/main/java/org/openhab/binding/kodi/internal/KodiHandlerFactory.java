@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,20 +19,23 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.WebSocketFactory;
 import org.openhab.binding.kodi.internal.handler.KodiHandler;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.io.net.http.WebSocketFactory;
+import org.openhab.core.net.HttpServiceUtil;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -45,21 +48,35 @@ import org.slf4j.LoggerFactory;
  * @author Paul Frank - Initial contribution
  * @author Christoph Weitkamp - Improvements on channels for opening PVR TV or Radio streams
  */
+@NonNullByDefault
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.kodi")
 public class KodiHandlerFactory extends BaseThingHandlerFactory {
 
-    private Logger logger = LoggerFactory.getLogger(KodiHandlerFactory.class);
+    private final Logger logger = LoggerFactory.getLogger(KodiHandlerFactory.class);
 
-    private AudioHTTPServer audioHTTPServer;
-    private NetworkAddressService networkAddressService;
-    private WebSocketClient webSocketClient;
+    private final AudioHTTPServer audioHTTPServer;
+    private final NetworkAddressService networkAddressService;
+    private final KodiDynamicCommandDescriptionProvider commandDescriptionProvider;
+    private final KodiDynamicStateDescriptionProvider stateDescriptionProvider;
+    private final WebSocketClient webSocketClient;
+
+    private final Map<String, ServiceRegistration<AudioSink>> audioSinkRegistrations = new ConcurrentHashMap<>();
 
     // url (scheme+server+port) to use for playing notification sounds
-    private String callbackUrl = null;
+    private @Nullable String callbackUrl;
 
-    private Map<String, ServiceRegistration<AudioSink>> audioSinkRegistrations = new ConcurrentHashMap<>();
-
-    private KodiDynamicStateDescriptionProvider stateDescriptionProvider;
+    @Activate
+    public KodiHandlerFactory(final @Reference AudioHTTPServer audioHTTPServer,
+            final @Reference NetworkAddressService networkAddressService,
+            final @Reference KodiDynamicCommandDescriptionProvider commandDescriptionProvider,
+            final @Reference KodiDynamicStateDescriptionProvider stateDescriptionProvider,
+            final @Reference WebSocketFactory webSocketFactory) {
+        this.audioHTTPServer = audioHTTPServer;
+        this.networkAddressService = networkAddressService;
+        this.commandDescriptionProvider = commandDescriptionProvider;
+        this.stateDescriptionProvider = stateDescriptionProvider;
+        this.webSocketClient = webSocketFactory.getCommonWebSocketClient();
+    }
 
     @Override
     protected void activate(ComponentContext componentContext) {
@@ -74,18 +91,19 @@ public class KodiHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_KODI)) {
             String callbackUrl = createCallbackUrl();
-            KodiHandler handler = new KodiHandler(thing, stateDescriptionProvider, webSocketClient, callbackUrl);
+            KodiHandler handler = new KodiHandler(thing, commandDescriptionProvider, stateDescriptionProvider,
+                    webSocketClient, callbackUrl);
 
             // register the Kodi as an audio sink
             KodiAudioSink audioSink = new KodiAudioSink(handler, audioHTTPServer, callbackUrl);
             @SuppressWarnings("unchecked")
             ServiceRegistration<AudioSink> reg = (ServiceRegistration<AudioSink>) bundleContext
-                    .registerService(AudioSink.class.getName(), audioSink, new Hashtable<String, Object>());
+                    .registerService(AudioSink.class.getName(), audioSink, new Hashtable<>());
             audioSinkRegistrations.put(thing.getUID().toString(), reg);
 
             return handler;
@@ -94,7 +112,7 @@ public class KodiHandlerFactory extends BaseThingHandlerFactory {
         return null;
     }
 
-    private String createCallbackUrl() {
+    private @Nullable String createCallbackUrl() {
         if (callbackUrl != null) {
             return callbackUrl;
         } else {
@@ -122,41 +140,5 @@ public class KodiHandlerFactory extends BaseThingHandlerFactory {
         if (reg != null) {
             reg.unregister();
         }
-    }
-
-    @Reference
-    protected void setHttpClientFactory(WebSocketFactory webSocketFactory) {
-        this.webSocketClient = webSocketFactory.getCommonWebSocketClient();
-    }
-
-    protected void unsetHttpClientFactory(WebSocketFactory webSocketFactory) {
-        this.webSocketClient = null;
-    }
-
-    @Reference
-    protected void setAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = audioHTTPServer;
-    }
-
-    protected void unsetAudioHTTPServer(AudioHTTPServer audioHTTPServer) {
-        this.audioHTTPServer = null;
-    }
-
-    @Reference
-    protected void setNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = networkAddressService;
-    }
-
-    protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = null;
-    }
-
-    @Reference
-    protected void setDynamicStateDescriptionProvider(KodiDynamicStateDescriptionProvider stateDescriptionProvider) {
-        this.stateDescriptionProvider = stateDescriptionProvider;
-    }
-
-    protected void unsetDynamicStateDescriptionProvider(KodiDynamicStateDescriptionProvider stateDescriptionProvider) {
-        this.stateDescriptionProvider = null;
     }
 }

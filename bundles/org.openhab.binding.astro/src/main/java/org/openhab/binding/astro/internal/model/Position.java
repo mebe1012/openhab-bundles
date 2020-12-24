@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,8 @@ package org.openhab.binding.astro.internal.model;
 
 import javax.measure.quantity.Angle;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 
 /**
  * Holds the calculated azimuth and elevation.
@@ -45,7 +43,7 @@ public class Position {
      * Returns the azimuth.
      */
     public QuantityType<Angle> getAzimuth() {
-        return new QuantityType<Angle>(azimuth, SmartHomeUnits.DEGREE_ANGLE);
+        return new QuantityType<>(azimuth, Units.DEGREE_ANGLE);
     }
 
     /**
@@ -59,7 +57,7 @@ public class Position {
      * Returns the elevation.
      */
     public QuantityType<Angle> getElevation() {
-        return new QuantityType<Angle>(elevation, SmartHomeUnits.DEGREE_ANGLE);
+        return new QuantityType<>(elevation, Units.DEGREE_ANGLE);
     }
 
     public double getElevationAsDouble() {
@@ -85,11 +83,5 @@ public class Position {
      */
     public void setShadeLength(double shadeLength) {
         this.shadeLength = shadeLength;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("azimuth", azimuth)
-                .append("elevation", elevation).append("shadeLength", shadeLength).toString();
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,14 +18,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.loxone.internal.types.LxState;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +131,15 @@ class LxControlJalousie extends LxControl {
     }
 
     private void handleOperateCommands(Command command) throws IOException {
+        logger.debug("Command input {}", command);
         if (command instanceof PercentType) {
-            moveToPosition(((PercentType) command).doubleValue() / 100);
+            if (PercentType.ZERO.equals(command)) {
+                sendAction(CMD_FULL_UP);
+            } else if (PercentType.HUNDRED.equals(command)) {
+                sendAction(CMD_FULL_DOWN);
+            } else {
+                moveToPosition(((PercentType) command).doubleValue() / 100);
+            }
         } else if (command instanceof UpDownType) {
             if ((UpDownType) command == UpDownType.UP) {
                 sendAction(CMD_FULL_UP);
@@ -226,7 +233,7 @@ class LxControlJalousie extends LxControl {
      * position.
      *
      * @param position end position to move jalousie to, floating point number from 0..1 (0-fully closed to 1-fully
-     *                     open)
+     *            open)
      * @throws IOException when something went wrong with communication
      */
     private void moveToPosition(Double position) throws IOException {

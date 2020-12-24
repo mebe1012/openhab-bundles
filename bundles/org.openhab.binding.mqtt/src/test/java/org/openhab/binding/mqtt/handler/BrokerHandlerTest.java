@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,32 +13,33 @@
 package org.openhab.binding.mqtt.handler;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
-import org.eclipse.smarthome.io.transport.mqtt.MqttException;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.openhab.binding.mqtt.handler.BrokerHandler;
-import org.openhab.binding.mqtt.internal.MqttThingID;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttException;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
 import org.osgi.service.cm.ConfigurationException;
 
 /**
@@ -46,29 +47,24 @@ import org.osgi.service.cm.ConfigurationException;
  *
  * @author David Graeff - Initial contribution
  */
-public class BrokerHandlerTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
+public class BrokerHandlerTest extends JavaTest {
     private ScheduledExecutorService scheduler;
 
-    @Mock
-    private ThingHandlerCallback callback;
-
-    @Mock
-    private Bridge thing;
-
-    @Mock
-    private MqttService service;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock Bridge thing;
+    private @Mock MqttService service;
 
     private MqttBrokerConnectionEx connection;
 
     private BrokerHandler handler;
 
-    @Before
-    public void setUp() throws ConfigurationException, MqttException {
+    @BeforeEach
+    public void setUp() {
         scheduler = new ScheduledThreadPoolExecutor(1);
-        MockitoAnnotations.initMocks(this);
-        when(thing.getUID()).thenReturn(MqttThingID.getThingUID("10.10.0.10", 80));
         connection = spy(new MqttBrokerConnectionEx("10.10.0.10", 80, false, "BrokerHandlerTest"));
-        connection.setTimeoutExecutor(scheduler, 10);
+        connection.setTimeoutExecutor(scheduler, 10000);
         connection.setConnectionCallback(connection);
 
         Configuration config = new Configuration();
@@ -78,17 +74,16 @@ public class BrokerHandlerTest {
         handler.setCallback(callback);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         scheduler.shutdownNow();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void handlerInitWithoutUrl()
-            throws InterruptedException, IllegalArgumentException, MqttException, ConfigurationException {
+    @Test
+    public void handlerInitWithoutUrl() throws IllegalArgumentException {
         // Assume it is a real handler and not a mock as defined above
         handler = new BrokerHandler(thing);
-        assertThat(initializeHandlerWaitForTimeout(), is(true));
+        assertThrows(IllegalArgumentException.class, () -> initializeHandlerWaitForTimeout());
     }
 
     @Test
@@ -102,14 +97,12 @@ public class BrokerHandlerTest {
     }
 
     @Test
-    public void handlerInit()
-            throws InterruptedException, IllegalArgumentException, MqttException, ConfigurationException {
-
+    public void handlerInit() throws InterruptedException, IllegalArgumentException {
         assertThat(initializeHandlerWaitForTimeout(), is(true));
 
         ArgumentCaptor<ThingStatusInfo> statusInfoCaptor = ArgumentCaptor.forClass(ThingStatusInfo.class);
         verify(callback, atLeast(3)).statusUpdated(eq(thing), statusInfoCaptor.capture());
-        Assert.assertThat(statusInfoCaptor.getValue().getStatus(), is(ThingStatus.ONLINE));
+        assertThat(statusInfoCaptor.getValue().getStatus(), is(ThingStatus.ONLINE));
     }
 
     /**
@@ -122,9 +115,7 @@ public class BrokerHandlerTest {
      * @throws MqttException
      * @throws ConfigurationException
      */
-    boolean initializeHandlerWaitForTimeout()
-            throws InterruptedException, IllegalArgumentException, MqttException, ConfigurationException {
-
+    boolean initializeHandlerWaitForTimeout() throws InterruptedException, IllegalArgumentException {
         MqttBrokerConnection c = connection;
 
         MqttConnectionObserverEx o = new MqttConnectionObserverEx();
@@ -132,15 +123,13 @@ public class BrokerHandlerTest {
 
         assertThat(connection.connectionState(), is(MqttConnectionState.DISCONNECTED));
         handler.initialize();
-        verify(connection, times(2)).addConnectionObserver(any());
-        verify(connection, times(1)).start();
-        boolean s = o.semaphore.tryAcquire(300, TimeUnit.MILLISECONDS);
+        waitForAssert(() -> verify(connection, times(2)).addConnectionObserver(any()));
+        waitForAssert(() -> verify(connection, times(1)).start());
         // First we expect a CONNECTING state and then a CONNECTED unique state change
-        assertThat(o.counter, is(2));
+        waitForAssert(() -> assertThat(o.counter, is(2)));
         // First we expect a CONNECTING state and then a CONNECTED state change
         // (and other CONNECTED after the future completes)
-        verify(handler, times(3)).connectionStateChanged(any(), any());
-        return s;
+        waitForAssert(() -> verify(handler, times(3)).connectionStateChanged(any(), any()));
+        return true;
     }
-
 }

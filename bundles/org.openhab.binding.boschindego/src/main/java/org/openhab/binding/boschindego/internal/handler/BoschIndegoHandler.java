@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,17 +22,17 @@ import java.util.Queue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public class BoschIndegoHandler extends BaseThingHandler {
             // Query the device state
             DeviceStateInformation state = controller.getState();
             DeviceStatus statusWithMessage = DeviceStatus.decodeStatusCode(state.getState());
-            int eshStatus = getEshStatusFromCommand(statusWithMessage.getAssociatedCommand());
+            int status = getStatusFromCommand(statusWithMessage.getAssociatedCommand());
             int mowed = state.getMowed();
             int error = state.getError();
             int statecode = state.getState();
@@ -136,7 +136,7 @@ public class BoschIndegoHandler extends BaseThingHandler {
                         if (state.getState() != stateTmp.getState()) {
                             state = stateTmp;
                             statusWithMessage = DeviceStatus.decodeStatusCode(state.getState());
-                            eshStatus = getEshStatusFromCommand(statusWithMessage.getAssociatedCommand());
+                            status = getStatusFromCommand(statusWithMessage.getAssociatedCommand());
                             mowed = state.getMowed();
                             error = state.getError();
                             statecode = state.getState();
@@ -156,7 +156,7 @@ public class BoschIndegoHandler extends BaseThingHandler {
             updateState(READY, new DecimalType(ready ? 1 : 0));
             updateState(ERRORCODE, new DecimalType(error));
             updateState(MOWED, new PercentType(mowed));
-            updateState(STATE, new DecimalType(eshStatus));
+            updateState(STATE, new DecimalType(status));
             updateState(TEXTUAL_STATE, new StringType(statusWithMessage.getMessage()));
 
         } catch (IndegoAuthenticationException e) {
@@ -200,22 +200,22 @@ public class BoschIndegoHandler extends BaseThingHandler {
         return true;
     }
 
-    private int getEshStatusFromCommand(DeviceCommand command) {
-        int eshStatus;
+    private int getStatusFromCommand(DeviceCommand command) {
+        int status;
         switch (command) {
             case MOW:
-                eshStatus = 1;
+                status = 1;
                 break;
             case RETURN:
-                eshStatus = 2;
+                status = 2;
                 break;
             case PAUSE:
-                eshStatus = 3;
+                status = 3;
                 break;
             default:
-                eshStatus = 0;
+                status = 0;
         }
-        return eshStatus;
+        return status;
     }
 
     @Override

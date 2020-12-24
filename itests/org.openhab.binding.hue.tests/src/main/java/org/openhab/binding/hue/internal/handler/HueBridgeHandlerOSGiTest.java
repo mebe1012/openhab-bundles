@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,33 +12,35 @@
  */
 package org.openhab.binding.hue.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.binding.hue.internal.HueBindingConstants.*;
 import static org.openhab.binding.hue.internal.config.HueBridgeConfig.HTTP;
+import static org.openhab.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.hue.internal.AbstractHueOSGiTestParent;
 import org.openhab.binding.hue.internal.HueBridge;
 import org.openhab.binding.hue.internal.HueConfigStatusMessage;
 import org.openhab.binding.hue.internal.exceptions.ApiException;
 import org.openhab.binding.hue.internal.exceptions.LinkButtonException;
 import org.openhab.binding.hue.internal.exceptions.UnauthorizedException;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * Tests for {@link HueBridgeHandler}.
@@ -49,7 +51,7 @@ import org.openhab.binding.hue.internal.exceptions.UnauthorizedException;
  */
 public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
 
-    private final ThingTypeUID BRIDGE_THING_TYPE_UID = new ThingTypeUID(BINDING_ID, "bridge");
+    private static final ThingTypeUID BRIDGE_THING_TYPE_UID = new ThingTypeUID(BINDING_ID, "bridge");
     private static final String TEST_USER_NAME = "eshTestUser";
     private static final String DUMMY_HOST = "1.2.3.4";
 
@@ -57,7 +59,7 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
 
     private ScheduledExecutorService scheduler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         thingRegistry = getService(ThingRegistry.class, ThingRegistry.class);
@@ -131,7 +133,7 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
         hueBridgeHandler.onNotAuthenticated();
 
         assertEquals("notAuthenticatedUser", bridge.getConfiguration().get(USER_NAME));
-        assertEquals(ThingStatus.OFFLINE, bridge.getStatus());
+        waitForAssert(() -> assertEquals(ThingStatus.OFFLINE, bridge.getStatus()));
         assertEquals(ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, bridge.getStatusInfo().getStatusDetail());
     }
 
@@ -155,7 +157,7 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
         hueBridgeHandler.onNotAuthenticated();
 
         assertNull(bridge.getConfiguration().get(USER_NAME));
-        assertEquals(ThingStatus.OFFLINE, bridge.getStatus());
+        waitForAssert(() -> assertEquals(ThingStatus.OFFLINE, bridge.getStatus()));
         assertEquals(ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, bridge.getStatusInfo().getStatusDetail());
     }
 
@@ -179,8 +181,9 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
         hueBridgeHandler.onNotAuthenticated();
 
         assertNull(bridge.getConfiguration().get(USER_NAME));
-        assertEquals(ThingStatus.OFFLINE, bridge.getStatus());
-        assertEquals(ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, bridge.getStatusInfo().getStatusDetail());
+        waitForAssert(() -> assertEquals(ThingStatus.OFFLINE, bridge.getStatus()));
+        waitForAssert(() -> assertEquals(ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
+                bridge.getStatusInfo().getStatusDetail()));
     }
 
     @Test
@@ -195,7 +198,7 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
 
         hueBridgeHandler.onConnectionLost();
 
-        assertEquals(ThingStatus.OFFLINE, bridge.getStatus());
+        waitForAssert(() -> assertEquals(ThingStatus.OFFLINE, bridge.getStatus()));
         assertNotEquals(ThingStatusDetail.BRIDGE_OFFLINE, bridge.getStatusInfo().getStatusDetail());
     }
 
@@ -235,7 +238,7 @@ public class HueBridgeHandlerOSGiTest extends AbstractHueOSGiTestParent {
         Bridge bridge = (Bridge) thingRegistry.createThingOfType(BRIDGE_THING_TYPE_UID,
                 new ThingUID(BRIDGE_THING_TYPE_UID, "testBridge"), null, "Bridge", configuration);
 
-        assertNotNull(bridge);
+        bridge = requireNonNull(bridge, "Bridge is null");
         thingRegistry.add(bridge);
         return bridge;
     }

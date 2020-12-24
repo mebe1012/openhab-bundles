@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.volvooncall.internal.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link Trips} is responsible for storing
@@ -24,6 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
-public class Trips {
-    public @Nullable List<Trip> trips = null;
+public class Trips extends VocAnswer {
+    public List<Trip> trips = new ArrayList<>();
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,17 +15,16 @@ package org.openhab.io.neeo.internal.serialization;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.types.Command;
 import org.openhab.io.neeo.internal.NeeoUtil;
 import org.openhab.io.neeo.internal.ServiceContext;
 import org.openhab.io.neeo.internal.models.ItemSubType;
@@ -77,12 +76,7 @@ public class NeeoDeviceChannelSerializer
     }
 
     @Override
-    public JsonElement serialize(NeeoDeviceChannel chnl, @Nullable Type type,
-            @Nullable JsonSerializationContext jsonContext) {
-        Objects.requireNonNull(chnl, "chnl cannot be null");
-        Objects.requireNonNull(type, "type cannot be null");
-        Objects.requireNonNull(jsonContext, "jsonContext cannot be null");
-
+    public JsonElement serialize(NeeoDeviceChannel chnl, Type type, JsonSerializationContext jsonContext) {
         final JsonObject jo = new JsonObject();
 
         jo.add("kind", jsonContext.serialize(chnl.getKind()));
@@ -169,12 +163,8 @@ public class NeeoDeviceChannelSerializer
     }
 
     @Override
-    public NeeoDeviceChannel deserialize(@Nullable JsonElement elm, @Nullable Type type,
-            @Nullable JsonDeserializationContext context) throws JsonParseException {
-        Objects.requireNonNull(elm, "elm cannot be null");
-        Objects.requireNonNull(type, "type cannot be null");
-        Objects.requireNonNull(context, "context cannot be null");
-
+    public @Nullable NeeoDeviceChannel deserialize(JsonElement elm, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
         if (!(elm instanceof JsonObject)) {
             throw new JsonParseException("Element not an instance of JsonObject: " + elm);
         }

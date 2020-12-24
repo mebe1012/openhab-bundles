@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.io.hueemulation.internal.dto;
 
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * Hue API state object
@@ -22,13 +22,13 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  *
  */
 public class HueStateBulb extends HueStatePlug {
-    // https://github.com/openhab/openhab2-addons/issues/2881
+    // https://github.com/openhab/openhab-addons/issues/2881
     // Apparently the maximum brightness is 254
-    public static int MAX_BRI = 254;
+    public static final int MAX_BRI = 254;
     public int bri = 0;
 
     /** white color temperature, 154 (cold) - 500 (warm) */
-    public static int MAX_CT = 500;
+    public static final int MAX_CT = 500;
     public int ct = 500;
 
     protected HueStateBulb() {
@@ -36,7 +36,7 @@ public class HueStateBulb extends HueStatePlug {
 
     public HueStateBulb(boolean on) {
         super(on);
-        this.bri = on ? MAX_BRI : 0;
+        this.bri = on ? MAX_BRI : 1;
     }
 
     /**
@@ -47,7 +47,7 @@ public class HueStateBulb extends HueStatePlug {
      */
     public HueStateBulb(PercentType brightness, boolean on) {
         super(on);
-        this.bri = (int) (brightness.intValue() * MAX_BRI / 100.0 + 0.5);
+        this.bri = Math.max(1, (int) (brightness.intValue() * MAX_BRI / 100.0 + 0.5));
     }
 
     public PercentType toBrightnessType() {

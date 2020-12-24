@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,8 +18,8 @@ import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Kordelle - pre compiled scripts
  */
 @NonNullByDefault
-@Component(immediate = true, property = { "smarthome.transform=JS" })
+@Component(property = { "openhab.transform=JS" })
 public class JavaScriptTransformationService implements TransformationService {
 
     private Logger logger = LoggerFactory.getLogger(JavaScriptTransformationService.class);
@@ -55,9 +55,9 @@ public class JavaScriptTransformationService implements TransformationService {
      * transformations one should use subfolders.
      *
      * @param filename the name of the file which contains the Java script
-     *                     transformation rule. Transformation service inject input
-     *                     (source) to 'input' variable.
-     * @param source   the input to transform
+     *            transformation rule. Transformation service inject input
+     *            (source) to 'input' variable.
+     * @param source the input to transform
      */
     @Override
     public @Nullable String transform(String filename, String source) throws TransformationException {

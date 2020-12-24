@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ package org.openhab.binding.nuki.internal.dto;
  * Bridge to the openHAB Server.
  *
  * @author Markus Katter - Initial contribution
+ * @contributer Christian Hoefler - Door sensor integration
  */
 public class BridgeApiLockStateRequestDto {
 
@@ -24,6 +25,7 @@ public class BridgeApiLockStateRequestDto {
     private int state;
     private String stateName;
     private boolean batteryCritical;
+    private int doorsensorState;
 
     public int getNukiId() {
         return nukiId;
@@ -57,4 +59,11 @@ public class BridgeApiLockStateRequestDto {
         this.batteryCritical = batteryCritical;
     }
 
+    public int getDoorsensorState() {
+        return doorsensorState;
+    }
+
+    public void setDoorsensorState(int doorsensorState) {
+        this.doorsensorState = doorsensorState;
+    }
 }

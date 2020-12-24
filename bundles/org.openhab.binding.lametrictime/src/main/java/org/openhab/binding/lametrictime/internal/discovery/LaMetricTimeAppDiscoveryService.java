@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,23 +17,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.openhab.binding.lametrictime.api.local.model.Application;
+import org.openhab.binding.lametrictime.api.local.model.Widget;
+import org.openhab.binding.lametrictime.api.model.CoreApps;
 import org.openhab.binding.lametrictime.internal.LaMetricTimeBindingConstants;
 import org.openhab.binding.lametrictime.internal.LaMetricTimeUtil;
 import org.openhab.binding.lametrictime.internal.config.LaMetricTimeAppConfiguration;
 import org.openhab.binding.lametrictime.internal.handler.LaMetricTimeAppHandler;
 import org.openhab.binding.lametrictime.internal.handler.LaMetricTimeHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.syphr.lametrictime.api.local.model.Application;
-import org.syphr.lametrictime.api.local.model.Widget;
-import org.syphr.lametrictime.api.model.CoreApps;
 
 import com.google.gson.JsonPrimitive;
 

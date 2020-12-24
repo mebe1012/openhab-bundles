@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,10 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.paradoxalarm.internal.communication.IParadoxCommunicator;
 import org.openhab.binding.paradoxalarm.internal.exceptions.ParadoxRuntimeException;
 import org.openhab.binding.paradoxalarm.internal.handlers.ParadoxIP150BridgeHandler;
@@ -29,6 +25,10 @@ import org.openhab.binding.paradoxalarm.internal.model.ParadoxInformation;
 import org.openhab.binding.paradoxalarm.internal.model.ParadoxPanel;
 import org.openhab.binding.paradoxalarm.internal.model.Partition;
 import org.openhab.binding.paradoxalarm.internal.model.Zone;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class ParadoxDiscoveryService extends AbstractDiscoveryService {
             discoverPartitions(panel.getPartitions());
             discoverZones(panel.getZones());
         } else {
-            logger.debug("Communicator null or not online. Trace={}", new ParadoxRuntimeException());
+            logger.debug("Communicator null or not online. Trace:", new ParadoxRuntimeException());
         }
     }
 
@@ -111,5 +111,4 @@ public class ParadoxDiscoveryService extends AbstractDiscoveryService {
             thingDiscovered(result);
         });
     }
-
 }

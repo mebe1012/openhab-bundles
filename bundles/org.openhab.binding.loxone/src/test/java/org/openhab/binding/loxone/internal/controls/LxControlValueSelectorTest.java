@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,13 +14,13 @@ package org.openhab.binding.loxone.internal.controls;
 
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StopMoveType;
 
 /**
  * Test class for (@link LxControlValueSelector}
@@ -31,7 +31,7 @@ import org.junit.Test;
 public class LxControlValueSelectorTest extends LxControlTest {
     private static final String NUMBER_CHANNEL = " / Number";
 
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("432a7b7e-0022-3aac-ffff403fb0c34b9e", "0b734138-037d-034e-ffff403fb0c34b9e",
                 "0fe650c2-0004-d446-ffff504f9410790f", "Selection Switch");

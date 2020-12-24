@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,15 +14,14 @@ package org.openhab.binding.mihome.internal.handler;
 
 import static org.openhab.binding.mihome.internal.XiaomiGatewayBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.mihome.internal.ColorUtil;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,28 +127,6 @@ public class XiaomiActorGatewayHandler extends XiaomiActorBaseHandler {
     }
 
     @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        logger.debug("Update {} for channel {} received", newState, channelUID);
-        switch (channelUID.getId()) {
-            case CHANNEL_BRIGHTNESS:
-                if (newState instanceof PercentType) {
-                    lastBrigthness = ((PercentType) newState).intValue();
-                }
-                break;
-            case CHANNEL_COLOR:
-                if (newState instanceof HSBType) {
-                    lastColor = ((HSBType) newState).getRGB();
-                }
-                break;
-            case CHANNEL_GATEWAY_VOLUME:
-                if (newState instanceof DecimalType) {
-                    updateLastVolume((DecimalType) newState);
-                }
-                break;
-        }
-    }
-
-    @Override
     void parseReport(JsonObject data) {
         parseDefault(data);
     }
@@ -210,5 +187,4 @@ public class XiaomiActorGatewayHandler extends XiaomiActorBaseHandler {
     private void stopRingtone() {
         getXiaomiBridgeHandler().writeToBridge(new String[] { MID }, new Object[] { 10000 });
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,25 +22,24 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.plclogo.internal.PLCLogoClient;
 import org.openhab.binding.plclogo.internal.config.PLCDigitalConfiguration;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,18 +60,18 @@ public class PLCDigitalHandler extends PLCCommonHandler {
     private final Logger logger = LoggerFactory.getLogger(PLCDigitalHandler.class);
     private AtomicReference<PLCDigitalConfiguration> config = new AtomicReference<>();
 
-    private static final Map<String, @Nullable Integer> LOGO_BLOCKS_0BA7;
+    private static final Map<String, Integer> LOGO_BLOCKS_0BA7;
     static {
-        Map<String, @Nullable Integer> buffer = new HashMap<>();
+        Map<String, Integer> buffer = new HashMap<>();
         buffer.put(I_DIGITAL, 24); // 24 digital inputs
         buffer.put(Q_DIGITAL, 16); // 16 digital outputs
         buffer.put(M_DIGITAL, 27); // 27 digital markers
         LOGO_BLOCKS_0BA7 = Collections.unmodifiableMap(buffer);
     }
 
-    private static final Map<String, @Nullable Integer> LOGO_BLOCKS_0BA8;
+    private static final Map<String, Integer> LOGO_BLOCKS_0BA8;
     static {
-        Map<String, @Nullable Integer> buffer = new HashMap<>();
+        Map<String, Integer> buffer = new HashMap<>();
         buffer.put(I_DIGITAL, 24); // 24 digital inputs
         buffer.put(Q_DIGITAL, 20); // 20 digital outputs
         buffer.put(M_DIGITAL, 64); // 64 digital markers
@@ -81,9 +80,9 @@ public class PLCDigitalHandler extends PLCCommonHandler {
         LOGO_BLOCKS_0BA8 = Collections.unmodifiableMap(buffer);
     }
 
-    private static final Map<String, @Nullable Map<String, @Nullable Integer>> LOGO_BLOCK_NUMBER;
+    private static final Map<String, Map<String, Integer>> LOGO_BLOCK_NUMBER;
     static {
-        Map<String, @Nullable Map<String, @Nullable Integer>> buffer = new HashMap<>();
+        Map<String, Map<String, Integer>> buffer = new HashMap<>();
         buffer.put(LOGO_0BA7, LOGO_BLOCKS_0BA7);
         buffer.put(LOGO_0BA8, LOGO_BLOCKS_0BA8);
         LOGO_BLOCK_NUMBER = Collections.unmodifiableMap(buffer);
@@ -227,7 +226,7 @@ public class PLCDigitalHandler extends PLCCommonHandler {
         String family = getLogoFamily();
         logger.debug("Get block number of {} LOGO! for {} blocks.", family, kind);
 
-        Map<?, @Nullable Integer> blocks = LOGO_BLOCK_NUMBER.get(family);
+        Map<?, Integer> blocks = LOGO_BLOCK_NUMBER.get(family);
         Integer number = (blocks != null) ? blocks.get(kind) : null;
         return (number != null) ? number.intValue() : 0;
     }
@@ -321,5 +320,4 @@ public class PLCDigitalHandler extends PLCCommonHandler {
             logger.debug("Channel {} will not accept {} items.", channelUID, type);
         }
     }
-
 }

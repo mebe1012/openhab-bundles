@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,12 +14,12 @@ package org.openhab.binding.yeelight.internal.handler;
 
 import static org.openhab.binding.yeelight.internal.YeelightBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.yeelight.internal.YeelightBindingConstants;
 import org.openhab.binding.yeelight.internal.lib.device.DeviceStatus;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
 
 /**
  * The {@link YeelightCeilingHandler} is responsible for handling commands, which are

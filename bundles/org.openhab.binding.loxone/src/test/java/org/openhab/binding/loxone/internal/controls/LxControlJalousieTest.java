@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,13 +15,13 @@ package org.openhab.binding.loxone.internal.controls;
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
 
 /**
  * Test class for (@link LxControlJalousie}
@@ -35,7 +35,7 @@ public class LxControlJalousieTest extends LxControlTest {
     private static final String SHADE_CHANNEL = " / Shade";
     private static final String AUTO_SHADE_CHANNEL = " / Auto Shade";
 
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("0e367c09-0161-e2c1-ffff403fb0c34b9e", "0e368d32-014f-4604-ffff403fb0c34b9e",
                 "0b734138-033e-02d8-ffff403fb0c34b9e", "Window Blinds");
@@ -181,7 +181,7 @@ public class LxControlJalousieTest extends LxControlTest {
         changeLoxoneState("position", 0.80);
         testAction(null);
         changeLoxoneState("position", 1.00);
-        testAction("Stop");
+        testAction(null);
         changeLoxoneState("down", 0.0);
 
         executeCommand(ROLLERSHUTTER_CHANNEL, PercentType.ZERO);
@@ -191,7 +191,7 @@ public class LxControlJalousieTest extends LxControlTest {
         changeLoxoneState("position", 0.20);
         testAction(null);
         changeLoxoneState("position", 0.00);
-        testAction("Stop");
+        testAction(null);
         changeLoxoneState("up", 0.0);
     }
 }

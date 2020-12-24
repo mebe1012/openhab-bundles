@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,29 +14,29 @@ package org.openhab.binding.logreader.internal.handler;
 
 import static org.openhab.binding.logreader.internal.LogReaderBindingConstants.*;
 
-import java.util.Calendar;
+import java.time.ZonedDateTime;
 import java.util.regex.PatternSyntaxException;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.logreader.internal.config.LogReaderConfiguration;
 import org.openhab.binding.logreader.internal.filereader.api.FileReaderListener;
 import org.openhab.binding.logreader.internal.filereader.api.LogFileReader;
 import org.openhab.binding.logreader.internal.searchengine.SearchEngine;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link LogReaderHandler} is responsible for handling commands, which are
+ * The {@link LogHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Miika Jukka - Initial contribution
@@ -80,10 +80,15 @@ public class LogHandler extends BaseThingHandler implements FileReaderListener {
 
     @Override
     public void initialize() {
-        configuration = getConfigAs(LogReaderConfiguration.class);
+        String logDir = System.getProperty("openhab.logdir");
+        if (logDir == null) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Cannot determine system log directory.");
+            return;
+        }
 
-        configuration.filePath = configuration.filePath.replaceFirst("\\$\\{OPENHAB_LOGDIR\\}",
-                System.getProperty("openhab.logdir"));
+        configuration = getConfigAs(LogReaderConfiguration.class);
+        configuration.filePath = configuration.filePath.replaceFirst("\\$\\{OPENHAB_LOGDIR\\}", logDir);
 
         logger.debug("Using configuration: {}", configuration);
 
@@ -104,7 +109,7 @@ public class LogHandler extends BaseThingHandler implements FileReaderListener {
 
         try {
             fileReader.registerListener(this);
-            fileReader.start(configuration.filePath, configuration.refreshRate, scheduler);
+            fileReader.start(configuration.filePath, configuration.refreshRate);
             updateStatus(ThingStatus.ONLINE);
         } catch (Exception e) {
             logger.debug("Exception occurred during initalization: {}. ", e.getMessage(), e);
@@ -162,7 +167,7 @@ public class LogHandler extends BaseThingHandler implements FileReaderListener {
     @Override
     public void fileRotated() {
         logger.debug("Log rotated");
-        updateChannelIfLinked(CHANNEL_LOGROTATED, new DateTimeType(Calendar.getInstance()));
+        updateChannelIfLinked(CHANNEL_LOGROTATED, new DateTimeType(ZonedDateTime.now()));
     }
 
     @Override

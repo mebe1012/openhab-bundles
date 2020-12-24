@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,15 +24,14 @@ import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.neeo.internal.NeeoConstants;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Tim Roberts - initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true)
+@Component
 public class NeeoBrainDiscovery implements MDNSDiscoveryParticipant {
 
     /** The logger */
@@ -100,7 +99,7 @@ public class NeeoBrainDiscovery implements MDNSDiscoveryParticipant {
         }
 
         logger.debug("getThingUID is evaluating: {}", service);
-        if (!StringUtils.equals("neeo", service.getApplication())) {
+        if (!"neeo".equals(service.getApplication())) {
             logger.debug("Application not 'neeo' in MDNS serviceinfo: {}", service);
             return null;
         }
@@ -158,5 +157,4 @@ public class NeeoBrainDiscovery implements MDNSDiscoveryParticipant {
         }
         return null;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,20 +19,20 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.profiles.Profile;
-import org.eclipse.smarthome.core.thing.profiles.ProfileAdvisor;
-import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
-import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
-import org.eclipse.smarthome.core.thing.profiles.ProfileFactory;
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeBuilder;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.profiles.Profile;
+import org.openhab.core.thing.profiles.ProfileAdvisor;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.thing.profiles.ProfileFactory;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeBuilder;
+import org.openhab.core.thing.profiles.ProfileTypeProvider;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -111,5 +111,4 @@ public class LeapMotionProfileFactory implements ProfileFactory, ProfileAdvisor,
             return null;
         }
     }
-
 }

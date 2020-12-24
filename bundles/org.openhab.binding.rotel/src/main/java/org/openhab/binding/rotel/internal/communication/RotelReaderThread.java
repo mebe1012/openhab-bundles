@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,8 +38,10 @@ public class RotelReaderThread extends Thread {
      * Constructor
      *
      * @param connector the object that should handle the received message
+     * @param threadName the name of the thread
      */
-    public RotelReaderThread(RotelConnector connector) {
+    public RotelReaderThread(RotelConnector connector, String threadName) {
+        super(threadName);
         this.connector = connector;
     }
 

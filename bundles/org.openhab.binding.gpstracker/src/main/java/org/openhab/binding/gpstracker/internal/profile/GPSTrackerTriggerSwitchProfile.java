@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,13 @@
 package org.openhab.binding.gpstracker.internal.profile;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
-import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.gpstracker.internal.config.ConfigHelper;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.TriggerProfile;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

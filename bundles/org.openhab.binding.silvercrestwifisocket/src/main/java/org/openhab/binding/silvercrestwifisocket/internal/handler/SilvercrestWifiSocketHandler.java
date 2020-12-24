@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,15 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.silvercrestwifisocket.internal.SilvercrestWifiSocketBindingConstants;
 import org.openhab.binding.silvercrestwifisocket.internal.entities.SilvercrestWifiSocketRequest;
 import org.openhab.binding.silvercrestwifisocket.internal.entities.SilvercrestWifiSocketResponse;
@@ -42,6 +33,15 @@ import org.openhab.binding.silvercrestwifisocket.internal.exceptions.MacAddressN
 import org.openhab.binding.silvercrestwifisocket.internal.utils.NetworkUtils;
 import org.openhab.binding.silvercrestwifisocket.internal.utils.ValidationUtils;
 import org.openhab.binding.silvercrestwifisocket.internal.utils.WifiSocketPacketConverter;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -353,7 +353,6 @@ public class SilvercrestWifiSocketHandler extends BaseThingHandler {
             logger.error("The Mac address passed is not valid! {}", e.getMacAddress());
             this.updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
         }
-
     }
 
     /**

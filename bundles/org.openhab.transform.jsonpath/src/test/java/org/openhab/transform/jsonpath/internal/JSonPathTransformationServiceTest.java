@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,11 @@
  */
 package org.openhab.transform.jsonpath.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.transform.TransformationException;
 
 /**
  * @author Gaël L'hopital
@@ -26,20 +25,19 @@ public class JSonPathTransformationServiceTest {
 
     private JSonPathTransformationService processor;
 
-    @Before
+    @BeforeEach
     public void init() {
         processor = new JSonPathTransformationService();
     }
 
     @Test
     public void testTransformByJSon() throws TransformationException {
-
         String json = "{'store':{'book':[{'category':'reference','author':'Nigel Rees','title': 'Sayings of the Century', 'price': 8.95  } ],  'bicycle': { 'color': 'red',  'price': 19.95} }}";
         // method under test
         String transformedResponse = processor.transform("$.store.book[0].author", json);
 
         // Asserts
-        Assert.assertEquals("Nigel Rees", transformedResponse);
+        assertEquals("Nigel Rees", transformedResponse);
     }
 
     private static final String jsonArray = "[" + //
@@ -59,19 +57,19 @@ public class JSonPathTransformationServiceTest {
         assertEquals("2", transformedResponse);
     }
 
-    @Test(expected = TransformationException.class)
-    public void testInvalidPathThrowsException() throws TransformationException {
-        processor.transform("$$", jsonArray);
+    @Test
+    public void testInvalidPathThrowsException() {
+        assertThrows(TransformationException.class, () -> processor.transform("$$", jsonArray));
     }
 
-    @Test(expected = TransformationException.class)
-    public void testPathMismatchReturnNull() throws TransformationException {
-        processor.transform("$[5].id", jsonArray);
+    @Test
+    public void testPathMismatchReturnNull() {
+        assertThrows(TransformationException.class, () -> processor.transform("$[5].id", jsonArray));
     }
 
-    @Test(expected = TransformationException.class)
+    @Test
     public void testInvalidJsonReturnNull() throws TransformationException {
-        processor.transform("$", "{id:");
+        assertThrows(TransformationException.class, () -> processor.transform("$", "{id:"));
     }
 
     @Test

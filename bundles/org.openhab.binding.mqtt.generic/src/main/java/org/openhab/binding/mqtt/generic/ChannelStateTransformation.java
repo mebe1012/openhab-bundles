@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,8 @@ import java.lang.ref.WeakReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class ChannelStateTransformation {
     /**
      * Creates a new channel state transformer.
      *
-     * @param type A transformation service name.
+     * @param serviceName A transformation service name.
      * @param pattern A transformation. An Example:
      *            $.device.status.temperature for a json {device: {status: {
      *            temperature: 23.2 }}} (for type <code>JSONPATH</code>).
@@ -76,7 +76,7 @@ public class ChannelStateTransformation {
      * @param value The incoming value
      * @return The transformed value
      */
-    protected String processValue(String value) {
+    protected @Nullable String processValue(String value) {
         TransformationService transformationService = this.transformationService.get();
         if (transformationService == null) {
             transformationService = provider.getTransformationService(serviceName);
@@ -86,12 +86,12 @@ public class ChannelStateTransformation {
             }
             this.transformationService = new WeakReference<>(transformationService);
         }
-        String temp = null;
+        String returnValue = null;
         try {
-            temp = transformationService.transform(pattern, value);
+            returnValue = transformationService.transform(pattern, value);
         } catch (TransformationException e) {
             logger.warn("Executing the {}-transformation failed: {}", serviceName, e.getMessage());
         }
-        return (temp != null) ? temp : value;
+        return returnValue;
     }
 }

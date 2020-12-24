@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,18 +17,6 @@ import java.net.UnknownHostException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.sinope.SinopeBindingConstants;
 import org.openhab.binding.sinope.internal.config.SinopeConfig;
 import org.openhab.binding.sinope.internal.core.SinopeDataReadRequest;
@@ -40,6 +28,18 @@ import org.openhab.binding.sinope.internal.core.appdata.SinopeSetPointModeData;
 import org.openhab.binding.sinope.internal.core.appdata.SinopeSetPointTempData;
 import org.openhab.binding.sinope.internal.core.base.SinopeDataAnswer;
 import org.openhab.binding.sinope.internal.util.ByteUtil;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,11 +108,9 @@ public class SinopeThermostatHandler extends BaseThingHandler {
         } finally {
             getSinopeGatewayHandler().schedulePoll();
         }
-
     }
 
     private void setSetpointMode(int mode) throws UnknownHostException, IOException {
-
         getSinopeGatewayHandler().stopPoll();
         try {
             if (getSinopeGatewayHandler().connectToBridge()) {
@@ -267,6 +265,7 @@ public class SinopeThermostatHandler extends BaseThingHandler {
         if (handler != null) {
             handler.registerThermostatHandler(this);
         }
+        updateStatus(ThingStatus.ONLINE);
     }
 
     private @Nullable SinopeGatewayHandler getSinopeGatewayHandler() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,24 +12,24 @@
  */
 package org.openhab.binding.gpstracker.internal.discovery;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.gpstracker.internal.GPSTrackerBindingConstants;
-import org.openhab.binding.gpstracker.internal.config.ConfigHelper;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.gpstracker.internal.GPSTrackerBindingConstants;
+import org.openhab.binding.gpstracker.internal.config.ConfigHelper;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 
 /**
  * The {@link TrackerDiscoveryService} class provides discovery service for the binding to discover trackers. Discovery
@@ -39,7 +39,8 @@ import java.util.Set;
  * @author Gabor Bicskei - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { DiscoveryService.class, TrackerDiscoveryService.class }, immediate = true, configurationPid = "discovery.gpstracker")
+@Component(service = { DiscoveryService.class,
+        TrackerDiscoveryService.class }, configurationPid = "discovery.gpstracker")
 public class TrackerDiscoveryService extends AbstractDiscoveryService {
     /**
      * Discovery timeout
@@ -96,21 +97,20 @@ public class TrackerDiscoveryService extends AbstractDiscoveryService {
         ThingUID id = new ThingUID(GPSTrackerBindingConstants.THING_TYPE_TRACKER, trackerId);
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(id)
                 .withProperty(ConfigHelper.CONFIG_TRACKER_ID, trackerId)
-                .withThingType(GPSTrackerBindingConstants.THING_TYPE_TRACKER)
-                .withLabel("GPS Tracker " + trackerId)
+                .withThingType(GPSTrackerBindingConstants.THING_TYPE_TRACKER).withLabel("GPS Tracker " + trackerId)
                 .build();
         this.thingDiscovered(discoveryResult);
     }
 
     @Override
     @Activate
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
     }
 
     @Override
     @Modified
-    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         super.modified(configProperties);
     }
 

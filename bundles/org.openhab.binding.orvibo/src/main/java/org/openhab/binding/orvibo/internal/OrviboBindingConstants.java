@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.orvibo.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link OrviboBindingConstants} class defines common constants, which are
@@ -34,5 +34,4 @@ public class OrviboBindingConstants {
 
     // List of all Config properties
     public static final String CONFIG_PROPERTY_DEVICE_ID = "deviceId";
-
 }

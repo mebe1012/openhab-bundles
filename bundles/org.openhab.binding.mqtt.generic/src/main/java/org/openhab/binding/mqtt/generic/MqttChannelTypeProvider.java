@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,21 +19,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
 import org.openhab.binding.mqtt.generic.internal.MqttThingHandlerFactory;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelGroupTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -65,32 +64,32 @@ public class MqttChannelTypeProvider implements ThingTypeProvider, ChannelGroupT
     }
 
     @Override
-    public @Nullable Collection<@NonNull ChannelType> getChannelTypes(@Nullable Locale locale) {
+    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return types.values();
     }
 
     @Override
-    public @Nullable ChannelType getChannelType(@NonNull ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
+    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         return types.get(channelTypeUID);
     }
 
     @Override
-    public @Nullable ChannelGroupType getChannelGroupType(@NonNull ChannelGroupTypeUID channelGroupTypeUID,
+    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
             @Nullable Locale locale) {
         return groups.get(channelGroupTypeUID);
     }
 
     @Override
-    public @Nullable Collection<@NonNull ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
+    public Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return groups.values();
     }
 
     @Override
-    public Collection<@NonNull ThingType> getThingTypes(@Nullable Locale locale) {
+    public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
         return things.values();
     }
 
-    public Set<@NonNull ThingTypeUID> getThingTypeUIDs() {
+    public Set<ThingTypeUID> getThingTypeUIDs() {
         return things.keySet();
     }
 

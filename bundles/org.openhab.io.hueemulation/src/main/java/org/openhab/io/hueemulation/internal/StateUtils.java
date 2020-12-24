@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,13 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.openhab.io.hueemulation.internal.dto.AbstractHueState;
 import org.openhab.io.hueemulation.internal.dto.HueStateBulb;
 import org.openhab.io.hueemulation.internal.dto.HueStateColorBulb;
@@ -156,7 +156,6 @@ public class StateUtils {
      */
     public static @Nullable Command computeCommandByState(List<HueResponse> responses, String prefix,
             AbstractHueState state, HueStateChange newState) {
-
         // Apply new state and collect success, error items
         Map<String, Object> successApplied = new TreeMap<>();
         List<String> errorApplied = new ArrayList<>();
@@ -198,7 +197,6 @@ public class StateUtils {
         }
 
         if (newState.sat != null) {
-
             try {
                 HueStateColorBulb c = state.as(HueStateColorBulb.class);
                 c.sat = newState.sat;
@@ -261,7 +259,7 @@ public class StateUtils {
         if (newState.ct != null) {
             try {
                 // We can't do anything here with a white color temperature.
-                // The core ESH color type does not support setting it.
+                // The color type does not support setting it.
 
                 // Adjusting the color temperature implies setting the mode to ct
                 if (state instanceof HueStateColorBulb) {
@@ -281,7 +279,7 @@ public class StateUtils {
         if (newState.ct_inc != null) {
             try {
                 // We can't do anything here with a white color temperature.
-                // The core ESH color type does not support setting it.
+                // The color type does not support setting it.
 
                 // Adjusting the color temperature implies setting the mode to ct
                 if (state instanceof HueStateColorBulb) {
@@ -394,23 +392,73 @@ public class StateUtils {
         if (t == null) {
             switch (type) {
                 case CoreItemFactory.COLOR:
-                    if (cs.colorFilter.size() == 0) {
+                    if (cs.colorFilter.isEmpty()) {
                         t = DeviceType.ColorType;
                     }
                     break;
                 case CoreItemFactory.DIMMER:
                 case CoreItemFactory.ROLLERSHUTTER:
-                    if (cs.whiteFilter.size() == 0) {
+                    if (cs.whiteFilter.isEmpty()) {
                         t = DeviceType.WhiteTemperatureType;
                     }
                     break;
                 case CoreItemFactory.SWITCH:
-                    if (cs.switchFilter.size() == 0) {
+                    if (cs.switchFilter.isEmpty()) {
                         t = DeviceType.SwitchType;
                     }
                     break;
             }
         }
         return t;
+    }
+
+    /**
+     * Compute the hue state from a given item state and a device type.
+     * If the item state matches the last command. the hue state is adjusted
+     * to use the values from the last hue state change. This is done to prevent
+     * Alexa reporting device errors.
+     *
+     * @param itemState The item state
+     * @param deviceType The device type
+     * @param lastCommand The last command
+     * @param lastHueChange The last hue state change
+     * @return A hue light state
+     */
+    public static AbstractHueState adjustedColorStateFromItemState(State itemState, @Nullable DeviceType deviceType,
+            @Nullable Command lastCommand, @Nullable HueStateChange lastHueChange) {
+        AbstractHueState hueState = colorStateFromItemState(itemState, deviceType);
+
+        if (lastCommand != null && lastHueChange != null) {
+            if (lastCommand instanceof HSBType) {
+                if (hueState instanceof HueStateColorBulb && itemState.as(HSBType.class).equals(lastCommand)) {
+                    HueStateColorBulb c = (HueStateColorBulb) hueState;
+
+                    if (lastHueChange.bri != null) {
+                        c.bri = lastHueChange.bri;
+                    }
+                    if (lastHueChange.hue != null) {
+                        c.hue = lastHueChange.hue;
+                    }
+                    if (lastHueChange.sat != null) {
+                        c.sat = lastHueChange.sat;
+                    }
+                    // Although we can't set a colour temperature in OH
+                    // this keeps Alexa happy when asking to turn a light
+                    // to white.
+                    if (lastHueChange.ct != null) {
+                        c.ct = lastHueChange.ct;
+                    }
+                }
+            } else if (lastCommand instanceof PercentType) {
+                if (hueState instanceof HueStateBulb && itemState != null
+                        && lastCommand.equals(itemState.as(PercentType.class))) {
+                    if (lastHueChange.bri != null) {
+                        ((HueStateBulb) hueState).bri = lastHueChange.bri;
+                    }
+                }
+            }
+        }
+
+        return hueState;
     }
 }

@@ -9,6 +9,7 @@
 				"property": "power",
 				"friendlyName": "Power",
 				"channel": "power",
+				"channelType": "power",
 				"type": "Switch",
 				"refresh": true,
 				"ChannelGroup": "",
@@ -23,13 +24,24 @@
 				"property": "bright",
 				"friendlyName": "Brightness",
 				"channel": "brightness",
-				"type": "Number",
+				"channelType": "brightness",
+				"type": "Dimmer",
 				"refresh": true,
 				"ChannelGroup": "actions",
 				"actions": [
 					{
 						"command": "set_bright",
-						"parameterType": "NUMBER"
+						"parameterType": "NUMBER",
+						"condition": {
+							"name": "BrightnessExisting"
+						}
+					},
+					{
+						"command": "set_power",
+						"parameterType": "ONOFF",
+						"condition": {
+							"name": "BrightnessOnOff"
+						}
 					}
 				]
 			},
@@ -37,7 +49,8 @@
 				"property": "cct",
 				"friendlyName": "Correlated Color Temperature",
 				"channel": "cct",
-				"type": "Number",
+				"channelType": "cct",
+				"type": "Dimmer",
 				"refresh": true,
 				"ChannelGroup": "actions",
 				"actions": [
@@ -51,6 +64,7 @@
 				"property": "snm",
 				"friendlyName": "Scene",
 				"channel": "scene",
+				"channelType": "scene",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "actions",

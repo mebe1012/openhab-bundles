@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,16 +13,17 @@
 package org.openhab.binding.volvooncall.internal.wrapper;
 
 import java.time.ZoneId;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.volvooncall.internal.dto.Position;
 import org.openhab.binding.volvooncall.internal.dto.PositionData;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * The {@link VehiclePositionWrapper} stores provides utility functions
@@ -32,39 +33,38 @@ import org.openhab.binding.volvooncall.internal.dto.PositionData;
  */
 @NonNullByDefault
 public class VehiclePositionWrapper {
-    private final Position vehicle;
+    private final Optional<PositionData> position;
+    private boolean isCalculated;
 
     public VehiclePositionWrapper(Position vehicle) {
-        this.vehicle = vehicle;
+        if (vehicle.calculatedPosition != null && vehicle.position.latitude != null) {
+            position = Optional.of(vehicle.position);
+            isCalculated = false;
+        } else if (vehicle.calculatedPosition != null && vehicle.calculatedPosition.latitude != null) {
+            position = Optional.of(vehicle.calculatedPosition);
+            isCalculated = true;
+        } else {
+            position = Optional.empty();
+        }
     }
 
     private State getPositionAsState(PositionData details) {
         if (details.latitude != null && details.longitude != null) {
             return new PointType(details.latitude + "," + details.longitude);
-        } else {
-            return UnDefType.NULL;
         }
+        return UnDefType.NULL;
     }
 
     public State getPosition() {
-        if (vehicle.position.latitude != null) {
-            return getPositionAsState(vehicle.position);
-        } else if (vehicle.calculatedPosition.latitude != null) {
-            return getPositionAsState(vehicle.calculatedPosition);
-        } else {
-            return UnDefType.NULL;
-        }
+        return position.map(pos -> getPositionAsState(pos)).orElse(UnDefType.UNDEF);
     }
 
     public @Nullable String getPositionAsJSon() {
-        PositionData details = vehicle.position;
-        if (details != null && details.latitude != null && details.longitude != null) {
-            StringBuilder json = new StringBuilder();
-
-            json.append("{\"clientLatitude\":");
-            json.append(details.latitude);
+        if (getPosition() != UnDefType.UNDEF) {
+            StringBuilder json = new StringBuilder("{\"clientLatitude\":");
+            json.append(position.get().latitude);
             json.append(",\"clientLongitude\":");
-            json.append(details.longitude);
+            json.append(position.get().longitude);
             json.append(",\"clientAccuracy\":0}");
 
             return json.toString();
@@ -73,19 +73,16 @@ public class VehiclePositionWrapper {
     }
 
     public State isCalculated() {
-        return vehicle.calculatedPosition.latitude != null ? OnOffType.ON : OnOffType.OFF;
+        return position.map(pos -> isCalculated ? (State) OnOffType.ON : OnOffType.OFF).orElse(UnDefType.UNDEF);
     }
 
     public State isHeading() {
-        return (vehicle.position.isHeading() || vehicle.calculatedPosition.isHeading()) ? OnOffType.ON : OnOffType.OFF;
+        return position.map(pos -> pos.isHeading() ? (State) OnOffType.ON : OnOffType.OFF).orElse(UnDefType.UNDEF);
     }
 
     public State getTimestamp() {
-        return vehicle.position.timestamp != null
-                ? new DateTimeType(vehicle.position.timestamp.withZoneSameInstant(ZoneId.systemDefault()))
-                : vehicle.calculatedPosition.timestamp != null
-                        ? new DateTimeType(
-                                vehicle.calculatedPosition.timestamp.withZoneSameInstant(ZoneId.systemDefault()))
-                        : UnDefType.NULL;
+        return position.flatMap(pos -> pos.getTimestamp())
+                .map(dt -> (State) new DateTimeType(dt.withZoneSameInstant(ZoneId.systemDefault())))
+                .orElse(UnDefType.NULL);
     }
 }

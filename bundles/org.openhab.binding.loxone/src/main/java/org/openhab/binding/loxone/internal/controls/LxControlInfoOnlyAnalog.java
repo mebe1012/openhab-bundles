@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,11 +14,12 @@ package org.openhab.binding.loxone.internal.controls;
 
 import static org.openhab.binding.loxone.internal.LxBindingConstants.*;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.StateDescription;
 import org.openhab.binding.loxone.internal.types.LxCategory;
+import org.openhab.binding.loxone.internal.types.LxTags;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  * An InfoOnlyAnalog type of control on Loxone Miniserver.
@@ -57,7 +58,7 @@ class LxControlInfoOnlyAnalog extends LxControl {
         super.initialize(config);
         LxCategory category = getCategory();
         if (category != null && category.getType() == LxCategory.CategoryType.TEMPERATURE) {
-            tags.add("CurrentTemperature");
+            tags.addAll(LxTags.TEMPERATURE);
         }
         ChannelUID cid = addChannel("Number", new ChannelTypeUID(BINDING_ID, MINISERVER_CHANNEL_TYPE_RO_ANALOG),
                 defaultChannelLabel, "Analog virtual state", tags, null, () -> getStateDecimalValue(STATE_VALUE));
@@ -67,6 +68,7 @@ class LxControlInfoOnlyAnalog extends LxControl {
         } else {
             format = "%.1f";
         }
-        addChannelStateDescription(cid, new StateDescription(null, null, null, format, true, null));
+        addChannelStateDescriptionFragment(cid,
+                StateDescriptionFragmentBuilder.create().withPattern(format).withReadOnly(true).build());
     }
 }

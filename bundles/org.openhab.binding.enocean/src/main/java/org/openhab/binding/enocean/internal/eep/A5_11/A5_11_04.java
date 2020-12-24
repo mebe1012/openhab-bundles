@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,18 +16,18 @@ import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.*;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.openhab.binding.enocean.internal.eep.EEPHelper;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
+import org.openhab.binding.enocean.internal.eep.EEPHelper;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +135,7 @@ public class A5_11_04 extends _4BSMessage {
 
             return new QuantityType<>(
                     Long.parseLong(HexUtils.bytesToHex(new byte[] { getDB_3(), getDB_2() }), 16) * factor,
-                    SmartHomeUnits.KILOWATT_HOUR);
+                    Units.KILOWATT_HOUR);
         }
 
         return UnDefType.UNDEF;
@@ -163,8 +163,7 @@ public class A5_11_04 extends _4BSMessage {
             }
 
             return new QuantityType<>(
-                    Long.parseLong(HexUtils.bytesToHex(new byte[] { getDB_3(), getDB_2() }), 16) * factor,
-                    SmartHomeUnits.WATT);
+                    Long.parseLong(HexUtils.bytesToHex(new byte[] { getDB_3(), getDB_2() }), 16) * factor, Units.WATT);
         }
 
         return UnDefType.UNDEF;
@@ -179,8 +178,8 @@ public class A5_11_04 extends _4BSMessage {
     }
 
     @Override
-    protected State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc,
-            Configuration config) {
+    protected State convertToStateImpl(String channelId, String channelTypeId,
+            Function<String, State> getCurrentStateFunc, Configuration config) {
         if (isErrorState()) {
             return UnDefType.UNDEF;
         }

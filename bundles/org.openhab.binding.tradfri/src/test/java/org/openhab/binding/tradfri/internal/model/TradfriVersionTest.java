@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,19 @@
  */
 package org.openhab.binding.tradfri.internal.model;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.openhab.binding.tradfri.internal.model.TradfriVersion;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link TradfriVersion}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class TradfriVersionTest {
 
     private static final int LESS_THAN = -1;
@@ -33,9 +34,9 @@ public class TradfriVersionTest {
     private static final String VERSION_STRING = "1.2.42";
     private static final TradfriVersion VERSION = new TradfriVersion(VERSION_STRING);
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIllegalArgumentException() throws IllegalArgumentException {
-        new TradfriVersion("FAILURE");
+        assertThrows(IllegalArgumentException.class, () -> new TradfriVersion("FAILURE"));
     }
 
     @Test

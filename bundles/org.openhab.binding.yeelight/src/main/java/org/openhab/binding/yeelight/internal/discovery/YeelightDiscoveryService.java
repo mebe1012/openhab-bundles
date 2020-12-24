@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,17 @@
  */
 package org.openhab.binding.yeelight.internal.discovery;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.yeelight.internal.YeelightBindingConstants;
 import org.openhab.binding.yeelight.internal.YeelightHandlerFactory;
 import org.openhab.binding.yeelight.internal.lib.device.DeviceBase;
 import org.openhab.binding.yeelight.internal.lib.listeners.DeviceListener;
 import org.openhab.binding.yeelight.internal.lib.services.DeviceManager;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Coaster Li - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.yeelight")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.yeelight")
 public class YeelightDiscoveryService extends AbstractDiscoveryService implements DeviceListener {
 
     private final Logger logger = LoggerFactory.getLogger(YeelightDiscoveryService.class.getSimpleName());
@@ -85,11 +85,12 @@ public class YeelightDiscoveryService extends AbstractDiscoveryService implement
     private ThingUID getThingUID(DeviceBase device) {
         switch (device.getDeviceType()) {
             case ceiling:
-                return new ThingUID(YeelightBindingConstants.THING_TYPE_CEILING, device.getDeviceId());
-            case ceiling1:
-                return new ThingUID(YeelightBindingConstants.THING_TYPE_CEILING, device.getDeviceId());
             case ceiling3:
                 return new ThingUID(YeelightBindingConstants.THING_TYPE_CEILING, device.getDeviceId());
+            case ceiling1:
+                return new ThingUID(YeelightBindingConstants.THING_TYPE_CEILING1, device.getDeviceId());
+            case ceiling4:
+                return new ThingUID(YeelightBindingConstants.THING_TYPE_CEILING4, device.getDeviceId());
             case color:
                 return new ThingUID(YeelightBindingConstants.THING_TYPE_WONDER, device.getDeviceId());
             case mono:
@@ -113,6 +114,8 @@ public class YeelightDiscoveryService extends AbstractDiscoveryService implement
                 return YeelightBindingConstants.THING_TYPE_CEILING1;
             case ceiling3:
                 return YeelightBindingConstants.THING_TYPE_CEILING3;
+            case ceiling4:
+                return YeelightBindingConstants.THING_TYPE_CEILING4;
             case color:
                 return YeelightBindingConstants.THING_TYPE_WONDER;
             case mono:

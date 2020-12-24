@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,52 +13,48 @@
 package org.openhab.binding.mqtt.handler;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
-import org.eclipse.smarthome.io.transport.mqtt.MqttException;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.openhab.binding.mqtt.handler.AbstractBrokerHandler;
-import org.openhab.binding.mqtt.handler.SystemBrokerHandler;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.mqtt.internal.MqttThingID;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttException;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
 import org.osgi.service.cm.ConfigurationException;
 
 /**
- * Tests cases for {@link AbstractBrokerHandler}.
+ * Tests cases for {@link org.openhab.binding.mqtt.handler.AbstractBrokerHandler}.
  *
  * @author David Graeff - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class AbstractBrokerHandlerTest {
     private final String HOST = "tcp://123.1.2.3";
     private final int PORT = 80;
     private SystemBrokerHandler handler;
     int stateChangeCounter = 0;
 
-    @Mock
-    private ThingHandlerCallback callback;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock Bridge thing;
+    private @Mock MqttService service;
 
-    @Mock
-    private Bridge thing;
-
-    @Mock
-    private MqttService service;
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        doReturn(MqttThingID.getThingUID(HOST, PORT)).when(thing).getUID();
         doReturn(new Configuration(Collections.singletonMap("brokerid", MqttThingID.getThingUID(HOST, PORT).getId())))
                 .when(thing).getConfiguration();
         handler = new SystemBrokerHandler(thing, service);
@@ -70,7 +66,6 @@ public class AbstractBrokerHandlerTest {
     @Test
     public void brokerAddedWrongID() throws ConfigurationException, MqttException {
         MqttBrokerConnection brokerConnection = mock(MqttBrokerConnection.class);
-        when(brokerConnection.connectionState()).thenReturn(MqttConnectionState.CONNECTED);
         handler.brokerAdded("nonsense_id", brokerConnection);
         assertNull(handler.connection);
         // We do not expect a status change, because brokerAdded will do nothing with invalid connections.
@@ -91,7 +86,6 @@ public class AbstractBrokerHandlerTest {
     public void brokerAdded() throws ConfigurationException, MqttException {
         MqttBrokerConnectionEx connection = spy(
                 new MqttBrokerConnectionEx("10.10.0.10", 80, false, "BrokerHandlerTest"));
-        doReturn(connection).when(service).getBrokerConnection(eq(handler.brokerID));
 
         verify(callback, times(0)).statusUpdated(any(), any());
         handler.brokerAdded(handler.brokerID, connection);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.darksky.internal.handler;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.*;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.*;
-import static org.eclipse.smarthome.core.library.unit.SmartHomeUnits.*;
 import static org.openhab.binding.darksky.internal.DarkSkyBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.*;
+import static org.openhab.core.library.unit.SIUnits.*;
+import static org.openhab.core.library.unit.Units.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -35,33 +35,8 @@ import java.util.regex.Pattern;
 
 import javax.measure.Unit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelGroupUID;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.darksky.internal.config.DarkSkyChannelConfiguration;
 import org.openhab.binding.darksky.internal.config.DarkSkyWeatherAndForecastConfiguration;
 import org.openhab.binding.darksky.internal.connection.DarkSkyCommunicationException;
@@ -72,6 +47,30 @@ import org.openhab.binding.darksky.internal.model.DarkSkyDailyData.DailyData;
 import org.openhab.binding.darksky.internal.model.DarkSkyHourlyData.HourlyData;
 import org.openhab.binding.darksky.internal.model.DarkSkyJsonWeatherData;
 import org.openhab.binding.darksky.internal.model.DarkSkyJsonWeatherData.AlertsData;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelGroupUID;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +127,7 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
         DarkSkyWeatherAndForecastConfiguration config = getConfigAs(DarkSkyWeatherAndForecastConfiguration.class);
 
         boolean configValid = true;
-        if (StringUtils.trimToNull(config.location) == null) {
+        if (config.location == null || config.location.trim().isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-missing-location");
             configValid = false;
@@ -137,9 +136,10 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
         try {
             location = new PointType(config.location);
         } catch (IllegalArgumentException e) {
-            location = null;
+            logger.warn("Error parsing 'location' parameter: {}", e.getMessage());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-parsing-location");
+            location = null;
             configValid = false;
         }
 
@@ -394,6 +394,7 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
                     updateAlertsChannel(channelUID, i);
                     break;
                 }
+                logger.warn("Unknown channel group '{}'. Cannot update channel '{}'.", channelGroupId, channelUID);
                 break;
         }
     }
@@ -424,6 +425,9 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
                     break;
                 case CHANNEL_TEMPERATURE:
                     state = getQuantityTypeState(currentData.getTemperature(), CELSIUS);
+                    break;
+                case CHANNEL_APPARENT_TEMPERATURE:
+                    state = getQuantityTypeState(currentData.getApparentTemperature(), CELSIUS);
                     break;
                 case CHANNEL_PRESSURE:
                     state = getQuantityTypeState(currentData.getPressure(), HECTO(PASCAL));
@@ -512,6 +516,9 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
                 case CHANNEL_TEMPERATURE:
                     state = getQuantityTypeState(forecastData.getTemperature(), CELSIUS);
                     break;
+                case CHANNEL_APPARENT_TEMPERATURE:
+                    state = getQuantityTypeState(forecastData.getApparentTemperature(), CELSIUS);
+                    break;
                 case CHANNEL_PRESSURE:
                     state = getQuantityTypeState(forecastData.getPressure(), HECTO(PASCAL));
                     break;
@@ -599,6 +606,12 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
                 case CHANNEL_MAX_TEMPERATURE:
                     state = getQuantityTypeState(forecastData.getTemperatureMax(), CELSIUS);
                     break;
+                case CHANNEL_MIN_APPARENT_TEMPERATURE:
+                    state = getQuantityTypeState(forecastData.getApparentTemperatureMin(), CELSIUS);
+                    break;
+                case CHANNEL_MAX_APPARENT_TEMPERATURE:
+                    state = getQuantityTypeState(forecastData.getApparentTemperatureMax(), CELSIUS);
+                    break;
                 case CHANNEL_PRESSURE:
                     state = getQuantityTypeState(forecastData.getPressure(), HECTO(PASCAL));
                     break;
@@ -678,9 +691,10 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
     private void updateAlertsChannel(ChannelUID channelUID, int count) {
         String channelId = channelUID.getIdWithoutGroup();
         String channelGroupId = channelUID.getGroupId();
-        if (weatherData != null && weatherData.getAlerts() != null && weatherData.getAlerts().size() > count) {
-            AlertsData alertsData = weatherData.getAlerts().get(count - 1);
-            State state = UnDefType.UNDEF;
+        List<AlertsData> alerts = weatherData != null ? weatherData.getAlerts() : null;
+        State state = UnDefType.UNDEF;
+        if (alerts != null && alerts.size() > count) {
+            AlertsData alertsData = alerts.get(count - 1);
             switch (channelId) {
                 case CHANNEL_ALERT_TITLE:
                     state = getStringTypeState(alertsData.title);
@@ -702,10 +716,10 @@ public class DarkSkyWeatherAndForecastHandler extends BaseThingHandler {
                     break;
             }
             logger.debug("Update channel '{}' of group '{}' with new state '{}'.", channelId, channelGroupId, state);
-            updateState(channelUID, state);
         } else {
             logger.debug("No data available to update channel '{}' of group '{}'.", channelId, channelGroupId);
         }
+        updateState(channelUID, state);
     }
 
     private State getDateTimeTypeState(int value) {

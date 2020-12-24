@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,31 +12,28 @@
  */
 package org.openhab.binding.onewire.internal.device;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.MILLI;
 import static org.openhab.binding.onewire.internal.OwBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.MILLI;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.ElectricCurrent;
-import javax.measure.quantity.ElectricPotential;
-import javax.measure.quantity.Illuminance;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.SensorId;
 import org.openhab.binding.onewire.internal.Util;
 import org.openhab.binding.onewire.internal.handler.OwBaseThingHandler;
 import org.openhab.binding.onewire.internal.handler.OwserverBridgeHandler;
 import org.openhab.binding.onewire.internal.owserver.OwserverDeviceParameter;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,12 +90,13 @@ public class DS2438 extends AbstractOwDevice {
     @Override
     public void refresh(OwserverBridgeHandler bridgeHandler, Boolean forcedRefresh) throws OwException {
         if (isConfigured) {
+            logger.trace("refresh of sensor {} started", sensorId);
             double Vcc = 5.0;
 
             if (enabledChannels.contains(CHANNEL_TEMPERATURE) || enabledChannels.contains(CHANNEL_HUMIDITY)
                     || enabledChannels.contains(CHANNEL_ABSOLUTE_HUMIDITY)
                     || enabledChannels.contains(CHANNEL_DEWPOINT)) {
-                QuantityType<Temperature> temperature = new QuantityType<Temperature>(
+                QuantityType<Temperature> temperature = new QuantityType<>(
                         (DecimalType) bridgeHandler.readDecimalType(sensorId, temperatureParameter), SIUnits.CELSIUS);
                 logger.trace("read temperature {} from {}", temperature, sensorId);
 
@@ -108,9 +106,8 @@ public class DS2438 extends AbstractOwDevice {
 
                 if (enabledChannels.contains(CHANNEL_HUMIDITY) || enabledChannels.contains(CHANNEL_ABSOLUTE_HUMIDITY)
                         || enabledChannels.contains(CHANNEL_DEWPOINT)) {
-                    QuantityType<Dimensionless> humidity = new QuantityType<Dimensionless>(
-                            (DecimalType) bridgeHandler.readDecimalType(sensorId, humidityParameter),
-                            SmartHomeUnits.PERCENT);
+                    QuantityType<Dimensionless> humidity = new QuantityType<>(
+                            (DecimalType) bridgeHandler.readDecimalType(sensorId, humidityParameter), Units.PERCENT);
                     logger.trace("read humidity {} from {}", humidity, sensorId);
 
                     if (enabledChannels.contains(CHANNEL_HUMIDITY)) {
@@ -135,7 +132,7 @@ public class DS2438 extends AbstractOwDevice {
                     // workaround bug in DS2438
                     measured = 0.0;
                 }
-                State voltage = new QuantityType<ElectricPotential>(measured, SmartHomeUnits.VOLT);
+                State voltage = new QuantityType<>(measured, Units.VOLT);
 
                 logger.trace("read voltage {} from {}", voltage, sensorId);
                 callback.postUpdate(CHANNEL_VOLTAGE, voltage);
@@ -147,24 +144,23 @@ public class DS2438 extends AbstractOwDevice {
                     if (current instanceof DecimalType) {
                         double currentDouble = ((DecimalType) current).doubleValue();
                         if (currentDouble >= 0.1 || currentDouble <= 3.78) {
-                            current = new QuantityType<ElectricCurrent>(currentDouble * 5.163 + 0.483,
-                                    SmartHomeUnits.AMPERE);
+                            current = new QuantityType<>(currentDouble * 5.163 + 0.483, Units.AMPERE);
                         }
                         callback.postUpdate(CHANNEL_CURRENT, current);
                     } else {
                         callback.postUpdate(CHANNEL_CURRENT, UnDefType.UNDEF);
                     }
                 } else {
-                    State current = new QuantityType<ElectricCurrent>(
+                    State current = new QuantityType<>(
                             (DecimalType) bridgeHandler.readDecimalType(sensorId, currentParamater),
-                            MILLI(SmartHomeUnits.AMPERE));
+                            MILLI(Units.AMPERE));
                     callback.postUpdate(CHANNEL_CURRENT, current);
                 }
             }
 
             if (enabledChannels.contains(CHANNEL_SUPPLYVOLTAGE)) {
                 Vcc = ((DecimalType) bridgeHandler.readDecimalType(sensorId, supplyVoltageParameter)).doubleValue();
-                State supplyVoltage = new QuantityType<ElectricPotential>(Vcc, SmartHomeUnits.VOLT);
+                State supplyVoltage = new QuantityType<>(Vcc, Units.VOLT);
                 callback.postUpdate(CHANNEL_SUPPLYVOLTAGE, supplyVoltage);
             }
 
@@ -173,19 +169,19 @@ public class DS2438 extends AbstractOwDevice {
                     case ELABNET_V2:
                         State light = bridgeHandler.readDecimalType(sensorId, currentParamater);
                         if (light instanceof DecimalType) {
-                            light = new QuantityType<Illuminance>(
+                            light = new QuantityType<>(
                                     Math.round(Math.pow(10, ((DecimalType) light).doubleValue() / 47 * 1000)),
-                                    SmartHomeUnits.LUX);
+                                    Units.LUX);
                             callback.postUpdate(CHANNEL_LIGHT, light);
                         }
                         break;
                     case ELABNET_V1:
                         light = bridgeHandler.readDecimalType(sensorId, currentParamater);
                         if (light instanceof DecimalType) {
-                            light = new QuantityType<Illuminance>(Math.round(Math
+                            light = new QuantityType<>(Math.round(Math
                                     .exp(1.059 * Math.log(1000000 * ((DecimalType) light).doubleValue() / (4096 * 390))
                                             + 4.518)
-                                    * 20000), SmartHomeUnits.LUX);
+                                    * 20000), Units.LUX);
                             callback.postUpdate(CHANNEL_LIGHT, light);
                         }
                         break;
@@ -194,10 +190,10 @@ public class DS2438 extends AbstractOwDevice {
                                 .doubleValue();
                         if (measured <= 0 || measured > 10.0) {
                             // workaround bug in DS2438
-                            light = new QuantityType<Illuminance>(0, SmartHomeUnits.LUX);
+                            light = new QuantityType<>(0, Units.LUX);
                         } else {
-                            light = new QuantityType<Illuminance>(
-                                    Math.pow(10, (65 / 7.5) - (47 / 7.5) * (Vcc / measured)), SmartHomeUnits.LUX);
+                            light = new QuantityType<>(Math.pow(10, (65 / 7.5) - (47 / 7.5) * (Vcc / measured)),
+                                    Units.LUX);
                         }
                         callback.postUpdate(CHANNEL_LIGHT, light);
                 }
@@ -222,5 +218,4 @@ public class DS2438 extends AbstractOwDevice {
     public void setCurrentSensorType(CurrentSensorType currentSensorType) {
         this.currentSensorType = currentSensorType;
     }
-
 }

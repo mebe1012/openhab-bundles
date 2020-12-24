@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,8 +15,8 @@ package org.openhab.binding.digiplex.internal.communication;
 import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StringType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StringType;
 
 /**
  * Area status, as received for the Area Status requests
@@ -51,5 +51,4 @@ public enum AreaStatus {
     public StringType toStringType() {
         return new StringType(this.toString());
     }
-
 }

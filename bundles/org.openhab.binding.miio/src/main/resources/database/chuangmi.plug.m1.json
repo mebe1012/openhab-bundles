@@ -10,6 +10,7 @@
 				"property": "power",
 				"friendlyName": "Power",
 				"channel": "power",
+				"channelType": "power",
 				"type": "Switch",
 				"refresh": true,
 				"ChannelGroup": "",
@@ -24,10 +25,32 @@
 				"property": "temperature",
 				"friendlyName": "Temperature",
 				"channel": "temperature",
-				"type": "Number",
+				"channelType": "temperatureC",
+				"type": "Number:Temperature",
+				"unit": "CELCIUS",
 				"refresh": true,
 				"ChannelGroup": "",
-				"actions": []
+				"actions": [],
+				"category": "temperature",
+				"tags": [
+					"Measurement",
+					"Temperature"
+				]
+			},
+			{
+				"property": "wifi_led",
+				"friendlyName": "Indicator light",
+				"channel": "led",
+				"channelType": "led",
+				"type": "Switch",
+				"refresh": true,
+				"ChannelGroup": "",
+				"actions": [
+					{
+						"command": "set_wifi_led",
+						"parameterType": "ONOFF"
+					}
+				]
 			}
 		]
 	}

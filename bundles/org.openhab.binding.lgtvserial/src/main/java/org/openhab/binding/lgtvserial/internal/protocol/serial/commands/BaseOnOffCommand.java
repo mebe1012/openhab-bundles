@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.lgtvserial.internal.protocol.serial.commands;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialResponse;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.responses.OnOffResponse;
+import org.openhab.core.library.types.OnOffType;
 
 /**
  * This command is the base command for the On/Off type command which translates to 00/01 on the wire.
@@ -37,5 +37,4 @@ public abstract class BaseOnOffCommand extends BaseLGSerialCommand {
     protected LGSerialResponse createResponse(int set, boolean success, String data) {
         return new OnOffResponse(set, success, data);
     }
-
 }

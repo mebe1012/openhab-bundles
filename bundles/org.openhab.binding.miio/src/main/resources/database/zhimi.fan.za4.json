@@ -1,0 +1,184 @@
+{
+	"deviceMapping": {
+		"id": [
+			"zhimi.fan.za4",
+			"zhimi.fan.za3"
+		],
+		"channels": [
+			{
+				"property": "power",
+				"friendlyName": "Power",
+				"channel": "power",
+				"channelType": "power",
+				"type": "Switch",
+				"refresh": true,
+				"actions": [
+					{
+						"command": "set_power",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "angle_enable",
+				"friendlyName": "Rotation",
+				"channel": "angleEnable",
+				"channelType": "angleEnable",
+				"type": "Switch",
+				"refresh": true,
+				"actions": [
+					{
+						"command": "set_angle_enable",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "use_time",
+				"friendlyName": "Run Time",
+				"channel": "usedhours",
+				"channelType": "usedhours",
+				"type": "Number:Time",
+				"unit": "hours",
+				"refresh": true,
+				"transformation": "SecondsToHours",
+				"ChannelGroup": "Status",
+				"actions": [],
+				"category": "time"
+			},
+			{
+				"property": "angle",
+				"friendlyName": "Angle",
+				"channel": "angle",
+				"channelType": "angle",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_angle",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "poweroff_time",
+				"friendlyName": "Timer",
+				"channel": "poweroffTime",
+				"channelType": "poweroffTime",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_poweroff_time",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "buzzer",
+				"friendlyName": "Buzzer",
+				"channel": "buzzer",
+				"channelType": "buzzer",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_buzzer",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "led_b",
+				"friendlyName": "LED",
+				"channel": "led_b",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_led_b",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "child_lock",
+				"friendlyName": "Child Lock",
+				"channel": "child_lock",
+				"type": "Switch",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_child_lock",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "speed_level",
+				"friendlyName": "Speed Level",
+				"channel": "speedLevel",
+				"channelType": "speedLevel",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_speed_level",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "speed",
+				"friendlyName": "Speed",
+				"channel": "speed",
+				"channelType": "speed",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_speed",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "natural_level",
+				"friendlyName": "Natural Level",
+				"channel": "naturalLevel",
+				"channelType": "naturalLevel",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_natural_level",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "",
+				"friendlyName": "Move Direction",
+				"channel": "move",
+				"channelType": "move",
+				"type": "String",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_move",
+						"parameterType": "STRING"
+					}
+				]
+			}
+		]
+	}
+}

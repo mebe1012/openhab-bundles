@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,11 +25,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpCommand;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpException;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpMessage;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpProtocol;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

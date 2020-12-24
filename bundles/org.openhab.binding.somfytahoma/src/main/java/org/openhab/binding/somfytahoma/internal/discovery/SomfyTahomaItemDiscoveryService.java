@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,27 +12,29 @@
  */
 package org.openhab.binding.somfytahoma.internal.discovery;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceCallback;
-import org.eclipse.smarthome.config.discovery.ExtendedDiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.somfytahoma.internal.handler.SomfyTahomaBridgeHandler;
-import org.openhab.binding.somfytahoma.internal.model.*;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static org.openhab.binding.somfytahoma.internal.SomfyTahomaBindingConstants.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.somfytahoma.internal.handler.SomfyTahomaBridgeHandler;
+import org.openhab.binding.somfytahoma.internal.model.*;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link SomfyTahomaItemDiscoveryService} discovers rollershutters and
@@ -41,50 +43,51 @@ import java.util.concurrent.TimeUnit;
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService implements ExtendedDiscoveryService {
+public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService
+        implements DiscoveryService, ThingHandlerService {
 
     private final Logger logger = LoggerFactory.getLogger(SomfyTahomaItemDiscoveryService.class);
 
-    private SomfyTahomaBridgeHandler bridge;
-
-    private @Nullable DiscoveryServiceCallback discoveryServiceCallback;
+    private @Nullable SomfyTahomaBridgeHandler bridgeHandler;
 
     private @Nullable ScheduledFuture<?> discoveryJob;
 
     private static final int DISCOVERY_TIMEOUT_SEC = 10;
-    private static final int DISCOVERY_REFRESH_SEC = 1800;
+    private static final int DISCOVERY_REFRESH_SEC = 3600;
 
-    public SomfyTahomaItemDiscoveryService(SomfyTahomaBridgeHandler bridgeHandler) {
+    public SomfyTahomaItemDiscoveryService() {
         super(DISCOVERY_TIMEOUT_SEC);
         logger.debug("Creating discovery service");
-        this.bridge = bridgeHandler;
-    }
-
-    /**
-     * Called on component activation.
-     */
-    @Override
-    @Activate
-    public void activate(@Nullable Map<String, @Nullable Object> configProperties) {
-        super.activate(configProperties);
     }
 
     @Override
-    @Deactivate
+    public void activate() {
+        super.activate(null);
+    }
+
+    @Override
     public void deactivate() {
         super.deactivate();
     }
 
     @Override
-    public void setDiscoveryServiceCallback(DiscoveryServiceCallback discoveryServiceCallback) {
-        this.discoveryServiceCallback = discoveryServiceCallback;
+    public void setThingHandler(@NonNullByDefault({}) ThingHandler handler) {
+        if (handler instanceof SomfyTahomaBridgeHandler) {
+            bridgeHandler = (SomfyTahomaBridgeHandler) handler;
+        }
+    }
+
+    @Override
+    public @Nullable ThingHandler getThingHandler() {
+        return bridgeHandler;
     }
 
     @Override
     protected void startBackgroundDiscovery() {
         logger.debug("Starting SomfyTahoma background discovery");
 
-        if (discoveryJob == null || discoveryJob.isCancelled()) {
+        ScheduledFuture<?> localDiscoveryJob = discoveryJob;
+        if (localDiscoveryJob == null || localDiscoveryJob.isCancelled()) {
             discoveryJob = scheduler.scheduleWithFixedDelay(this::runDiscovery, 10, DISCOVERY_REFRESH_SEC,
                     TimeUnit.SECONDS);
         }
@@ -93,22 +96,15 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService im
     @Override
     protected void stopBackgroundDiscovery() {
         logger.debug("Stopping SomfyTahoma background discovery");
-        if (discoveryJob != null && !discoveryJob.isCancelled()) {
-            discoveryJob.cancel(true);
-            discoveryJob = null;
+        ScheduledFuture<?> localDiscoveryJob = discoveryJob;
+        if (localDiscoveryJob != null && !localDiscoveryJob.isCancelled()) {
+            localDiscoveryJob.cancel(true);
         }
     }
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
-        return new HashSet<>(Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_ROLLERSHUTTER,
-                THING_TYPE_ROLLERSHUTTER_SILENT, THING_TYPE_SCREEN, THING_TYPE_VENETIANBLIND, THING_TYPE_EXTERIORSCREEN,
-                THING_TYPE_EXTERIORVENETIANBLIND, THING_TYPE_GARAGEDOOR, THING_TYPE_ACTIONGROUP, THING_TYPE_AWNING,
-                THING_TYPE_ONOFF, THING_TYPE_LIGHT, THING_TYPE_LIGHTSENSOR, THING_TYPE_SMOKESENSOR,
-                THING_TYPE_CONTACTSENSOR, THING_TYPE_OCCUPANCYSENSOR, THING_TYPE_WINDOW, THING_TYPE_EXTERNAL_ALARM,
-                THING_TYPE_INTERNAL_ALARM, THING_TYPE_POD, THING_TYPE_HEATING_SYSTEM, THING_TYPE_ONOFF_HEATING_SYSTEM,
-                THING_TYPE_DOOR_LOCK, THING_TYPE_PERGOLA, THING_TYPE_WINDOW_HANDLE, THING_TYPE_TEMPERATURESENSOR,
-                THING_TYPE_GATE));
+        return SUPPORTED_THING_TYPES_UIDS;
     }
 
     @Override
@@ -119,27 +115,28 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService im
     private synchronized void runDiscovery() {
         logger.debug("Starting scanning for things...");
 
-        if (bridge.getThing().getStatus().equals(ThingStatus.ONLINE)) {
-            SomfyTahomaSetup devices = bridge.listDevices();
+        SomfyTahomaBridgeHandler localBridgeHandler = bridgeHandler;
+        if (localBridgeHandler != null && ThingStatus.ONLINE == localBridgeHandler.getThing().getStatus()) {
+            SomfyTahomaSetup setup = localBridgeHandler.getSetup();
 
-            if (devices == null) {
+            if (setup == null) {
                 return;
             }
 
-            for (SomfyTahomaDevice device : devices.getDevices()) {
+            for (SomfyTahomaDevice device : setup.getDevices()) {
                 discoverDevice(device);
             }
-            for (SomfyTahomaGateway gw : devices.getGateways()) {
-                gatewayDiscovered(gw.getGatewayId());
+            for (SomfyTahomaGateway gw : setup.getGateways()) {
+                gatewayDiscovered(gw);
             }
 
-            List<SomfyTahomaActionGroup> actions = bridge.listActionGroups();
+            List<SomfyTahomaActionGroup> actions = localBridgeHandler.listActionGroups();
 
             for (SomfyTahomaActionGroup group : actions) {
                 String oid = group.getOid();
                 String label = group.getLabel();
 
-                //actiongroups use oid as deviceURL
+                // actiongroups use oid as deviceURL
                 actionGroupDiscovered(label, oid, oid);
             }
         } else {
@@ -150,153 +147,269 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService im
     private void discoverDevice(SomfyTahomaDevice device) {
         logger.debug("url: {}", device.getDeviceURL());
         switch (device.getUiClass()) {
-            case AWNING:
+            case CLASS_AWNING:
+                // widget: PositionableHorizontalAwning
                 deviceDiscovered(device, THING_TYPE_AWNING);
                 break;
-            case CONTACTSENSOR:
+            case CLASS_CONTACT_SENSOR:
+                // widget: ContactSensor
                 deviceDiscovered(device, THING_TYPE_CONTACTSENSOR);
                 break;
-            case EXTERIORSCREEN:
+            case CLASS_CURTAIN:
+                deviceDiscovered(device, THING_TYPE_CURTAIN);
+                break;
+            case CLASS_EXTERIOR_SCREEN:
+                // widget: PositionableScreen
                 deviceDiscovered(device, THING_TYPE_EXTERIORSCREEN);
                 break;
-            case EXTERIORVENETIANBLIND:
+            case CLASS_EXTERIOR_VENETIAN_BLIND:
+                // widget: PositionableExteriorVenetianBlind
                 deviceDiscovered(device, THING_TYPE_EXTERIORVENETIANBLIND);
                 break;
-            case GARAGEDOOR:
+            case CLASS_GARAGE_DOOR:
                 deviceDiscovered(device, THING_TYPE_GARAGEDOOR);
                 break;
-            case LIGHT:
-                deviceDiscovered(device, THING_TYPE_LIGHT);
+            case CLASS_LIGHT:
+                if ("DimmerLight".equals(device.getWidget())) {
+                    // widget: DimmerLight
+                    deviceDiscovered(device, THING_TYPE_DIMMER_LIGHT);
+                } else {
+                    // widget: TimedOnOffLight
+                    // widget: StatefulOnOffLight
+                    deviceDiscovered(device, THING_TYPE_LIGHT);
+                }
                 break;
-            case LIGHTSENSOR:
+            case CLASS_LIGHT_SENSOR:
                 deviceDiscovered(device, THING_TYPE_LIGHTSENSOR);
                 break;
-            case OCCUPANCYSENSOR:
+            case CLASS_OCCUPANCY_SENSOR:
+                // widget: OccupancySensor
                 deviceDiscovered(device, THING_TYPE_OCCUPANCYSENSOR);
                 break;
-            case ONOFF:
+            case CLASS_ON_OFF:
+                // widget: StatefulOnOff
                 deviceDiscovered(device, THING_TYPE_ONOFF);
                 break;
-            case ROLLERSHUTTER:
+            case CLASS_ROLLER_SHUTTER:
                 if (isSilentRollerShutter(device)) {
+                    // widget: PositionableRollerShutterWithLowSpeedManagement
                     deviceDiscovered(device, THING_TYPE_ROLLERSHUTTER_SILENT);
+                } else if (isUnoRollerShutter(device)) {
+                    // widget: PositionableRollerShutterUno
+                    deviceDiscovered(device, THING_TYPE_ROLLERSHUTTER_UNO);
                 } else {
+                    // widget: PositionableRollerShutter
+                    // widget: PositionableTiltedRollerShutter
                     deviceDiscovered(device, THING_TYPE_ROLLERSHUTTER);
                 }
                 break;
-            case SCREEN:
+            case CLASS_SCREEN:
+                // widget: PositionableTiltedScreen
                 deviceDiscovered(device, THING_TYPE_SCREEN);
                 break;
-            case SMOKESENSOR:
+            case CLASS_SMOKE_SENSOR:
+                // widget: SmokeSensor
                 deviceDiscovered(device, THING_TYPE_SMOKESENSOR);
                 break;
-            case VENETIANBLIND:
+            case CLASS_VENETIAN_BLIND:
                 deviceDiscovered(device, THING_TYPE_VENETIANBLIND);
                 break;
-            case WINDOW:
+            case CLASS_WINDOW:
+                // widget: PositionableTiltedWindow
                 deviceDiscovered(device, THING_TYPE_WINDOW);
                 break;
-            case ALARM:
+            case CLASS_ALARM:
                 if (device.getDeviceURL().startsWith("internal:")) {
+                    // widget: TSKAlarmController
                     deviceDiscovered(device, THING_TYPE_INTERNAL_ALARM);
+                } else if ("MyFoxAlarmController".equals(device.getWidget())) {
+                    // widget: MyFoxAlarmController
+                    deviceDiscovered(device, THING_TYPE_MYFOX_ALARM);
                 } else {
                     deviceDiscovered(device, THING_TYPE_EXTERNAL_ALARM);
                 }
                 break;
-            case POD:
-                deviceDiscovered(device, THING_TYPE_POD);
-                break;
-            case HEATINGSYSTEM:
-                if (isOnOffHeatingSystem(device)) {
-                    deviceDiscovered(device, THING_TYPE_ONOFF_HEATING_SYSTEM);
-                } else {
-                    deviceDiscovered(device, THING_TYPE_HEATING_SYSTEM);
+            case CLASS_POD:
+                if (hasState(device, CYCLIC_BUTTON_STATE)) {
+                    deviceDiscovered(device, THING_TYPE_POD);
                 }
                 break;
-            case DOORLOCK:
+            case CLASS_HEATING_SYSTEM:
+                if ("SomfyThermostat".equals(device.getWidget())) {
+                    deviceDiscovered(device, THING_TYPE_THERMOSTAT);
+                } else if ("ValveHeatingTemperatureInterface".equals(device.getWidget())) {
+                    deviceDiscovered(device, THING_TYPE_VALVE_HEATING_SYSTEM);
+                } else if (isOnOffHeatingSystem(device)) {
+                    deviceDiscovered(device, THING_TYPE_ONOFF_HEATING_SYSTEM);
+                } else if (isZwaveHeatingSystem(device)) {
+                    deviceDiscovered(device, THING_TYPE_ZWAVE_HEATING_SYSTEM);
+                } else {
+                    logUnsupportedDevice(device);
+                }
+                break;
+            case CLASS_EXTERIOR_HEATING_SYSTEM:
+                if ("DimmerExteriorHeating".equals(device.getWidget())) {
+                    // widget: DimmerExteriorHeating
+                    deviceDiscovered(device, THING_TYPE_EXTERIOR_HEATING_SYSTEM);
+                } else {
+                    logUnsupportedDevice(device);
+                }
+                break;
+            case CLASS_HUMIDITY_SENSOR:
+                if (hasState(device, WATER_DETECTION_STATE)) {
+                    deviceDiscovered(device, THING_TYPE_WATERSENSOR);
+                } else {
+                    // widget: RelativeHumiditySensor
+                    deviceDiscovered(device, THING_TYPE_HUMIDITYSENSOR);
+                }
+            case CLASS_DOOR_LOCK:
+                // widget: UnlockDoorLockWithUnknownPosition
                 deviceDiscovered(device, THING_TYPE_DOOR_LOCK);
                 break;
-            case PERGOLA:
+            case CLASS_PERGOLA:
                 deviceDiscovered(device, THING_TYPE_PERGOLA);
                 break;
-            case WINDOWHANDLE:
+            case CLASS_WINDOW_HANDLE:
+                // widget: ThreeWayWindowHandle
                 deviceDiscovered(device, THING_TYPE_WINDOW_HANDLE);
                 break;
-            case TEMPERATURESENSOR:
+            case CLASS_TEMPERATURE_SENSOR:
+                // widget: TemperatureSensor
                 deviceDiscovered(device, THING_TYPE_TEMPERATURESENSOR);
                 break;
-            case GATE:
+            case CLASS_GATE:
                 deviceDiscovered(device, THING_TYPE_GATE);
                 break;
-            case PROTOCOLGATEWAY:
-            case REMOTECONTROLLER:
-            case NETWORKCOMPONENT:
+            case CLASS_ELECTRICITY_SENSOR:
+                if (hasEnergyConsumption(device)) {
+                    deviceDiscovered(device, THING_TYPE_ELECTRICITYSENSOR);
+                } else {
+                    logUnsupportedDevice(device);
+                }
+                break;
+            case CLASS_DOCK:
+                // widget: Dock
+                deviceDiscovered(device, THING_TYPE_DOCK);
+                break;
+            case CLASS_SIREN:
+                deviceDiscovered(device, THING_TYPE_SIREN);
+                break;
+            case CLASS_ADJUSTABLE_SLATS_ROLLER_SHUTTER:
+                deviceDiscovered(device, THING_TYPE_ADJUSTABLE_SLATS_ROLLERSHUTTER);
+                break;
+            case CLASS_CAMERA:
+                if (hasMyfoxShutter(device)) {
+                    // widget: MyFoxSecurityCamera
+                    deviceDiscovered(device, THING_TYPE_MYFOX_CAMERA);
+                } else {
+                    logUnsupportedDevice(device);
+                }
+                break;
+            case THING_PROTOCOL_GATEWAY:
+            case THING_REMOTE_CONTROLLER:
+                // widget: AlarmRemoteController
+            case THING_NETWORK_COMPONENT:
                 break;
             default:
-                logger.info("Detected a new unsupported device: {}", device.getUiClass());
-                logger.info("If you want to add the support, please create a new issue and attach the information below");
-                logger.info("Supported commands: {}", device.getDefinition().toString());
-
-                StringBuilder sb = new StringBuilder().append('\n');
-                for (SomfyTahomaState state : device.getStates()) {
-                    sb.append(state.toString()).append('\n');
-                }
-                logger.info("Device states: {}", sb.toString());
+                logUnsupportedDevice(device);
         }
+    }
+
+    private boolean isStateLess(SomfyTahomaDevice device) {
+        return device.getStates().isEmpty() || (device.getStates().size() == 1 && hasState(device, STATUS_STATE));
+    }
+
+    private void logUnsupportedDevice(SomfyTahomaDevice device) {
+        if (!isStateLess(device)) {
+            logger.info("Detected a new unsupported device: {} with widgetName: {}", device.getUiClass(),
+                    device.getWidget());
+            logger.info("If you want to add the support, please create a new issue and attach the information below");
+            logger.info("Device definition:\n{}", device.getDefinition());
+
+            StringBuilder sb = new StringBuilder().append('\n');
+            for (SomfyTahomaState state : device.getStates()) {
+                sb.append(state.toString()).append('\n');
+            }
+            logger.info("Current device states: {}", sb);
+        }
+    }
+
+    private boolean hasState(SomfyTahomaDevice device, String state) {
+        return device.getDefinition().getStates().stream().anyMatch(st -> state.equals(st.getQualifiedName()));
+    }
+
+    private boolean hasMyfoxShutter(SomfyTahomaDevice device) {
+        return hasState(device, MYFOX_SHUTTER_STATUS_STATE);
+    }
+
+    private boolean hasEnergyConsumption(SomfyTahomaDevice device) {
+        return hasState(device, ENERGY_CONSUMPTION_STATE);
     }
 
     private boolean isSilentRollerShutter(SomfyTahomaDevice device) {
-        SomfyTahomaDeviceDefinition def = device.getDefinition();
-        for (SomfyTahomaDeviceDefinitionCommand cmd : def.getCommands()) {
-            if (cmd.getCommandName().equals(COMMAND_SET_CLOSURESPEED)) {
-                return true;
-            }
-        }
-        return false;
+        return "PositionableRollerShutterWithLowSpeedManagement".equals(device.getWidget());
+    }
+
+    private boolean isUnoRollerShutter(SomfyTahomaDevice device) {
+        return "PositionableRollerShutterUno".equals(device.getWidget());
     }
 
     private boolean isOnOffHeatingSystem(SomfyTahomaDevice device) {
-        SomfyTahomaDeviceDefinition def = device.getDefinition();
-        for (SomfyTahomaDeviceDefinitionCommand cmd : def.getCommands()) {
-            if (cmd.getCommandName().equals(COMMAND_SET_HEATINGLEVEL)) {
-                return true;
-            }
-        }
-        return false;
+        return hasCommmand(device, COMMAND_SET_HEATINGLEVEL);
+    }
+
+    private boolean isZwaveHeatingSystem(SomfyTahomaDevice device) {
+        return hasState(device, ZWAVE_SET_POINT_TYPE_STATE);
+    }
+
+    private boolean hasCommmand(SomfyTahomaDevice device, String command) {
+        return device.getDefinition().getCommands().stream().anyMatch(cmd -> command.equals(cmd.getCommandName()));
     }
 
     private void deviceDiscovered(SomfyTahomaDevice device, ThingTypeUID thingTypeUID) {
-        deviceDiscovered(device.getLabel(), device.getDeviceURL(), device.getOid(), thingTypeUID);
+        deviceDiscovered(device.getLabel(), device.getDeviceURL(), device.getOid(), thingTypeUID,
+                hasState(device, RSSI_LEVEL_STATE));
     }
 
-    private void deviceDiscovered(String label, String deviceURL, String oid, ThingTypeUID thingTypeUID) {
+    private void deviceDiscovered(String label, String deviceURL, String oid, ThingTypeUID thingTypeUID, boolean rssi) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("url", deviceURL);
-        properties.put("label", label);
+        properties.put(NAME_STATE, label);
+        if (rssi) {
+            properties.put(RSSI_LEVEL_STATE, "-1");
+        }
 
-        ThingUID thingUID = new ThingUID(thingTypeUID, bridge.getThing().getUID(), oid);
+        SomfyTahomaBridgeHandler localBridgeHandler = bridgeHandler;
+        if (localBridgeHandler != null) {
+            ThingUID thingUID = new ThingUID(thingTypeUID, localBridgeHandler.getThing().getUID(), oid);
 
-        logger.debug("Detected a/an {} - label: {} oid: {}", thingTypeUID.getId(), label, oid);
-        thingDiscovered(DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
-                .withProperties(properties).withRepresentationProperty("url").withLabel(label)
-                .withBridge(bridge.getThing().getUID()).build());
+            logger.debug("Detected a/an {} - label: {} oid: {}", thingTypeUID.getId(), label, oid);
+            thingDiscovered(DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                    .withProperties(properties).withRepresentationProperty("url").withLabel(label)
+                    .withBridge(localBridgeHandler.getThing().getUID()).build());
+        }
     }
 
     private void actionGroupDiscovered(String label, String deviceURL, String oid) {
-        deviceDiscovered(label, deviceURL, oid, THING_TYPE_ACTIONGROUP);
+        deviceDiscovered(label, deviceURL, oid, THING_TYPE_ACTIONGROUP, false);
     }
 
-    private void gatewayDiscovered(String id) {
+    private void gatewayDiscovered(SomfyTahomaGateway gw) {
         Map<String, Object> properties = new HashMap<>(1);
+        String type = gatewayTypes.getOrDefault(gw.getType(), "UNKNOWN");
+        String id = gw.getGatewayId();
         properties.put("id", id);
+        properties.put("type", type);
 
-        ThingUID thingUID = new ThingUID(THING_TYPE_GATEWAY, bridge.getThing().getUID(), id);
+        SomfyTahomaBridgeHandler localBridgeHandler = bridgeHandler;
+        if (localBridgeHandler != null) {
+            ThingUID thingUID = new ThingUID(THING_TYPE_GATEWAY, localBridgeHandler.getThing().getUID(), id);
 
-        if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
-            logger.debug("Detected a gateway with id: {}", id);
-            thingDiscovered(DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_GATEWAY)
-                    .withProperties(properties).withRepresentationProperty("id").withLabel("Somfy Tahoma Gateway")
-                    .withBridge(bridge.getThing().getUID()).build());
+            logger.debug("Detected a gateway with id: {} and type: {}", id, type);
+            thingDiscovered(
+                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_GATEWAY).withProperties(properties)
+                            .withRepresentationProperty("id").withLabel("Somfy Gateway (" + type + ")")
+                            .withBridge(localBridgeHandler.getThing().getUID()).build());
         }
     }
 }

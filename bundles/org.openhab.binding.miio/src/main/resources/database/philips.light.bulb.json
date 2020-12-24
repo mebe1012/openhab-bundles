@@ -3,16 +3,17 @@
 		"id": [
 			"philips.light.bulb",
 			"philips.light.downlight",
-			"philips.light.mono1",
 			"philips.light.virtual",
 			"philips.light.zysread",
-			"philips.light.zystrip"
+			"philips.light.zystrip",
+			"philips.light.hbulb"
 		],
 		"channels": [
 			{
 				"property": "power",
 				"friendlyName": "Power",
 				"channel": "power",
+				"channelType": "power",
 				"type": "Switch",
 				"refresh": true,
 				"ChannelGroup": "",
@@ -27,13 +28,24 @@
 				"property": "bright",
 				"friendlyName": "Brightness",
 				"channel": "brightness",
-				"type": "Number",
+				"channelType": "brightness",
+				"type": "Dimmer",
 				"refresh": true,
 				"ChannelGroup": "actions",
 				"actions": [
 					{
 						"command": "set_bright",
-						"parameterType": "NUMBER"
+						"parameterType": "NUMBER",
+						"condition": {
+							"name": "BrightnessExisting"
+						}
+					},
+					{
+						"command": "set_power",
+						"parameterType": "ONOFF",
+						"condition": {
+							"name": "BrightnessOnOff"
+						}
 					}
 				]
 			},
@@ -41,7 +53,8 @@
 				"property": "cct",
 				"friendlyName": "Correlated Color Temperature",
 				"channel": "cct",
-				"type": "Number",
+				"channelType": "cct",
+				"type": "Dimmer",
 				"refresh": true,
 				"ChannelGroup": "actions",
 				"actions": [
@@ -55,6 +68,7 @@
 				"property": "snm",
 				"friendlyName": "Scene",
 				"channel": "scene",
+				"channelType": "scene",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "actions",
@@ -69,12 +83,13 @@
 				"property": "dv",
 				"friendlyName": "DV",
 				"channel": "dv",
+				"channelType": "dv",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "actions",
 				"actions": [
 					{
-						
+						"parameterType": "EMPTY"
 					}
 				]
 			},
@@ -96,6 +111,7 @@
 				"property": "",
 				"friendlyName": "Delay Off",
 				"channel": "delayoff",
+				"channelType": "delayoff",
 				"type": "Switch",
 				"refresh": false,
 				"ChannelGroup": "actions",
@@ -103,20 +119,6 @@
 					{
 						"command": "delay_off",
 						"parameterType": "NUMBER"
-					}
-				]
-			},
-			{
-				"property": "",
-				"friendlyName": "Toggle",
-				"channel": "toggle",
-				"type": "Switch",
-				"refresh": false,
-				"ChannelGroup": "actions",
-				"actions": [
-					{
-						"command": "toggle",
-						"parameterType": "EMPTY"
 					}
 				]
 			}

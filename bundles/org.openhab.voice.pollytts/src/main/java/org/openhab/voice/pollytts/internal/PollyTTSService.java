@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.voice.pollytts.internal;
 
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.smarthome.core.audio.AudioFormat.*;
+import static org.openhab.core.audio.AudioFormat.*;
 import static org.openhab.voice.pollytts.internal.PollyTTSService.*;
 
 import java.io.File;
@@ -24,14 +24,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
 import org.openhab.voice.pollytts.internal.cloudapi.CachedPollyTTSCloudImpl;
 import org.openhab.voice.pollytts.internal.cloudapi.PollyTTSConfig;
 import org.osgi.framework.Constants;
@@ -46,10 +46,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Hillman - Initial contribution
  */
-@Component(configurationPid = SERVICE_PID, property = { Constants.SERVICE_PID + "=" + SERVICE_PID,
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=" + SERVICE_NAME + " Text-to-Speech",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + SERVICE_CATEGORY + ":" + SERVICE_ID,
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=" + SERVICE_CATEGORY })
+@Component(configurationPid = SERVICE_PID, property = Constants.SERVICE_PID + "=" + SERVICE_PID)
+@ConfigurableService(category = SERVICE_CATEGORY, label = SERVICE_NAME
+        + " Text-to-Speech", description_uri = SERVICE_CATEGORY + ":" + SERVICE_ID)
 public class PollyTTSService implements TTSService {
 
     /**
@@ -108,7 +107,7 @@ public class PollyTTSService implements TTSService {
             logger.debug("Using configuration {}", config);
 
             // create cache folder
-            File cacheFolder = new File(new File(ConfigConstants.getUserDataFolder(), CACHE_FOLDER_NAME), SERVICE_PID);
+            File cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), SERVICE_PID);
             if (!cacheFolder.exists()) {
                 cacheFolder.mkdirs();
             }
@@ -236,5 +235,4 @@ public class PollyTTSService implements TTSService {
     public String getLabel(Locale locale) {
         return "PollyTTS";
     }
-
 }

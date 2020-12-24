@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,16 +24,14 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.LocationProvider;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.weatherunderground.internal.handler.WeatherUndergroundHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.LocationProvider;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +71,7 @@ public class WeatherUndergroundDiscoveryService extends AbstractDiscoveryService
 
     /* We override this method to allow a call from the thing handler factory */
     @Override
-    public void activate(@Nullable Map<@NonNull String, @Nullable Object> configProperties) {
+    public void activate(Map<String, Object> configProperties) {
         super.activate(configProperties);
     }
 
@@ -141,7 +139,7 @@ public class WeatherUndergroundDiscoveryService extends AbstractDiscoveryService
     }
 
     private void createResults(PointType location, Locale locale) {
-        ThingUID localWeatherThing = new ThingUID(THING_TYPE_WEATHER, LOCAL);
+        ThingUID localWeatherThing = new ThingUID(THING_TYPE_WEATHER, bridgeUID, LOCAL);
         Map<String, Object> properties = new HashMap<>(3);
         properties.put(LOCATION, String.format("%s,%s", location.getLatitude(), location.getLongitude()));
         String lang = WeatherUndergroundHandler.getCodeFromLanguage(locale);
@@ -151,5 +149,4 @@ public class WeatherUndergroundDiscoveryService extends AbstractDiscoveryService
         thingDiscovered(DiscoveryResultBuilder.create(localWeatherThing).withLabel("Local Weather")
                 .withProperties(properties).withBridge(bridgeUID).build());
     }
-
 }

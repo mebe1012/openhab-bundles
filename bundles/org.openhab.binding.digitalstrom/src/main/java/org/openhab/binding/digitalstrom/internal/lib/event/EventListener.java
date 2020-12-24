@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,12 @@ package org.openhab.binding.digitalstrom.internal.lib.event;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.openhab.binding.digitalstrom.internal.lib.config.Config;
 import org.openhab.binding.digitalstrom.internal.lib.event.types.Event;
 import org.openhab.binding.digitalstrom.internal.lib.event.types.EventItem;
@@ -29,6 +27,7 @@ import org.openhab.binding.digitalstrom.internal.lib.event.types.JSONEventImpl;
 import org.openhab.binding.digitalstrom.internal.lib.manager.ConnectionManager;
 import org.openhab.binding.digitalstrom.internal.lib.serverconnection.constants.JSONApiResponseKeysEnum;
 import org.openhab.binding.digitalstrom.internal.lib.serverconnection.impl.JSONResponseHandler;
+import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class EventListener {
 
     private int subscriptionID = 15;
     private final int timeout = 500;
-    private final List<String> subscribedEvents = Collections.synchronizedList(new LinkedList<String>());
+    private final List<String> subscribedEvents = Collections.synchronizedList(new LinkedList<>());
     private boolean subscribed = false;
 
     // error message
@@ -74,7 +73,7 @@ public class EventListener {
                                                                      // found."
 
     private final ConnectionManager connManager;
-    private final List<EventHandler> eventHandlers = Collections.synchronizedList(new LinkedList<EventHandler>());
+    private final List<EventHandler> eventHandlers = Collections.synchronizedList(new LinkedList<>());
     private final Config config;
     private boolean isStarted = false;
 
@@ -137,14 +136,21 @@ public class EventListener {
         return isStarted;
     }
 
-    private void internalStop() {
-        if (subscriptionScheduler != null && !subscriptionScheduler.isCancelled()) {
+    private void stopSubscriptionScheduler() {
+        final ScheduledFuture<?> subscriptionScheduler = this.subscriptionScheduler;
+        if (subscriptionScheduler != null) {
             subscriptionScheduler.cancel(true);
-            subscriptionScheduler = null;
+            this.subscriptionScheduler = null;
         }
-        if (pollingScheduler != null && !pollingScheduler.isCancelled()) {
+    }
+
+    private void internalStop() {
+        stopSubscriptionScheduler();
+
+        ScheduledFuture<?> pollingScheduler = this.pollingScheduler;
+        if (pollingScheduler != null) {
             pollingScheduler.cancel(true);
-            pollingScheduler = null;
+            this.pollingScheduler = null;
             unsubscribe();
             logger.debug("internal stop EventListener");
         }
@@ -218,7 +224,7 @@ public class EventListener {
      */
     public void removeEventHandler(EventHandler eventHandler) {
         if (eventHandler != null && eventHandlers.contains(eventHandler)) {
-            List<String> tempSubsList = new ArrayList<String>();
+            List<String> tempSubsList = new ArrayList<>();
             int index = -1;
             EventHandler intEventHandler = null;
             boolean subscribedEventsChanged = false;
@@ -341,23 +347,16 @@ public class EventListener {
             logger.debug("subscribed event: {} to subscriptionID: {}", eventName, subscriptionID);
         } else {
             logger.error(
-                    "Couldn't subscribe event {} ... maybe timeout because system is too busy ... event will be tried to subscribe later again ... ");
+                    "Couldn't subscribe event {} ... maybe timeout because system is too busy ... event will be tried to subscribe later again ... ",
+                    eventName);
         }
         return subscribed;
     }
 
-    private void subscribe(final List<String> evetNames) {
-        final Iterator<String> eventNameIter = evetNames.iterator();
-        subscriptionScheduler = scheduler.scheduleWithFixedDelay(new Runnable() {
-
-            @Override
-            public void run() {
-                while (eventNameIter.hasNext()) {
-                    subscribe(eventNameIter.next());
-                }
-                subscriptionScheduler.cancel(true);
-            }
-
+    private void subscribe(final List<String> eventNames) {
+        subscriptionScheduler = scheduler.scheduleWithFixedDelay(() -> {
+            eventNames.forEach(this::subscribe);
+            stopSubscriptionScheduler();
         }, 0, SUBSCRIBE_DELAY, TimeUnit.MILLISECONDS);
     }
 

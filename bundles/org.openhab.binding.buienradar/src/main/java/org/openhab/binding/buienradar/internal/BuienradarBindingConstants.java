@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.binding.buienradar.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link BuienradarBindingConstants} class defines common constants, which are
@@ -54,5 +54,4 @@ public class BuienradarBindingConstants {
     public static final String FORECAST_105 = "forecast_105";
     public static final String FORECAST_110 = "forecast_110";
     public static final String FORECAST_115 = "forecast_115";
-
 }

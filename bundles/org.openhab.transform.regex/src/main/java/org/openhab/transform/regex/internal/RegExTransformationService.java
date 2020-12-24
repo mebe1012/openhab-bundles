@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationService;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  */
 @NonNullByDefault
-@Component(immediate = true, property = { "smarthome.transform=REGEX" })
+@Component(property = { "openhab.transform=REGEX" })
 public class RegExTransformationService implements TransformationService {
 
     private final Logger logger = LoggerFactory.getLogger(RegExTransformationService.class);
@@ -94,5 +94,4 @@ public class RegExTransformationService implements TransformationService {
 
         return result;
     }
-
 }

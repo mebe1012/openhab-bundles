@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.dsmr.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,15 +57,15 @@ public final class TelegramReaderUtil {
      * @return a P1Telegram object
      */
     public static P1Telegram readTelegram(String telegramName, TelegramState expectedTelegramState) {
-        AtomicReference<P1Telegram> p1Telegram = new AtomicReference<>(null);
+        AtomicReference<P1Telegram> p1Telegram = new AtomicReference<>();
         byte[] telegram = readRawTelegram(telegramName);
         P1TelegramParser parser = new P1TelegramParser(p1Telegram::set);
 
         parser.setLenientMode(true);
         parser.parse(telegram, telegram.length);
-        assertNotNull("Telegram state should have been set. (Missing newline at end of message?)", p1Telegram.get());
-        assertEquals("Expected TelegramState should be as expected", expectedTelegramState,
-                p1Telegram.get().getTelegramState());
+        assertNotNull(p1Telegram.get(), "Telegram state should have been set. (Missing newline at end of message?)");
+        assertEquals(expectedTelegramState, p1Telegram.get().getTelegramState(),
+                "Expected TelegramState should be as expected");
         return p1Telegram.get();
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,22 +22,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.ReadingPublisher;
 import org.openhab.binding.jeelink.internal.RollingAveragePublisher;
 import org.openhab.binding.jeelink.internal.RollingReadingAverage;
 import org.openhab.binding.jeelink.internal.config.LaCrosseTemperatureSensorConfig;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
 public class LaCrosseTemperatureSensorHandler extends JeeLinkSensorHandler<LaCrosseTemperatureReading> {
     private final Logger logger = LoggerFactory.getLogger(LaCrosseTemperatureSensorHandler.class);
 
-    public LaCrosseTemperatureSensorHandler(Thing thing) {
-        super(thing);
+    public LaCrosseTemperatureSensorHandler(Thing thing, String sensorType) {
+        super(thing, sensorType);
     }
 
     @Override
@@ -130,8 +130,7 @@ public class LaCrosseTemperatureSensorHandler extends JeeLinkSensorHandler<LaCro
                                 getThing().getLabel(), getThing().getUID().getId(), temp, reading.getTemperature(),
                                 reading.getHumidity(), reading.isBatteryNew(), reading.isBatteryLow());
                         updateState(TEMPERATURE_CHANNEL, new QuantityType<>(temp, SIUnits.CELSIUS));
-                        updateState(HUMIDITY_CHANNEL,
-                                new QuantityType<>(reading.getHumidity(), SmartHomeUnits.PERCENT));
+                        updateState(HUMIDITY_CHANNEL, new QuantityType<>(reading.getHumidity(), Units.PERCENT));
                         updateState(BATTERY_NEW_CHANNEL, reading.isBatteryNew() ? OnOffType.ON : OnOffType.OFF);
                         updateState(BATTERY_LOW_CHANNEL, reading.isBatteryLow() ? OnOffType.ON : OnOffType.OFF);
                     } else {
@@ -141,7 +140,7 @@ public class LaCrosseTemperatureSensorHandler extends JeeLinkSensorHandler<LaCro
                         updateState(TEMPERATURE_CHANNEL + reading.getChannel(),
                                 new QuantityType<>(temp, SIUnits.CELSIUS));
                         updateState(HUMIDITY_CHANNEL + reading.getChannel(),
-                                new QuantityType<>(reading.getHumidity(), SmartHomeUnits.PERCENT));
+                                new QuantityType<>(reading.getHumidity(), Units.PERCENT));
                     }
                 }
             }

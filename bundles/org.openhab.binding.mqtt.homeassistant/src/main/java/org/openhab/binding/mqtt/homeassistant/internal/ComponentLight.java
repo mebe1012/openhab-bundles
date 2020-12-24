@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.binding.mqtt.generic.ChannelStateUpdateListener;
+import org.openhab.binding.mqtt.generic.mapping.ColorMode;
 import org.openhab.binding.mqtt.generic.values.ColorValue;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * A MQTT light, following the https://www.home-assistant.io/components/light.mqtt/ specification.
@@ -100,25 +101,24 @@ public class ComponentLight extends AbstractComponent<ComponentLight.ChannelConf
     public ComponentLight(CFactory.ComponentConfiguration builder) {
         super(builder, ChannelConfiguration.class);
         this.channelStateUpdateListener = builder.getUpdateListener();
-        ColorValue value = new ColorValue(true, channelConfiguration.payload_on, channelConfiguration.payload_off, 100);
+        ColorValue value = new ColorValue(ColorMode.RGB, channelConfiguration.payload_on,
+                channelConfiguration.payload_off, 100);
 
         // Create three MQTT subscriptions and use this class object as update listener
-        switchChannel = buildChannel(switchChannelID, value, channelConfiguration.name).listener(this)//
-                .stateTopic(channelConfiguration.state_topic, channelConfiguration.state_value_template)//
-                .commandTopic(channelConfiguration.command_topic, channelConfiguration.retain)//
-                .build(false);
+        switchChannel = buildChannel(switchChannelID, value, channelConfiguration.name, this)
+                .stateTopic(channelConfiguration.state_topic, channelConfiguration.state_value_template,
+                        channelConfiguration.value_template)
+                .commandTopic(channelConfiguration.command_topic, channelConfiguration.retain).build(false);
 
-        colorChannel = buildChannel(colorChannelID, value, channelConfiguration.name).listener(this)//
-                .stateTopic(channelConfiguration.rgb_state_topic, channelConfiguration.rgb_value_template)//
-                .commandTopic(channelConfiguration.rgb_command_topic, channelConfiguration.retain)//
-                .build(false);
+        colorChannel = buildChannel(colorChannelID, value, channelConfiguration.name, this)
+                .stateTopic(channelConfiguration.rgb_state_topic, channelConfiguration.rgb_value_template)
+                .commandTopic(channelConfiguration.rgb_command_topic, channelConfiguration.retain).build(false);
 
-        brightnessChannel = buildChannel(brightnessChannelID, value, channelConfiguration.name).listener(this)//
-                .stateTopic(channelConfiguration.brightness_state_topic, channelConfiguration.brightness_value_template)//
-                .commandTopic(channelConfiguration.brightness_command_topic, channelConfiguration.retain)//
-                .build(false);
+        brightnessChannel = buildChannel(brightnessChannelID, value, channelConfiguration.name, this)
+                .stateTopic(channelConfiguration.brightness_state_topic, channelConfiguration.brightness_value_template)
+                .commandTopic(channelConfiguration.brightness_command_topic, channelConfiguration.retain).build(false);
 
-        channels.put(switchChannelID, colorChannel);
+        channels.put(colorChannelID, colorChannel);
     }
 
     @Override

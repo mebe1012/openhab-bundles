@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,12 +17,12 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.leapmotion.internal.LeapMotionBindingConstants;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 
 import com.leapmotion.leap.Controller;
@@ -35,7 +35,7 @@ import com.leapmotion.leap.Listener;
  *
  */
 @NonNullByDefault
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.leapmotion")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.leapmotion")
 public class LeapMotionDiscoveryService extends AbstractDiscoveryService {
 
     private @NonNullByDefault({}) Controller leapController;
@@ -46,7 +46,7 @@ public class LeapMotionDiscoveryService extends AbstractDiscoveryService {
     }
 
     @Override
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         leapController = new Controller();
         listener = new Listener() {
             @Override
@@ -94,5 +94,4 @@ public class LeapMotionDiscoveryService extends AbstractDiscoveryService {
     private void removeDiscoveryResult() {
         removeOlderResults(System.currentTimeMillis());
     }
-
 }

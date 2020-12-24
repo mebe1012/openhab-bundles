@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,12 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.openhab.binding.onewire.internal.DS2438Configuration;
 import org.openhab.binding.onewire.internal.OwDynamicStateDescriptionProvider;
 import org.openhab.binding.onewire.internal.OwException;
@@ -42,6 +36,12 @@ import org.openhab.binding.onewire.internal.device.DS2438;
 import org.openhab.binding.onewire.internal.device.DS2438.LightSensorType;
 import org.openhab.binding.onewire.internal.device.OwChannelConfig;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,17 +90,20 @@ public class AdvancedMultisensorThingHandler extends OwBaseThingHandler {
             return;
         }
 
-        hwRevision = Integer.valueOf(properties.get(PROPERTY_HW_REVISION));
+        hwRevision = Integer.valueOf(properties.getOrDefault(PROPERTY_HW_REVISION, "0"));
 
-        sensors.add(new DS2438(sensorId, this));
-        sensors.add(new DS18x20(new SensorId(properties.get(PROPERTY_DS18B20)), this));
-        if (THING_TYPE_AMS.equals(thingType)) {
-            sensors.add(new DS2438(new SensorId(properties.get(PROPERTY_DS2438)), this));
-            sensors.add(new DS2406_DS2413(new SensorId(properties.get(PROPERTY_DS2413)), this));
-            digitalRefreshInterval = configuration.digitalRefresh * 1000;
-            digitalLastRefresh = 0;
+        try {
+            sensors.add(new DS2438(sensorId, this));
+            sensors.add(new DS18x20(new SensorId(properties.get(PROPERTY_DS18B20)), this));
+            if (THING_TYPE_AMS.equals(thingType)) {
+                sensors.add(new DS2438(new SensorId(properties.get(PROPERTY_DS2438)), this));
+                sensors.add(new DS2406_DS2413(new SensorId(properties.get(PROPERTY_DS2413)), this));
+                digitalRefreshInterval = configuration.digitalRefresh * 1000;
+                digitalLastRefresh = 0;
+            }
+        } catch (IllegalArgumentException e) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "properties invalid");
         }
-
         scheduler.execute(() -> {
             configureThingChannels();
         });
@@ -109,7 +112,7 @@ public class AdvancedMultisensorThingHandler extends OwBaseThingHandler {
     @Override
     public void refresh(OwserverBridgeHandler bridgeHandler, long now) {
         try {
-            if ((now >= (digitalLastRefresh + digitalRefreshInterval)) && (thingType == THING_TYPE_AMS)) {
+            if ((now >= (digitalLastRefresh + digitalRefreshInterval)) && (thingType.equals(THING_TYPE_AMS))) {
                 logger.trace("refreshing digital {}", this.thing.getUID());
 
                 Boolean forcedRefresh = digitalLastRefresh == 0;

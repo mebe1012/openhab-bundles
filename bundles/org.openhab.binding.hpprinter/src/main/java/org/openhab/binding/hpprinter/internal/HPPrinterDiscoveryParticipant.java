@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hpprinter.internal;
 
+import static org.openhab.binding.hpprinter.internal.HPPrinterBindingConstants.THING_PRINTER;
+
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,16 +23,14 @@ import javax.jmdns.ServiceInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.openhab.binding.hpprinter.internal.HPPrinterBindingConstants.*;
 
 /**
  * The {@link HPPrinterDiscoveryParticipant} class discovers HP Printers over
@@ -39,7 +39,7 @@ import static org.openhab.binding.hpprinter.internal.HPPrinterBindingConstants.*
  * @author Stewart Cossey - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true)
+@Component
 public class HPPrinterDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
     private final Logger logger = LoggerFactory.getLogger(HPPrinterDiscoveryParticipant.class);
@@ -52,13 +52,14 @@ public class HPPrinterDiscoveryParticipant implements MDNSDiscoveryParticipant {
         }
 
         // We only care about HP Printers
-        if (service.getPropertyString("ty").toLowerCase().startsWith("hp")) {
+        String ty = service.getPropertyString("ty");
+        if (ty != null && ty.toLowerCase().startsWith("hp")) {
             String rp = service.getPropertyString("rp");
             if (rp == null) {
                 return null;
             }
 
-            logger.debug("Found HP Printer ID: {}", service.getPropertyString("ty"));
+            logger.debug("Found HP Printer ID: {}", ty);
             ThingUID uid = getThingUID(service);
             if (uid != null) {
                 Map<String, Object> properties = new HashMap<>(2);
@@ -69,17 +70,18 @@ public class HPPrinterDiscoveryParticipant implements MDNSDiscoveryParticipant {
                 String inetAddress = ip.toString().substring(1); // trim leading slash
                 String label = service.getName();
 
-                DiscoveryResult result = null;
                 properties.put(HPPrinterConfiguration.IP_ADDRESS, inetAddress);
-                result = DiscoveryResultBuilder.create(uid).withProperties(properties).withLabel(label).build();
+                properties.put(HPPrinterConfiguration.UUID, service.getPropertyString("UUID"));
+                DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties)
+                        .withRepresentationProperty(HPPrinterConfiguration.UUID).withLabel(label).build();
                 logger.trace("Created a DiscoveryResult {} for printer on host '{}' name '{}'", result, inetAddress,
                         label);
                 return result;
             } else {
-                logger.debug("Found unsupported HP Printer ID: {}", service.getPropertyString("ty"));
+                logger.debug("Found unsupported HP Printer ID: {}", ty);
             }
         } else {
-            logger.trace("Ignore non HP device {}", service.getPropertyString("ty"));
+            logger.trace("Ignore non HP device {}", ty);
         }
 
         return null;
@@ -105,7 +107,7 @@ public class HPPrinterDiscoveryParticipant implements MDNSDiscoveryParticipant {
             logger.trace("ServiceInfo: {}", service);
             if (service.getType().equals(getServiceType())) {
                 String uidName = getUIDName(service);
-                ThingTypeUID mdl = findThingType(service);
+                ThingTypeUID mdl = findThingType();
 
                 return new ThingUID(mdl, uidName);
             }
@@ -128,7 +130,7 @@ public class HPPrinterDiscoveryParticipant implements MDNSDiscoveryParticipant {
         return address;
     }
 
-    private @Nullable ThingTypeUID findThingType(ServiceInfo service) {
+    private ThingTypeUID findThingType() {
         return THING_PRINTER;
     }
 }

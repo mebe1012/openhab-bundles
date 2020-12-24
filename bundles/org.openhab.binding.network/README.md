@@ -13,6 +13,7 @@ The binding has the following configuration options:
 -   **allowDHCPlisten:**  If devices leave and reenter a network, they usually request their last IPv4 address by using DHCP requests. By listening for those messages, the status update can be more "real-time" without having to wait for the next refresh cycle. Default is true.
 -   **arpPingToolPath:** If the arp ping tool is not called `arping` and cannot be found in the PATH environment variable, the absolute path can be configured here. Default is `arping`.
 -   **cacheDeviceStateTimeInMS:** The result of a device presence detection is cached for a small amount of time. Set this time here in milliseconds. Be aware that no new pings will be issued within this time frame, even if explicitly requested. Default is 2000.
+-   **preferResponseTimeAsLatency:** If enabled, an attempt will be made to extract the latency from the output of the ping command. If no such latency value is found in the ping command output, the time to execute the ping command is used as fallback latency. If disabled, the time to execute the ping command is always used as latency value. This is disabled by default to be backwards-compatible and to not break statistics and monitoring which existed before this feature.
 
 Create a `<openHAB-conf>/services/network.cfg` file and use the above options like this:
 
@@ -40,14 +41,15 @@ Please note: things discovered by the network binding will be provided with a ti
 
 ```
 network:pingdevice:one_device [ hostname="192.168.0.64" ]
-network:pingdevice:second_device [ hostname="192.168.0.65", retry=1, timeout=5000, refreshInterval=60000 ]
+network:pingdevice:second_device [ hostname="192.168.0.65", macAddress="6f:70:65:6e:48:41", retry=1, timeout=5000, refreshInterval=60000 ]
 network:servicedevice:important_server [ hostname="192.168.0.62", port=1234 ]
 network:speedtest:local "SpeedTest 50Mo" @ "Internet" [refreshInterval=20, uploadSize=1000000, url="https://bouygues.testdebit.info/", fileName="50M.iso"]
 ```
 
 Use the following options for a **network:pingdevice**:
 
--   **hostname:** IP address or hostname of the device
+-   **hostname:** IP address or hostname of the device.
+-   **macAddress:** MAC address used for waking the device by the Wake-on-LAN action.
 -   **retry:** After how many refresh interval cycles the device will be assumed to be offline. Default: `1`.
 -   **timeout:** How long the ping will wait for an answer, in milliseconds. Default: `5000` (5 seconds).
 -   **refreshInterval:** How often the device will be checked, in milliseconds. Default: `60000` (one minute).
@@ -63,6 +65,7 @@ Use the following options for a **network:speedtest**:
 -   **url:** Url of the speed test server.
 -   **fileName:** Name of the file to download from test server.
 -   **initialDelay:** Delay (in minutes) before starting the first speed test (can help avoid flooding your server at startup). Default: `5`.
+-   **maxTimeout:** Number of timeout events that can happend (resetted at success) before setting the thing offline. Default: `3`.
 
 ## Presence detection - Configure target device
 
@@ -130,11 +133,11 @@ Linux has three different tools:
 *   arping by Thomas Habets (Ubuntu/Debian: `apt-get install arping`)
 *   arp-ping by Eli Fulkerson (Windows: https://www.elifulkerson.com/projects/arp-ping.php)
 
-arping by Thomas Habets runs on Windows and MacOS as well.
+arping by Thomas Habets runs on Windows and macOS as well.
 
 Make sure the tool is available in the PATH, or in the same path as the openHAB executable.
 
-On Linux and MacOS elevated access permissions may be needed, for instance by making the executable a suid executable (`chmod u+s /usr/sbin/arping`).
+On Linux and macOS elevated access permissions may be needed, for instance by making the executable a suid executable (`chmod u+s /usr/sbin/arping`).
 Just test the executable on the command line; if `sudo` is required, grant elevated permissions.
 
 ### DHCP Listen
@@ -156,6 +159,18 @@ iptables -A PREROUTING -t mangle -p udp ! -s 127.0.0.1 --dport 67 -j TEE --gatew
 iptables -A OUTPUT -t nat -p udp -s 127.0.0.1/32 --dport 67 -j DNAT --to 127.0.0.1:6767
 ```
 
+Above iptables solutions to check *dhcp_state* are not working when openHAB is started in Docker. Use another workaround
+
+```shell
+iptables -I PREROUTING -t nat -p udp --src 0.0.0.0 --dport 67 -j DNAT --to 0.0.0.0:6767
+```
+
+To verify PREROUTING list use below command
+
+```shell
+iptables -L -n -t nat
+```
+
 ## Channels
 
 Things support the following channels:
@@ -171,7 +186,7 @@ Things support the following channels:
 demo.things:
 
 ```xtend
-Thing network:pingdevice:devicename [ hostname="192.168.0.42" ]
+Thing network:pingdevice:devicename [ hostname="192.168.0.42", macAddress="6f:70:65:6e:48:41" ]
 Thing network:speedtest:local "SpeedTest 50Mo" @ "Internet" [url="https://bouygues.testdebit.info/", fileName="50M.iso"]
 ```
 
@@ -221,5 +236,20 @@ sitemap demo label="Main Menu"
         Chart item=Speedtest_ResultUp period=M refresh=30000 service="influxdb" visibility=[sys_chart_period==2]
         Chart item=Speedtest_ResultUp period=Y refresh=30000 service="influxdb" visibility=[sys_chart_period==3]  
     }
+}
+```
+
+## Rule Actions
+
+A Wake-on-LAN action is supported by this binding for the `pingdevice` and `servicedevice` thing types.
+In classic rules this action is accessible as shown in the example below:
+
+```
+val actions = getActions("network", "network:pingdevice:devicename")
+if (actions === null) {
+    logInfo("actions", "Actions not found, check thing ID")
+    return
+} else {
+    actions.sendWakeOnLanPacket()
 }
 ```

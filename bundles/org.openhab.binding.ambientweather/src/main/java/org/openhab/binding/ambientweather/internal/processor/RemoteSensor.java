@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,9 +20,9 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.openhab.binding.ambientweather.internal.handler.AmbientWeatherStationHandler;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.Units;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class RemoteSensor {
 
     private final Logger logger = LoggerFactory.getLogger(RemoteSensor.class);
 
-    private final TreeMap<Double, String> soilMoistureMap = new TreeMap<Double, String>();
+    private final TreeMap<Double, String> soilMoistureMap = new TreeMap<>();
 
     private int numberOfSensors;
 
@@ -73,6 +73,9 @@ public class RemoteSensor {
      * there are remote sensor values
      */
     private void updateSensorChannels(AmbientWeatherStationHandler handler, int i, final @Nullable String jsonData) {
+        if (jsonData == null) {
+            return;
+        }
         String sensorNumber = String.valueOf(i);
         StringReader stringReader = new StringReader(jsonData);
         JsonReader reader = new JsonReader(stringReader);
@@ -83,16 +86,22 @@ public class RemoteSensor {
                 if (("temp" + sensorNumber + "f").equals(name)) {
                     handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_TEMPERATURE, reader.nextDouble(),
                             ImperialUnits.FAHRENHEIT);
+                } else if (("dewPoint" + sensorNumber).equals(name)) {
+                    handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_DEW_POINT, reader.nextDouble(),
+                            ImperialUnits.FAHRENHEIT);
+                } else if (("feelsLike" + sensorNumber).equals(name)) {
+                    handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_FEELING_TEMPERATURE,
+                            reader.nextDouble(), ImperialUnits.FAHRENHEIT);
                 } else if (("humidity" + sensorNumber).equals(name)) {
                     handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_HUMIDITY, reader.nextDouble(),
-                            SmartHomeUnits.PERCENT);
+                            Units.PERCENT);
                 } else if (("soiltemp" + sensorNumber).equals(name)) {
                     handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_SOIL_TEMPERATURE, reader.nextDouble(),
                             ImperialUnits.FAHRENHEIT);
                 } else if (("soilhum" + sensorNumber).equals(name)) {
                     Double soilMoisture = reader.nextDouble();
                     handler.updateQuantity(CHGRP_REMOTE_SENSOR + sensorNumber, CH_SOIL_MOISTURE, soilMoisture,
-                            SmartHomeUnits.PERCENT);
+                            Units.PERCENT);
                     handler.updateString(CHGRP_REMOTE_SENSOR + sensorNumber, CH_SOIL_MOISTURE_LEVEL,
                             convertSoilMoistureToString(soilMoisture));
                 } else if (("batt" + sensorNumber).equals(name)) {
@@ -126,6 +135,6 @@ public class RemoteSensor {
      */
     private String convertSoilMoistureToString(double soilMoisture) {
         Double key = soilMoistureMap.ceilingKey(soilMoisture);
-        return key == null ? "UNKNOWN" : soilMoistureMap.get(key);
+        return key == null ? "UNKNOWN" : soilMoistureMap.getOrDefault(key, "UNKNOWN");
     }
 }

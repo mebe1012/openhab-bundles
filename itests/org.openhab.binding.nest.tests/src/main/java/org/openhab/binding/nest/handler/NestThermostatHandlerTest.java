@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,31 +12,31 @@
  */
 package org.openhab.binding.nest.handler;
 
-import static org.eclipse.smarthome.core.library.types.OnOffType.*;
-import static org.eclipse.smarthome.core.library.unit.ImperialUnits.FAHRENHEIT;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.CELSIUS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.openhab.binding.nest.internal.NestBindingConstants.*;
 import static org.openhab.binding.nest.internal.data.NestDataUtil.*;
+import static org.openhab.core.library.types.OnOffType.*;
+import static org.openhab.core.library.unit.ImperialUnits.FAHRENHEIT;
+import static org.openhab.core.library.unit.SIUnits.CELSIUS;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.nest.internal.config.NestDeviceConfiguration;
 import org.openhab.binding.nest.internal.handler.NestThermostatHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 
 /**
  * Tests for {@link NestThermostatHandler}.
@@ -76,11 +76,11 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
         assertThatItemHasState(CHANNEL_ECO_MAX_SET_POINT, new QuantityType<>(24, CELSIUS));
         assertThatItemHasState(CHANNEL_ECO_MIN_SET_POINT, new QuantityType<>(12.5, CELSIUS));
         assertThatItemHasState(CHANNEL_FAN_TIMER_ACTIVE, OFF);
-        assertThatItemHasState(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(15, SmartHomeUnits.MINUTE));
+        assertThatItemHasState(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(15, Units.MINUTE));
         assertThatItemHasState(CHANNEL_FAN_TIMER_TIMEOUT, parseDateTimeType("1970-01-01T00:00:00.000Z"));
         assertThatItemHasState(CHANNEL_HAS_FAN, ON);
         assertThatItemHasState(CHANNEL_HAS_LEAF, ON);
-        assertThatItemHasState(CHANNEL_HUMIDITY, new QuantityType<>(25, SmartHomeUnits.PERCENT));
+        assertThatItemHasState(CHANNEL_HUMIDITY, new QuantityType<>(25, Units.PERCENT));
         assertThatItemHasState(CHANNEL_LAST_CONNECTION, parseDateTimeType("2017-02-02T21:00:06.000Z"));
         assertThatItemHasState(CHANNEL_LOCKED, OFF);
         assertThatItemHasState(CHANNEL_LOCKED_MAX_SET_POINT, new QuantityType<>(22, CELSIUS));
@@ -94,7 +94,7 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
         assertThatItemHasState(CHANNEL_SUNLIGHT_CORRECTION_ACTIVE, OFF);
         assertThatItemHasState(CHANNEL_SUNLIGHT_CORRECTION_ENABLED, ON);
         assertThatItemHasState(CHANNEL_TEMPERATURE, new QuantityType<>(19, CELSIUS));
-        assertThatItemHasState(CHANNEL_TIME_TO_TARGET, new QuantityType<>(0, SmartHomeUnits.MINUTE));
+        assertThatItemHasState(CHANNEL_TIME_TO_TARGET, new QuantityType<>(0, Units.MINUTE));
         assertThatItemHasState(CHANNEL_USING_EMERGENCY_HEAT, OFF);
 
         assertThatAllItemStatesAreNotNull();
@@ -114,11 +114,11 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
         assertThatItemHasState(CHANNEL_ECO_MAX_SET_POINT, new QuantityType<>(76, FAHRENHEIT));
         assertThatItemHasState(CHANNEL_ECO_MIN_SET_POINT, new QuantityType<>(55, FAHRENHEIT));
         assertThatItemHasState(CHANNEL_FAN_TIMER_ACTIVE, OFF);
-        assertThatItemHasState(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(15, SmartHomeUnits.MINUTE));
+        assertThatItemHasState(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(15, Units.MINUTE));
         assertThatItemHasState(CHANNEL_FAN_TIMER_TIMEOUT, parseDateTimeType("1970-01-01T00:00:00.000Z"));
         assertThatItemHasState(CHANNEL_HAS_FAN, ON);
         assertThatItemHasState(CHANNEL_HAS_LEAF, ON);
-        assertThatItemHasState(CHANNEL_HUMIDITY, new QuantityType<>(25, SmartHomeUnits.PERCENT));
+        assertThatItemHasState(CHANNEL_HUMIDITY, new QuantityType<>(25, Units.PERCENT));
         assertThatItemHasState(CHANNEL_LAST_CONNECTION, parseDateTimeType("2017-02-02T21:00:06.000Z"));
         assertThatItemHasState(CHANNEL_LOCKED, OFF);
         assertThatItemHasState(CHANNEL_LOCKED_MAX_SET_POINT, new QuantityType<>(72, FAHRENHEIT));
@@ -132,7 +132,7 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
         assertThatItemHasState(CHANNEL_SUNLIGHT_CORRECTION_ACTIVE, OFF);
         assertThatItemHasState(CHANNEL_SUNLIGHT_CORRECTION_ENABLED, ON);
         assertThatItemHasState(CHANNEL_TEMPERATURE, new QuantityType<>(66, FAHRENHEIT));
-        assertThatItemHasState(CHANNEL_TIME_TO_TARGET, new QuantityType<>(0, SmartHomeUnits.MINUTE));
+        assertThatItemHasState(CHANNEL_TIME_TO_TARGET, new QuantityType<>(0, Units.MINUTE));
         assertThatItemHasState(CHANNEL_USING_EMERGENCY_HEAT, OFF);
 
         assertThatAllItemStatesAreNotNull();
@@ -194,7 +194,7 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
     public void handleFanTimerDurationCommands() throws IOException {
         int[] durations = { 15, 30, 45, 60, 120, 240, 480, 960, 15 };
         for (int duration : durations) {
-            handleCommand(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(duration, SmartHomeUnits.MINUTE));
+            handleCommand(CHANNEL_FAN_TIMER_DURATION, new QuantityType<>(duration, Units.MINUTE));
             assertNestApiPropertyState(THERMOSTAT1_DEVICE_ID, "fan_timer_duration", String.valueOf(duration));
         }
     }
@@ -297,5 +297,4 @@ public class NestThermostatHandlerTest extends NestThingHandlerOSGiTest {
         handleCommand(channelId, new QuantityType<>(21, CELSIUS));
         assertNestApiPropertyState(THERMOSTAT1_DEVICE_ID, apiPropertyName, "70");
     }
-
 }

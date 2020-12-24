@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,11 @@
  */
 package org.openhab.binding.pioneeravr.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.pioneeravr.internal.PioneerAvrBindingConstants;
 import org.openhab.binding.pioneeravr.internal.protocol.avr.AvrConnection;
 import org.openhab.binding.pioneeravr.internal.protocol.serial.SerialAvrConnection;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Thing;
 
 /**
  * An handler of an AVR connected through a serial port.
@@ -24,15 +25,17 @@ import org.openhab.binding.pioneeravr.internal.protocol.serial.SerialAvrConnecti
  */
 public class SerialAvrHandler extends AbstractAvrHandler {
 
-    public SerialAvrHandler(Thing thing) {
+    private SerialPortManager serialPortManager;
+
+    public SerialAvrHandler(Thing thing, SerialPortManager serialPortManager) {
         super(thing);
+        this.serialPortManager = serialPortManager;
     }
 
     @Override
     protected AvrConnection createConnection() {
         String serialPort = (String) this.getConfig().get(PioneerAvrBindingConstants.SERIAL_PORT_PARAMETER);
 
-        return new SerialAvrConnection(serialPort);
+        return new SerialAvrConnection(serialPort, serialPortManager);
     }
-
 }

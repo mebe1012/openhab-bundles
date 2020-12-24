@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.unifi.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.ThingStatus.OFFLINE;
-import static org.eclipse.smarthome.core.thing.ThingStatus.ONLINE;
-import static org.eclipse.smarthome.core.thing.ThingStatusDetail.*;
+import static org.openhab.core.thing.ThingStatus.OFFLINE;
+import static org.openhab.core.thing.ThingStatus.ONLINE;
+import static org.openhab.core.thing.ThingStatusDetail.*;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +22,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.unifi.internal.UniFiBindingConstants;
 import org.openhab.binding.unifi.internal.UniFiControllerThingConfig;
 import org.openhab.binding.unifi.internal.api.UniFiCommunicationException;
@@ -39,6 +30,15 @@ import org.openhab.binding.unifi.internal.api.UniFiInvalidCredentialsException;
 import org.openhab.binding.unifi.internal.api.UniFiInvalidHostException;
 import org.openhab.binding.unifi.internal.api.UniFiSSLException;
 import org.openhab.binding.unifi.internal.api.model.UniFiController;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,5 +196,4 @@ public class UniFiControllerThingHandler extends BaseBridgeHandler {
             });
         }
     }
-
 }

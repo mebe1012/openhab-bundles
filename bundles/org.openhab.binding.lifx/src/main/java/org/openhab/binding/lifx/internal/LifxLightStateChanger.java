@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,11 +29,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.PercentType;
 import org.openhab.binding.lifx.internal.fields.HSBK;
 import org.openhab.binding.lifx.internal.listener.LifxLightStateListener;
 import org.openhab.binding.lifx.internal.protocol.AcknowledgementResponse;
 import org.openhab.binding.lifx.internal.protocol.ApplicationRequest;
+import org.openhab.binding.lifx.internal.protocol.Effect;
 import org.openhab.binding.lifx.internal.protocol.GetColorZonesRequest;
 import org.openhab.binding.lifx.internal.protocol.GetLightInfraredRequest;
 import org.openhab.binding.lifx.internal.protocol.GetLightPowerRequest;
@@ -46,7 +46,9 @@ import org.openhab.binding.lifx.internal.protocol.SetColorZonesRequest;
 import org.openhab.binding.lifx.internal.protocol.SetLightInfraredRequest;
 import org.openhab.binding.lifx.internal.protocol.SetLightPowerRequest;
 import org.openhab.binding.lifx.internal.protocol.SetPowerRequest;
+import org.openhab.binding.lifx.internal.protocol.SetTileEffectRequest;
 import org.openhab.binding.lifx.internal.protocol.SignalStrength;
+import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +85,7 @@ public class LifxLightStateChanger implements LifxLightStateListener {
 
     private @Nullable ScheduledFuture<?> sendJob;
 
-    private Map<Integer, @Nullable List<PendingPacket>> pendingPacketsMap = new ConcurrentHashMap<>();
+    private Map<Integer, List<PendingPacket>> pendingPacketsMap = new ConcurrentHashMap<>();
 
     private class PendingPacket {
 
@@ -228,12 +230,10 @@ public class LifxLightStateChanger implements LifxLightStateListener {
     private @Nullable PendingPacket findPacketToSend() {
         PendingPacket result = null;
         for (List<PendingPacket> pendingPackets : pendingPacketsMap.values()) {
-            if (pendingPackets != null) {
-                for (PendingPacket pendingPacket : pendingPackets) {
-                    if (pendingPacket.hasAcknowledgeIntervalElapsed()
-                            && (result == null || pendingPacket.lastSend < result.lastSend)) {
-                        result = pendingPacket;
-                    }
+            for (PendingPacket pendingPacket : pendingPackets) {
+                if (pendingPacket.hasAcknowledgeIntervalElapsed()
+                        && (result == null || pendingPacket.lastSend < result.lastSend)) {
+                    result = pendingPacket;
                 }
             }
         }
@@ -252,15 +252,13 @@ public class LifxLightStateChanger implements LifxLightStateListener {
 
     private void removeFailedPackets() {
         for (List<PendingPacket> pendingPackets : pendingPacketsMap.values()) {
-            if (pendingPackets != null) {
-                Iterator<PendingPacket> it = pendingPackets.iterator();
-                while (it.hasNext()) {
-                    PendingPacket pendingPacket = it.next();
-                    if (pendingPacket.sendCount > MAX_RETRIES && pendingPacket.hasAcknowledgeIntervalElapsed()) {
-                        logger.warn("{} failed (unacknowledged {} times to light {})",
-                                pendingPacket.packet.getClass().getSimpleName(), pendingPacket.sendCount, logId);
-                        it.remove();
-                    }
+            Iterator<PendingPacket> it = pendingPackets.iterator();
+            while (it.hasNext()) {
+                PendingPacket pendingPacket = it.next();
+                if (pendingPacket.sendCount > MAX_RETRIES && pendingPacket.hasAcknowledgeIntervalElapsed()) {
+                    logger.warn("{} failed (unacknowledged {} times to light {})",
+                            pendingPacket.packet.getClass().getSimpleName(), pendingPacket.sendCount, logId);
+                    it.remove();
                 }
             }
         }
@@ -268,14 +266,12 @@ public class LifxLightStateChanger implements LifxLightStateListener {
 
     private @Nullable PendingPacket removeAcknowledgedPacket(int sequenceNumber) {
         for (List<PendingPacket> pendingPackets : pendingPacketsMap.values()) {
-            if (pendingPackets != null) {
-                Iterator<PendingPacket> it = pendingPackets.iterator();
-                while (it.hasNext()) {
-                    PendingPacket pendingPacket = it.next();
-                    if (pendingPacket.packet.getSequence() == sequenceNumber) {
-                        it.remove();
-                        return pendingPacket;
-                    }
+            Iterator<PendingPacket> it = pendingPackets.iterator();
+            while (it.hasNext()) {
+                PendingPacket pendingPacket = it.next();
+                if (pendingPacket.packet.getSequence() == sequenceNumber) {
+                    it.remove();
+                    return pendingPacket;
                 }
             }
         }
@@ -327,6 +323,14 @@ public class LifxLightStateChanger implements LifxLightStateListener {
         // Nothing to handle
     }
 
+    @Override
+    public void handleTileEffectChange(@Nullable Effect oldEffect, Effect newEffect) {
+        if (oldEffect == null || !oldEffect.equals(newEffect)) {
+            SetTileEffectRequest packet = new SetTileEffectRequest(newEffect);
+            replacePacketsInMap(packet);
+        }
+    }
+
     public void handleResponsePacket(Packet packet) {
         if (packet instanceof AcknowledgementResponse) {
             long ackTimestamp = System.currentTimeMillis();
@@ -376,5 +380,4 @@ public class LifxLightStateChanger implements LifxLightStateListener {
             }
         }
     }
-
 }

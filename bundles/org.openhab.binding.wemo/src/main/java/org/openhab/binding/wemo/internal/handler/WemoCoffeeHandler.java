@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,22 +32,22 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOParticipant;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.CharacterData;
@@ -71,7 +71,7 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
 
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_COFFEE);
 
-    private Map<String, Boolean> subscriptionState = new HashMap<String, Boolean>();
+    private Map<String, Boolean> subscriptionState = new HashMap<>();
 
     protected static final int SUBSCRIPTION_DURATION = 600;
 
@@ -96,7 +96,7 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
                 updateWemoState();
                 onSubscription();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
             }
         }
@@ -150,7 +150,7 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
             try {
                 updateWemoState();
             } catch (Exception e) {
-                logger.debug("Exception during poll : {}", e);
+                logger.debug("Exception during poll", e);
             }
         } else if (channelUID.getId().equals(CHANNEL_STATE)) {
             if (command instanceof OnOffType) {
@@ -231,7 +231,7 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
                 service.removeSubscription(this, subscription);
             }
 
-            subscriptionState = new HashMap<String, Boolean>();
+            subscriptionState = new HashMap<>();
             service.unregisterParticipant(this);
         }
     }
@@ -423,6 +423,7 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
         }
     }
 
+    @SuppressWarnings("null")
     public State getDateTimeState(String attributeValue) {
         if (attributeValue != null) {
             long value = 0;
@@ -467,5 +468,4 @@ public class WemoCoffeeHandler extends AbstractWemoHandler implements UpnpIOPart
     @Override
     public void onStatusChanged(boolean status) {
     }
-
 }

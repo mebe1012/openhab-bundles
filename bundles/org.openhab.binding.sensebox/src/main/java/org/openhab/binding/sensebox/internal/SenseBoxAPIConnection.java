@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,38 +12,38 @@
  */
 package org.openhab.binding.sensebox.internal;
 
-import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
-import org.openhab.binding.sensebox.internal.model.SenseBoxData;
-import org.openhab.binding.sensebox.internal.model.SenseBoxDescriptor;
-import org.openhab.binding.sensebox.internal.model.SenseBoxLoc;
-import org.openhab.binding.sensebox.internal.model.SenseBoxLocation;
-import org.openhab.binding.sensebox.internal.model.SenseBoxSensor;
+import static org.openhab.binding.sensebox.internal.SenseBoxBindingConstants.*;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.sensebox.internal.dto.SenseBoxData;
+import org.openhab.binding.sensebox.internal.dto.SenseBoxDescriptor;
+import org.openhab.binding.sensebox.internal.dto.SenseBoxLoc;
+import org.openhab.binding.sensebox.internal.dto.SenseBoxLocation;
+import org.openhab.binding.sensebox.internal.dto.SenseBoxSensor;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.ThingStatus;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.openhab.binding.sensebox.internal.SenseBoxBindingConstants.INVALID_BRIGHTNESS;
-import static org.openhab.binding.sensebox.internal.SenseBoxBindingConstants.SENSEMAP_API_URL_BASE;
-import static org.openhab.binding.sensebox.internal.SenseBoxBindingConstants.SENSEMAP_IMAGE_URL_BASE;
-import static org.openhab.binding.sensebox.internal.SenseBoxBindingConstants.SENSEMAP_MAP_URL_BASE;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
+import com.google.gson.Gson;
 
 /**
  * The {@link SenseBoxAPIConnection} is responsible for fetching data from the senseBox API server.
  *
  * @author Hakan Tandogan - Initial contribution
  */
+@NonNullByDefault
 public class SenseBoxAPIConnection {
-    private Logger logger = LoggerFactory.getLogger(SenseBoxAPIConnection.class);
 
-    private Gson gson = new Gson();
+    private final Logger logger = LoggerFactory.getLogger(SenseBoxAPIConnection.class);
+
+    private final Gson gson = new Gson();
 
     private static final Properties HEADERS = new Properties();
 
@@ -75,7 +75,7 @@ public class SenseBoxAPIConnection {
             // Could perhaps be simplified via triply-nested arrays
             // http://stackoverflow.com/questions/36946875/how-can-i-parse-geojson-with-gson
             for (SenseBoxLoc loc : parsedData.getLocs()) {
-               if (loc.getGeometry() != null) {
+                if (loc.getGeometry() != null) {
                     List<Double> locationData = loc.getGeometry().getData();
                     if (locationData != null) {
                         SenseBoxLocation location = new SenseBoxLocation();
@@ -98,12 +98,6 @@ public class SenseBoxAPIConnection {
             }
 
             for (SenseBoxSensor sensor : parsedData.getSensors()) {
-                // the uom library uses the 'MICRO SIGN', so if we encounter the GREEK SMALL LETTER MU,
-                // replace it with the proper representation.
-                if (sensor.getUnit() != null) {
-                    sensor.getUnit().replaceAll("\u03bc", "\00b5");
-                }
-
                 if ("VEML6070".equals(sensor.getSensorType())) {
                     // "unit" is not nicely comparable, so use sensor type for now
                     parsedData.setUvIntensity(sensor);
@@ -122,7 +116,7 @@ public class SenseBoxAPIConnection {
                             parsedData.setLuminance(sensor);
                         }
                     }
-                } else if ("hPa".equals(sensor.getUnit())) {
+                } else if ("Pa".equals(sensor.getUnit()) || "hPa".equals(sensor.getUnit())) {
                     parsedData.setPressure(sensor);
                 } else if ("%".equals(sensor.getUnit())) {
                     parsedData.setHumidity(sensor);
@@ -144,8 +138,9 @@ public class SenseBoxAPIConnection {
 
             SenseBoxDescriptor descriptor = new SenseBoxDescriptor();
             descriptor.setApiUrl(query);
-            if (StringUtils.isNotEmpty(parsedData.getImage())) {
-                descriptor.setImageUrl(SENSEMAP_IMAGE_URL_BASE + "/" + parsedData.getImage());
+            String image = parsedData.getImage();
+            if (image != null && !image.isEmpty()) {
+                descriptor.setImageUrl(SENSEMAP_IMAGE_URL_BASE + "/" + image);
             }
             descriptor.setMapUrl(SENSEMAP_MAP_URL_BASE + "/explore/" + senseBoxId);
             parsedData.setDescriptor(descriptor);

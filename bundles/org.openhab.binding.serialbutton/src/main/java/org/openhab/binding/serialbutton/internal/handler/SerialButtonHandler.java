@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,22 +16,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TooManyListenersException;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.serialbutton.internal.SerialButtonBindingConstants;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.CommonTriggerEvents;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,9 +93,20 @@ public class SerialButtonHandler extends BaseThingHandler implements SerialPortE
     @Override
     public void dispose() {
         if (serialPort != null) {
+            serialPort.removeEventListener();
+        }
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                logger.debug("Error while closing the input stream: {}", e.getMessage());
+            }
+        }
+        if (serialPort != null) {
             serialPort.close();
         }
-        IOUtils.closeQuietly(inputStream);
+        inputStream = null;
+        serialPort = null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,20 +37,20 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.irtrans.internal.IRtransBindingConstants;
-import org.openhab.binding.irtrans.internal.IrCommand;
 import org.openhab.binding.irtrans.internal.IRtransBindingConstants.Led;
+import org.openhab.binding.irtrans.internal.IrCommand;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class EthernetBridgeHandler extends BaseBridgeHandler implements Transcei
      * configuration files. Command loading from pre-defined configuration files is not supported
      * (anymore), but the code is maintained in case this functionality is re-added in the future
      **/
-    protected final Collection<IrCommand> irCommands = new HashSet<IrCommand>();
+    protected final Collection<IrCommand> irCommands = new HashSet<>();
 
     public EthernetBridgeHandler(Bridge bridge) {
         super(bridge);
@@ -124,7 +124,7 @@ public class EthernetBridgeHandler extends BaseBridgeHandler implements Transcei
         if (selector != null) {
             if (getConfig().get(IP_ADDRESS) != null && getConfig().get(PORT_NUMBER) != null) {
                 if (pollingThread == null) {
-                    pollingThread = new Thread(pollingRunnable, "ESH-IRtrans-Polling " + getThing().getUID());
+                    pollingThread = new Thread(pollingRunnable, "OH-binding-" + getThing().getUID() + "-polling");
                     pollingThread.start();
                 }
             } else {

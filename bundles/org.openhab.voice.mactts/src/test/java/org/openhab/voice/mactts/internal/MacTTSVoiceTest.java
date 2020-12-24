@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,17 @@
  */
 package org.openhab.voice.mactts.internal;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * Test MacTTSVoice
@@ -30,15 +30,15 @@ import org.apache.commons.io.IOUtils;
  * @author Kelly Davis - Initial contribution and API
  */
 public class MacTTSVoiceTest {
-    
+
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * Test MacTTSVoice(String) constructor
      */
     @Test
-    public void testConstructor() {
-        Assume.assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
+    public void testConstructor() throws IOException {
+        assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
         BufferedReader bufferedReader = null;
         try {
             Process process = Runtime.getRuntime().exec("say -v ?");
@@ -47,9 +47,7 @@ public class MacTTSVoiceTest {
 
             String nextLine = bufferedReader.readLine();
             MacTTSVoice voiceMacOS = new MacTTSVoice(nextLine);
-            Assert.assertNotNull("The MacTTSVoice(String) constructor failed", voiceMacOS);
-        } catch (IOException e) {
-            Assert.fail("testConstructor() failed with IOException: " + e.getMessage());
+            assertNotNull(voiceMacOS, "The MacTTSVoice(String) constructor failed");
         } finally {
             IOUtils.closeQuietly(bufferedReader);
         }
@@ -59,8 +57,8 @@ public class MacTTSVoiceTest {
      * Test VoiceMacOS.getUID()
      */
     @Test
-    public void getUIDTest() {
-        Assume.assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
+    public void getUIDTest() throws IOException {
+        assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
         BufferedReader bufferedReader = null;
         try {
             Process process = Runtime.getRuntime().exec("say -v ?");
@@ -69,12 +67,9 @@ public class MacTTSVoiceTest {
 
             String nextLine = bufferedReader.readLine();
             MacTTSVoice macTTSVoice = new MacTTSVoice(nextLine);
-            Assert.assertTrue("The VoiceMacOS UID has an incorrect format",
-                    (0 == macTTSVoice.getUID().indexOf("mactts:")));
-        } catch (IOException e) {
-            Assert.fail("getUIDTest() failed with IOException: " + e.getMessage());
+            assertTrue(0 == macTTSVoice.getUID().indexOf("mactts:"), "The VoiceMacOS UID has an incorrect format");
         } finally {
-        	IOUtils.closeQuietly(bufferedReader);
+            IOUtils.closeQuietly(bufferedReader);
         }
     }
 
@@ -82,8 +77,8 @@ public class MacTTSVoiceTest {
      * Test MacTTSVoice.getLabel()
      */
     @Test
-    public void getLabelTest() {
-        Assume.assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
+    public void getLabelTest() throws IOException {
+        assumeTrue("Mac OS X".equals(System.getProperty("os.name")));
         BufferedReader bufferedReader = null;
         try {
             Process process = Runtime.getRuntime().exec("say -v ?");
@@ -92,9 +87,7 @@ public class MacTTSVoiceTest {
 
             String nextLine = bufferedReader.readLine();
             MacTTSVoice voiceMacOS = new MacTTSVoice(nextLine);
-            Assert.assertNotNull("The MacTTSVoice label has an incorrect format", voiceMacOS.getLabel());
-        } catch (IOException e) {
-            Assert.fail("getLabelTest() failed with IOException: " + e.getMessage());
+            assertNotNull(voiceMacOS.getLabel(), "The MacTTSVoice label has an incorrect format");
         } finally {
             IOUtils.closeQuietly(bufferedReader);
         }
@@ -104,8 +97,8 @@ public class MacTTSVoiceTest {
      * Test MacTTSVoice.getLocale()
      */
     @Test
-    public void getLocaleTest() {
-        Assume.assumeTrue("Mac OS X" == System.getProperty("os.name"));
+    public void getLocaleTest() throws IOException {
+        assumeTrue("Mac OS X" == System.getProperty("os.name"));
         BufferedReader bufferedReader = null;
         try {
             Process process = Runtime.getRuntime().exec("say -v ?");
@@ -114,9 +107,7 @@ public class MacTTSVoiceTest {
 
             String nextLine = bufferedReader.readLine();
             MacTTSVoice voiceMacOS = new MacTTSVoice(nextLine);
-            Assert.assertNotNull("The MacTTSVoice locale has an incorrect format", voiceMacOS.getLocale());
-        } catch (IOException e) {
-            Assert.fail("getLocaleTest() failed with IOException: " + e.getMessage());
+            assertNotNull(voiceMacOS.getLocale(), "The MacTTSVoice locale has an incorrect format");
         } finally {
             IOUtils.closeQuietly(bufferedReader);
         }

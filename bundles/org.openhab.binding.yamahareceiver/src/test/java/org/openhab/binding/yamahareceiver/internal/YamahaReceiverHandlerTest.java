@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,21 +13,15 @@
 package org.openhab.binding.yamahareceiver.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.binding.yamahareceiver.internal.config.YamahaBridgeConfig;
@@ -38,6 +32,11 @@ import org.openhab.binding.yamahareceiver.internal.protocol.DeviceInformation;
 import org.openhab.binding.yamahareceiver.internal.protocol.ProtocolFactory;
 import org.openhab.binding.yamahareceiver.internal.protocol.SystemControl;
 import org.openhab.binding.yamahareceiver.internal.protocol.xml.AbstractXMLProtocolTest;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
 
 /**
  * Test cases for {@link YamahaBridgeHandler}. The tests provide mocks for supporting entities using Mockito.
@@ -48,32 +47,17 @@ public class YamahaReceiverHandlerTest extends AbstractXMLProtocolTest {
 
     private YamahaBridgeHandler subject;
 
-    @Mock
-    private YamahaBridgeConfig bridgeConfig;
-
-    @Mock
-    private Configuration configuration;
-
-    @Mock
-    private ProtocolFactory protocolFactory;
-
-    @Mock
-    private DeviceInformation deviceInformation;
-
-    @Mock
-    private SystemControl systemControl;
-
-    @Mock
-    private ThingHandlerCallback callback;
-
-    @Mock
-    private Bridge bridge;
+    private @Mock YamahaBridgeConfig bridgeConfig;
+    private @Mock Configuration configuration;
+    private @Mock ProtocolFactory protocolFactory;
+    private @Mock DeviceInformation deviceInformation;
+    private @Mock SystemControl systemControl;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock Bridge bridge;
 
     @Override
     protected void onSetUp() throws Exception {
         super.onSetUp();
-
-        initMocks(this);
 
         ctx.prepareForModel(TestModels.RX_S601D);
         ctx.respondWith("<Main_Zone><Input><Input_Sel_Item>GetParam</Input_Sel_Item></Input></Main_Zone>",
@@ -95,14 +79,13 @@ public class YamahaReceiverHandlerTest extends AbstractXMLProtocolTest {
         subject.setCallback(callback);
 
         doAnswer(a -> {
-            ((ConnectionStateListener) a.getArgument(1)).connectionEstablished(ctx.getConnection());
+            ((ConnectionStateListener) a.getArgument(1)).onConnectionCreated(ctx.getConnection());
             return null;
         }).when(protocolFactory).createConnection(anyString(), same(subject));
     }
 
     @Test
     public void afterInitializeBridgeShouldBeOnline() throws InterruptedException {
-
         // when
         subject.initialize();
         // internally there is an timer, let's allow it to execute

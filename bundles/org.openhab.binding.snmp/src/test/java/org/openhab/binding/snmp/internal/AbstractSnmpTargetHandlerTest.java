@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.snmp.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.snmp.internal.SnmpBindingConstants.THING_TYPE_TARGET;
@@ -23,23 +23,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.OID;
@@ -64,6 +65,12 @@ public abstract class AbstractSnmpTargetHandlerTest extends JavaTest {
 
     protected Thing thing;
     protected SnmpTargetHandler thingHandler;
+    private AutoCloseable mocks;
+
+    @AfterEach
+    public void after() throws Exception {
+        mocks.close();
+    }
 
     protected VariableBinding handleCommandSwitchChannel(SnmpDatatype datatype, Command command, String onValue,
             String offValue, boolean refresh) throws IOException {
@@ -134,12 +141,12 @@ public abstract class AbstractSnmpTargetHandlerTest extends JavaTest {
     protected void refresh(SnmpChannelMode channelMode, boolean refresh) throws IOException {
         setup(SnmpBindingConstants.CHANNEL_TYPE_UID_STRING, channelMode);
 
-        waitForAssert(() -> assertEquals(ThingStatus.ONLINE, thingHandler.getThing().getStatusInfo().getStatus()));
+        verifyStatus(ThingStatus.UNKNOWN);
         verify(snmpService).addCommandResponder(any());
 
         if (refresh) {
             ArgumentCaptor<PDU> pduCaptor = ArgumentCaptor.forClass(PDU.class);
-            verify(snmpService, atLeast(1)).send(pduCaptor.capture(), any(), eq(null), eq(thingHandler));
+            verify(snmpService, timeout(500).atLeast(1)).send(pduCaptor.capture(), any(), eq(null), eq(thingHandler));
             Vector<? extends VariableBinding> variables = pduCaptor.getValue().getVariableBindings();
             assertTrue(variables.stream().filter(v -> v.getOid().toDottedString().equals(TEST_OID)).findFirst()
                     .isPresent());
@@ -165,7 +172,7 @@ public abstract class AbstractSnmpTargetHandlerTest extends JavaTest {
             String onValue, String offValue, String exceptionValue) {
         Map<String, Object> channelConfig = new HashMap<>();
         Map<String, Object> thingConfig = new HashMap<>();
-        MockitoAnnotations.initMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
 
         thingConfig.put("hostname", "localhost");
 
@@ -206,6 +213,10 @@ public abstract class AbstractSnmpTargetHandlerTest extends JavaTest {
 
         thingHandler.initialize();
 
-        waitForAssert(() -> assertEquals(ThingStatus.ONLINE, thingHandler.getThing().getStatusInfo().getStatus()));
+        verifyStatus(ThingStatus.UNKNOWN);
+    }
+
+    protected void verifyStatus(ThingStatus status) {
+        waitForAssert(() -> assertEquals(status, thingHandler.getThing().getStatusInfo().getStatus()));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Complementary class to {@link org.eclipse.smarthome.core.cache.ExpiringCache}, implementing an async variant
+ * Complementary class to {@link org.openhab.core.cache.ExpiringCache}, implementing an async variant
  * of an expiring cache. Returns the cached value immediately to the callback if not expired yet, otherwise issue
  * a fetch and notify callback implementors asynchronously.
  *

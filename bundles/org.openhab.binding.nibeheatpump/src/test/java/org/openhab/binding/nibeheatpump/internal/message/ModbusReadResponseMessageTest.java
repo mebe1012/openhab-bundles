@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,16 @@
  */
 package org.openhab.binding.nibeheatpump.internal.message;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.eclipse.smarthome.core.util.HexUtils;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Tests cases for {@link ModbusReadRequestMessage}.
  *
- * @author Pauli Anttila
+ * @author Pauli Anttila - Initial contribution
  */
 public class ModbusReadResponseMessageTest {
 
@@ -46,17 +45,17 @@ public class ModbusReadResponseMessageTest {
         assertEquals(value, m.getValue());
     }
 
-    @Test(expected = NibeHeatPumpException.class)
-    public void badCrcTest() throws NibeHeatPumpException {
+    @Test
+    public void badCrcTest() {
         final String strMessage = "5C00206A060102030405064C";
         final byte[] byteMessage = HexUtils.hexToBytes(strMessage);
-        MessageFactory.getMessage(byteMessage);
+        assertThrows(NibeHeatPumpException.class, () -> MessageFactory.getMessage(byteMessage));
     }
 
-    @Test(expected = NibeHeatPumpException.class)
-    public void notReadResponseMessageTest() throws NibeHeatPumpException {
+    @Test
+    public void notReadResponseMessageTest() {
         final String strMessage = "5C00206B060102030405064A";
         final byte[] byteMessage = HexUtils.hexToBytes(strMessage);
-        new ModbusReadResponseMessage(byteMessage);
+        assertThrows(NibeHeatPumpException.class, () -> new ModbusReadResponseMessage(byteMessage));
     }
 }

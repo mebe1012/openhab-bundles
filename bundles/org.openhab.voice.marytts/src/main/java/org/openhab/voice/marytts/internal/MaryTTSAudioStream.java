@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,10 +20,10 @@ import java.io.SequenceInputStream;
 import javax.sound.sampled.AudioInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.FixedLengthAudioStream;
 
 /**
  * Implementation of the {@link AudioSource} interface for the {@link MaryTTSService}
@@ -122,8 +122,8 @@ class MaryTTSAudioStream extends FixedLengthAudioStream {
         header[22] = channel;
         header[23] = 0;
         header[24] = (byte) (srate & 0xff);
-        header[25] = (byte) ((srate >> 8) & 0xff); 
-        header[26] = (byte) ((srate >> 16) & 0xff); 
+        header[25] = (byte) ((srate >> 8) & 0xff);
+        header[26] = (byte) ((srate >> 16) & 0xff);
         header[27] = (byte) ((srate >> 24) & 0xff);
         header[28] = (byte) ((bitrate / 8) & 0xff);
         header[29] = (byte) (((bitrate / 8) >> 8) & 0xff);

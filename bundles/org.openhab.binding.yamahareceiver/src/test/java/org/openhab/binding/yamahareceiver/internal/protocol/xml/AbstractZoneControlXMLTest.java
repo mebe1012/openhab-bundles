@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,14 @@
  */
 package org.openhab.binding.yamahareceiver.internal.protocol.xml;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import org.mockito.Mock;
 import org.openhab.binding.yamahareceiver.internal.config.YamahaZoneConfig;
 import org.openhab.binding.yamahareceiver.internal.protocol.InputConverter;
 import org.openhab.binding.yamahareceiver.internal.state.DeviceInformationState;
 import org.openhab.binding.yamahareceiver.internal.state.ZoneControlStateListener;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 /**
  * Common zone test.
@@ -28,16 +28,11 @@ import static org.mockito.Mockito.when;
  */
 public abstract class AbstractZoneControlXMLTest extends AbstractXMLProtocolTest {
 
-    @Mock
-    protected YamahaZoneConfig zoneConfig;
-
-    @Mock
-    protected ZoneControlStateListener zoneControlStateListener;
-
     protected DeviceInformationState deviceInformationState;
 
-    @Mock
-    protected InputConverter inputConverter;
+    protected @Mock InputConverter inputConverter;
+    protected @Mock ZoneControlStateListener zoneControlStateListener;
+    protected @Mock YamahaZoneConfig zoneConfig;
 
     @Override
     protected void onSetUp() throws Exception {
@@ -51,5 +46,4 @@ public abstract class AbstractZoneControlXMLTest extends AbstractXMLProtocolTest
         when(inputConverter.fromStateName(anyString())).thenAnswer(p -> p.getArgument(0));
         when(inputConverter.toCommandName(anyString())).thenAnswer(p -> p.getArgument(0));
     }
-
 }

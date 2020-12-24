@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.pioneeravr.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.pioneeravr.internal.PioneerAvrBindingConstants;
 import org.openhab.binding.pioneeravr.internal.protocol.avr.AvrConnection;
 import org.openhab.binding.pioneeravr.internal.protocol.ip.IpAvrConnection;
+import org.openhab.core.thing.Thing;
 
 /**
  * An handler of an AVR connected through an IP connection.
@@ -35,5 +35,4 @@ public class IpAvrHandler extends AbstractAvrHandler {
 
         return new IpAvrConnection(host, tcpPort);
     }
-
 }

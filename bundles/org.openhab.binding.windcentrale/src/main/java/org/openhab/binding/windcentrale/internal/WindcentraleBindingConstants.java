@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link WindcentraleBindingConstants} class defines common constants, which are
@@ -49,5 +49,4 @@ public final class WindcentraleBindingConstants {
     public static final String PROPERTY_MILL_ID = "millId";
     public static final String PROPERTY_QTY_WINDDELEN = "wd";
     public static final String PROPERTY_REFRESH_INTERVAL = "refreshInterval";
-
 }

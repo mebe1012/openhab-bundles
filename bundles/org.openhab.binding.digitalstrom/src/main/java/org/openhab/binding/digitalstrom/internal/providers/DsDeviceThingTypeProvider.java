@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,19 +21,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinitionBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
 import org.openhab.binding.digitalstrom.internal.DigitalSTROMBindingConstants;
 import org.openhab.binding.digitalstrom.internal.handler.CircuitHandler;
 import org.openhab.binding.digitalstrom.internal.handler.DeviceHandler;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.constants.MeteringTypeEnum;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.constants.MeteringUnitsEnum;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ChannelDefinition;
+import org.openhab.core.thing.type.ChannelDefinitionBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Michael Ochel - initial contributer
  * @author Matthias Siegele - initial contributer
  */
-@Component(service = ThingTypeProvider.class, immediate = true)
+@Component(service = ThingTypeProvider.class)
 public class DsDeviceThingTypeProvider extends BaseDsI18n implements ThingTypeProvider {
 
     /**
@@ -124,7 +124,7 @@ public class DsDeviceThingTypeProvider extends BaseDsI18n implements ThingTypePr
 
     @Override
     public Collection<ThingType> getThingTypes(Locale locale) {
-        List<ThingType> thingTypes = new LinkedList<ThingType>();
+        List<ThingType> thingTypes = new LinkedList<>();
         for (SupportedThingTypes supportedThingType : SupportedThingTypes.values()) {
             thingTypes.add(getThingType(
                     new ThingTypeUID(DigitalSTROMBindingConstants.BINDING_ID, supportedThingType.toString()), locale));
@@ -157,7 +157,7 @@ public class DsDeviceThingTypeProvider extends BaseDsI18n implements ThingTypePr
                                 .build()));
             }
             if (SupportedThingTypes.circuit.equals(supportedThingType)) {
-                List<ChannelDefinition> channelDefinitions = new ArrayList<ChannelDefinition>(3);
+                List<ChannelDefinition> channelDefinitions = new ArrayList<>(3);
                 for (MeteringTypeEnum meteringType : MeteringTypeEnum.values()) {
                     channelDefinitions.add(new ChannelDefinitionBuilder(
                             DsChannelTypeProvider.getMeteringChannelID(meteringType, MeteringUnitsEnum.WH, false),
@@ -172,5 +172,4 @@ public class DsDeviceThingTypeProvider extends BaseDsI18n implements ThingTypePr
         }
         return null;
     }
-
 }

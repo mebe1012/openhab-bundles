@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,18 +16,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.binding.mqtt.discovery.AbstractMQTTDiscovery;
 import org.openhab.binding.mqtt.discovery.MQTTTopicDiscoveryService;
-import org.openhab.binding.mqtt.generic.tools.WaitForTopicValue;
 import org.openhab.binding.mqtt.homie.generic.internal.MqttBindingConstants;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -40,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mqtthomie")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.mqtthomie")
 @NonNullByDefault
 public class Homie300Discovery extends AbstractMQTTDiscovery {
     private final Logger logger = LoggerFactory.getLogger(Homie300Discovery.class);
@@ -80,6 +78,8 @@ public class Homie300Discovery extends AbstractMQTTDiscovery {
     @Override
     public void receivedMessage(ThingUID connectionBridge, MqttBrokerConnection connection, String topic,
             byte[] payload) {
+        resetTimeout();
+
         if (!checkVersion(payload)) {
             logger.trace("Found homie device. But version {} is out of range.",
                     new String(payload, StandardCharsets.UTF_8));
@@ -91,17 +91,7 @@ public class Homie300Discovery extends AbstractMQTTDiscovery {
             return;
         }
 
-        // Retrieve name and update found discovery
-        try {
-            WaitForTopicValue w = new WaitForTopicValue(connection, topic.replace("$homie", "$name"));
-            w.waitForTopicValueAsync(scheduler, 700).thenAccept(name -> {
-                publishDevice(connectionBridge, connection, deviceID, topic, name);
-            });
-        } catch (InterruptedException | ExecutionException ignored) {
-            // The name is nice to have, but not required, use deviceId as fallback
-            publishDevice(connectionBridge, connection, deviceID, topic, deviceID);
-        }
-
+        publishDevice(connectionBridge, connection, deviceID, topic, deviceID);
     }
 
     void publishDevice(ThingUID connectionBridge, MqttBrokerConnection connection, String deviceID, String topic,

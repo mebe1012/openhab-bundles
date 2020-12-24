@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,11 +18,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.dsmr.internal.device.connector.DSMRConnectorErrorEvent;
 import org.openhab.binding.dsmr.internal.device.connector.DSMRSerialConnector;
 import org.openhab.binding.dsmr.internal.device.connector.DSMRSerialSettings;
 import org.openhab.binding.dsmr.internal.device.p1telegram.P1Telegram;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +40,18 @@ public class DSMRSerialAutoDevice implements DSMRDevice, DSMREventListener {
      * Enum to keep track of the internal state of {@link DSMRSerialAutoDevice}.
      */
     enum DeviceState {
-    /**
-     * Discovers the settings of the serial port.
-     */
-    DISCOVER_SETTINGS,
-    /**
-     * Device is receiving telegram data from the serial port.
-     */
-    NORMAL,
-    /**
-     * Communication with serial port isn't working.
-     */
-    ERROR
+        /**
+         * Discovers the settings of the serial port.
+         */
+        DISCOVER_SETTINGS,
+        /**
+         * Device is receiving telegram data from the serial port.
+         */
+        NORMAL,
+        /**
+         * Communication with serial port isn't working.
+         */
+        ERROR
     }
 
     /**
@@ -279,5 +279,4 @@ public class DSMRSerialAutoDevice implements DSMRDevice, DSMREventListener {
         }
         halfTimeTimer = scheduler.schedule(this::switchBaudrate, baudrateSwitchTimeoutSeconds, TimeUnit.SECONDS);
     }
-
 }

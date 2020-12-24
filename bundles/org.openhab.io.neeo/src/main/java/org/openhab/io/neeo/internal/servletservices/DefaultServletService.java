@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,8 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
 
 /**
  * The default implementation of {@link ServletService} that simply does nothing (allowing subclasses to override
@@ -65,7 +65,7 @@ class DefaultServletService implements ServletService {
     /**
      * Overridden to simply return false
      *
-     * @see org.openhab.io.neeo.internal.servletservices.ServletService#handleEvent(org.eclipse.smarthome.core.events.Event)
+     * @see org.openhab.io.neeo.internal.servletservices.ServletService#handleEvent(org.openhab.core.events.Event)
      */
     @Override
     public boolean handleEvent(Event event) {

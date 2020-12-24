@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,25 @@
  */
 package org.openhab.binding.amazonechocontrol.internal.channelhandler;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.types.State;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.amazonechocontrol.internal.jsons.JsonDevices.Device;
+import org.openhab.core.types.State;
 
 /**
- * The {@link IAmazonThingHandler} is used from ChannelHandlers to communicate with the thing
+ * The {@link IAmazonThingHandler} is used from ChannelHandlers to communicate
+ * with the thing
  *
  * @author Michael Geramb - Initial contribution
  */
 @NonNullByDefault
 public interface IAmazonThingHandler {
+
     void updateChannelState(String channelId, State state);
+
+    void startAnnouncement(Device device, String speak, String bodyText, @Nullable String title,
+            @Nullable Integer volume) throws IOException, URISyntaxException;
 }

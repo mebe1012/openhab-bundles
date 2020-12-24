@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,28 +19,29 @@ import static org.openhab.binding.onewire.internal.OwBindingConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.device.DS18x20;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
 
 /**
  * Tests cases for {@link DS18x20}.
  *
  * @author Jan N. Klug - Initial contribution
  */
-public class DS18x20Test extends DeviceTestParent {
+@NonNullByDefault
+public class DS18x20Test extends DeviceTestParent<DS18x20> {
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
-        setupMocks(THING_TYPE_TEMPERATURE);
-        deviceTestClazz = DS18x20.class;
+        setupMocks(THING_TYPE_BASIC, DS18x20.class);
 
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put(CONFIG_IGNORE_POR, true);
@@ -48,40 +49,34 @@ public class DS18x20Test extends DeviceTestParent {
     }
 
     @Test
-    public void temperatureTest() {
-        instantiateDevice();
+    public void temperatureTest() throws OwException {
+        final DS18x20 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(15.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(15.0));
 
-            testDevice.enableChannel(CHANNEL_TEMPERATURE);
-            testDevice.configureChannels();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_TEMPERATURE);
+        testDevice.configureChannels();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler, times(1)).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_TEMPERATURE), eq(new QuantityType<>("15.0 °C")));
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verify(mockBridgeHandler, times(1)).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_TEMPERATURE), eq(new QuantityType<>("15.0 °C")));
     }
 
     @Test
-    public void temperatureIgnorePORTest() {
-        instantiateDevice();
+    public void temperatureIgnorePORTest() throws OwException {
+        final DS18x20 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(85.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(85.0));
 
-            testDevice.enableChannel(CHANNEL_TEMPERATURE);
-            testDevice.configureChannels();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_TEMPERATURE);
+        testDevice.configureChannels();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler, times(1)).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler, times(0)).postUpdate(eq(CHANNEL_TEMPERATURE), any());
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verify(mockBridgeHandler, times(1)).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler, times(0)).postUpdate(eq(CHANNEL_TEMPERATURE), any());
     }
 }

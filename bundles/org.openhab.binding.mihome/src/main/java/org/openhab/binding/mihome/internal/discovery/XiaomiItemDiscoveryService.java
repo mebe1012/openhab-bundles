@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.mihome.internal.XiaomiItemUpdateListener;
 import org.openhab.binding.mihome.internal.handler.XiaomiBridgeHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,12 +105,12 @@ public class XiaomiItemDiscoveryService extends AbstractDiscoveryService impleme
             Map<String, Object> properties = new HashMap<>(1);
             properties.put(ITEM_ID, sid);
 
-            ThingUID thingUID = new ThingUID(thingType, sid);
+            ThingUID bridgeUID = xiaomiBridgeHandler.getThing().getUID();
+            ThingUID thingUID = new ThingUID(thingType, bridgeUID, sid);
 
             logger.debug("Discovered device - sid: {} model: {}", sid, model);
             thingDiscovered(DiscoveryResultBuilder.create(thingUID).withThingType(thingType).withProperties(properties)
-                    .withRepresentationProperty(ITEM_ID).withLabel(modelLabel)
-                    .withBridge(xiaomiBridgeHandler.getThing().getUID()).build());
+                    .withRepresentationProperty(ITEM_ID).withLabel(modelLabel).withBridge(bridgeUID).build());
         }
     }
 

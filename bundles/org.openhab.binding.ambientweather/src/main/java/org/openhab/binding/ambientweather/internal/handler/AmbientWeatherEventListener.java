@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.binding.ambientweather.internal.handler;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -109,11 +110,12 @@ public class AmbientWeatherEventListener {
     }
 
     private AmbientWeatherStationHandler getHandler(String macAddress) {
-        logger.debug("Listener: Search for MAC {} in handlers list with {} entries", macAddress, handlers.size());
+        logger.debug("Listener: Search for MAC {} in handlers list with {} entries: {}", macAddress, handlers.size(),
+                Arrays.asList(handlers.values()));
         for (Map.Entry<AmbientWeatherStationHandler, String> device : handlers.entrySet()) {
             AmbientWeatherStationHandler handler = device.getKey();
             String mac = device.getValue();
-            if (mac.equals(macAddress)) {
+            if (mac.equalsIgnoreCase(macAddress)) {
                 logger.debug("Listener: Found handler for {} with MAC {}", handler.getThing().getUID(), macAddress);
                 return handler;
             }
@@ -182,6 +184,15 @@ public class AmbientWeatherEventListener {
     }
 
     /*
+     * Attempt to reconnect to the Ambient Weather real-time API
+     */
+    private void reconnectToService() {
+        logger.debug("Listener: Attempting to reconnect to service");
+        disconnectFromService();
+        connectToService();
+    }
+
+    /*
      * Socket.io event callbacks
      */
     private Emitter.Listener onEventConnect = new Emitter.Listener() {
@@ -220,7 +231,8 @@ public class AmbientWeatherEventListener {
     private Emitter.Listener onEventReconnect = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            logger.debug("Listener: Received socket event: {}", Socket.EVENT_RECONNECT);
+            logger.debug("Listener: Received reconnect event from service");
+            reconnectToService();
         }
     };
 

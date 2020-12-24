@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,23 +17,8 @@ import static org.openhab.binding.digiplex.internal.handler.TypeUtils.openClosed
 
 import java.time.ZonedDateTime;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.digiplex.internal.DigiplexBindingConstants;
 import org.openhab.binding.digiplex.internal.communication.DigiplexMessageHandler;
 import org.openhab.binding.digiplex.internal.communication.DigiplexRequest;
@@ -42,6 +27,20 @@ import org.openhab.binding.digiplex.internal.communication.ZoneStatusResponse;
 import org.openhab.binding.digiplex.internal.communication.events.ZoneEvent;
 import org.openhab.binding.digiplex.internal.communication.events.ZoneEventType;
 import org.openhab.binding.digiplex.internal.communication.events.ZoneStatusEvent;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * The {@link DigiplexZoneHandler} is responsible for handling commands, which are
@@ -52,8 +51,7 @@ import org.openhab.binding.digiplex.internal.communication.events.ZoneStatusEven
 @NonNullByDefault
 public class DigiplexZoneHandler extends BaseThingHandler {
 
-    @Nullable
-    private DigiplexBridgeHandler bridgeHandler;
+    private @Nullable DigiplexBridgeHandler bridgeHandler;
     private DigiplexZoneMessageHandler messageHandler = new DigiplexZoneMessageHandler();
     private int zoneNo;
     private int areaNo = 0; // not known at the beginning (protocol limitation)
@@ -104,7 +102,9 @@ public class DigiplexZoneHandler extends BaseThingHandler {
                 break;
             case ZONE_LAST_TRIGGERED:
                 if (command == RefreshType.REFRESH) {
-                    updateState(ZONE_LAST_TRIGGERED, lastTriggered);
+                    if (lastTriggered != UnDefType.NULL) {
+                        updateState(ZONE_LAST_TRIGGERED, lastTriggered);
+                    }
                 }
                 break;
         }
@@ -121,7 +121,9 @@ public class DigiplexZoneHandler extends BaseThingHandler {
         this.bridgeHandler = (DigiplexBridgeHandler) bridge.getHandler();
 
         String nodeParm = getThing().getProperties().get(DigiplexBindingConstants.PROPERTY_ZONE_NO);
-        zoneNo = Integer.parseInt(nodeParm);
+        if (nodeParm != null) {
+            zoneNo = Integer.parseInt(nodeParm);
+        }
         String areaParm = getThing().getProperties().get(DigiplexBindingConstants.PROPERTY_AREA_NO);
         if (areaParm != null) {
             areaNo = Integer.parseInt(areaParm);
@@ -138,7 +140,9 @@ public class DigiplexZoneHandler extends BaseThingHandler {
     private void updateChannels(boolean allChannels) {
         updateState(ZONE_STATUS, status);
         updateState(ZONE_EXTENDED_STATUS, extendedStatus);
-        updateState(ZONE_LAST_TRIGGERED, lastTriggered);
+        if (lastTriggered != UnDefType.NULL) {
+            updateState(ZONE_LAST_TRIGGERED, lastTriggered);
+        }
         if (allChannels) {
             updateState(ZONE_ALARM, alarm);
             updateState(ZONE_FIRE_ALARM, fireAlarm);
@@ -202,7 +206,7 @@ public class DigiplexZoneHandler extends BaseThingHandler {
         }
 
         @Override
-        public void handleZoneEvent(@NonNull ZoneEvent event) {
+        public void handleZoneEvent(ZoneEvent event) {
             if (event.getZoneNo() == DigiplexZoneHandler.this.zoneNo) {
                 switch (event.getType()) {
                     case ALARM:

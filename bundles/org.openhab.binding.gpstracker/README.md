@@ -1,13 +1,15 @@
 # GPSTracker Binding
 
-This binding allows you to connect mobile GPS tracker applications to openHAB and process GPS location reports. Currently two applications are supported:
+This binding allows you to connect mobile GPS tracker applications to openHAB and process GPS location reports.
+
+Currently two applications are supported:
 
 * [OwnTracks](https://owntracks.org/booklet/) - iOS, Android
 * [GPSLogger](https://gpslogger.app/) - Android
 
 GPS location reports are sent to openHAB using HTTP.
 Please be aware that this communication uses the public network so make sure your openHAB installation is [secured](https://www.openhab.org/docs/installation/security.html#encrypted-communication) (but accessible from public internet through myopenhab.org or using a reverse proxy) and you configured HTTP**S** access in tracking applications.
-The easiest way to achieve this is to use the [openHAB Cloud Connector](https://www.openhab.org/addons/integrations/openhabcloud/) in conjunction with [myopenHAB.org](http://www.myopenhab.org/).
+The easiest way to achieve this is to use the [openHAB Cloud Connector](https://www.openhab.org/addons/integrations/openhabcloud/) in conjunction with [myopenHAB.org](https://www.myopenhab.org/).
 
 The binding can process two message types received from trackers:
 
@@ -34,7 +36,7 @@ Go to Preferences/Connection and set:
 
 ### GPSLogger
 
-Install [GPSLogger for Android](https://play.google.com/store/apps/details?id=com.mendhak.gpslogger) on your device.
+Install [GPSLogger for Android](https://github.com/mendhak/gpslogger/releases) on your device.
 After the launch, go to General Options.
 Enable **Start on boot-up** and **Start on app launch**.
 
@@ -171,14 +173,14 @@ In order to see detailed debug information [set TRACE debug level](https://www.o
 ### Binding Start
 
 ```
-2018-10-03 18:12:38.950 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.eclipse.smarthome.config.discovery.DiscoveryService, org.openhab.binding.gpstracker.internal.discovery.TrackerDiscoveryService}={service.id=425, service.bundleid=183, service.scope=bundle, component.name=org.openhab.binding.gpstracker.internal.discovery.TrackerDiscoveryService, component.id=268} - org.openhab.binding.gpstracker
-2018-10-03 18:12:38.965 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory, org.eclipse.smarthome.config.core.ConfigOptionProvider}={location=47.536178,19.169812, service.id=426, service.bundleid=183, service.scope=bundle, radius=100, name=Home, component.name=org.openhab.binding.gpstracker.internal.GPSTrackerHandlerFactory, component.id=267, additionalRegionsJSON=[
+2018-10-03 18:12:38.950 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.openhab.core.config.discovery.DiscoveryService, org.openhab.binding.gpstracker.internal.discovery.TrackerDiscoveryService}={service.id=425, service.bundleid=183, service.scope=bundle, component.name=org.openhab.binding.gpstracker.internal.discovery.TrackerDiscoveryService, component.id=268} - org.openhab.binding.gpstracker
+2018-10-03 18:12:38.965 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.openhab.core.thing.binding.ThingHandlerFactory, org.openhab.core.config.core.ConfigOptionProvider}={location=47.536178,19.169812, service.id=426, service.bundleid=183, service.scope=bundle, radius=100, name=Home, component.name=org.openhab.binding.gpstracker.internal.GPSTrackerHandlerFactory, component.id=267, additionalRegionsJSON=[
 ], triggerEvent=false, service.pid=binding.gpstracker} - org.openhab.binding.gpstracker
 2018-10-03 18:12:38.994 [DEBUG] [er.internal.GPSTrackerHandlerFactory] - Initializing callback servlets
 2018-10-03 18:12:39.013 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {javax.servlet.ServletContext}={osgi.web.version=2.4.0.201809241418, osgi.web.contextpath=/, service.id=427, osgi.web.symbolicname=org.openhab.binding.gpstracker, service.bundleid=183, service.scope=singleton, osgi.web.contextname=default} - org.openhab.binding.gpstracker
 2018-10-03 18:12:39.047 [DEBUG] [er.internal.GPSTrackerHandlerFactory] - Started GPSTracker Callback servlet on /gpstracker/owntracks
 2018-10-03 18:12:39.058 [DEBUG] [er.internal.GPSTrackerHandlerFactory] - Started GPSTracker Callback servlet on /gpstracker/gpslogger
-2018-10-03 18:12:39.072 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.eclipse.smarthome.core.thing.profiles.ProfileFactory, org.eclipse.smarthome.core.thing.profiles.ProfileAdvisor, org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider}={service.id=428, service.bundleid=183, service.scope=bundle, component.name=org.openhab.binding.gpstracker.internal.profile.GPSTrackerProfileFactory, component.id=269} - org.openhab.binding.gpstracker
+2018-10-03 18:12:39.072 [DEBUG] [org.openhab.binding.gpstracker      ] - ServiceEvent REGISTERED - {org.openhab.core.thing.profiles.ProfileFactory, org.openhab.core.thing.profiles.ProfileAdvisor, org.openhab.core.thing.profiles.ProfileTypeProvider}={service.id=428, service.bundleid=183, service.scope=bundle, component.name=org.openhab.binding.gpstracker.internal.profile.GPSTrackerProfileFactory, component.id=269} - org.openhab.binding.gpstracker
 2018-10-03 18:12:39.092 [DEBUG] [org.openhab.binding.gpstracker      ] - BundleEvent STARTING - org.openhab.binding.gpstracker
 2018-10-03 18:12:39.098 [DEBUG] [org.openhab.binding.gpstracker      ] - BundleEvent STARTED - org.openhab.binding.gpstracker
 ```

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,13 +19,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.allplay.internal.AllPlayBindingConstants;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import de.kaizencode.tchaikovsky.speaker.Speaker;
  *
  * @author Dominic Lerbs - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.allplay")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.allplay")
 public class AllPlaySpeakerDiscoveryService extends AbstractDiscoveryService implements SpeakerAnnouncedListener {
 
     private final Logger logger = LoggerFactory.getLogger(AllPlaySpeakerDiscoveryService.class);
@@ -106,7 +106,5 @@ public class AllPlaySpeakerDiscoveryService extends AbstractDiscoveryService imp
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withProperties(properties)
                 .withRepresentationProperty(AllPlayBindingConstants.DEVICE_ID).withLabel(speaker.getName()).build();
         thingDiscovered(discoveryResult);
-
     }
-
 }

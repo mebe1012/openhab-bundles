@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.nibeheatpump.internal.handler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,20 +20,23 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.types.State;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.binding.nibeheatpump.internal.models.PumpModel;
 import org.openhab.binding.nibeheatpump.internal.models.VariableInformation;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.types.State;
 
 /**
  * Tests cases for {@link NibeHeatPumpHandler}.
  *
  * @author Jevgeni Kiski - Initial contribution
  */
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class NibeHeatPumpHandlerNibe2StateTest {
 
     // we need to get the decimal separator of the default locale for our tests
@@ -44,13 +47,9 @@ public class NibeHeatPumpHandlerNibe2StateTest {
     private Method m;
     private Class<?>[] parameterTypes;
     private Object[] parameters;
-    private int fCoilAddress;
-    private int fValue;
-    private String fFormat;
-    private String fType;
-    private String fExpected;
 
-    @Parameterized.Parameters(name = "{index}: f({0}, {1}, {3})={4}")
+    private @Mock SerialPortManager serialPortManager;
+
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] { //
                 { 47028, 0xFF, "%d", "Number", "-1" }, //
@@ -82,18 +81,9 @@ public class NibeHeatPumpHandlerNibe2StateTest {
         });
     }
 
-    public NibeHeatPumpHandlerNibe2StateTest(final int coilAddress, final int value, final String format,
-            final String type, final String expected) {
-        this.fCoilAddress = coilAddress;
-        this.fValue = value;
-        this.fFormat = format;
-        this.fType = type;
-        this.fExpected = expected;
-    }
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        product = new NibeHeatPumpHandler(null, PumpModel.F1X55);
+        product = new NibeHeatPumpHandler(null, PumpModel.F1X55, serialPortManager);
         parameterTypes = new Class[3];
         parameterTypes[0] = VariableInformation.class;
         parameterTypes[1] = int.class;
@@ -103,14 +93,16 @@ public class NibeHeatPumpHandlerNibe2StateTest {
         parameters = new Object[3];
     }
 
-    @Test
-    public void convertNibeValueToStateTest() throws InvocationTargetException, IllegalAccessException {
-        VariableInformation varInfo = VariableInformation.getVariableInfo(PumpModel.F1X55, fCoilAddress);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void convertNibeValueToStateTest(final int coilAddress, final int value, final String format,
+            final String type, final String expected) throws InvocationTargetException, IllegalAccessException {
+        VariableInformation varInfo = VariableInformation.getVariableInfo(PumpModel.F1X55, coilAddress);
         parameters[0] = varInfo;
-        parameters[1] = fValue;
-        parameters[2] = fType;
+        parameters[1] = value;
+        parameters[2] = type;
         State state = (State) m.invoke(product, parameters);
 
-        assertEquals(fExpected, state.format(fFormat));
+        assertEquals(expected, state.format(format));
     }
 }

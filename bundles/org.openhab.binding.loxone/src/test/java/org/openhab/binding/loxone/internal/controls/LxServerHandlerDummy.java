@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,26 +12,27 @@
  */
 package org.openhab.binding.loxone.internal.controls;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
 import org.openhab.binding.loxone.internal.LxBindingConfiguration;
 import org.openhab.binding.loxone.internal.LxServerHandlerApi;
 import org.openhab.binding.loxone.internal.types.LxConfig;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -64,7 +65,7 @@ public class LxServerHandlerDummy implements LxServerHandlerApi {
     void loadConfiguration() {
         InputStream stream = LxServerHandlerDummy.class.getResourceAsStream("LoxAPP3.json");
         assertNotNull(stream);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         assertNotNull(reader);
         String msg = reader.lines().collect(Collectors.joining(System.lineSeparator()));
         assertNotNull(msg);
@@ -96,7 +97,6 @@ public class LxServerHandlerDummy implements LxServerHandlerApi {
     @Override
     public void setChannelState(ChannelUID channelId, State state) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -115,7 +115,6 @@ public class LxServerHandlerDummy implements LxServerHandlerApi {
     @Override
     public void setSettings(Map<String, String> properties) {
         // TODO Auto-generated method stub
-
     }
 
     @Override

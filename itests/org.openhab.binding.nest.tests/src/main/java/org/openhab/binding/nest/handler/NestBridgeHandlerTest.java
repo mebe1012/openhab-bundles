@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,25 +13,29 @@
 package org.openhab.binding.nest.handler;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.junit.Before;
-import org.junit.Test;
+import javax.ws.rs.client.ClientBuilder;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.binding.nest.internal.config.NestBridgeConfiguration;
 import org.openhab.binding.nest.internal.handler.NestBridgeHandler;
 import org.openhab.binding.nest.internal.handler.NestRedirectUrlSupplier;
 import org.openhab.binding.nest.test.NestTestBridgeHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.osgi.service.jaxrs.client.SseEventSourceFactory;
 
 /**
  * Tests cases for {@link NestBridgeHandler}.
@@ -42,24 +46,25 @@ public class NestBridgeHandlerTest {
 
     private ThingHandler handler;
 
-    @Mock
-    private ThingHandlerCallback callback;
+    private AutoCloseable mocksCloseable;
 
-    @Mock
-    private Bridge bridge;
+    private @Mock Bridge bridge;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock ClientBuilder clientBuilder;
+    private @Mock Configuration configuration;
+    private @Mock SseEventSourceFactory eventSourceFactory;
+    private @Mock NestRedirectUrlSupplier redirectUrlSupplier;
 
-    @Mock
-    private Configuration configuration;
-
-    @Mock
-    private NestRedirectUrlSupplier redirectUrlSupplier;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-
-        handler = new NestTestBridgeHandler(bridge, "http://localhost");
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
+        handler = new NestTestBridgeHandler(bridge, clientBuilder, eventSourceFactory, "http://localhost");
         handler.setCallback(callback);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @SuppressWarnings("null")
@@ -84,5 +89,4 @@ public class NestBridgeHandlerTest {
         ThingStatusInfo thingStatusInfo = statusInfoCaptor.getValue();
         assertThat(thingStatusInfo.getStatus(), is(equalTo(ThingStatus.UNKNOWN)));
     }
-
 }

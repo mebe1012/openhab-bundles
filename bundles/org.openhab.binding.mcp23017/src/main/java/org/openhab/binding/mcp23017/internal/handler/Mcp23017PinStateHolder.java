@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.mcp23017.internal.GPIODataHolder;
 import org.openhab.binding.mcp23017.internal.PinMapper;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

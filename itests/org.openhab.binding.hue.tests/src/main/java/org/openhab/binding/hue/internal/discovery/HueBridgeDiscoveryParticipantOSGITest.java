@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,23 +12,18 @@
  */
 package org.openhab.binding.hue.internal.discovery;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.openhab.binding.hue.internal.HueBindingConstants.*;
+import static org.openhab.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.jupnp.model.meta.DeviceDetails;
 import org.jupnp.model.meta.ManufacturerDetails;
@@ -38,10 +33,14 @@ import org.jupnp.model.meta.RemoteDeviceIdentity;
 import org.jupnp.model.meta.RemoteService;
 import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.UDN;
-import org.openhab.binding.hue.internal.discovery.HueBridgeDiscoveryParticipant;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.ThingUID;
 
 /**
- * Tests for {@link HueBridgeDiscoveryParticipant}.
+ * Tests for {@link org.openhab.binding.hue.internal.discovery.HueBridgeDiscoveryParticipant}.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Höfer - Added representation
@@ -54,7 +53,7 @@ public class HueBridgeDiscoveryParticipantOSGITest extends JavaOSGiTest {
     RemoteDevice hueDevice;
     RemoteDevice otherDevice;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         discoveryParticipant = getService(UpnpDiscoveryParticipant.class, HueBridgeDiscoveryParticipant.class);
         assertThat(discoveryParticipant, is(notNullValue()));
@@ -75,11 +74,11 @@ public class HueBridgeDiscoveryParticipantOSGITest extends JavaOSGiTest {
                             new ManufacturerDetails("Taiwan"), new ModelDetails("$%&/"), "serial567", "upc"),
                     remoteService);
         } catch (final ValidationException | MalformedURLException ex) {
-            Assert.fail("Internal test error.");
+            fail("Internal test error.");
         }
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
     }
 

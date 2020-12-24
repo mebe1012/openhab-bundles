@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,17 +16,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
-import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
 import org.openhab.binding.rfxcom.internal.config.RFXComBridgeConfiguration;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +39,15 @@ public class RFXComSerialConnector extends RFXComBaseConnector implements Serial
 
     private OutputStream out;
     private SerialPort serialPort;
-    private SerialPortManager serialPortManager;
+    private final SerialPortManager serialPortManager;
 
+    private final String readerThreadName;
     private Thread readerThread;
 
-    public RFXComSerialConnector(SerialPortManager serialPortManager) {
+    public RFXComSerialConnector(SerialPortManager serialPortManager, String readerThreadName) {
         super();
         this.serialPortManager = serialPortManager;
+        this.readerThreadName = readerThreadName;
     }
 
     @Override
@@ -82,7 +83,7 @@ public class RFXComSerialConnector extends RFXComBaseConnector implements Serial
         } catch (TooManyListenersException e) {
         }
 
-        readerThread = new RFXComStreamReader(this);
+        readerThread = new RFXComStreamReader(this, readerThreadName);
         readerThread.start();
     }
 
@@ -106,11 +107,19 @@ public class RFXComSerialConnector extends RFXComBaseConnector implements Serial
 
         if (out != null) {
             logger.debug("Close serial out stream");
-            IOUtils.closeQuietly(out);
+            try {
+                out.close();
+            } catch (IOException e) {
+                logger.debug("Error while closing the out stream: {}", e.getMessage());
+            }
         }
         if (in != null) {
             logger.debug("Close serial in stream");
-            IOUtils.closeQuietly(in);
+            try {
+                in.close();
+            } catch (IOException e) {
+                logger.debug("Error while closing the in stream: {}", e.getMessage());
+            }
         }
 
         if (serialPort != null) {

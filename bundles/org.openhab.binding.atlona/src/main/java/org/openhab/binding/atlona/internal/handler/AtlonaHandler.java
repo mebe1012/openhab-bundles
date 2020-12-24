@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.atlona.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.BaseThingHandler;
 
 /**
  * This abstract class should be the base class for any Atlona product line handler.
@@ -30,7 +30,7 @@ public abstract class AtlonaHandler<C extends AtlonaCapabilities> extends BaseTh
     /**
      * Constructs the handler from the specified thing and capabilities
      *
-     * @param thing a non-null {@link org.eclipse.smarthome.core.thing.Thing}
+     * @param thing a non-null {@link org.openhab.core.thing.Thing}
      * @param capabilities a non-null {@link org.openhab.binding.atlona.internal.handler.AtlonaCapabilities}
      */
     public AtlonaHandler(Thing thing, C capabilities) {

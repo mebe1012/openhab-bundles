@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.loxone.internal.controls;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Test class for (@link LxControlInfoOnlyDigital}
@@ -24,7 +24,7 @@ import org.junit.Test;
  *
  */
 public class LxControlInfoOnlyDigitalTest extends LxControlTest {
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("101b50f7-0306-98fb-ffff403fb0c34b9e", "0e368d32-014f-4604-ffff403fb0c34b9e",
                 "101b563d-0302-78bd-ffff403fb0c34b9e", "Info Only Digital");

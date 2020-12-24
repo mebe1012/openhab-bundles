@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,13 +16,13 @@ import static org.openhab.binding.loxone.internal.LxBindingConstants.*;
 
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  * A timed switch type of control on Loxone Miniserver.
@@ -68,7 +68,8 @@ class LxControlTimedSwitch extends LxControlPushbutton {
         ChannelUID id = addChannel("Number", new ChannelTypeUID(BINDING_ID, MINISERVER_CHANNEL_TYPE_RO_NUMBER),
                 defaultChannelLabel + " / Deactivation Delay", "Deactivation Delay", null, null,
                 this::getDeactivationState);
-        addChannelStateDescription(id, new StateDescription(new BigDecimal(-1), null, null, null, true, null));
+        addChannelStateDescriptionFragment(id,
+                StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(-1)).withReadOnly(true).build());
     }
 
     private State getDeactivationState() {

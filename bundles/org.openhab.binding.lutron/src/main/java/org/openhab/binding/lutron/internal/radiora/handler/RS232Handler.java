@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,6 @@ package org.openhab.binding.lutron.internal.radiora.handler;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.lutron.internal.radiora.RS232Connection;
 import org.openhab.binding.lutron.internal.radiora.RadioRAConnection;
 import org.openhab.binding.lutron.internal.radiora.RadioRAConnectionException;
@@ -31,6 +23,15 @@ import org.openhab.binding.lutron.internal.radiora.config.RS232Config;
 import org.openhab.binding.lutron.internal.radiora.protocol.RadioRACommand;
 import org.openhab.binding.lutron.internal.radiora.protocol.RadioRAFeedback;
 import org.openhab.binding.lutron.internal.radiora.protocol.ZoneMapInquiryCommand;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +49,10 @@ public class RS232Handler extends BaseBridgeHandler implements RadioRAFeedbackLi
 
     private ScheduledFuture<?> zoneMapScheduledTask;
 
-    public RS232Handler(Bridge bridge) {
+    public RS232Handler(Bridge bridge, SerialPortManager serialPortManager) {
         super(bridge);
 
-        this.connection = new RS232Connection();
+        this.connection = new RS232Connection(serialPortManager);
         this.connection.setListener(this);
     }
 

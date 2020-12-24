@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,20 +15,22 @@ package org.openhab.binding.rfxcom.internal.messages;
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.*;
 import static org.openhab.binding.rfxcom.internal.messages.ByteEnumUtil.fromByte;
 
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 
 /**
  * RFXCOM data class for blinds1 message.
  *
  * @author Peter Janson / Pål Edman - Initial contribution
- * @author Pauli Anttila
+ * @author Pauli Anttila - Migration to OH2
+ * @author Fabien Le Bars - Added support for Cherubini blinds
  */
 public class RFXComBlinds1Message extends RFXComBatteryDeviceMessage<RFXComBlinds1Message.SubType> {
 
@@ -46,7 +48,8 @@ public class RFXComBlinds1Message extends RFXComBatteryDeviceMessage<RFXComBlind
         T10(10), // Dolat DLM-1, Topstar
         T11(11), // ASP
         T12(12), // Confexx CNF24-2435
-        T13(13); // Screenline
+        T13(13), // Screenline
+        T18(18); // Cherubini
 
         private final int subType;
 
@@ -165,11 +168,11 @@ public class RFXComBlinds1Message extends RFXComBatteryDeviceMessage<RFXComBlind
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         if (CHANNEL_COMMAND.equals(channelId)) {
             return (command == Commands.CLOSE ? OpenClosedType.CLOSED : OpenClosedType.OPEN);
         } else {
-            return super.convertToState(channelId);
+            return super.convertToState(channelId, deviceState);
         }
     }
 

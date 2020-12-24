@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,16 +18,16 @@ import javax.measure.Quantity;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.smartmeter.SmartMeterBindingConstants;
 import org.openhab.binding.smartmeter.internal.MeterDevice;
 import org.openhab.binding.smartmeter.internal.MeterValue;
 import org.openhab.binding.smartmeter.internal.ObisCode;
 import org.openhab.binding.smartmeter.internal.conformity.negate.NegateHandler;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,6 @@ public enum Conformity {
         @Override
         public <Q extends Quantity<Q>> State apply(Channel channel, QuantityType<Q> currentState, Thing thing,
                 MeterDevice<?> device) {
-
             return retrieveOverwrittenNegate(channel, currentState, thing, device, null);
         }
     },
@@ -57,8 +56,8 @@ public enum Conformity {
         /*
          * (non-Javadoc)
          *
-         * @see org.openhab.binding.smartmeter.internal.Conformity#apply(org.eclipse.smarthome.core.thing.Channel,
-         * org.eclipse.smarthome.core.library.types.QuantityType, org.eclipse.smarthome.core.thing.Thing,
+         * @see org.openhab.binding.smartmeter.internal.Conformity#apply(org.openhab.core.thing.Channel,
+         * org.openhab.core.library.types.QuantityType, org.openhab.core.thing.Thing,
          * org.openhab.binding.smartmeter.internal.MeterDevice)
          */
         @Override
@@ -68,34 +67,31 @@ public enum Conformity {
                 // Negate if this channel has the unit "Watt" and the negate bit is set. Read from all other
                 // channels the state and check if there is a negate bit.
                 String channelObis = channel.getProperties().get(SmartMeterBindingConstants.CHANNEL_PROPERTY_OBIS);
-                MeterValue<?> value = device.getMeterValue(channelObis);
-                if (value != null && SmartHomeUnits.WATT.isCompatible(value.getUnit())) {
-
-                    for (String obis : device.getObisCodes()) {
-                        try {
-                            MeterValue<?> otherValue = device.getMeterValue(obis);
-                            ObisCode obisCode = ObisCode.from(obis);
-                            if (otherValue != null) {
-
-                                if (obisCode.matches((byte) 0x60, (byte) 0x05, (byte) 0x05)) {
-
-                                    // we found status status obis 96.5.5
-                                    if (NegateHandler.isNegateSet(otherValue.getValue(), 5)) {
-                                        return currentState.negate();
-                                    }
-                                } else if (obisCode.matches((byte) 0x01, (byte) 0x08, (byte) 0x00)) {
-
-                                    // check obis 1.8.0 for status if status has negate bit set.
-                                    String status = otherValue.getStatus();
-                                    if (status != null && NegateHandler.isNegateSet(status, 5)) {
-                                        return currentState.negate();
+                if (channelObis != null) {
+                    MeterValue<?> value = device.getMeterValue(channelObis);
+                    if (value != null && Units.WATT.isCompatible(value.getUnit())) {
+                        for (String obis : device.getObisCodes()) {
+                            try {
+                                MeterValue<?> otherValue = device.getMeterValue(obis);
+                                ObisCode obisCode = ObisCode.from(obis);
+                                if (otherValue != null) {
+                                    if (obisCode.matches((byte) 0x60, (byte) 0x05, (byte) 0x05)) {
+                                        // we found status status obis 96.5.5
+                                        if (NegateHandler.isNegateSet(otherValue.getValue(), 5)) {
+                                            return currentState.negate();
+                                        }
+                                    } else if (obisCode.matches((byte) 0x01, (byte) 0x08, (byte) 0x00)) {
+                                        // check obis 1.8.0 for status if status has negate bit set.
+                                        String status = otherValue.getStatus();
+                                        if (status != null && NegateHandler.isNegateSet(status, 5)) {
+                                            return currentState.negate();
+                                        }
                                     }
                                 }
+                            } catch (Exception e) {
+                                logger.warn("Failed to check negate status for obis {}", obis, e);
                             }
-                        } catch (Exception e) {
-                            logger.warn("Failed to check negate status for obis {}", obis, e);
                         }
-
                     }
                 }
                 return currentState;
@@ -103,7 +99,7 @@ public enum Conformity {
         }
     };
 
-    private final static Logger logger = LoggerFactory.getLogger(Conformity.class);
+    private static final Logger logger = LoggerFactory.getLogger(Conformity.class);
 
     /**
      * Applies the overwritten negation setting for the channel.
@@ -119,9 +115,8 @@ public enum Conformity {
         boolean shouldNegateState = NegateHandler.shouldNegateState(negateProperty, channelId -> {
             Channel negateChannel = thing.getChannel(channelId);
             if (negateChannel != null) {
-
-                return device.getMeterValue(
-                        negateChannel.getProperties().get(SmartMeterBindingConstants.CHANNEL_PROPERTY_OBIS));
+                String property = negateChannel.getProperties().get(SmartMeterBindingConstants.CHANNEL_PROPERTY_OBIS);
+                return property != null ? device.getMeterValue(property) : null;
             }
             return null;
         });

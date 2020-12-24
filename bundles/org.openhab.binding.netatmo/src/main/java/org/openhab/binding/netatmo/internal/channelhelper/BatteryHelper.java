@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,10 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.netatmo.internal.ChannelTypeUtils;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +36,12 @@ import org.slf4j.LoggerFactory;
  * @author Gaël L'hopital - Initial contribution
  *
  */
+@NonNullByDefault
 public class BatteryHelper {
-    private Logger logger = LoggerFactory.getLogger(BatteryHelper.class);
+    private final Logger logger = LoggerFactory.getLogger(BatteryHelper.class);
     private int batteryLow;
 
-    private Object module;
+    private @Nullable Object module;
 
     public BatteryHelper(String batteryLevels) {
         List<String> thresholds = Arrays.asList(batteryLevels.split(","));
@@ -50,6 +53,7 @@ public class BatteryHelper {
     }
 
     public Optional<State> getNAThingProperty(String channelId) {
+        Object module = this.module;
         if (module != null) {
             try {
                 if (CHANNEL_BATTERY_LEVEL.equalsIgnoreCase(channelId)

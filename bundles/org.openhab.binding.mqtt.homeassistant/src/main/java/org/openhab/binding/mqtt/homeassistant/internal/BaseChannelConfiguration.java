@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,12 +14,13 @@ package org.openhab.binding.mqtt.homeassistant.internal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.util.UIDUtils;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.util.UIDUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
@@ -54,7 +55,7 @@ public abstract class BaseChannelConfiguration {
      */
     public static <C extends BaseChannelConfiguration> C fromString(final String configJSON, final Gson gson,
             final Class<C> clazz) {
-        return gson.fromJson(configJSON, clazz);
+        return Objects.requireNonNull(gson.fromJson(configJSON, clazz));
     }
 
     /**
@@ -108,6 +109,7 @@ public abstract class BaseChannelConfiguration {
         }
     }
 
+    @JsonAdapter(ConnectionDeserializer.class)
     static class Connection {
         protected @Nullable String type;
         protected @Nullable String identifier;

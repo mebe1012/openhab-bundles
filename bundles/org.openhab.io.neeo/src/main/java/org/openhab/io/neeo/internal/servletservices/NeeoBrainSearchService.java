@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -109,7 +109,10 @@ public class NeeoBrainSearchService extends DefaultServletService {
         final String path = StringUtils.lowerCase(paths[1]);
 
         if (StringUtils.equalsIgnoreCase(path, "search")) {
-            doSearch(req.getQueryString(), resp);
+            String queryString = req.getQueryString();
+            if (queryString != null) {
+                doSearch(queryString, resp);
+            }
         } else if (StringUtils.equalsIgnoreCase(path, "adapterdefinition") && paths.length >= 3) {
             doAdapterDefinition(paths[2], resp);
         } else {
@@ -121,7 +124,7 @@ public class NeeoBrainSearchService extends DefaultServletService {
      * Does the search of all things and returns the results
      *
      * @param queryString the non-null, possibly empty query string
-     * @param resp        the non-null response to write to
+     * @param resp the non-null response to write to
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void doSearch(String queryString, HttpServletResponse resp) throws IOException {
@@ -154,7 +157,7 @@ public class NeeoBrainSearchService extends DefaultServletService {
     /**
      * Does a query for the NEEO device definition
      *
-     * @param id   the non-empty (last) search identifier
+     * @param id the non-empty (last) search identifier
      * @param resp the non-null response to write to
      * @throws IOException Signals that an I/O exception has occurred.
      */
@@ -184,7 +187,7 @@ public class NeeoBrainSearchService extends DefaultServletService {
     /**
      * Does a query for the NEEO device definition
      *
-     * @param id   the non-empty (last) search identifier
+     * @param id the non-empty (last) search identifier
      * @param resp the non-null response to write to
      * @throws IOException Signals that an I/O exception has occurred.
      */

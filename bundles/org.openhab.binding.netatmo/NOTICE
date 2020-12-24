@@ -10,7 +10,7 @@ https://www.eclipse.org/legal/epl-2.0/.
 
 == Source Code
 
-https://github.com/openhab/openhab2-addons
+https://github.com/openhab/openhab-addons
 
 == Third-party Content
 
@@ -18,6 +18,11 @@ commons-codec
 * License: Apache 2.0 License
 * Project; https://commons.apache.org/proper/commons-codec
 * Source:  https://commons.apache.org/proper/commons-codec
+
+gson-fire
+* License: Apache 2.0 License
+* Project: http://gsonfire.io
+* Source:  https://github.com/julman99/gson-fire
 
 json
 * License: JSON License
@@ -39,12 +44,7 @@ oltu.oauth2
 * Project: https://oltu.apache.org
 * Source:  https://svn.apache.org/viewvc/oltu/trunk
 
-netatmo-java-retrofit
-* License: Apache 2.0 License
+netatmo-swagger-decl
+* License: MIT License
 * Project: https://dev.netatmo.com
-* Source:  https://github.com/cbornet/netatmo-swagger-api
-
-retrofit
-* License: Apache 2.0 License
-* Project: https://square.github.io/retrofit
-* Source:  https://github.com/square/retrofit
+* Source:  https://github.com/cbornet/netatmo-swagger-decl

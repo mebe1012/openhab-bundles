@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,24 +27,24 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.keba.internal.KebaBindingConstants.KebaSeries;
 import org.openhab.binding.keba.internal.KebaBindingConstants.KebaType;
+import org.openhab.core.cache.ExpiringCacheMap;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +183,6 @@ public class KeContactHandler extends BaseThingHandler {
                         }
                         isReport100needed = false;
                     }
-
                 }
             }
         } catch (NumberFormatException | IOException e) {
@@ -558,15 +557,17 @@ public class KeContactHandler extends BaseThingHandler {
                     if (command instanceof DecimalType) {
                         transceiver.send(
                                 "setenergy " + String.valueOf(
-                                        Math.min(Math.max(0, ((DecimalType) command).intValue()*10), 999999999)), this);
+                                        Math.min(Math.max(0, ((DecimalType) command).intValue() * 10), 999999999)),
+                                this);
                     }
                     break;
                 }
                 case CHANNEL_AUTHENTICATE: {
                     if (command instanceof StringType) {
                         String cmd = command.toString();
-                        // cmd must contain ID + CLASS (works only if the RFID TAG is in the whitelist of the Keba station) 
-                        transceiver.send("start " + cmd , this);
+                        // cmd must contain ID + CLASS (works only if the RFID TAG is in the whitelist of the Keba
+                        // station)
+                        transceiver.send("start " + cmd, this);
                     }
                     break;
                 }

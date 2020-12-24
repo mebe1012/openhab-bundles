@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,15 @@
  */
 package org.openhab.binding.lutron.internal.radiora.handler;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.lutron.internal.LutronBindingConstants;
 import org.openhab.binding.lutron.internal.radiora.config.PhantomButtonConfig;
 import org.openhab.binding.lutron.internal.radiora.protocol.ButtonPressCommand;
 import org.openhab.binding.lutron.internal.radiora.protocol.LEDMapFeedback;
 import org.openhab.binding.lutron.internal.radiora.protocol.RadioRAFeedback;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
 
 /**
  * Handler for RadioRA Phantom buttons
@@ -51,7 +51,6 @@ public class PhantomButtonHandler extends LutronHandler {
         if (feedback instanceof LEDMapFeedback) {
             handleLEDMapFeedback((LEDMapFeedback) feedback);
         }
-
     }
 
     private void handleLEDMapFeedback(LEDMapFeedback feedback) {
@@ -59,5 +58,4 @@ public class PhantomButtonHandler extends LutronHandler {
 
         updateState(LutronBindingConstants.CHANNEL_SWITCH, zoneEnabled ? OnOffType.ON : OnOffType.OFF);
     }
-
 }

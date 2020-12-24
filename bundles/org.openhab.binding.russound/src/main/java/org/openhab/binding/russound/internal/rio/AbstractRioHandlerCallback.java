@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,7 @@ package org.openhab.binding.russound.internal.rio;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.State;
 
 /**
  * Abstract implementation of {@link RioHandlerCallback} that will provide listener services (adding/removing and firing

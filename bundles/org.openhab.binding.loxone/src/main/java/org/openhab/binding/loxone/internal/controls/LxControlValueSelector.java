@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,17 @@ import static org.openhab.binding.loxone.internal.LxBindingConstants.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.StateDescription;
 import org.openhab.binding.loxone.internal.types.LxState;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,10 +193,11 @@ class LxControlValueSelector extends LxControl {
             logger.debug("Error parsing value for state {}: {}", stateName, e.getMessage());
         }
         if (minValue != null && maxValue != null && stepValue != null && minValue < maxValue) {
-            StateDescription description = new StateDescription(new BigDecimal(minValue), new BigDecimal(maxValue),
-                    new BigDecimal(stepValue), format, false, null);
-            addChannelStateDescription(channelId, description);
-            addChannelStateDescription(numberChannelId, description);
+            StateDescriptionFragment fragment = StateDescriptionFragmentBuilder.create()
+                    .withMinimum(new BigDecimal(minValue)).withMaximum(new BigDecimal(maxValue))
+                    .withStep(new BigDecimal(stepValue)).withPattern(format).withReadOnly(false).build();
+            addChannelStateDescriptionFragment(channelId, fragment);
+            addChannelStateDescriptionFragment(numberChannelId, fragment);
         }
     }
 }

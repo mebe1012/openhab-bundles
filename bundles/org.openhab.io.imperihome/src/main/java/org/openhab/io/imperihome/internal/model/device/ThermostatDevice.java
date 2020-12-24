@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,9 @@ package org.openhab.io.imperihome.internal.model.device;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.State;
 import org.openhab.io.imperihome.internal.model.param.DeviceParam;
 import org.openhab.io.imperihome.internal.model.param.NumericValueParam;
 import org.openhab.io.imperihome.internal.model.param.ParamType;
@@ -118,9 +118,9 @@ public class ThermostatDevice extends AbstractDevice {
             device = getDeviceRegistry().getDevice(deviceId);
         }
         if (logWhenMissing && device == null) {
-            logger.error("Couldn't resolve linked {} device '{}', make sure the Item has iss tags", linkName, deviceName);
+            logger.error("Couldn't resolve linked {} device '{}', make sure the Item has iss tags", linkName,
+                    deviceName);
         }
         return device;
     }
-
 }

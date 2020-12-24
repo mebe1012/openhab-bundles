@@ -1,0 +1,171 @@
+{
+	"deviceMapping": {
+		"id": [
+			"zhimi.humidifier.cb1"
+		],
+		"channels": [
+			{
+				"property": "power",
+				"friendlyName": "Power",
+				"channel": "power",
+				"channelType": "power",
+				"type": "Switch",
+				"refresh": true,
+				"actions": [
+					{
+						"command": "set_power",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "mode",
+				"friendlyName": "Humidifier Mode",
+				"channel": "humidifierMode",
+				"channelType": "humidifierMode",
+				"type": "String",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_mode",
+						"parameterType": "STRING"
+					}
+				]
+			},
+			{
+				"property": "humidity",
+				"friendlyName": "Humidity",
+				"channel": "humidity",
+				"channelType": "humidity",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": []
+			},
+			{
+				"property": "limit_hum",
+				"friendlyName": "Humidity Set",
+				"channel": "setHumidity",
+				"channelType": "setHumidity",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": [
+					{
+						"command": "set_limit_hum",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "led_b",
+				"friendlyName": "LED Brightness",
+				"channel": "bright",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_led_b",
+						"parameterType": "NUMBER"
+					}
+				]
+			},
+			{
+				"property": "buzzer",
+				"friendlyName": "Buzzer Status",
+				"channel": "buzzer",
+				"channelType": "buzzer",
+				"type": "Switch",
+				"refresh": true,
+				"ChannelGroup": "actions",
+				"actions": [
+					{
+						"command": "set_buzzer",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "depth",
+				"friendlyName": "Depth",
+				"channel": "depth",
+				"channelType": "depth",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": []
+			},
+			{
+				"property": "dry",
+				"friendlyName": "Dry",
+				"channel": "dry",
+				"channelType": "dry",
+				"type": "Switch",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": [
+					{
+						"command": "set_dry",
+						"parameterType": "ONOFF"
+					}
+				]
+			},
+			{
+				"property": "use_time",
+				"friendlyName": "Run Time",
+				"channel": "usedhours",
+				"channelType": "usedhours",
+				"type": "Number:Time",
+				"unit": "hours",
+				"refresh": true,
+				"transformation": "SecondsToHours",
+				"ChannelGroup": "Status",
+				"actions": [],
+				"category": "time"
+			},
+			{
+				"property": "speed",
+				"friendlyName": "Motor Speed",
+				"channel": "motorspeed",
+				"channelType": "motorspeed",
+				"type": "Number",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": []
+			},
+			{
+				"property": "temperature",
+				"friendlyName": "Temperature",
+				"channel": "temperature",
+				"channelType": "temperatureC",
+				"type": "Number:Temperature",
+				"unit": "CELCIUS",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": [],
+				"category": "temperature",
+				"tags": [
+					"Measurement",
+					"Temperature"
+				]
+			},
+			{
+				"property": "child_lock",
+				"friendlyName": "Child Lock",
+				"channel": "childlock",
+				"channelType": "childlock",
+				"type": "Switch",
+				"refresh": true,
+				"ChannelGroup": "Status",
+				"actions": [
+					{
+						"command": "set_child_lock",
+						"parameterType": "ONOFF"
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,8 @@
 package org.openhab.binding.wemo.internal.handler.test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,19 +23,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jupnp.model.ValidationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -42,6 +33,16 @@ import org.openhab.binding.wemo.internal.WemoBindingConstants;
 import org.openhab.binding.wemo.internal.handler.WemoLightHandler;
 import org.openhab.binding.wemo.internal.http.WemoHttpCall;
 import org.openhab.binding.wemo.internal.test.GenericWemoLightOSGiTestParent;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 
 /**
  * Tests for {@link WemoLightHandler}.
@@ -54,12 +55,12 @@ public class WemoLightHandlerOSGiTest extends GenericWemoLightOSGiTestParent {
     private static final String GET_ACTION = "GetDeviceStatus";
     private static final String SET_ACTION = "SetDeviceStatus";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         setUpServices();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         removeThing();
     }
@@ -187,17 +188,17 @@ public class WemoLightHandlerOSGiTest extends GenericWemoLightOSGiTestParent {
             boolean matchesAction = result.contains("<s:Body><u:" + action);
 
             if (action != null) {
-                if (matchesAction == false) {
+                if (!matchesAction) {
                     continue;
                 }
             }
             if (capitability != null) {
-                if (matchesCapability == false) {
+                if (!matchesCapability) {
                     continue;
                 }
             }
             if (value != null) {
-                if (matchesValue == false) {
+                if (!matchesValue) {
                     continue;
                 }
             }

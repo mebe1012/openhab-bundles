@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,6 @@ package org.openhab.binding.fronius.internal.handler;
 import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.fronius.internal.FroniusBaseDeviceConfiguration;
 import org.openhab.binding.fronius.internal.FroniusBindingConstants;
 import org.openhab.binding.fronius.internal.FroniusBridgeConfiguration;
@@ -26,6 +22,10 @@ import org.openhab.binding.fronius.internal.api.BaseFroniusResponse;
 import org.openhab.binding.fronius.internal.api.InverterRealtimeResponse;
 import org.openhab.binding.fronius.internal.api.PowerFlowRealtimeResponse;
 import org.openhab.binding.fronius.internal.api.ValueUnit;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +37,7 @@ import com.google.gson.JsonSyntaxException;
  * sent to one of the channels.
  *
  * @author Thomas Rokohl - Initial contribution
+ * @author Peter Schraffl - Added device status and error status channels
  */
 public class FroniusSymoInverterHandler extends FroniusBaseThingHandler {
 
@@ -92,7 +93,12 @@ public class FroniusSymoInverterHandler extends FroniusBaseThingHandler {
                 }
                 return day;
             case FroniusBindingConstants.InverterDataChannelPac:
-                return inverterRealtimeResponse.getBody().getData().getPac();
+                ValueUnit pac = inverterRealtimeResponse.getBody().getData().getPac();
+                if (pac == null) {
+                    pac = new ValueUnit();
+                    pac.setValue(0);
+                }
+                return pac;
             case FroniusBindingConstants.InverterDataChannelTotal:
                 ValueUnit total = inverterRealtimeResponse.getBody().getData().getTotalEnergy();
                 if (total != null) {
@@ -115,6 +121,10 @@ public class FroniusSymoInverterHandler extends FroniusBaseThingHandler {
                 return inverterRealtimeResponse.getBody().getData().getUac();
             case FroniusBindingConstants.InverterDataChannelUdc:
                 return inverterRealtimeResponse.getBody().getData().getUdc();
+            case FroniusBindingConstants.InverterDataChannelDeviceStatusErrorCode:
+                return inverterRealtimeResponse.getBody().getData().getDeviceStatus().getErrorCode();
+            case FroniusBindingConstants.InverterDataChannelDeviceStatusStatusCode:
+                return inverterRealtimeResponse.getBody().getData().getDeviceStatus().getStatusCode();
         }
         if (powerFlowResponse == null) {
             return null;
@@ -211,5 +221,4 @@ public class FroniusSymoInverterHandler extends FroniusBaseThingHandler {
         location = location.replace("%DEVICEID%", Integer.toString(deviceId));
         return collectDataFormUrl(InverterRealtimeResponse.class, location);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,16 @@ import static org.openhab.binding.jeelink.internal.JeeLinkBindingConstants.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.jeelink.internal.JeeLinkHandler;
 import org.openhab.binding.jeelink.internal.Reading;
 import org.openhab.binding.jeelink.internal.ReadingHandler;
 import org.openhab.binding.jeelink.internal.SensorDefinition;
 import org.openhab.binding.jeelink.internal.config.JeeLinkSensorConfig;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class SensorDiscoveryService extends AbstractDiscoveryService implements 
             logger.debug("discovery started for bridge {}", bridge.getThing().getUID());
 
             // start listening for new sensor values
-            bridge.startDiscovery(this);
+            bridge.addReadingHandler(this);
             capture.set(true);
         }
     }
@@ -71,7 +71,7 @@ public class SensorDiscoveryService extends AbstractDiscoveryService implements 
     @Override
     protected synchronized void stopScan() {
         if (capture.getAndSet(false)) {
-            bridge.stopDiscovery();
+            bridge.removeReadingHandler(this);
             logger.debug("discovery stopped for bridge {}", bridge.getThing().getUID());
         }
     }
@@ -102,17 +102,18 @@ public class SensorDiscoveryService extends AbstractDiscoveryService implements 
                     || id.equals(t.getConfiguration().as(JeeLinkSensorConfig.class).sensorId);
         }
 
+        ThingUID bridgeUID = bridge.getThing().getUID();
+
         if (!sensorThingExists) {
             SensorDefinition<?> def = SensorDefinition.getSensorDefinition(reading);
-            logger.debug("discovery for bridge {} found unknown sensor of type {} with id {}",
-                    bridge.getThing().getUID(), def.getThingTypeUID(), id);
+            logger.debug("discovery for bridge {} found unknown sensor of type {} with id {}", bridgeUID,
+                    def.getThingTypeUID(), id);
 
             boolean idExists = idExistsAtBridge(id);
             String newId = id;
 
             if (idExists) {
-                logger.debug("bridge {} already has a connected sensor with thing id {}", bridge.getThing().getUID(),
-                        id);
+                logger.debug("bridge {} already has a connected sensor with thing id {}", bridgeUID, id);
 
                 int idx = 1;
                 while (idExists) {
@@ -120,22 +121,27 @@ public class SensorDiscoveryService extends AbstractDiscoveryService implements 
                     idExists = idExistsAtBridge(newId);
                 }
 
-                logger.debug("Bridge {} uses thing id {} instead of {}", bridge.getThing().getUID(), newId, id);
+                logger.debug("Bridge {} uses thing id {} instead of {}", bridgeUID, newId, id);
             }
 
-            ThingUID sensorThing = new ThingUID(def.getThingTypeUID(), newId);
+            ThingUID sensorThing = new ThingUID(def.getThingTypeUID(), bridgeUID, newId);
 
             DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(sensorThing).withLabel(def.getName())
-                    .withBridge(bridge.getThing().getUID()).withRepresentationProperty("id")
-                    .withProperty(PROPERTY_SENSOR_ID, id).build();
+                    .withBridge(bridgeUID).withRepresentationProperty("id").withProperty(PROPERTY_SENSOR_ID, id)
+                    .build();
             thingDiscovered(discoveryResult);
         } else {
-            logger.debug("discovery for bridge {} found already known sensor id {}", bridge.getThing().getUID(), id);
+            logger.debug("discovery for bridge {} found already known sensor id {}", bridgeUID, id);
         }
     }
 
     @Override
     public Class<Reading> getReadingClass() {
         return Reading.class;
+    }
+
+    @Override
+    public String getSensorType() {
+        return SensorDefinition.ALL_TYPE;
     }
 }

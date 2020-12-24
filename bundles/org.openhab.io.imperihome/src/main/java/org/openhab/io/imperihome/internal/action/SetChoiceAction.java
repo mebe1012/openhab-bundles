@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.io.imperihome.internal.model.device.AbstractDevice;
 
 /**
@@ -60,5 +60,4 @@ public class SetChoiceAction extends Action {
                 COMMAND_SOURCE);
         eventPublisher.post(event);
     }
-
 }

@@ -2,7 +2,6 @@
 	"deviceMapping": {
 		"id": [
 			"zhimi.airpurifier.v6",
-			"zhimi.airpurifier.v7",
 			"zhimi.airpurifier.ma2"
 		],
 		"channels": [
@@ -10,9 +9,9 @@
 				"property": "power",
 				"friendlyName": "Power",
 				"channel": "power",
+				"channelType": "power",
 				"type": "Switch",
 				"refresh": true,
-				"channelGroup": "actions",
 				"actions": [
 					{
 						"command": "set_power",
@@ -24,6 +23,7 @@
 				"property": "mode",
 				"friendlyName": "Mode",
 				"channel": "mode",
+				"channelType": "mode",
 				"type": "String",
 				"refresh": true,
 				"ChannelGroup": "actions",
@@ -38,6 +38,7 @@
 				"property": "humidity",
 				"friendlyName": "Humidity",
 				"channel": "humidity",
+				"channelType": "humidity",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -47,6 +48,7 @@
 				"property": "aqi",
 				"friendlyName": "Air Quality Index",
 				"channel": "aqi",
+				"channelType": "aqi",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -56,6 +58,7 @@
 				"property": "average_aqi",
 				"friendlyName": "Average Air Quality Index",
 				"channel": "averageaqi",
+				"channelType": "averageaqi",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -63,8 +66,9 @@
 			},
 			{
 				"property": "led",
-				"friendlyName": "Led Status",
+				"friendlyName": "LED Status",
 				"channel": "led",
+				"channelType": "led",
 				"type": "Switch",
 				"refresh": true,
 				"ChannelGroup": "actions",
@@ -77,7 +81,7 @@
 			},
 			{
 				"property": "bright",
-				"friendlyName": "Led Brightness",
+				"friendlyName": "LED Brightness",
 				"channel": "bright",
 				"type": "Number",
 				"refresh": true,
@@ -93,6 +97,7 @@
 				"property": "f1_hour",
 				"friendlyName": "Filter Max Life",
 				"channel": "filtermaxlife",
+				"channelType": "filtermaxlife",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -102,26 +107,33 @@
 				"property": "f1_hour_used",
 				"friendlyName": "Filter Hours used",
 				"channel": "filterhours",
-				"type": "Number",
+				"channelType": "filterhours",
+				"type": "Number:Time",
+				"unit": "hours",
 				"refresh": true,
 				"transformation": "SecondsToHours",
 				"ChannelGroup": "Status",
-				"actions": []
+				"actions": [],
+				"category": "time"
 			},
 			{
 				"property": "use_time",
 				"friendlyName": "Run Time",
 				"channel": "usedhours",
-				"type": "Number",
+				"channelType": "usedhours",
+				"type": "Number:Time",
+				"unit": "hours",
 				"refresh": true,
 				"transformation": "SecondsToHours",
 				"ChannelGroup": "Status",
-				"actions": []
+				"actions": [],
+				"category": "time"
 			},
 			{
 				"property": "motor1_speed",
 				"friendlyName": "Motor Speed",
 				"channel": "motorspeed",
+				"channelType": "motorspeed",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -129,7 +141,7 @@
 			},
 			{
 				"property": "filter1_life",
-				"friendlyName": "Filter  Life",
+				"friendlyName": "Filter Life",
 				"channel": "filterlife",
 				"type": "Number",
 				"refresh": true,
@@ -140,6 +152,7 @@
 				"property": "favorite_level",
 				"friendlyName": "Favorite Level",
 				"channel": "favoritelevel",
+				"channelType": "favoritelevel",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -154,16 +167,24 @@
 				"property": "temp_dec",
 				"friendlyName": "Temperature",
 				"channel": "temperature",
-				"type": "Number",
+				"channelType": "temperatureC",
+				"type": "Number:Temperature",
+				"unit": "CELCIUS",
 				"refresh": true,
 				"transformation": "/10",
 				"ChannelGroup": "Status",
-				"actions": []
+				"actions": [],
+				"category": "temperature",
+				"tags": [
+					"Measurement",
+					"Temperature"
+				]
 			},
 			{
 				"property": "purify_volume",
 				"friendlyName": "Purivied Volume",
 				"channel": "purifyvolume",
+				"channelType": "purifyvolume",
 				"type": "Number",
 				"refresh": true,
 				"ChannelGroup": "Status",
@@ -173,6 +194,7 @@
 				"property": "child_lock",
 				"friendlyName": "Child Lock",
 				"channel": "childlock",
+				"channelType": "childlock",
 				"type": "Switch",
 				"refresh": true,
 				"ChannelGroup": "Status",

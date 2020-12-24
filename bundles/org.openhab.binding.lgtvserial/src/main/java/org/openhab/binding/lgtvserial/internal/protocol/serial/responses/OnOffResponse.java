@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.lgtvserial.internal.protocol.serial.responses;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialResponse;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
 
 /**
  * This class represents an ON/OFF response.
@@ -56,5 +56,4 @@ public class OnOffResponse implements LGSerialResponse {
     public boolean isSuccess() {
         return success;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,36 +21,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.SensorId;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
 import org.openhab.binding.onewire.internal.handler.OwserverBridgeHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link OneWireDiscoveryService} implements the discovery service for the OneWire binding.
+ * The {@link OwDiscoveryService} implements the discovery service for the OneWire binding.
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class OwDiscoveryService extends AbstractDiscoveryService {
-
     private final Logger logger = LoggerFactory.getLogger(OwDiscoveryService.class);
 
     private final OwserverBridgeHandler owBridgeHandler;
+    private final ThingUID bridgeUID;
 
     Map<SensorId, OwDiscoveryItem> owDiscoveryItems = new HashMap<>();
     Set<SensorId> associatedSensors = new HashSet<>();
-    ThingUID bridgeUID;
 
     public OwDiscoveryService(OwserverBridgeHandler owBridgeHandler) {
         super(SUPPORTED_THING_TYPES, 60, false);
         this.owBridgeHandler = owBridgeHandler;
+        this.bridgeUID = owBridgeHandler.getThing().getUID();
         logger.debug("registering discovery service for {}", owBridgeHandler);
     }
 
@@ -91,8 +93,6 @@ public class OwDiscoveryService extends AbstractDiscoveryService {
 
     @Override
     public void startScan() {
-        bridgeUID = owBridgeHandler.getThing().getUID();
-
         scanDirectory("/");
 
         // remove duplicates
@@ -134,5 +134,4 @@ public class OwDiscoveryService extends AbstractDiscoveryService {
     public void deactivate() {
         removeOlderResults(new Date().getTime());
     }
-
 }

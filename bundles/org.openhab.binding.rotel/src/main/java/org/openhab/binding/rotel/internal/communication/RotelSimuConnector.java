@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -80,9 +81,11 @@ public class RotelSimuConnector extends RotelConnector {
      *
      * @param model the projector model in use
      * @param protocol the protocol to be used
+     * @param readerThreadName the name of thread to be created
      */
-    public RotelSimuConnector(RotelModel model, RotelProtocol protocol, Map<RotelSource, String> sourcesLabels) {
-        super(model, protocol, sourcesLabels, true);
+    public RotelSimuConnector(RotelModel model, RotelProtocol protocol, Map<RotelSource, String> sourcesLabels,
+            String readerThreadName) {
+        super(model, protocol, sourcesLabels, true, readerThreadName);
         this.minVolume = 0;
         this.maxVolume = model.hasVolumeControl() ? model.getVolumeMax() : 0;
         this.maxToneLevel = model.hasToneControl() ? model.getToneLevelMax() : 0;
@@ -92,7 +95,7 @@ public class RotelSimuConnector extends RotelConnector {
     @Override
     public synchronized void open() throws RotelException {
         logger.debug("Opening simulated connection");
-        Thread thread = new RotelReaderThread(this);
+        Thread thread = new RotelReaderThread(this, readerThreadName);
         setReaderThread(thread);
         thread.start();
         setConnected(true);
@@ -1143,11 +1146,10 @@ public class RotelSimuConnector extends RotelConnector {
         String label;
         if (considerFollowMain && source.getName().equals(RotelSource.CAT1_FOLLOW_MAIN.getName())) {
             label = "SOURCE";
-        } else if (sourcesLabels.get(source) != null) {
-            label = sourcesLabels.get(source);
         } else {
-            label = source.getLabel();
+            label = Objects.requireNonNullElse(sourcesLabels.get(source), source.getLabel());
         }
+
         return label;
     }
 }

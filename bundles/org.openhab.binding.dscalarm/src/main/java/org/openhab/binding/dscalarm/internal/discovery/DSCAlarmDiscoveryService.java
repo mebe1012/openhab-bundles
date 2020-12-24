@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,11 +15,6 @@ package org.openhab.binding.dscalarm.internal.discovery;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.dscalarm.internal.DSCAlarmBindingConstants;
 import org.openhab.binding.dscalarm.internal.DSCAlarmEvent;
 import org.openhab.binding.dscalarm.internal.DSCAlarmMessage.DSCAlarmMessageInfoType;
@@ -27,6 +22,11 @@ import org.openhab.binding.dscalarm.internal.config.DSCAlarmPartitionConfigurati
 import org.openhab.binding.dscalarm.internal.config.DSCAlarmZoneConfiguration;
 import org.openhab.binding.dscalarm.internal.handler.DSCAlarmBaseBridgeHandler;
 import org.openhab.binding.dscalarm.internal.handler.DSCAlarmThingType;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,14 +71,14 @@ public class DSCAlarmDiscoveryService extends AbstractDiscoveryService {
     }
 
     /**
-     * Method to add a Thing to the Smarthome Inbox.
+     * Method to add a Thing to the Inbox.
      *
      * @param bridge
      * @param dscAlarmThingType
      * @param event
      */
     public void addThing(Bridge bridge, DSCAlarmThingType dscAlarmThingType, DSCAlarmEvent event) {
-        logger.trace("addThing(): Adding new DSC Alarm {} to the smarthome inbox", dscAlarmThingType.getLabel());
+        logger.trace("addThing(): Adding new DSC Alarm {} to the inbox", dscAlarmThingType.getLabel());
 
         ThingUID thingUID = null;
         String thingID = "";
@@ -136,7 +136,6 @@ public class DSCAlarmDiscoveryService extends AbstractDiscoveryService {
         } else {
             logger.debug("addThing(): Unable to Add DSC Alarm Thing to Inbox!");
         }
-
     }
 
     @Override

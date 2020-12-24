@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,55 +12,56 @@
  */
 package org.openhab.binding.avmfritz.internal.handler;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
-import static org.openhab.binding.avmfritz.internal.BindingConstants.*;
+import static org.openhab.binding.avmfritz.internal.AVMFritzBindingConstants.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.ThingProvider;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.openhab.binding.avmfritz.internal.AVMFritzDynamicStateDescriptionProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.openhab.binding.avmfritz.internal.AVMFritzDynamicCommandDescriptionProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.ThingProvider;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
 
 /**
  * Tests for {@link AVMFritzThingHandlerOSGiTest}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public abstract class AVMFritzThingHandlerOSGiTest extends JavaOSGiTest {
 
-    private static HttpClient httpClient;
+    private static HttpClient httpClient = new HttpClient();
 
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
 
-    protected Bridge bridge;
-    protected BoxHandler bridgeHandler;
+    protected @NonNullByDefault({}) Bridge bridge;
+    protected @NonNullByDefault({}) BoxHandler bridgeHandler;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception {
-        httpClient = new HttpClient();
         httpClient.start();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerService(volatileStorageService);
 
         managedThingProvider = getService(ThingProvider.class, ManagedThingProvider.class);
-        assertNotNull("Could not get ManagedThingProvider", managedThingProvider);
+        assertNotNull(managedThingProvider, "Could not get ManagedThingProvider");
 
         bridge = buildBridge();
         assertNotNull(bridge.getConfiguration());
@@ -69,7 +70,7 @@ public abstract class AVMFritzThingHandlerOSGiTest extends JavaOSGiTest {
 
         ThingHandlerCallback callback = mock(ThingHandlerCallback.class);
 
-        bridgeHandler = new BoxHandler(bridge, httpClient, new AVMFritzDynamicStateDescriptionProvider());
+        bridgeHandler = new BoxHandler(bridge, httpClient, mock(AVMFritzDynamicCommandDescriptionProvider.class));
         assertNotNull(bridgeHandler);
 
         bridgeHandler.setCallback(callback);
@@ -81,7 +82,7 @@ public abstract class AVMFritzThingHandlerOSGiTest extends JavaOSGiTest {
         bridgeHandler.initialize();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (bridge != null) {
             managedThingProvider.remove(bridge.getUID());
@@ -90,7 +91,7 @@ public abstract class AVMFritzThingHandlerOSGiTest extends JavaOSGiTest {
         unregisterService(volatileStorageService);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() throws Exception {
         httpClient.stop();
     }

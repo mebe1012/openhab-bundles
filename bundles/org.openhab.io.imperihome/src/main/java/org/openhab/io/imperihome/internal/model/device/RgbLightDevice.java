@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,10 @@ package org.openhab.io.imperihome.internal.model.device;
 import java.math.BigDecimal;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.State;
 import org.openhab.io.imperihome.internal.model.param.DeviceParam;
 import org.openhab.io.imperihome.internal.model.param.ParamType;
 
@@ -86,5 +86,4 @@ public class RgbLightDevice extends AbstractEnergyLinkDevice {
         return percent.toBigDecimal().multiply(BigDecimal.valueOf(255))
                 .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP).intValue();
     }
-
 }

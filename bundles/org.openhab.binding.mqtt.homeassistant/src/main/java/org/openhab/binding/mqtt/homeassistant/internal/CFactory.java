@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,14 @@
  */
 package org.openhab.binding.mqtt.homeassistant.internal;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.binding.mqtt.generic.AvailabilityTracker;
 import org.openhab.binding.mqtt.generic.ChannelStateUpdateListener;
 import org.openhab.binding.mqtt.generic.TransformationServiceProvider;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +47,11 @@ public class CFactory {
      * @return A HA MQTT Component
      */
     public static @Nullable AbstractComponent<?> createComponent(ThingUID thingUID, HaID haID,
-            String channelConfigurationJSON, @Nullable ChannelStateUpdateListener updateListener, Gson gson,
+            String channelConfigurationJSON, ChannelStateUpdateListener updateListener, AvailabilityTracker tracker,
+            ScheduledExecutorService scheduler, Gson gson,
             TransformationServiceProvider transformationServiceProvider) {
         ComponentConfiguration componentConfiguration = new ComponentConfiguration(thingUID, haID,
-                channelConfigurationJSON, gson).listener(updateListener)
+                channelConfigurationJSON, gson, updateListener, tracker, scheduler)
                         .transformationProvider(transformationServiceProvider);
         try {
             switch (haID.component) {
@@ -79,23 +83,25 @@ public class CFactory {
     }
 
     protected static class ComponentConfiguration {
-        private ThingUID thingUID;
-        private HaID haID;
-        private String configJSON;
+        private final ThingUID thingUID;
+        private final HaID haID;
+        private final String configJSON;
+        private final ChannelStateUpdateListener updateListener;
+        private final AvailabilityTracker tracker;
+        private final Gson gson;
+        private final ScheduledExecutorService scheduler;
         private @Nullable TransformationServiceProvider transformationServiceProvider;
-        private @Nullable ChannelStateUpdateListener updateListener;
-        private Gson gson;
 
-        protected ComponentConfiguration(ThingUID thingUID, HaID haID, String configJSON, Gson gson) {
+        protected ComponentConfiguration(ThingUID thingUID, HaID haID, String configJSON, Gson gson,
+                ChannelStateUpdateListener updateListener, AvailabilityTracker tracker,
+                ScheduledExecutorService scheduler) {
             this.thingUID = thingUID;
             this.haID = haID;
             this.configJSON = configJSON;
             this.gson = gson;
-        }
-
-        public ComponentConfiguration listener(@Nullable ChannelStateUpdateListener updateListener) {
             this.updateListener = updateListener;
-            return this;
+            this.tracker = tracker;
+            this.scheduler = scheduler;
         }
 
         public ComponentConfiguration transformationProvider(
@@ -116,7 +122,6 @@ public class CFactory {
             return configJSON;
         }
 
-        @Nullable
         public ChannelStateUpdateListener getUpdateListener() {
             return updateListener;
         }
@@ -128,6 +133,14 @@ public class CFactory {
 
         public Gson getGson() {
             return gson;
+        }
+
+        public AvailabilityTracker getTracker() {
+            return tracker;
+        }
+
+        public ScheduledExecutorService getScheduler() {
+            return scheduler;
         }
 
         public <C extends BaseChannelConfiguration> C getConfig(Class<C> clazz) {

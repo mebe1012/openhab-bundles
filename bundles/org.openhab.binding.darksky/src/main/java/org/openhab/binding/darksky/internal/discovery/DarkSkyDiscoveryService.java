@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,15 +22,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.LocationProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.darksky.internal.handler.DarkSkyAPIHandler;
 import org.openhab.binding.darksky.internal.handler.DarkSkyWeatherAndForecastHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.LocationProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class DarkSkyDiscoveryService extends AbstractDiscoveryService {
     }
 
     @Override
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
     }
 

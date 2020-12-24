@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,19 +22,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.tplinksmarthome.internal.Connection;
 import org.openhab.binding.tplinksmarthome.internal.TPLinkIpAddressService;
 import org.openhab.binding.tplinksmarthome.internal.TPLinkSmartHomeConfiguration;
@@ -42,6 +29,19 @@ import org.openhab.binding.tplinksmarthome.internal.TPLinkSmartHomeThingType;
 import org.openhab.binding.tplinksmarthome.internal.TPLinkSmartHomeThingType.DeviceType;
 import org.openhab.binding.tplinksmarthome.internal.device.DeviceState;
 import org.openhab.binding.tplinksmarthome.internal.device.SmartHomeDevice;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,10 +125,10 @@ public class SmartHomeHandler extends BaseThingHandler {
                 configuration.deviceId);
         connection = createConnection(configuration);
         smartHomeDevice.initialize(connection, configuration);
-        cache = new ExpiringCache<@Nullable DeviceState>(Duration.ofSeconds(configuration.refresh), this::refreshCache);
+        cache = new ExpiringCache<>(Duration.ofSeconds(configuration.refresh), this::refreshCache);
         // If refresh > threshold fast cache invalidates after 1 second, else it behaves just as the 'normal' cache
         fastCache = configuration.refresh > forceRefreshThreshold
-                ? new ExpiringCache<@Nullable DeviceState>(ONE_SECOND, this::forceCacheUpdate)
+                ? new ExpiringCache<>(ONE_SECOND, this::forceCacheUpdate)
                 : cache;
         updateStatus(ThingStatus.UNKNOWN);
         // While config.xml defines refresh as min 1, this check is used to run a test that doesn't start refresh.
@@ -251,7 +251,7 @@ public class SmartHomeHandler extends BaseThingHandler {
         if (deviceState == null) {
             state = UnDefType.UNDEF;
         } else if (CHANNEL_RSSI.equals(channelId)) {
-            state = new QuantityType<>(deviceState.getSysinfo().getRssi(), SmartHomeUnits.DECIBEL_MILLIWATTS);
+            state = new QuantityType<>(deviceState.getSysinfo().getRssi(), Units.DECIBEL_MILLIWATTS);
         } else {
             state = smartHomeDevice.updateChannel(channelUID, deviceState);
         }

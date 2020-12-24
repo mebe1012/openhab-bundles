@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,16 +16,17 @@ import static org.openhab.binding.icloud.internal.ICloudBindingConstants.*;
 
 import java.util.List;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.icloud.internal.ICloudDeviceInformationListener;
 import org.openhab.binding.icloud.internal.handler.ICloudAccountBridgeHandler;
 import org.openhab.binding.icloud.internal.json.response.ICloudDeviceInformation;
 import org.openhab.binding.icloud.internal.utilities.ICloudTextTranslator;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Patrik Gfeller - Initial Contribution
  *
  */
+@NonNullByDefault
 public class ICloudDeviceDiscovery extends AbstractDiscoveryService implements ICloudDeviceInformationListener {
     private final Logger logger = LoggerFactory.getLogger(ICloudDeviceDiscovery.class);
     private static final int TIMEOUT = 10;

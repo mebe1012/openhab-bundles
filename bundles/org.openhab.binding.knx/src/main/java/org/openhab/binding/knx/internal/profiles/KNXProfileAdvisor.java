@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,12 +16,12 @@ import static org.openhab.binding.knx.internal.KNXBindingConstants.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.profiles.ProfileAdvisor;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.profiles.ProfileAdvisor;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.SystemProfiles;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -59,5 +59,4 @@ public class KNXProfileAdvisor implements ProfileAdvisor {
     public static boolean isControl(ChannelTypeUID channelTypeUID) {
         return CONTROL_CHANNEL_TYPES.contains(channelTypeUID.getId());
     }
-
 }

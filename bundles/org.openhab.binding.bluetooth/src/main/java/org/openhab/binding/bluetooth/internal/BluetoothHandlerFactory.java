@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,15 @@ package org.openhab.binding.bluetooth.internal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.bluetooth.BeaconBluetoothHandler;
 import org.openhab.binding.bluetooth.BluetoothBindingConstants;
-import org.openhab.binding.bluetooth.ConnectedBluetoothHandler;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -30,13 +31,13 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@NonNullByDefault
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.bluetooth")
 public class BluetoothHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>();
     static {
         SUPPORTED_THING_TYPES_UIDS.add(BluetoothBindingConstants.THING_TYPE_BEACON);
-        SUPPORTED_THING_TYPES_UIDS.add(BluetoothBindingConstants.THING_TYPE_CONNECTED);
     }
 
     @Override
@@ -45,15 +46,12 @@ public class BluetoothHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(BluetoothBindingConstants.THING_TYPE_BEACON)) {
             return new BeaconBluetoothHandler(thing);
-        } else if (thingTypeUID.equals(BluetoothBindingConstants.THING_TYPE_CONNECTED)) {
-            return new ConnectedBluetoothHandler(thing);
         }
-
         return null;
     }
 }

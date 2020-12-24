@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.openhab.core.thing.ChannelUID;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -36,12 +36,8 @@ import com.google.gson.JsonSerializer;
 public class ChannelUIDSerializer implements JsonSerializer<ChannelUID>, JsonDeserializer<ChannelUID> {
 
     @Override
-    public ChannelUID deserialize(@Nullable JsonElement elm, @Nullable Type type,
-            @Nullable JsonDeserializationContext context) throws JsonParseException {
-        Objects.requireNonNull(elm, "elm cannot be null");
-        Objects.requireNonNull(type, "type cannot be null");
-        Objects.requireNonNull(context, "context cannot be null");
-
+    public @Nullable ChannelUID deserialize(JsonElement elm, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
         if (elm.isJsonNull()) {
             throw new JsonParseException("Not a valid ChannelUID: (null)");
         }

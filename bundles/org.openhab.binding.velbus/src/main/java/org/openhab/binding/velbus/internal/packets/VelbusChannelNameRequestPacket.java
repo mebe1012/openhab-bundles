@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,9 @@
  */
 package org.openhab.binding.velbus.internal.packets;
 
-import static org.openhab.binding.velbus.internal.VelbusBindingConstants.COMMAND_MODULE_NAME_REQUEST;
+import static org.openhab.binding.velbus.internal.VelbusBindingConstants.*;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link VelbusChannelNameRequestPacket} represents a Velbus packet that can be used to
@@ -20,8 +22,8 @@ import static org.openhab.binding.velbus.internal.VelbusBindingConstants.COMMAND
  *
  * @author Cedric Boon - Initial contribution
  */
+@NonNullByDefault
 public class VelbusChannelNameRequestPacket extends VelbusPacket {
-    private static final byte ALL_CHANNELS = (byte) 0xFF;
 
     public VelbusChannelNameRequestPacket(byte address) {
         super(address, PRIO_LOW);
@@ -31,5 +33,4 @@ public class VelbusChannelNameRequestPacket extends VelbusPacket {
     protected byte[] getDataBytes() {
         return new byte[] { COMMAND_MODULE_NAME_REQUEST, ALL_CHANNELS };
     }
-
 }

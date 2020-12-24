@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,14 @@
  */
 package org.openhab.binding.ihc.internal.converters;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.Type;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.ihc.internal.ws.exeptions.ConversionException;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSIntegerValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSResourceValue;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.Type;
 
 /**
  * Test for IHC / ELKO binding
@@ -42,16 +42,18 @@ public class DecimalTypeWSIntegerValueConverterTest {
         assertEquals(new DecimalType(2), type);
     }
 
-    @Test(expected = ConversionException.class)
-    public void testMinExceed() throws ConversionException {
+    @Test
+    public void testMinExceed() {
         WSIntegerValue val = new WSIntegerValue(12345, 0, -100, 100);
-        val = convertFromOHType(val, new DecimalType(-101.5), new ConverterAdditionalInfo(null, false, null));
+        assertThrows(ConversionException.class,
+                () -> convertFromOHType(val, new DecimalType(-101.5), new ConverterAdditionalInfo(null, false, null)));
     }
 
-    @Test(expected = ConversionException.class)
-    public void testMaxExceed() throws ConversionException {
+    @Test
+    public void testMaxExceed() {
         WSIntegerValue val = new WSIntegerValue(12345, 0, -100, 100);
-        val = convertFromOHType(val, new DecimalType(101.5), new ConverterAdditionalInfo(null, false, null));
+        assertThrows(ConversionException.class,
+                () -> convertFromOHType(val, new DecimalType(101.5), new ConverterAdditionalInfo(null, false, null)));
     }
 
     private WSIntegerValue convertFromOHType(WSIntegerValue IHCvalue, Type OHval,

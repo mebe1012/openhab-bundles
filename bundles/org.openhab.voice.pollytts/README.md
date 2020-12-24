@@ -14,7 +14,7 @@ You can find pricing information on the [documentation page](https://aws.amazon.
 
 When you sign up for AWS, your account is automatically signed up for all services in AWS, including Amazon Polly. 
 
-* Create an IAM User. [link](http://docs.aws.amazon.com/polly/latest/dg/setting-up.html)
+* Create an IAM User. [link](https://docs.aws.amazon.com/polly/latest/dg/setting-up.html)
 
 Services in AWS, such as Amazon Polly, require that you provide credentials when you access them so that the service can determine whether you have permissions to access the resources owned by that service.
 Within the AWS console, you can create access keys for your AWS account to access the Polly API.
@@ -42,6 +42,22 @@ A value of 365 removes files that have been unused for a year.
  
 Use "default" to select the system default audio format.
 The default audio format can be overriden with the value "mp3" or "ogg".
+
+
+### Service Configuration via Text files
+
+Create a new file in `$OPENHAB_ROOT/conf/services` named `pollytts.cfg`
+
+It's contents should look similar to:
+
+```
+org.openhab.pollytts:accessKey=ACCESS_KEY_ID
+org.openhab.pollytts:secretKey=SECRET_KEY
+org.openhab.pollytts:serviceRegion=SERVICE_REGION
+org.openhab.pollytts:cacheExpiration=EXPIRATION_IN_DAYS
+```
+
+These have the same meanings as described in the **Service Configuration** block above.
 
 ## Rule Examples
 

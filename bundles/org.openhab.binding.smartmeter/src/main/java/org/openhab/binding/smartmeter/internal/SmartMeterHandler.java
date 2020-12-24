@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,29 +31,29 @@ import org.eclipse.jdt.annotation.DefaultLocation;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.TypeParser;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.smartmeter.SmartMeterBindingConstants;
 import org.openhab.binding.smartmeter.SmartMeterConfiguration;
 import org.openhab.binding.smartmeter.internal.conformity.Conformity;
 import org.openhab.binding.smartmeter.internal.helper.Baudrate;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,7 +193,7 @@ public class SmartMeterHandler extends BaseThingHandler {
                         ChannelUID channelId = channel.getUID();
 
                         // add all valid channels to the thing builder
-                        List<Channel> channels = new ArrayList<Channel>(getThing().getChannels());
+                        List<Channel> channels = new ArrayList<>(getThing().getChannels());
                         if (channels.stream().filter((element) -> element.getUID().equals(channelId)).count() == 0) {
                             channels.add(channel);
                             thingBuilder.withChannels(channels);
@@ -219,7 +219,7 @@ public class SmartMeterHandler extends BaseThingHandler {
                         .withDefaultTags(channel.getDefaultTags()).withConfiguration(channel.getConfiguration())
                         .withDescription(description == null ? "" : description).withKind(channel.getKind())
                         .withLabel(label == null ? "" : label).withType(channel.getChannelTypeUID());
-                HashMap<String, String> properties = new HashMap<>(channel.getProperties());
+                Map<String, String> properties = new HashMap<>(channel.getProperties());
                 properties.put(SmartMeterBindingConstants.CHANNEL_PROPERTY_OBIS, obis);
                 newChannel.withProperties(properties);
                 updateThing(editThing().withoutChannel(channel.getUID()).withChannel(newChannel.build()).build());
@@ -251,13 +251,13 @@ public class SmartMeterHandler extends BaseThingHandler {
         if (isLinked(channelId.getId())) {
             Channel channel = this.thing.getChannel(channelId.getId());
             if (channel != null) {
-
                 String obis = channel.getProperties().get(SmartMeterBindingConstants.CHANNEL_PROPERTY_OBIS);
-                MeterValue<?> value = this.smlDevice.getMeterValue(obis);
-                if (value != null) {
-
-                    State state = getStateForObisValue(value, channel);
-                    updateState(channel.getUID(), state);
+                if (obis != null) {
+                    MeterValue<?> value = this.smlDevice.getMeterValue(obis);
+                    if (value != null) {
+                        State state = getStateForObisValue(value, channel);
+                        updateState(channel.getUID(), state);
+                    }
                 }
             }
         }
@@ -290,5 +290,4 @@ public class SmartMeterHandler extends BaseThingHandler {
         }
         return currentState;
     }
-
 }

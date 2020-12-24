@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,10 +19,10 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.openhab.binding.dmx.internal.DmxBridgeHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public abstract class DmxOverEthernetHandler extends DmxBridgeHandler {
 
     protected DmxOverEthernetPacket packetTemplate;
     protected IpNode senderNode = new IpNode();
-    protected List<IpNode> receiverNodes = new ArrayList<IpNode>();
+    protected List<IpNode> receiverNodes = new ArrayList<>();
 
     protected boolean refreshAlways = false;
 
@@ -129,5 +129,4 @@ public abstract class DmxOverEthernetHandler extends DmxBridgeHandler {
     public DmxOverEthernetHandler(Bridge sacnBridge) {
         super(sacnBridge);
     }
-
 }

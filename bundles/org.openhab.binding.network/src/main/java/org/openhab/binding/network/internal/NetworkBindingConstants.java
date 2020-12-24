@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link NetworkBindingConstants} class defines common constants, which are
@@ -69,5 +69,4 @@ public class NetworkBindingConstants {
         SUPPORTED_THING_TYPES_UIDS.add(BACKWARDS_COMPATIBLE_DEVICE);
         SUPPORTED_THING_TYPES_UIDS.add(SPEEDTEST_DEVICE);
     }
-
 }

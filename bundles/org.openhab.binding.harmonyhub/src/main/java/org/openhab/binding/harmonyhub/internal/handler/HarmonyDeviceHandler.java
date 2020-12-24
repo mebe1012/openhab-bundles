@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,28 +22,28 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.harmonyhub.internal.HarmonyHubHandlerFactory;
 import org.openhab.binding.harmonyhub.internal.config.HarmonyDeviceConfig;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,14 +85,13 @@ public class HarmonyDeviceHandler extends BaseThingHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.trace("Handling command '{}' for {}", command, channelUID);
 
-        Channel channel = getThing().getChannel(channelUID.getId());
-        if (channel == null) {
-            logger.warn("No such channel: {}", channelUID);
+        if (command instanceof RefreshType) {
+            // nothing to refresh
             return;
         }
 
-        if (command instanceof RefreshType) {
-            // nothing to refresh
+        if (getThing().getStatus() != ThingStatus.ONLINE) {
+            logger.debug("Hub is offline, ignoring command {} for channel {}", command, channelUID);
             return;
         }
 
@@ -188,7 +187,8 @@ public class HarmonyDeviceHandler extends BaseThingHandler {
 
         ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "Send Button Press", "String")
                 .withDescription("Send a button press to device " + getThing().getLabel())
-                .withStateDescription(new StateDescription(null, null, null, null, false, states)).build();
+                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withOptions(states).build())
+                .build();
 
         factory.addChannelType(channelType);
 

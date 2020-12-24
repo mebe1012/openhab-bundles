@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,16 @@ import static org.openhab.binding.jeelink.internal.JeeLinkBindingConstants.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.ReadingPublisher;
 import org.openhab.binding.jeelink.internal.RollingAveragePublisher;
 import org.openhab.binding.jeelink.internal.RollingReadingAverage;
-import org.openhab.binding.jeelink.internal.config.JeeLinkSensorConfig;
+import org.openhab.binding.jeelink.internal.config.BufferedSensorConfig;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
 public class Ec3kSensorHandler extends JeeLinkSensorHandler<Ec3kReading> {
     private final Logger logger = LoggerFactory.getLogger(Ec3kSensorHandler.class);
 
-    public Ec3kSensorHandler(Thing thing) {
-        super(thing);
+    public Ec3kSensorHandler(Thing thing, String sensorType) {
+        super(thing, sensorType);
     }
 
     @Override
@@ -61,13 +61,12 @@ public class Ec3kSensorHandler extends JeeLinkSensorHandler<Ec3kReading> {
                             getThing().getUID().getId(), currentWatt, reading.getCurrentWatt(), maxWatt,
                             reading.getConsumptionTotal(), reading.getApplianceTime(), reading.getSensorTime());
 
-                    updateState(CURRENT_POWER_CHANNEL, new QuantityType<>(currentWatt, SmartHomeUnits.WATT));
-                    updateState(MAX_POWER_CHANNEL, new QuantityType<>(maxWatt, SmartHomeUnits.WATT));
+                    updateState(CURRENT_POWER_CHANNEL, new QuantityType<>(currentWatt, Units.WATT));
+                    updateState(MAX_POWER_CHANNEL, new QuantityType<>(maxWatt, Units.WATT));
                     updateState(CONSUMPTION_CHANNEL,
-                            new QuantityType<>(reading.getConsumptionTotal(), SmartHomeUnits.WATT_HOUR));
-                    updateState(APPLIANCE_TIME_CHANNEL,
-                            new QuantityType<>(reading.getApplianceTime(), SmartHomeUnits.HOUR));
-                    updateState(SENSOR_TIME_CHANNEL, new QuantityType<>(reading.getSensorTime(), SmartHomeUnits.HOUR));
+                            new QuantityType<>(reading.getConsumptionTotal(), Units.WATT_HOUR));
+                    updateState(APPLIANCE_TIME_CHANNEL, new QuantityType<>(reading.getApplianceTime(), Units.HOUR));
+                    updateState(SENSOR_TIME_CHANNEL, new QuantityType<>(reading.getSensorTime(), Units.HOUR));
                     updateState(RESETS_CHANNEL, new DecimalType(reading.getResets()));
                 }
             }
@@ -77,7 +76,7 @@ public class Ec3kSensorHandler extends JeeLinkSensorHandler<Ec3kReading> {
             }
         };
 
-        JeeLinkSensorConfig cfg = getConfigAs(JeeLinkSensorConfig.class);
+        BufferedSensorConfig cfg = getConfigAs(BufferedSensorConfig.class);
         if (cfg.bufferSize > 1 && cfg.updateInterval > 0) {
             publisher = new RollingAveragePublisher<Ec3kReading>(cfg.bufferSize, cfg.updateInterval, publisher,
                     scheduler) {

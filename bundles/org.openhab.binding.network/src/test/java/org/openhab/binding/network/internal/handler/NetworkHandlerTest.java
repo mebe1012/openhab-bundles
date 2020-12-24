@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,49 +13,51 @@
 package org.openhab.binding.network.internal.handler;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.network.internal.NetworkBindingConfiguration;
 import org.openhab.binding.network.internal.NetworkBindingConstants;
 import org.openhab.binding.network.internal.PresenceDetection;
 import org.openhab.binding.network.internal.PresenceDetectionValue;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
 
 /**
  * Tests cases for {@link NetworkHandler}.
  *
  * @author David Graeff - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class NetworkHandlerTest extends JavaTest {
     private ThingUID thingUID = new ThingUID("network", "ttype", "ping");
-    @Mock
-    private ThingHandlerCallback callback;
 
-    @Mock
-    private Thing thing;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock Thing thing;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         when(thing.getUID()).thenReturn(thingUID);
     }
 
@@ -91,7 +93,7 @@ public class NetworkHandlerTest extends JavaTest {
     public void tcpDeviceInitTests() {
         NetworkBindingConfiguration config = new NetworkBindingConfiguration();
         NetworkHandler handler = spy(new NetworkHandler(thing, true, config));
-        Assert.assertThat(handler.isTCPServiceDevice(), is(true));
+        assertThat(handler.isTCPServiceDevice(), is(true));
         handler.setCallback(callback);
         // Port is missing, should make the device OFFLINE
         when(thing.getConfiguration()).thenAnswer(a -> {
@@ -103,9 +105,8 @@ public class NetworkHandlerTest extends JavaTest {
         // Check that we are offline
         ArgumentCaptor<ThingStatusInfo> statusInfoCaptor = ArgumentCaptor.forClass(ThingStatusInfo.class);
         verify(callback).statusUpdated(eq(thing), statusInfoCaptor.capture());
-        Assert.assertThat(statusInfoCaptor.getValue().getStatus(), is(equalTo(ThingStatus.OFFLINE)));
-        Assert.assertThat(statusInfoCaptor.getValue().getStatusDetail(),
-                is(equalTo(ThingStatusDetail.CONFIGURATION_ERROR)));
+        assertThat(statusInfoCaptor.getValue().getStatus(), is(equalTo(ThingStatus.OFFLINE)));
+        assertThat(statusInfoCaptor.getValue().getStatusDetail(), is(equalTo(ThingStatusDetail.CONFIGURATION_ERROR)));
     }
 
     @Test

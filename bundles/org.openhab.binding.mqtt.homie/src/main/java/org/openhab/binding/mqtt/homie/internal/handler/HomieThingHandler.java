@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.binding.mqtt.homie.internal.handler;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
@@ -20,12 +21,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.binding.mqtt.generic.AbstractMQTTThingHandler;
 import org.openhab.binding.mqtt.generic.ChannelState;
 import org.openhab.binding.mqtt.generic.MqttChannelTypeProvider;
@@ -38,6 +33,12 @@ import org.openhab.binding.mqtt.homie.internal.homie300.DeviceCallback;
 import org.openhab.binding.mqtt.homie.internal.homie300.HandlerConfiguration;
 import org.openhab.binding.mqtt.homie.internal.homie300.Node;
 import org.openhab.binding.mqtt.homie.internal.homie300.Property;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,7 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
     /** The timeout per attribute field subscription */
     protected final int attributeReceiveTimeout;
     protected final int subscribeTimeout;
+    protected final int deviceTimeout;
     protected HandlerConfiguration config = new HandlerConfiguration();
     protected DelayedBatchProcessing<Object> delayedProcessing;
     private @Nullable ScheduledFuture<?> heartBeatTimer;
@@ -65,15 +67,17 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
      *
      * @param thing The thing of this handler
      * @param channelTypeProvider A channel type provider
+     * @param deviceTimeout Timeout for the entire device subscription. In milliseconds.
      * @param subscribeTimeout Timeout for an entire attribute class subscription and receive. In milliseconds.
      *            Even a slow remote device will publish a full node or property within 100ms.
      * @param attributeReceiveTimeout The timeout per attribute field subscription. In milliseconds.
      *            One attribute subscription and receiving should not take longer than 50ms.
      */
-    public HomieThingHandler(Thing thing, MqttChannelTypeProvider channelTypeProvider, int subscribeTimeout,
-            int attributeReceiveTimeout) {
-        super(thing, subscribeTimeout);
+    public HomieThingHandler(Thing thing, MqttChannelTypeProvider channelTypeProvider, int deviceTimeout,
+            int subscribeTimeout, int attributeReceiveTimeout) {
+        super(thing, deviceTimeout);
         this.channelTypeProvider = channelTypeProvider;
+        this.deviceTimeout = deviceTimeout;
         this.subscribeTimeout = subscribeTimeout;
         this.attributeReceiveTimeout = attributeReceiveTimeout;
         this.delayedProcessing = new DelayedBatchProcessing<>(subscribeTimeout, this, scheduler);
@@ -116,13 +120,16 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
     @Override
     protected CompletableFuture<@Nullable Void> start(MqttBrokerConnection connection) {
         logger.debug("About to start Homie device {}", device.attributes.name);
-        // We have mostly retained messages for Homie. QoS 1 is required.
-        connection.setRetain(true);
-        connection.setQos(1);
+        if (connection.getQos() != 1) {
+            // QoS 1 is required.
+            logger.warn(
+                    "Homie devices require QoS 1 but Qos 0/2 is configured. Using override. Please check the configuration");
+            connection.setQos(1);
+        }
         return device.subscribe(connection, scheduler, attributeReceiveTimeout).thenCompose((Void v) -> {
             return device.startChannels(connection, scheduler, attributeReceiveTimeout, this);
         }).thenRun(() -> {
-            logger.debug("Homie device {} fully attached", device.attributes.name);
+            logger.debug("Homie device {} fully attached (start)", device.attributes.name);
         });
     }
 
@@ -136,6 +143,7 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
         }
         delayedProcessing.join();
         device.stop();
+        super.stop();
     }
 
     @Override
@@ -212,14 +220,14 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
         if (!device.isInitialized()) {
             return;
         }
-        List<Channel> channels = device.nodes().stream().flatMap(n -> n.properties.stream())
-                .map(prop -> prop.getChannel()).collect(Collectors.toList());
+        List<Channel> channels = device.nodes().stream().flatMap(n -> n.properties.stream()).map(Property::getChannel)
+                .collect(Collectors.toList());
         updateThing(editThing().withChannels(channels).build());
         updateProperty(MqttBindingConstants.HOMIE_PROPERTY_VERSION, device.attributes.homie);
         final MqttBrokerConnection connection = this.connection;
         if (connection != null) {
             device.startChannels(connection, scheduler, attributeReceiveTimeout, this).thenRun(() -> {
-                logger.debug("Homie device {} fully attached", device.attributes.name);
+                logger.debug("Homie device {} fully attached (accept)", device.attributes.name);
             });
         }
     }
@@ -236,5 +244,10 @@ public class HomieThingHandler extends AbstractMQTTThingHandler implements Devic
         device.getRetainedTopics().stream().map(d -> {
             return String.format("%s/%s", config.basetopic, d);
         }).collect(Collectors.toList()).forEach(t -> connection.publish(t, new byte[0], 1, true));
+    }
+
+    @Override
+    protected void updateThingStatus(boolean messageReceived, Optional<Boolean> availabilityTopicsSeen) {
+        // not used here
     }
 }

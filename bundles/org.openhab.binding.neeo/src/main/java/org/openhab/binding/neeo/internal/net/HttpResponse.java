@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,13 @@ package org.openhab.binding.neeo.internal.net;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -59,7 +58,7 @@ public class HttpResponse {
 
         if (response.hasEntity()) {
             InputStream is = response.readEntity(InputStream.class);
-            contents = IOUtils.toByteArray(is);
+            contents = is.readAllBytes();
         } else {
             contents = null;
         }
@@ -75,9 +74,9 @@ public class HttpResponse {
      * @param httpCode the http code
      * @param msg the msg
      */
-    HttpResponse(int httpCode, String msg) {
+    HttpResponse(int httpCode, @Nullable String msg) {
         httpStatus = httpCode;
-        httpReason = msg;
+        httpReason = msg != null ? msg : "";
         contents = null;
     }
 
@@ -101,8 +100,7 @@ public class HttpResponse {
             return "";
         }
 
-        final Charset charSet = Charset.forName("utf-8");
-        return new String(localContents, charSet);
+        return new String(localContents, StandardCharsets.UTF_8);
     }
 
     /**

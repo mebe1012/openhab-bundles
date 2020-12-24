@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,15 +16,15 @@ import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.*;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.enocean.internal.eep.Base._4BSMessage;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  *
@@ -69,7 +69,8 @@ public abstract class A5_08 extends _4BSMessage {
     }
 
     @Override
-    protected State convertToStateImpl(String channelId, String channelTypeId, Function<String, State> getCurrentStateFunc, Configuration config) {
+    protected State convertToStateImpl(String channelId, String channelTypeId,
+            Function<String, State> getCurrentStateFunc, Configuration config) {
         if (!isValid()) {
             return UnDefType.UNDEF;
         }
@@ -83,7 +84,7 @@ public abstract class A5_08 extends _4BSMessage {
             double scaledIllumination = getScaledIlluminationMin()
                     + ((getUnscaledIlluminationValue() * (getScaledIlluminationMax() - getScaledIlluminationMin()))
                             / (getUnscaledIlluminationMax() - getUnscaledIlluminationMin()));
-            return new QuantityType<>(scaledIllumination, SmartHomeUnits.LUX);
+            return new QuantityType<>(scaledIllumination, Units.LUX);
         } else if (channelId.equals(CHANNEL_MOTIONDETECTION)) {
             return getBit(getDB_0(), 1) ? OnOffType.OFF : OnOffType.ON;
         } else if (channelId.equals(CHANNEL_OCCUPANCY)) {

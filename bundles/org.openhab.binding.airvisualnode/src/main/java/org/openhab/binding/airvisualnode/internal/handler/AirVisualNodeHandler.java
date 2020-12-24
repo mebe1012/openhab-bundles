@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,15 @@
  */
 package org.openhab.binding.airvisualnode.internal.handler;
 
+import static org.openhab.binding.airvisualnode.internal.AirVisualNodeBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.MICRO;
+import static org.openhab.core.library.unit.SIUnits.CELSIUS;
+import static org.openhab.core.library.unit.SIUnits.CUBIC_METRE;
+import static org.openhab.core.library.unit.SIUnits.GRAM;
+import static org.openhab.core.library.unit.Units.ONE;
+import static org.openhab.core.library.unit.Units.PARTS_PER_MILLION;
+import static org.openhab.core.library.unit.Units.PERCENT;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -20,33 +29,31 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.zone.ZoneRules;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.CELSIUS;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.GRAM;
-import static org.eclipse.smarthome.core.library.unit.SIUnits.CUBIC_METRE;
-import static org.eclipse.smarthome.core.library.unit.SmartHomeUnits.ONE;
-import static org.eclipse.smarthome.core.library.unit.SmartHomeUnits.PERCENT;
-import static org.openhab.binding.airvisualnode.internal.AirVisualNodeBindingConstants.*;
-import static org.eclipse.smarthome.core.library.unit.SmartHomeUnits.PARTS_PER_MILLION;
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.MICRO;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.airvisualnode.internal.config.AirVisualNodeConfig;
-import org.openhab.binding.airvisualnode.internal.json.NodeData;
+import org.openhab.binding.airvisualnode.internal.json.MeasurementsInterface;
+import org.openhab.binding.airvisualnode.internal.json.NodeDataInterface;
+import org.openhab.binding.airvisualnode.internal.json.airvisual.NodeData;
+import org.openhab.binding.airvisualnode.internal.json.airvisualpro.ProNodeData;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +91,9 @@ public class AirVisualNodeHandler extends BaseThingHandler {
 
     private String nodeShareName;
 
-    private NodeData nodeData;
+    private NodeDataInterface nodeData;
+
+    private boolean isProVersion;
 
     public AirVisualNodeHandler(Thing thing) {
         super(thing);
@@ -115,7 +124,31 @@ public class AirVisualNodeHandler extends BaseThingHandler {
 
         this.refreshInterval = config.refresh * 1000L;
 
+        try {
+            var jsonData = gson.fromJson(getNodeJsonData(), Map.class);
+            this.isProVersion = jsonData.get("measurements") instanceof ArrayList;
+        } catch (IOException e) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Can't get node json");
+            return;
+        }
+
+        if (!this.isProVersion) {
+            removeProChannels();
+        }
+
         schedulePoll();
+    }
+
+    private void removeProChannels() {
+        List<Channel> channels = new ArrayList<>(getThing().getChannels());
+        channels.removeIf(channel -> channel.getLabel().equals("PM0.1") || channel.getLabel().equals("PM10"));
+        replaceChannels(channels);
+    }
+
+    private void replaceChannels(List<Channel> channels) {
+        ThingBuilder thingBuilder = editThing();
+        thingBuilder.withChannels(channels);
+        updateThing(thingBuilder.build());
     }
 
     @Override
@@ -163,7 +196,14 @@ public class AirVisualNodeHandler extends BaseThingHandler {
 
     private void pollNode() throws IOException {
         String jsonData = getNodeJsonData();
-        NodeData currentNodeData = gson.fromJson(jsonData, NodeData.class);
+
+        NodeDataInterface currentNodeData;
+        if (isProVersion) {
+            currentNodeData = gson.fromJson(jsonData, ProNodeData.class);
+        } else {
+            currentNodeData = gson.fromJson(jsonData, NodeData.class);
+        }
+
         if (nodeData == null || currentNodeData.getStatus().getDatetime() > nodeData.getStatus().getDatetime()) {
             nodeData = currentNodeData;
             // Update all channels from the updated Node data
@@ -177,7 +217,7 @@ public class AirVisualNodeHandler extends BaseThingHandler {
         String url = "smb://" + nodeAddress + "/" + nodeShareName + "/" + NODE_JSON_FILE;
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(null, nodeUsername, nodePassword);
         try (SmbFileInputStream in = new SmbFileInputStream(new SmbFile(url, auth))) {
-            return IOUtils.toString(in, StandardCharsets.UTF_8.name());
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 
@@ -189,32 +229,42 @@ public class AirVisualNodeHandler extends BaseThingHandler {
         }
     }
 
-    private State getChannelState(String channelId, NodeData nodeData) {
+    private State getChannelState(String channelId, NodeDataInterface nodeData) {
         State state = UnDefType.UNDEF;
 
         // Handle system channel IDs separately, because 'switch/case' expressions must be constant expressions
         if (CHANNEL_BATTERY_LEVEL.equals(channelId)) {
             state = new DecimalType(BigDecimal.valueOf(nodeData.getStatus().getBattery()).longValue());
         } else if (CHANNEL_WIFI_STRENGTH.equals(channelId)) {
-            state = new DecimalType(BigDecimal.valueOf(Math.max(0, nodeData.getStatus().getWifiStrength()-1)).longValue());
+            state = new DecimalType(
+                    BigDecimal.valueOf(Math.max(0, nodeData.getStatus().getWifiStrength() - 1)).longValue());
         } else {
+            MeasurementsInterface measurements = nodeData.getMeasurements();
             // Handle binding-specific channel IDs
             switch (channelId) {
                 case CHANNEL_CO2:
-                    state = new QuantityType<>(nodeData.getMeasurements().getCo2Ppm(), PARTS_PER_MILLION);
+                    state = new QuantityType<>(measurements.getCo2Ppm(), PARTS_PER_MILLION);
                     break;
                 case CHANNEL_HUMIDITY:
-                    state = new QuantityType<>(nodeData.getMeasurements().getHumidityRH(), PERCENT);
+                    state = new QuantityType<>(measurements.getHumidityRH(), PERCENT);
                     break;
                 case CHANNEL_AQI_US:
-                    state = new QuantityType<>(nodeData.getMeasurements().getPm25AQIUS(), ONE);
+                    state = new QuantityType<>(measurements.getPm25AQIUS(), ONE);
                     break;
                 case CHANNEL_PM_25:
                     // PM2.5 is in ug/m3
-                    state = new QuantityType<>(nodeData.getMeasurements().getPm25Ugm3(), MICRO(GRAM).divide(CUBIC_METRE));
+                    state = new QuantityType<>(measurements.getPm25Ugm3(), MICRO(GRAM).divide(CUBIC_METRE));
+                    break;
+                case CHANNEL_PM_10:
+                    // PM10 is in ug/m3
+                    state = new QuantityType<>(measurements.getPm10Ugm3(), MICRO(GRAM).divide(CUBIC_METRE));
+                    break;
+                case CHANNEL_PM_01:
+                    // PM0.1 is in ug/m3
+                    state = new QuantityType<>(measurements.getPm01Ugm3(), MICRO(GRAM).divide(CUBIC_METRE));
                     break;
                 case CHANNEL_TEMP_CELSIUS:
-                    state = new QuantityType<>(nodeData.getMeasurements().getTemperatureC(), CELSIUS);
+                    state = new QuantityType<>(measurements.getTemperatureC(), CELSIUS);
                     break;
                 case CHANNEL_TIMESTAMP:
                     // It seem the Node timestamp is Unix timestamp converted from UTC time plus timezone offset.
@@ -237,5 +287,4 @@ public class AirVisualNodeHandler extends BaseThingHandler {
 
         return state;
     }
-
 }

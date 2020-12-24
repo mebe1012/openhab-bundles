@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,18 +17,18 @@ import static org.openhab.binding.knx.internal.KNXBindingConstants.*;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.knx.internal.handler.DeviceThingHandler;
 import org.openhab.binding.knx.internal.handler.IPBridgeThingHandler;
 import org.openhab.binding.knx.internal.handler.SerialBridgeThingHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -105,5 +105,4 @@ public class KNXHandlerFactory extends BaseThingHandlerFactory {
     protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
         this.networkAddressService = null;
     }
-
 }

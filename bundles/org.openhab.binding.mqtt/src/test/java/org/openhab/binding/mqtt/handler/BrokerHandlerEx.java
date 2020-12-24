@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,9 @@ package org.openhab.binding.mqtt.handler;
 import static org.mockito.Mockito.verify;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.mockito.Mockito;
-import org.openhab.binding.mqtt.handler.BrokerHandler;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.thing.Bridge;
 
 /**
  * Overwrite BrokerHandler to return our mocked/extended MqttBrokerConnection in

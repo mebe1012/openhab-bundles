@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link RFXComBindingConstants} class defines common constants, which are
@@ -107,6 +107,7 @@ public class RFXComBindingConstants {
     public static final String CHANNEL_CONTACT_2 = "contact2";
     public static final String CHANNEL_CONTACT_3 = "contact3";
     public static final String CHANNEL_VOLTAGE = "voltage";
+    public static final String CHANNEL_REFERENCE_VOLTAGE = "referenceVoltage";
     public static final String CHANNEL_SET_POINT = "setpoint";
     public static final String CHANNEL_DATE_TIME = "dateTime";
     public static final String CHANNEL_CHIME_SOUND = "chimeSound";
@@ -129,7 +130,7 @@ public class RFXComBindingConstants {
     private static final ThingTypeUID THING_TYPE_FAN_LUCCI_DC = new ThingTypeUID(BINDING_ID, "fan_lucci_dc");
     private static final ThingTypeUID THING_TYPE_FAN_FT1211R = new ThingTypeUID(BINDING_ID, "fan_ft1211r");
     private static final ThingTypeUID THING_TYPE_FAN_FALMEC = new ThingTypeUID(BINDING_ID, "fan_falmec");
-    private static final ThingTypeUID THING_TYPE_FAN_LUCCI_DC_II = new ThingTypeUID(BINDING_ID, "fan_lucci_dc2");
+    private static final ThingTypeUID THING_TYPE_FAN_LUCCI_DC_II = new ThingTypeUID(BINDING_ID, "fan_lucci_dc_ii");
     private static final ThingTypeUID THING_TYPE_FS20 = new ThingTypeUID(BINDING_ID, "fs20");
     private static final ThingTypeUID THING_TYPE_GAS_USAGE = new ThingTypeUID(BINDING_ID, "gasusage");
     private static final ThingTypeUID THING_TYPE_HOME_CONFORT = new ThingTypeUID(BINDING_ID, "homeconfort");
@@ -205,7 +206,7 @@ public class RFXComBindingConstants {
                     put(PacketType.FAN_LUCCI_DC, RFXComBindingConstants.THING_TYPE_FAN_LUCCI_DC);
                     put(PacketType.FAN_FT1211R, RFXComBindingConstants.THING_TYPE_FAN_FT1211R);
                     put(PacketType.FAN_FALMEC, RFXComBindingConstants.THING_TYPE_FAN_FALMEC);
-                    put(PacketType.FAN_LUCCI_DCII, RFXComBindingConstants.THING_TYPE_FAN_LUCCI_DC_II);
+                    put(PacketType.FAN_LUCCI_DC_II, RFXComBindingConstants.THING_TYPE_FAN_LUCCI_DC_II);
                     put(PacketType.FS20, RFXComBindingConstants.THING_TYPE_FS20);
                     put(PacketType.GAS, RFXComBindingConstants.THING_TYPE_GAS_USAGE);
                     put(PacketType.HOME_CONFORT, RFXComBindingConstants.THING_TYPE_HOME_CONFORT);
@@ -241,5 +242,4 @@ public class RFXComBindingConstants {
                     put(PacketType.WIND, RFXComBindingConstants.THING_TYPE_WIND);
                 }
             });
-
 }

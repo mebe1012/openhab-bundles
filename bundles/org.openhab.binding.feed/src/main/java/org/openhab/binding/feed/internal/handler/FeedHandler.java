@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,27 +21,29 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.ZonedDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,116 +58,142 @@ import com.rometools.rome.io.SyndFeedInput;
  *
  * @author Svilen Valkanov - Initial contribution
  */
+@NonNullByDefault
 public class FeedHandler extends BaseThingHandler {
 
-    private Logger logger = LoggerFactory.getLogger(FeedHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(FeedHandler.class);
 
-    private String urlString;
-    private BigDecimal refreshTime;
-    private ScheduledFuture<?> refreshTask;
-    private SyndFeed currentFeedState;
+    private @Nullable URL url;
+    private long refreshTime;
+    private @Nullable ScheduledFuture<?> refreshTask;
+    private @Nullable SyndFeed currentFeedState;
     private long lastRefreshTime;
 
     public FeedHandler(Thing thing) {
         super(thing);
-        currentFeedState = null;
     }
 
     @Override
     public void initialize() {
-        checkConfiguration();
-        updateStatus(ThingStatus.UNKNOWN);
-        startAutomaticRefresh();
+        if (checkConfiguration()) {
+            updateStatus(ThingStatus.UNKNOWN);
+            startAutomaticRefresh();
+        }
     }
 
     /**
      * This method checks if the provided configuration is valid.
      * When invalid parameter is found, default value is assigned.
      */
-    private void checkConfiguration() {
+    private boolean checkConfiguration() {
         logger.debug("Start reading Feed Thing configuration.");
         Configuration configuration = getConfig();
 
         // It is not necessary to check if the URL is valid, this will be done in fetchFeedData() method
-        urlString = (String) configuration.get(URL);
-
+        String urlString = (String) configuration.get(URL);
         try {
-            refreshTime = (BigDecimal) configuration.get(REFRESH_TIME);
-            if (refreshTime.intValue() <= 0) {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            logger.warn("Url '{}' is not valid: ", urlString, e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, e.getMessage());
+            return false;
+        }
+
+        BigDecimal localRefreshTime = null;
+        try {
+            localRefreshTime = (BigDecimal) configuration.get(REFRESH_TIME);
+            if (localRefreshTime.intValue() <= 0) {
                 throw new IllegalArgumentException("Refresh time must be positive number!");
             }
+            refreshTime = localRefreshTime.longValue();
         } catch (Exception e) {
-            logger.warn("Refresh time [{}] is not valid. Falling back to default value: {}. {}", refreshTime,
+            logger.warn("Refresh time [{}] is not valid. Falling back to default value: {}. {}", localRefreshTime,
                     DEFAULT_REFRESH_TIME, e.getMessage());
             refreshTime = DEFAULT_REFRESH_TIME;
         }
+        return true;
     }
 
     private void startAutomaticRefresh() {
-        refreshTask = scheduler.scheduleWithFixedDelay(this::refreshFeedState, 0, refreshTime.intValue(),
-                TimeUnit.MINUTES);
-        logger.debug("Start automatic refresh at {} minutes", refreshTime.intValue());
+        refreshTask = scheduler.scheduleWithFixedDelay(this::refreshFeedState, 0, refreshTime, TimeUnit.MINUTES);
+        logger.debug("Start automatic refresh at {} minutes!", refreshTime);
     }
 
     private void refreshFeedState() {
-        SyndFeed feed = fetchFeedData(urlString);
+        SyndFeed feed = fetchFeedData();
         boolean feedUpdated = updateFeedIfChanged(feed);
-
         if (feedUpdated) {
-            List<Channel> channels = getThing().getChannels();
-            for (Channel channel : channels) {
-                publishChannelIfLinked(channel.getUID());
-            }
+            getThing().getChannels().forEach(channel -> publishChannelIfLinked(channel.getUID()));
         }
     }
 
     private void publishChannelIfLinked(ChannelUID channelUID) {
         String channelID = channelUID.getId();
 
-        if (currentFeedState == null) {
+        SyndFeed feedState = currentFeedState;
+        if (feedState == null) {
             // This will happen if the binding could not download data from the server
-            logger.info("Cannot update channel with ID {}; no data has been downloaded from the server!", channelID);
+            logger.trace("Cannot update channel with ID {}; no data has been downloaded from the server!", channelID);
             return;
         }
 
         if (!isLinked(channelUID)) {
+            logger.trace("Cannot update channel with ID {}; not linked!", channelID);
             return;
         }
 
         State state = null;
+        SyndEntry latestEntry = getLatestEntry(feedState);
+
         switch (channelID) {
             case CHANNEL_LATEST_TITLE:
-                String title = getLatestEntry(currentFeedState).getTitle();
-                state = new StringType(getValueSafely(title));
+                if (latestEntry == null || latestEntry.getTitle() == null) {
+                    state = UnDefType.UNDEF;
+                } else {
+                    String title = latestEntry.getTitle();
+                    state = new StringType(getValueSafely(title));
+                }
                 break;
             case CHANNEL_LATEST_DESCRIPTION:
-                String description = getLatestEntry(currentFeedState).getDescription().getValue();
-                state = new StringType(getValueSafely(description));
+                if (latestEntry == null || latestEntry.getDescription() == null) {
+                    state = UnDefType.UNDEF;
+                } else {
+                    String description = latestEntry.getDescription().getValue();
+                    state = new StringType(getValueSafely(description));
+                }
+                break;
+            case CHANNEL_LATEST_LINK:
+                if (latestEntry == null || latestEntry.getLink() == null) {
+                    state = UnDefType.UNDEF;
+                } else {
+                    state = new StringType(getValueSafely(latestEntry.getLink()));
+                }
                 break;
             case CHANNEL_LATEST_PUBLISHED_DATE:
             case CHANNEL_LAST_UPDATE:
-                Date date = getLatestEntry(currentFeedState).getPublishedDate();
-                if (date == null) {
+                if (latestEntry == null || latestEntry.getPublishedDate() == null) {
                     logger.debug("Cannot update date channel. No date found in feed.");
                     return;
+                } else {
+                    Date date = latestEntry.getPublishedDate();
+                    ZonedDateTime zdt = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                    state = new DateTimeType(zdt);
                 }
-                ZonedDateTime zdt = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-                state = new DateTimeType(zdt);
                 break;
             case CHANNEL_AUTHOR:
-                String author = currentFeedState.getAuthor();
+                String author = feedState.getAuthor();
                 state = new StringType(getValueSafely(author));
                 break;
             case CHANNEL_DESCRIPTION:
-                String channelDescription = currentFeedState.getDescription();
+                String channelDescription = feedState.getDescription();
                 state = new StringType(getValueSafely(channelDescription));
                 break;
             case CHANNEL_TITLE:
-                String channelTitle = currentFeedState.getTitle();
+                String channelTitle = feedState.getTitle();
                 state = new StringType(getValueSafely(channelTitle));
                 break;
             case CHANNEL_NUMBER_OF_ENTRIES:
-                int numberOfEntries = currentFeedState.getEntries().size();
+                int numberOfEntries = feedState.getEntries().size();
                 state = new DecimalType(numberOfEntries);
                 break;
             default:
@@ -175,7 +203,7 @@ public class FeedHandler extends BaseThingHandler {
         if (state != null) {
             updateState(channelID, state);
         } else {
-            logger.debug("Cannot update channel with ID {}", channelID);
+            logger.debug("Cannot update channel with ID {}; state not defined!", channelID);
         }
     }
 
@@ -187,7 +215,7 @@ public class FeedHandler extends BaseThingHandler {
      * @return <code>true</code> if new content is available on the server since the last update or <code>false</code>
      *         otherwise
      */
-    private synchronized boolean updateFeedIfChanged(SyndFeed newFeedState) {
+    private synchronized boolean updateFeedIfChanged(@Nullable SyndFeed newFeedState) {
         // SyndFeed class has implementation of equals ()
         if (newFeedState != null && !newFeedState.equals(currentFeedState)) {
             currentFeedState = newFeedState;
@@ -205,16 +233,18 @@ public class FeedHandler extends BaseThingHandler {
      * {@link ThingStatusDetail#CONFIGURATION_ERROR} or
      * {@link ThingStatusDetail#COMMUNICATION_ERROR} and adequate message.
      *
-     * @param urlString URL of the Feed
      * @return {@link SyndFeed} instance with the feed data, if the connection attempt was successful and
      *         <code>null</code> otherwise
      */
-    private SyndFeed fetchFeedData(String urlString) {
-        SyndFeed feed = null;
-        try {
-            URL url = new URL(urlString);
+    private @Nullable SyndFeed fetchFeedData() {
+        URL localUrl = url;
+        if (localUrl == null) {
+            logger.trace("Url '{}' is not valid: ", localUrl);
+            return null;
+        }
 
-            URLConnection connection = url.openConnection();
+        try {
+            URLConnection connection = localUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
 
             BufferedReader in = null;
@@ -225,50 +255,45 @@ public class FeedHandler extends BaseThingHandler {
             }
 
             SyndFeedInput input = new SyndFeedInput();
-            feed = input.build(in);
+            SyndFeed feed = input.build(in);
             in.close();
 
             if (this.thing.getStatus() != ThingStatus.ONLINE) {
                 updateStatus(ThingStatus.ONLINE);
             }
-        } catch (MalformedURLException e) {
-            logger.warn("Url '{}' is not valid: ", urlString, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, e.getMessage());
-            return null;
+
+            return feed;
         } catch (IOException e) {
-            logger.warn("Error accessing feed: {}", urlString, e);
+            logger.warn("Error accessing feed: {}", localUrl, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, e.getMessage());
             return null;
         } catch (IllegalArgumentException e) {
-            logger.warn("Feed URL is null ", e);
+            logger.warn("Feed URL is null: {} ", localUrl, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, e.getMessage());
             return null;
         } catch (FeedException e) {
-            logger.warn("Feed content is not valid: {} ", urlString, e);
+            logger.warn("Feed content is not valid: {} ", localUrl, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, e.getMessage());
             return null;
         }
-
-        return feed;
     }
 
     /**
      * Returns the most recent entry or null, if no entries are found.
      */
-    private SyndEntry getLatestEntry(SyndFeed feed) {
+    private @Nullable SyndEntry getLatestEntry(SyndFeed feed) {
         List<SyndEntry> allEntries = feed.getEntries();
-        SyndEntry lastEntry = null;
-        if (allEntries.size() >= 1) {
+        if (!allEntries.isEmpty()) {
             /*
              * The entries are stored in the SyndFeed object in the following order -
              * the newest entry has index 0. The order is determined from the time the entry was posted, not the
              * published time of the entry.
              */
-            lastEntry = allEntries.get(0);
+            return allEntries.get(0);
         } else {
             logger.debug("No entries found");
         }
-        return lastEntry;
+        return null;
     }
 
     @Override
@@ -276,7 +301,7 @@ public class FeedHandler extends BaseThingHandler {
         if (command instanceof RefreshType) {
             // safeguard for multiple REFRESH commands for different channels in a row
             if (isMinimumRefreshTimeExceeded()) {
-                SyndFeed feed = fetchFeedData(urlString);
+                SyndFeed feed = fetchFeedData();
                 updateFeedIfChanged(feed);
             }
             publishChannelIfLinked(channelUID);
@@ -304,7 +329,7 @@ public class FeedHandler extends BaseThingHandler {
         return true;
     }
 
-    public String getValueSafely(String value) {
-        return value == null ? new String() : value;
+    public String getValueSafely(@Nullable String value) {
+        return value == null ? "" : value;
     }
 }

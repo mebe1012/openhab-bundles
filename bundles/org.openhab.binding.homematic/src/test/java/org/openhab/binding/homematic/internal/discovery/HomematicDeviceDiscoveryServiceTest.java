@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,35 +14,30 @@ package org.openhab.binding.homematic.internal.discovery;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.openhab.binding.homematic.test.util.BridgeHelper.createHomematicBridge;
 import static org.openhab.binding.homematic.test.util.DimmerHelper.createDimmerHmDevice;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.homematic.internal.communicator.HomematicGateway;
-import org.openhab.binding.homematic.internal.discovery.HomematicDeviceDiscoveryService;
 import org.openhab.binding.homematic.internal.handler.HomematicBridgeHandler;
 import org.openhab.binding.homematic.internal.model.HmDevice;
 import org.openhab.binding.homematic.internal.type.HomematicTypeGenerator;
 import org.openhab.binding.homematic.test.util.SimpleDiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
 
 /**
  * Tests for {@link HomematicDeviceDiscoveryServiceTest}.
- * 
+ *
  * @author Florian Stolte - Initial Contribution
  *
  */
@@ -51,10 +46,11 @@ public class HomematicDeviceDiscoveryServiceTest extends JavaTest {
     private HomematicDeviceDiscoveryService homematicDeviceDiscoveryService;
     private HomematicBridgeHandler homematicBridgeHandler;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         this.homematicBridgeHandler = mockHomematicBridgeHandler();
-        this.homematicDeviceDiscoveryService = new HomematicDeviceDiscoveryService(homematicBridgeHandler);
+        this.homematicDeviceDiscoveryService = new HomematicDeviceDiscoveryService();
+        this.homematicDeviceDiscoveryService.setThingHandler(homematicBridgeHandler);
     }
 
     private HomematicBridgeHandler mockHomematicBridgeHandler() throws IOException {

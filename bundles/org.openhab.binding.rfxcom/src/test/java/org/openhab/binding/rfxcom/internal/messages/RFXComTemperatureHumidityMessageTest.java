@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,21 +12,23 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.openhab.binding.rfxcom.internal.messages.RFXComTemperatureHumidityMessage.HumidityStatus.*;
 import static org.openhab.binding.rfxcom.internal.messages.RFXComTemperatureHumidityMessage.SubType.*;
 
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComTemperatureHumidityMessage.HumidityStatus;
+import org.openhab.core.util.HexUtils;
 
 /**
  * Test for RFXCom-binding
  *
- * @author Ivan F. Martinez
- * @author Martin van Wingerden
+ * @author Ivan F. Martinez - Initial contribution
+ * @author Martin van Wingerden - Extended tests
  */
+@NonNullByDefault
 public class RFXComTemperatureHumidityMessageTest {
 
     private void testMessage(String hexMsg, RFXComTemperatureHumidityMessage.SubType subType, int seqNbr, int sensorId,
@@ -35,18 +37,18 @@ public class RFXComTemperatureHumidityMessageTest {
         byte[] binaryMessage = HexUtils.hexToBytes(hexMsg);
         final RFXComTemperatureHumidityMessage msg = (RFXComTemperatureHumidityMessage) RFXComMessageFactory
                 .createMessage(binaryMessage);
-        assertEquals("SubType", subType, msg.subType);
-        assertEquals("Seq Number", seqNbr, (short) (msg.seqNbr & 0xFF));
-        assertEquals("Sensor Id", sensorId, msg.sensorId);
-        assertEquals("Temperature", temperature, msg.temperature, 0.01);
-        assertEquals("Humidity", humidity, msg.humidity);
-        assertEquals("Humidity Status", humidityStatus, msg.humidityStatus);
-        assertEquals("Signal Level", signalLevel, msg.signalLevel);
-        assertEquals("Battery Level", batteryLevel, msg.batteryLevel);
+        assertEquals(subType, msg.subType, "SubType");
+        assertEquals(seqNbr, (short) (msg.seqNbr & 0xFF), "Seq Number");
+        assertEquals(sensorId, msg.sensorId, "Sensor Id");
+        assertEquals(temperature, msg.temperature, 0.01, "Temperature");
+        assertEquals(humidity, msg.humidity, "Humidity");
+        assertEquals(humidityStatus, msg.humidityStatus, "Humidity Status");
+        assertEquals(signalLevel, msg.signalLevel, "Signal Level");
+        assertEquals(batteryLevel, msg.batteryLevel, "Battery Level");
 
         byte[] decoded = msg.decodeMessage();
 
-        assertEquals("Message converted back", hexMsg, HexUtils.bytesToHex(decoded));
+        assertEquals(hexMsg, HexUtils.bytesToHex(decoded), "Message converted back");
     }
 
     @Test
@@ -55,5 +57,4 @@ public class RFXComTemperatureHumidityMessageTest {
         testMessage("0A520211700200A72D0089", TH2, 17, 28674, 16.7, 45, NORMAL, 8, 9);
         testMessage("0A5205D42F000082590379", TH5, 212, 12032, 13, 89, WET, 7, 9);
     }
-
 }

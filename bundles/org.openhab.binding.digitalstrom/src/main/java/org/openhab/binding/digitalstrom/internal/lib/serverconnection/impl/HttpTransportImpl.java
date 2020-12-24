@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -35,6 +36,7 @@ import java.util.Base64;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -256,9 +258,9 @@ public class HttpTransportImpl implements HttpTransport {
                 final int responseCode = connection.getResponseCode();
                 if (responseCode != HttpURLConnection.HTTP_FORBIDDEN) {
                     if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                        response = IOUtils.toString(connection.getErrorStream());
+                        response = new String(connection.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
                     } else {
-                        response = IOUtils.toString(connection.getInputStream());
+                        response = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                     }
                     if (response != null) {
                         if (!response.contains("Authentication failed")) {
@@ -296,11 +298,11 @@ public class HttpTransportImpl implements HttpTransport {
             informConnectionManager(ConnectionManager.MALFORMED_URL_EXCEPTION);
         } catch (java.net.UnknownHostException e) {
             informConnectionManager(ConnectionManager.UNKNOWN_HOST_EXCEPTION);
+        } catch (SSLHandshakeException e) {
+            informConnectionManager(ConnectionManager.SSL_HANDSHAKE_EXCEPTION);
         } catch (IOException e) {
             logger.error("An IOException occurred: ", e);
-            if (connectionManager != null) {
-                informConnectionManager(ConnectionManager.GENERAL_EXCEPTION);
-            }
+            informConnectionManager(ConnectionManager.GENERAL_EXCEPTION);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -379,7 +381,8 @@ public class HttpTransportImpl implements HttpTransport {
             if (connection != null) {
                 connection.connect();
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    if (IOUtils.toString(connection.getInputStream()).contains("Authentication failed")) {
+                    if (new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8)
+                            .contains("Authentication failed")) {
                         return ConnectionManager.AUTHENTIFICATION_PROBLEM;
                     }
                 }
@@ -418,13 +421,12 @@ public class HttpTransportImpl implements HttpTransport {
             File dssCert = new File(path);
             if (dssCert.exists()) {
                 if (path.endsWith(".crt")) {
-                    try {
-                        InputStream certInputStream = new FileInputStream(dssCert);
-                        String cert = IOUtils.toString(certInputStream);
+                    try (InputStream certInputStream = new FileInputStream(dssCert)) {
+                        String cert = new String(certInputStream.readAllBytes(), StandardCharsets.UTF_8);
                         if (cert.startsWith(BEGIN_CERT)) {
                             return cert;
                         } else {
-                            logger.error("File is not a PEM certificate file. PEM-Certificats starts with: {}",
+                            logger.error("File is not a PEM certificate file. PEM-Certificates starts with: {}",
                                     BEGIN_CERT);
                         }
                     } catch (FileNotFoundException e) {
@@ -581,12 +583,10 @@ public class HttpTransportImpl implements HttpTransport {
 
             @Override
             public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-
             }
         } };
 

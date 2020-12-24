@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,15 +18,15 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.meteoblue.internal.MeteoBlueBridgeConfig;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,6 @@ public class MeteoBlueBridgeHandler extends BaseBridgeHandler {
     private final Logger logger = LoggerFactory.getLogger(MeteoBlueBridgeHandler.class);
 
     private String apiKey;
-    private boolean isValidConfig;
 
     public MeteoBlueBridgeHandler(Bridge bridge) {
         super(bridge);
@@ -81,7 +80,7 @@ public class MeteoBlueBridgeHandler extends BaseBridgeHandler {
     private void healthCheck() {
         String url = "http://my.meteoblue.com/packages/";
         try {
-            String httpResponse = HttpUtil.executeUrl("GET", url, 30 * 1000);
+            HttpUtil.executeUrl("GET", url, 30 * 1000);
             logger.trace("HealthCheck succeeded.");
             updateStatus(ThingStatus.ONLINE);
         } catch (Exception e) {

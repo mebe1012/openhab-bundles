@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,13 +22,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
 import org.openhab.binding.lifx.internal.fields.HSBK;
 import org.openhab.binding.lifx.internal.listener.LifxLightStateListener;
+import org.openhab.binding.lifx.internal.protocol.Effect;
 import org.openhab.binding.lifx.internal.protocol.PowerState;
 import org.openhab.binding.lifx.internal.protocol.SignalStrength;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * The {@link LifxLightState} stores the properties that represent the state of a light.
@@ -42,6 +43,7 @@ public class LifxLightState {
     private @Nullable PercentType infrared;
     private @Nullable PowerState powerState;
     private @Nullable SignalStrength signalStrength;
+    private @Nullable Effect tileEffect;
 
     private LocalDateTime lastChange = LocalDateTime.MIN;
     private List<LifxLightStateListener> listeners = new CopyOnWriteArrayList<>();
@@ -51,6 +53,7 @@ public class LifxLightState {
         this.colors = other.getColors();
         this.infrared = other.getInfrared();
         this.signalStrength = other.getSignalStrength();
+        this.tileEffect = other.getTileEffect();
     }
 
     public @Nullable PowerState getPowerState() {
@@ -79,6 +82,10 @@ public class LifxLightState {
 
     public @Nullable SignalStrength getSignalStrength() {
         return signalStrength;
+    }
+
+    public @Nullable Effect getTileEffect() {
+        return tileEffect;
     }
 
     public void setColor(HSBType newHSB) {
@@ -165,6 +172,14 @@ public class LifxLightState {
         listeners.forEach(listener -> listener.handleSignalStrengthChange(oldSignalStrength, newSignalStrength));
     }
 
+    public void setTileEffect(Effect newEffect) {
+        // Caller has to take care that newEffect is another object
+        Effect oldEffect = tileEffect;
+        tileEffect = newEffect;
+        updateLastChange();
+        listeners.forEach(listener -> listener.handleTileEffectChange(oldEffect, newEffect));
+    }
+
     private void updateLastChange() {
         lastChange = LocalDateTime.now();
     }
@@ -180,5 +195,4 @@ public class LifxLightState {
     public void removeListener(LifxLightStateListener listener) {
         listeners.remove(listener);
     }
-
 }

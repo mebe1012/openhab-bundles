@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,38 +27,38 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
-import org.eclipse.smarthome.io.transport.upnp.UpnpIOService;
 import org.openhab.binding.onkyo.internal.OnkyoAlbumArt;
 import org.openhab.binding.onkyo.internal.OnkyoConnection;
 import org.openhab.binding.onkyo.internal.OnkyoEventListener;
 import org.openhab.binding.onkyo.internal.OnkyoStateDescriptionProvider;
 import org.openhab.binding.onkyo.internal.ServiceType;
-import org.openhab.binding.onkyo.internal.automation.modules.OnkyoThingActionsService;
+import org.openhab.binding.onkyo.internal.automation.modules.OnkyoThingActions;
 import org.openhab.binding.onkyo.internal.config.OnkyoDeviceConfiguration;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpCommand;
 import org.openhab.binding.onkyo.internal.eiscp.EiscpMessage;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -90,7 +90,7 @@ public class OnkyoHandler extends UpnpAudioSinkHandler implements OnkyoEventList
     private State volumeLevelZone2 = UnDefType.UNDEF;
     private State volumeLevelZone3 = UnDefType.UNDEF;
     private State lastPowerState = OnOffType.OFF;
-    
+
     private final OnkyoStateDescriptionProvider stateDescriptionProvider;
 
     private final OnkyoAlbumArt onkyoAlbumArt = new OnkyoAlbumArt();
@@ -509,7 +509,6 @@ public class OnkyoHandler extends UpnpAudioSinkHandler implements OnkyoEventList
         } catch (ParserConfigurationException | SAXException | IOException e) {
             logger.debug("Error occured during Info XML parsing.", e);
         }
-
     }
 
     @Override
@@ -620,7 +619,6 @@ public class OnkyoHandler extends UpnpAudioSinkHandler implements OnkyoEventList
             logger.debug("Not supported album art URL type: {}", data.substring(0, 2));
             updateState(CHANNEL_ALBUM_ART_URL, UnDefType.UNDEF);
         }
-
     }
 
     private void updateNetTitle(String data) {
@@ -635,7 +633,6 @@ public class OnkyoHandler extends UpnpAudioSinkHandler implements OnkyoEventList
 
         updateState(CHANNEL_NET_MENU_TITLE,
                 new StringType(service.toString() + ((title.length() > 0) ? ": " + title : "")));
-
     }
 
     private void updateNetMenu(String data) {
@@ -913,6 +910,6 @@ public class OnkyoHandler extends UpnpAudioSinkHandler implements OnkyoEventList
 
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
-        return Collections.singletonList(OnkyoThingActionsService.class);
+        return Collections.singletonList(OnkyoThingActions.class);
     }
 }

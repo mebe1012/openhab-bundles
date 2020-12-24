@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,20 +24,13 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ModbusDataConfiguration {
 
-    @Nullable
-    private String readStart;
-    @Nullable
-    private String readTransform;
-    @Nullable
-    private String readValueType;
-    @Nullable
-    private String writeStart;
-    @Nullable
-    private String writeType;
-    @Nullable
-    private String writeTransform;
-    @Nullable
-    private String writeValueType;
+    private @Nullable String readStart;
+    private @Nullable String readTransform;
+    private @Nullable String readValueType;
+    private @Nullable String writeStart;
+    private @Nullable String writeType;
+    private @Nullable String writeTransform;
+    private @Nullable String writeValueType;
     private boolean writeMultipleEvenWithSingleRegisterOrCoil;
     private int writeMaxTries = 3; // backwards compatibility and tests
     private long updateUnchangedValuesEveryMillis = 1000L;

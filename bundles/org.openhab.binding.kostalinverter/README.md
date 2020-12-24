@@ -32,6 +32,10 @@ Currently supported things are:
 
 Others may be supported (like future devices using the same SCB or offering the same Web API, branded OEM devices, ...), but they were not tested!
 
+Kostal bindings to third generation devices require Java's strong cryptography to be enabled in order to establish connections. In case you are allowed to use 
+strong cryptography in your country, you can achieve this by modifying the $JAVA_HOME/jre/lib/security/java.security file (find the line *crypto.policy=limited* and set it to *unlimited*). 
+If you're using the official openHAB docker image you may also enable Java's strong cryptography by specifying an environment variable *CRYPTO_POLICY="unlimited"*.
+
 ## Discovery
 
 None
@@ -155,7 +159,9 @@ All third generation inverters require to define 3 mandatory configuration param
 | refreshInternalInSeconds | Defines how often the device is polled for new values  | Integer | Seconds | 30            | 30            |
 
 If you are using the hostname instead of the IP address, please make sure your DNS is configuration correctly!
-The refresh interval should be chosen wisely. To small interval may led to high workload for the inverter. From my testing I recommend a interval of 30 seconds.
+The refresh interval should be chosen wisely.
+To small interval may led to high workload for the inverter.
+It is recommended to use an interval of 30 seconds.
 
 Full sample of thing configuration:
 

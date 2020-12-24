@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,18 +18,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.velbus.internal.VelbusChannelIdentifier;
 import org.openhab.binding.velbus.internal.packets.VelbusPacket;
 import org.openhab.binding.velbus.internal.packets.VelbusRelayPacket;
 import org.openhab.binding.velbus.internal.packets.VelbusStatusRequestPacket;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 
 /**
  * The {@link VelbusRelayHandler} is responsible for handling commands, which are
@@ -37,12 +38,14 @@ import org.openhab.binding.velbus.internal.packets.VelbusStatusRequestPacket;
  *
  * @author Cedric Boon - Initial contribution
  */
+@NonNullByDefault
 public class VelbusRelayHandler extends VelbusThingHandler {
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_VMB1RY,
-            THING_TYPE_VMB1RYNO, THING_TYPE_VMB1RYNOS, THING_TYPE_VMB4RY, THING_TYPE_VMB4RYLD, THING_TYPE_VMB4RYNO));
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(
+            Arrays.asList(THING_TYPE_VMB1RY, THING_TYPE_VMB1RYNO, THING_TYPE_VMB1RYNOS, THING_TYPE_VMB1RYS,
+                    THING_TYPE_VMB4RY, THING_TYPE_VMB4RYLD, THING_TYPE_VMB4RYNO));
 
     public VelbusRelayHandler(Thing thing) {
-        super(thing, 0, "Switch");
+        super(thing, 0);
     }
 
     @Override

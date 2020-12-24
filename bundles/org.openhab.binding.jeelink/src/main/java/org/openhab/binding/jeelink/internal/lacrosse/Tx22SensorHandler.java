@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,20 @@
  */
 package org.openhab.binding.jeelink.internal.lacrosse;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.*;
 import static org.openhab.binding.jeelink.internal.JeeLinkBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.openhab.binding.jeelink.internal.JeeLinkSensorHandler;
 import org.openhab.binding.jeelink.internal.ReadingPublisher;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 public class Tx22SensorHandler extends JeeLinkSensorHandler<Tx22Reading> {
     private final Logger logger = LoggerFactory.getLogger(Tx22SensorHandler.class);
 
-    public Tx22SensorHandler(Thing thing) {
-        super(thing);
+    public Tx22SensorHandler(Thing thing, String sensorType) {
+        super(thing, sensorType);
     }
 
     @Override
@@ -63,8 +63,7 @@ public class Tx22SensorHandler extends JeeLinkSensorHandler<Tx22Reading> {
                         updateState(TEMPERATURE_CHANNEL, new QuantityType<>(temp, SIUnits.CELSIUS));
                     }
                     if (reading.hasHumidity()) {
-                        updateState(HUMIDITY_CHANNEL,
-                                new QuantityType<>(reading.getHumidity(), SmartHomeUnits.PERCENT));
+                        updateState(HUMIDITY_CHANNEL, new QuantityType<>(reading.getHumidity(), Units.PERCENT));
                     }
                     if (reading.hasRain()) {
                         updateState(RAIN_CHANNEL, new QuantityType<>(reading.getRain(), MILLI(SIUnits.METRE)));
@@ -74,15 +73,15 @@ public class Tx22SensorHandler extends JeeLinkSensorHandler<Tx22Reading> {
                     }
                     if (reading.hasWindDirection()) {
                         updateState(WIND_ANGLE_CHANNEL,
-                                new QuantityType<>(reading.getWindDirection(), SmartHomeUnits.DEGREE_ANGLE));
+                                new QuantityType<>(reading.getWindDirection(), Units.DEGREE_ANGLE));
                     }
                     if (reading.hasWindSpeed()) {
                         updateState(WIND_STENGTH_CHANNEL,
-                                new QuantityType<>(reading.getWindSpeed(), SmartHomeUnits.METRE_PER_SECOND));
+                                new QuantityType<>(reading.getWindSpeed(), Units.METRE_PER_SECOND));
                     }
                     if (reading.hasWindGust()) {
                         updateState(GUST_STRENGTH_CHANNEL,
-                                new QuantityType<>(reading.getWindGust(), SmartHomeUnits.METRE_PER_SECOND));
+                                new QuantityType<>(reading.getWindGust(), Units.METRE_PER_SECOND));
                     }
                 }
             }

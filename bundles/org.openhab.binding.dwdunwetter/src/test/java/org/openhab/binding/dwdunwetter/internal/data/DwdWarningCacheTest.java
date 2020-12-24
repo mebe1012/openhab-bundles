@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,12 @@
 package org.openhab.binding.dwdunwetter.internal.data;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.Instant;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DwdWarningCache}
@@ -29,7 +29,7 @@ public class DwdWarningCacheTest {
 
     private DwdWarningCache cache;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cache = new DwdWarningCache();
     }
@@ -54,7 +54,6 @@ public class DwdWarningCacheTest {
         assertThat(cache.addEntry(data), is(false));
         cache.deleteOldEntries();
         assertThat(cache.addEntry(data), is(true));
-
     }
 
     private DwdWarningData createData(String id, long secondsBeforeNow) {

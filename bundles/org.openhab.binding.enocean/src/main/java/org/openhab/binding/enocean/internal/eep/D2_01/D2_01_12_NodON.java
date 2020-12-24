@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,14 +16,14 @@ import static org.openhab.binding.enocean.internal.EnOceanBindingConstants.CHANN
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.enocean.internal.EnOceanBindingConstants;
 import org.openhab.binding.enocean.internal.messages.ERP1Message;
 import org.openhab.binding.enocean.internal.messages.ERP1Message.RORG;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 
 /**
  *
@@ -42,9 +42,7 @@ public class D2_01_12_NodON extends D2_01 {
     @Override
     protected void convertFromCommandImpl(String channelId, String channelTypeId, Command command,
             Function<String, State> getCurrentStateFunc, Configuration config) {
-
         if (channelId.equalsIgnoreCase(CHANNEL_REPEATERMODE)) {
-
             if (command instanceof RefreshType) {
                 senderId = null; // make this message invalid as we do not support refresh of repeter status
             } else if (command instanceof StringType) {
@@ -63,5 +61,4 @@ public class D2_01_12_NodON extends D2_01 {
             super.convertFromCommandImpl(channelId, channelTypeId, command, getCurrentStateFunc, config);
         }
     }
-
 }

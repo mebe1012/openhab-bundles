@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,54 +13,54 @@
 package org.openhab.binding.network.internal;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.network.internal.toberemoved.cache.ExpiringCacheAsync;
 import org.openhab.binding.network.internal.toberemoved.cache.ExpiringCacheHelper;
 import org.openhab.binding.network.internal.utils.NetworkUtils;
 import org.openhab.binding.network.internal.utils.NetworkUtils.ArpPingUtilEnum;
 import org.openhab.binding.network.internal.utils.NetworkUtils.IpPingMethodEnum;
+import org.openhab.binding.network.internal.utils.PingResult;
 
 /**
  * Tests cases for {@see PresenceDetectionValue}
  *
  * @author David Graeff - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PresenceDetectionTest {
-    static long CACHETIME = 2000L;
-    @Mock
-    NetworkUtils networkUtils;
+    private static final long CACHETIME = 2000L;
 
-    @Mock
-    PresenceDetectionListener listener;
+    private PresenceDetection subject;
 
-    @Mock
-    ExecutorService executorService;
+    private @Mock Consumer<PresenceDetectionValue> callback;
+    private @Mock ExecutorService executorService;
+    private @Mock PresenceDetectionListener listener;
+    private @Mock NetworkUtils networkUtils;
 
-    @Mock
-    Consumer<PresenceDetectionValue> callback;
-
-    PresenceDetection subject;
-
-    @Before
+    @BeforeEach
     public void setUp() throws UnknownHostException {
-        MockitoAnnotations.initMocks(this);
-
         // Mock an interface
         when(networkUtils.getInterfaceNames()).thenReturn(Collections.singleton("TESTinterface"));
         doReturn(ArpPingUtilEnum.IPUTILS_ARPING).when(networkUtils).determineNativeARPpingMethod(anyString());
@@ -68,7 +68,7 @@ public class PresenceDetectionTest {
 
         subject = spy(new PresenceDetection(listener, (int) CACHETIME));
         subject.networkUtils = networkUtils;
-        subject.cache = spy(new ExpiringCacheAsync<PresenceDetectionValue>(CACHETIME, () -> {
+        subject.cache = spy(new ExpiringCacheAsync<>(CACHETIME, () -> {
             subject.performPresenceDetection(false);
         }));
 
@@ -84,7 +84,7 @@ public class PresenceDetectionTest {
         assertThat(subject.pingMethod, is(IpPingMethodEnum.WINDOWS_PING));
     }
 
-    @After
+    @AfterEach
     public void shutDown() {
         subject.waitForPresenceDetection();
     }
@@ -113,10 +113,11 @@ public class PresenceDetectionTest {
 
     @Test
     public void partialAndFinalCallbackTests() throws InterruptedException, IOException {
-        doReturn(true).when(networkUtils).nativePing(eq(IpPingMethodEnum.WINDOWS_PING), anyString(), anyInt());
-        doReturn(true).when(networkUtils).nativeARPPing(eq(ArpPingUtilEnum.IPUTILS_ARPING), anyString(), anyString(),
-                any(), anyInt());
-        doReturn(true).when(networkUtils).servicePing(anyString(), anyInt(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils).nativePing(eq(IpPingMethodEnum.WINDOWS_PING),
+                anyString(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils)
+                .nativeARPPing(eq(ArpPingUtilEnum.IPUTILS_ARPING), anyString(), anyString(), any(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils).servicePing(anyString(), anyInt(), anyInt());
 
         assertTrue(subject.performPresenceDetection(false));
         subject.waitForPresenceDetection();
@@ -135,10 +136,11 @@ public class PresenceDetectionTest {
 
     @Test
     public void cacheTest() throws InterruptedException, IOException {
-        doReturn(true).when(networkUtils).nativePing(eq(IpPingMethodEnum.WINDOWS_PING), anyString(), anyInt());
-        doReturn(true).when(networkUtils).nativeARPPing(eq(ArpPingUtilEnum.IPUTILS_ARPING), anyString(), anyString(),
-                any(), anyInt());
-        doReturn(true).when(networkUtils).servicePing(anyString(), anyInt(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils).nativePing(eq(IpPingMethodEnum.WINDOWS_PING),
+                anyString(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils)
+                .nativeARPPing(eq(ArpPingUtilEnum.IPUTILS_ARPING), anyString(), anyString(), any(), anyInt());
+        doReturn(Optional.of(new PingResult(true, 10))).when(networkUtils).servicePing(anyString(), anyInt(), anyInt());
 
         doReturn(executorService).when(subject).getThreadsFor(anyInt());
 

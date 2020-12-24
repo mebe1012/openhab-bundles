@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,8 @@
 package org.openhab.binding.ntp.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -26,48 +27,50 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.events.ItemStateEvent;
-import org.eclipse.smarthome.core.library.items.DateTimeItem;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingProvider;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ManagedItemChannelLinkProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.openhab.binding.ntp.internal.NtpBindingConstants;
 import org.openhab.binding.ntp.internal.handler.NtpHandler;
 import org.openhab.binding.ntp.server.SimpleNTPServer;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.DateTimeItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingProvider;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 
 /**
  * OSGi tests for the {@link NtpHandler}
@@ -97,7 +100,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
     private static final String TEST_ITEM_NAME = "testItem";
     private static final String TEST_THING_ID = "testThingId";
 
-    // No bundle in ESH is exporting a package from which we can use item types
+    // No bundle is exporting a package from which we can use item types
     // as constants, so we will use String.
     private static final String ACCEPTED_ITEM_TYPE_STRING = "String";
     private static final String ACCEPTED_ITEM_TYPE_DATE_TIME = "DateTime";
@@ -121,7 +124,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         // Initializing a new local server on this port
         timeServer = new SimpleNTPServer(TEST_PORT);
@@ -143,7 +146,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
         Locale.setDefault(Locale.US);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         VolatileStorageService volatileStorageService = new VolatileStorageService();
         registerService(volatileStorageService);
@@ -160,12 +163,11 @@ public class NtpOSGiTest extends JavaOSGiTest {
         channelTypeUID = new ChannelTypeUID(NtpBindingConstants.BINDING_ID + ":channelType");
         channelTypeProvider = mock(ChannelTypeProvider.class);
         when(channelTypeProvider.getChannelType(any(ChannelTypeUID.class), any(Locale.class)))
-                .thenReturn(new ChannelType(channelTypeUID, false, "Switch", ChannelKind.STATE, "label", null, null,
-                        null, null, null, null));
+                .thenReturn(ChannelTypeBuilder.state(channelTypeUID, "label", CoreItemFactory.SWITCH).build());
         registerService(channelTypeProvider);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (ntpThing != null) {
             Thing removedThing = thingRegistry.forceRemove(ntpThing.getUID());
@@ -177,7 +179,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
         // Stopping the local time server
         timeServer.stopServer();
@@ -209,7 +211,6 @@ public class NtpOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testDateTimeChannelTimeZoneUpdate() {
-
         Configuration configuration = new Configuration();
         configuration.put(NtpBindingConstants.PROPERTY_TIMEZONE, TEST_TIME_ZONE_ID);
         initialize(configuration, NtpBindingConstants.CHANNEL_DATE_TIME, ACCEPTED_ITEM_TYPE_DATE_TIME, null, null);
@@ -218,8 +219,9 @@ public class NtpOSGiTest extends JavaOSGiTest {
         assertFormat(testItemState, DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS);
         ZonedDateTime timeZoneFromItemRegistry = ((DateTimeType) getItemState(ACCEPTED_ITEM_TYPE_DATE_TIME))
                 .getZonedDateTime();
-        
-        ZoneOffset expectedOffset = ZoneId.of(TEST_TIME_ZONE_ID).getRules().getOffset(timeZoneFromItemRegistry.toInstant());
+
+        ZoneOffset expectedOffset = ZoneId.of(TEST_TIME_ZONE_ID).getRules()
+                .getOffset(timeZoneFromItemRegistry.toInstant());
         assertEquals(expectedOffset, timeZoneFromItemRegistry.getOffset());
     }
 
@@ -231,7 +233,8 @@ public class NtpOSGiTest extends JavaOSGiTest {
         ZonedDateTime timeZoneIdFromItemRegistry = ((DateTimeType) getItemState(ACCEPTED_ITEM_TYPE_DATE_TIME))
                 .getZonedDateTime();
 
-        ZoneOffset expectedOffset = ZoneId.of(TEST_TIME_ZONE_ID).getRules().getOffset(timeZoneIdFromItemRegistry.toInstant());
+        ZoneOffset expectedOffset = ZoneId.of(TEST_TIME_ZONE_ID).getRules()
+                .getOffset(timeZoneIdFromItemRegistry.toInstant());
         assertEquals(expectedOffset, timeZoneIdFromItemRegistry.getOffset());
     }
 
@@ -273,7 +276,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @Ignore("https://github.com/eclipse/smarthome/issues/5224")
+    @Disabled("https://github.com/eclipse/smarthome/issues/5224")
     public void testDateTimeChannelCalendarDefaultTimeZoneUpdate() {
         Configuration configuration = new Configuration();
         // Initialize with configuration with no time zone property set.
@@ -386,7 +389,6 @@ public class NtpOSGiTest extends JavaOSGiTest {
 
     private void initialize(Configuration configuration, String channelID, String acceptedItemType,
             Configuration channelConfiguration) {
-
         configuration.put(NtpBindingConstants.PROPERTY_NTP_SERVER_PORT, TEST_PORT);
         ThingUID ntpUid = new ThingUID(NtpBindingConstants.THING_TYPE_NTP, TEST_THING_ID);
 
@@ -476,7 +478,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
         }
         waitForAssert(() -> {
             assertEquals(ThingStatusDetail.COMMUNICATION_ERROR, ntpThing.getStatusInfo().getStatusDetail());
-        });
+        }, 60000, DFL_SLEEP_TIME);
     }
 
     private void assertEventIsReceived(UpdateEventType updateEventType, String channelID, String acceptedItemType) {
@@ -488,7 +490,7 @@ public class NtpOSGiTest extends JavaOSGiTest {
         registerService(eventSubscriberMock);
 
         if (updateEventType.equals(UpdateEventType.HANDLE_COMMAND)) {
-            ntpHandler.handleCommand(new ChannelUID("ntp:test:chan:1"), new StringType("test"));
+            ntpHandler.handleCommand(new ChannelUID("ntp:test:chan:1"), RefreshType.REFRESH);
         } else if (updateEventType.equals(UpdateEventType.CHANNEL_LINKED)) {
             ntpHandler.channelLinked(new ChannelUID("ntp:test:chan:1"));
         }
@@ -496,5 +498,4 @@ public class NtpOSGiTest extends JavaOSGiTest {
             verify(eventSubscriberMock, atLeastOnce()).receive(ArgumentMatchers.any(Event.class));
         });
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,7 @@ public class Config {
     /**
      * The default application name to generate the application token.
      */
-    public static final String DEFAULT_APPLICATION_NAME = "ESH";
+    public static final String DEFAULT_APPLICATION_NAME = "openHAB";
     /**
      * Defines the used tread pool name to get a thread pool from {@link ThreadPoolManager}.
      */

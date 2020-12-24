@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,8 @@ package org.openhab.binding.ntp.internal;
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link ntpBinding} class defines common constants, which are used across
@@ -24,9 +25,8 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * @author Marcel Verpaalen - Initial contribution
  *
  */
+@NonNullByDefault
 public class NtpBindingConstants {
-    
-    private NtpBindingConstants() {}
 
     public static final String BINDING_ID = "ntp";
 
@@ -47,5 +47,4 @@ public class NtpBindingConstants {
     public static final String PROPERTY_NTP_SERVER_PORT = "serverPort";
 
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_NTP);
-
 }

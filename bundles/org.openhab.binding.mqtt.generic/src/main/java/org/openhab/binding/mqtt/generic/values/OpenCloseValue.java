@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,10 +17,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.Command;
 
 /**
  * Implements an open/close boolean value.
@@ -70,7 +70,12 @@ public class OpenCloseValue extends Value {
     }
 
     @Override
-    public String getMQTTpublishValue() {
-        return (state == OpenClosedType.OPEN) ? openString : closeString;
+    public String getMQTTpublishValue(@Nullable String pattern) {
+        String formatPattern = pattern;
+        if (formatPattern == null) {
+            formatPattern = "%s";
+        }
+
+        return String.format(formatPattern, state == OpenClosedType.OPEN ? openString : closeString);
     }
 }

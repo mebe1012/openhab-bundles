@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,15 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioHTTPServer;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.URLAudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.library.types.PercentType;
 import org.openhab.binding.allplay.internal.handler.AllPlayHandler;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioHTTPServer;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,5 +145,4 @@ public class AllPlayAudioSink implements AudioSink {
             super(message);
         }
     }
-
 }

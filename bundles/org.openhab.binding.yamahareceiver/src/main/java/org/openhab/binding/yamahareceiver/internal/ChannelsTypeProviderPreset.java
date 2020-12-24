@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,18 +23,17 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.yamahareceiver.internal.handler.YamahaZoneThingHandler;
 import org.openhab.binding.yamahareceiver.internal.state.PresetInfoState;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateOption;
 
 /**
  * Provide a custom channel type for the preset channel
@@ -49,7 +48,7 @@ public class ChannelsTypeProviderPreset implements ChannelTypeProvider, ThingHan
     private @NonNullByDefault({}) YamahaZoneThingHandler handler;
 
     @Override
-    public @Nullable Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
+    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return Collections.singleton(channelType);
     }
 
@@ -62,40 +61,28 @@ public class ChannelsTypeProviderPreset implements ChannelTypeProvider, ThingHan
         }
     }
 
-    @Override
-    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
-            @Nullable Locale locale) {
-        return null;
-    }
-
-    @Override
-    public @Nullable Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
-        return null;
-    }
-
     public ChannelTypeUID getChannelTypeUID() {
         return channelTypeUID;
     }
 
-    private StateDescription getDefaultStateDescription() {
+    private StateDescriptionFragment getDefaultStateDescription() {
         List<StateOption> options = IntStream.rangeClosed(1, 40)
                 .mapToObj(i -> new StateOption(Integer.toString(i), "Item_" + i)).collect(toList());
-
-        StateDescription state = new StateDescription(null, null, null, "%s", false, options);
-        return state;
+        return StateDescriptionFragmentBuilder.create().withPattern("%s").withReadOnly(false).withOptions(options)
+                .build();
     }
 
     public void changePresetNames(List<PresetInfoState.Preset> presets) {
         List<StateOption> options = presets.stream()
                 .map(preset -> new StateOption(String.valueOf(preset.getValue()), preset.getName())).collect(toList());
-
-        StateDescription state = new StateDescription(null, null, null, "%s", false, options);
-        createChannelType(state);
+        createChannelType(StateDescriptionFragmentBuilder.create().withPattern("%s").withReadOnly(false)
+                .withOptions(options).build());
     }
 
-    private void createChannelType(StateDescription state) {
+    private void createChannelType(StateDescriptionFragment state) {
         channelType = ChannelTypeBuilder.state(channelTypeUID, "Preset", "Number")
-                .withDescription("Select a saved channel by its preset number").withStateDescription(state).build();
+                .withDescription("Select a saved channel by its preset number").withStateDescriptionFragment(state)
+                .build();
     }
 
     @NonNullByDefault({})
@@ -109,13 +96,11 @@ public class ChannelsTypeProviderPreset implements ChannelTypeProvider, ThingHan
         channelTypeUID = new ChannelTypeUID(BINDING_ID,
                 CHANNEL_PLAYBACK_PRESET_TYPE_NAMED + handler.getThing().getUID().getId());
 
-        StateDescription state = getDefaultStateDescription();
-        createChannelType(state);
+        createChannelType(getDefaultStateDescription());
     }
 
     @Override
-    public ThingHandler getThingHandler() {
+    public @Nullable ThingHandler getThingHandler() {
         return this.handler;
     }
-
 }

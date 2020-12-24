@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,16 @@
  */
 package org.openhab.binding.evohome.internal.handler;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.evohome.internal.EvohomeBindingConstants;
 import org.openhab.binding.evohome.internal.api.models.v2.response.ZoneStatus;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 
 /**
  * The {@link EvohomeHeatingZoneHandler} is responsible for handling commands, which are
@@ -58,7 +58,7 @@ public class EvohomeHeatingZoneHandler extends BaseEvohomeHandler {
         } else if (zoneStatus == null) {
             updateEvohomeThingStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                     "Status not found, check the zone id");
-        } else if (handleActiveFaults(zoneStatus) == false) {
+        } else if (!handleActiveFaults(zoneStatus)) {
             updateEvohomeThingStatus(ThingStatus.ONLINE);
 
             updateState(EvohomeBindingConstants.ZONE_TEMPERATURE_CHANNEL,
@@ -72,7 +72,6 @@ public class EvohomeHeatingZoneHandler extends BaseEvohomeHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-
         if (command == RefreshType.REFRESH) {
             update(tcsStatus, zoneStatus);
         } else {
@@ -103,5 +102,4 @@ public class EvohomeHeatingZoneHandler extends BaseEvohomeHandler {
         }
         return false;
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.max.internal.message;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.slf4j.Logger;
 
 /**
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
  *
  * @author Marcel Verpaalen - Initial contribution
  */
+@NonNullByDefault
 public final class AMessage extends Message {
 
     public AMessage(String raw) {

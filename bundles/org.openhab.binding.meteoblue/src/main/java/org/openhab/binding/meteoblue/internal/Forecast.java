@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 import org.openhab.binding.meteoblue.internal.json.JsonDataDay;
 import org.openhab.binding.meteoblue.internal.json.JsonMetadata;
 import org.openhab.binding.meteoblue.internal.json.JsonUnits;
+import org.openhab.core.OpenHAB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,7 +457,8 @@ public class Forecast {
 
     private Image loadImageIcon(String imageFileName) {
         BufferedImage buf = null;
-        File dataFile = new File(new File("../conf/icons/classic/"), imageFileName);
+        String configDirectory = OpenHAB.getConfigFolder();
+        File dataFile = new File(new File(configDirectory, "icons/classic/"), imageFileName);
         if (!dataFile.exists()) {
             logger.debug("Image file '{}' does not exist. Unable to create imageIcon.", dataFile.getAbsolutePath());
             return null;

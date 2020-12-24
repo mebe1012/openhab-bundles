@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,19 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.OwPageBuffer;
 import org.openhab.binding.onewire.internal.SensorId;
@@ -49,6 +36,19 @@ import org.openhab.binding.onewire.internal.owserver.OwfsDirectChannelConfig;
 import org.openhab.binding.onewire.internal.owserver.OwserverConnection;
 import org.openhab.binding.onewire.internal.owserver.OwserverConnectionState;
 import org.openhab.binding.onewire.internal.owserver.OwserverDeviceParameter;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +118,9 @@ public class OwserverBridgeHandler extends BaseBridgeHandler {
         updateStatus(ThingStatus.UNKNOWN);
 
         scheduler.execute(() -> {
-            owserverConnection.start();
+            synchronized (owserverConnection) {
+                owserverConnection.start();
+            }
         });
 
         if (refreshTask.isCancelled()) {
@@ -131,56 +133,69 @@ public class OwserverBridgeHandler extends BaseBridgeHandler {
      */
     private void refresh() {
         try {
-            if (refreshable) {
-                long now = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
+            if (!refreshable) {
+                logger.trace("refresh requested by thread ID {} denied, as not refresheable",
+                        Thread.currentThread().getId());
+                return;
+            }
 
-                // refresh thing channels
-                List<Thing> thingList = getThing().getThings();
-                int thingCount = thingList.size();
-                Iterator<Thing> childListIterator = thingList.iterator();
-                logger.trace("refreshTask starts at {}, {} childs", now, thingCount);
-                while (childListIterator.hasNext() && refreshable) {
-                    Thing owThing = childListIterator.next();
+            // refresh thing channels
+            List<Thing> thingList = getThing().getThings();
+            int thingCount = thingList.size();
+            Iterator<Thing> childListIterator = thingList.iterator();
+            logger.trace("refreshTask with thread ID {} starts at {}, {} childs", Thread.currentThread().getId(), now,
+                    thingCount);
+            while (childListIterator.hasNext() && refreshable) {
+                Thing owThing = childListIterator.next();
 
-                    logger.trace("refresh: getting handler for {} ({} to go)", owThing.getUID(), thingCount);
-                    OwBaseThingHandler owHandler = (OwBaseThingHandler) owThing.getHandler();
-                    if (owHandler != null) {
-                        if (owHandler.isRefreshable()) {
-                            logger.trace("{} initialized, refreshing", owThing.getUID());
-                            owHandler.refresh(OwserverBridgeHandler.this, now);
-                        } else {
-                            logger.trace("{} not initialized, skipping refresh", owThing.getUID());
-                        }
+                logger.trace("refresh: getting handler for {} ({} to go)", owThing.getUID(), thingCount);
+                OwBaseThingHandler owHandler = (OwBaseThingHandler) owThing.getHandler();
+                if (owHandler != null) {
+                    if (owHandler.isRefreshable()) {
+                        logger.trace("{} initialized, refreshing", owThing.getUID());
+                        owHandler.refresh(OwserverBridgeHandler.this, now);
                     } else {
-                        logger.debug("{} handler missing", owThing.getUID());
+                        logger.trace("{} not initialized, skipping refresh", owThing.getUID());
                     }
-                    thingCount--;
+                } else {
+                    logger.debug("{} handler missing", owThing.getUID());
                 }
+                thingCount--;
+            }
 
-                refreshBridgeChannels(now);
+            if (!refreshable) {
+                logger.trace("refresh aborted, as brige became non-refresheable.");
+                return;
+            }
+            refreshBridgeChannels(now);
 
-                // update thing properties (only one per refresh cycle)
-                Thing updateThing = thingPropertiesUpdateQueue.poll();
-                if (updateThing != null) {
-                    logger.trace("update: getting handler for {} ({} total in list)", updateThing.getUID(),
-                            thingPropertiesUpdateQueue.size());
-                    OwBaseThingHandler owHandler = (OwBaseThingHandler) updateThing.getHandler();
-                    if (owHandler != null) {
-                        try {
-                            owHandler.updateSensorProperties(this);
-                            owHandler.initialize();
-                            logger.debug("{} sucessfully updated properties, removing from property update list",
-                                    updateThing.getUID());
-                        } catch (OwException e) {
-                            thingPropertiesUpdateQueue.add(updateThing);
-                            logger.debug("updating thing properties for {} failed: {}, adding to end of list",
-                                    updateThing.getUID(), e.getMessage());
-                        }
-                    } else {
-                        logger.debug("{} is missing handler, removing from property update list", updateThing.getUID());
+            // update thing properties (only one per refresh cycle)
+            if (!refreshable) {
+                logger.trace("refresh aborted, as brige became non-refresheable.");
+                return;
+            }
+            Thing updateThing = thingPropertiesUpdateQueue.poll();
+            if (updateThing != null) {
+                logger.trace("update: getting handler for {} ({} total in list)", updateThing.getUID(),
+                        thingPropertiesUpdateQueue.size());
+                OwBaseThingHandler owHandler = (OwBaseThingHandler) updateThing.getHandler();
+                if (owHandler != null) {
+                    try {
+                        owHandler.updateSensorProperties(this);
+                        owHandler.initialize();
+                        logger.debug("{} sucessfully updated properties, removing from property update list",
+                                updateThing.getUID());
+                    } catch (OwException e) {
+                        thingPropertiesUpdateQueue.add(updateThing);
+                        logger.debug("updating thing properties for {} failed: {}, adding to end of list",
+                                updateThing.getUID(), e.getMessage());
                     }
+                } else {
+                    logger.debug("{} is missing handler, removing from property update list", updateThing.getUID());
                 }
             }
+
         } catch (RuntimeException e) {
             // catching RuntimeException because scheduled tasks finish once an exception occurs
             logger.error("refresh encountered exception of {}: {}, please report bug", e.getClass(), e.getMessage());
@@ -354,12 +369,15 @@ public class OwserverBridgeHandler extends BaseBridgeHandler {
      * @param connectionState current connection state
      */
     public void reportConnectionState(OwserverConnectionState connectionState) {
+        logger.debug("Updating owserverconnectionstate to {}", connectionState);
         switch (connectionState) {
             case FAILED:
                 refreshable = false;
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
                 scheduler.schedule(() -> {
-                    owserverConnection.start();
+                    synchronized (owserverConnection) {
+                        owserverConnection.start();
+                    }
                 }, RECONNECT_AFTER_FAIL_TIME, TimeUnit.MILLISECONDS);
                 break;
             case STOPPED:
@@ -395,7 +413,11 @@ public class OwserverBridgeHandler extends BaseBridgeHandler {
                         }
                     }
 
-                    updateState(channelConfig.channelUID, value);
+                    final ChannelUID channelUID = channelConfig.channelUID;
+                    if (channelUID == null) {
+                        throw new OwException("channelUID is null");
+                    }
+                    updateState(channelUID, value);
                     logger.trace("updated {} to {}", channelConfig.channelUID, value);
 
                     channelConfig.lastRefresh = now;

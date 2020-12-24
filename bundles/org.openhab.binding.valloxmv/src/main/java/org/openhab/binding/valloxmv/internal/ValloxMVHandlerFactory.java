@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,12 +20,13 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.io.net.http.WebSocketFactory;
+import org.openhab.core.io.net.http.WebSocketFactory;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -38,9 +39,15 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.valloxmv")
 @NonNullByDefault()
 public class ValloxMVHandlerFactory extends BaseThingHandlerFactory {
-    private @Nullable WebSocketClient webSocketClient;
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_VALLOXMV);
+
+    private final WebSocketClient webSocketClient;
+
+    @Activate
+    public ValloxMVHandlerFactory(@Reference final WebSocketFactory webSocketFactory) {
+        this.webSocketClient = webSocketFactory.getCommonWebSocketClient();
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -52,22 +59,9 @@ public class ValloxMVHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_VALLOXMV.equals(thingTypeUID)) {
-            if (webSocketClient != null) {
-                return new ValloxMVHandler(thing, webSocketClient);
-            } else {
-                return null;
-            }
+            return new ValloxMVHandler(thing, webSocketClient);
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setHttpClientFactory(WebSocketFactory webSocketFactory) {
-        this.webSocketClient = webSocketFactory.getCommonWebSocketClient();
-    }
-
-    protected void unsetHttpClientFactory(WebSocketFactory webSocketFactory) {
-        this.webSocketClient = null;
     }
 }

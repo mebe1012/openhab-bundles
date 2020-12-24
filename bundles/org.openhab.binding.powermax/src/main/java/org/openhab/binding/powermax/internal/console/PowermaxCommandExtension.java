@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,13 +15,14 @@ package org.openhab.binding.powermax.internal.console;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.binding.powermax.internal.handler.PowermaxBridgeHandler;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -45,19 +46,29 @@ public class PowermaxCommandExtension extends AbstractConsoleCommandExtension {
     @Override
     public void execute(String[] args, Console console) {
         if (args.length >= 2) {
-            PowermaxBridgeHandler handler = null;
+            Thing thing = null;
             try {
-                ThingUID bridgeUID = new ThingUID(args[0]);
-                Thing thing = thingRegistry.get(bridgeUID);
-                if ((thing != null) && (thing.getHandler() != null)
-                        && (thing.getHandler() instanceof PowermaxBridgeHandler)) {
-                    handler = (PowermaxBridgeHandler) thing.getHandler();
-                }
-            } catch (Exception e) {
-                handler = null;
+                ThingUID thingUID = new ThingUID(args[0]);
+                thing = thingRegistry.get(thingUID);
+            } catch (IllegalArgumentException e) {
+                thing = null;
             }
-            if (handler == null) {
-                console.println("Bad bridge id '" + args[0] + "'");
+            ThingHandler thingHandler = null;
+            PowermaxBridgeHandler handler = null;
+            if (thing != null) {
+                thingHandler = thing.getHandler();
+                if (thingHandler instanceof PowermaxBridgeHandler) {
+                    handler = (PowermaxBridgeHandler) thingHandler;
+                }
+            }
+            if (thing == null) {
+                console.println("Bad thing id '" + args[0] + "'");
+                printUsage(console);
+            } else if (thingHandler == null) {
+                console.println("No handler initialized for the thing id '" + args[0] + "'");
+                printUsage(console);
+            } else if (handler == null) {
+                console.println("'" + args[0] + "' is not a powermax bridge id");
                 printUsage(console);
             } else {
                 switch (args[1]) {
@@ -95,5 +106,4 @@ public class PowermaxCommandExtension extends AbstractConsoleCommandExtension {
     protected void unsetThingRegistry(ThingRegistry thingRegistry) {
         this.thingRegistry = null;
     }
-
 }

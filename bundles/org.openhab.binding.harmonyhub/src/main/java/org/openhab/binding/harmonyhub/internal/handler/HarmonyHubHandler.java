@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,30 +28,30 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
 import org.openhab.binding.harmonyhub.internal.HarmonyHubHandlerFactory;
 import org.openhab.binding.harmonyhub.internal.config.HarmonyHubConfig;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +95,7 @@ public class HarmonyHubHandler extends BaseBridgeHandler implements HarmonyClien
     public HarmonyHubHandler(Bridge bridge, HarmonyHubHandlerFactory factory) {
         super(bridge);
         this.factory = factory;
-        client = new HarmonyClient();
+        client = new HarmonyClient(factory.getHttpClient());
         client.addListener(this);
     }
 
@@ -103,8 +103,8 @@ public class HarmonyHubHandler extends BaseBridgeHandler implements HarmonyClien
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.trace("Handling command '{}' for {}", command, channelUID);
 
-        if (!client.isConnected()) {
-            logger.warn("Cannot send command '{}' on {} because HarmonyClient is not connected", command, channelUID);
+        if (getThing().getStatus() != ThingStatus.ONLINE) {
+            logger.debug("Hub is offline, ignoring command {} for channel {}", command, channelUID);
             return;
         }
 
@@ -314,7 +314,7 @@ public class HarmonyHubHandler extends BaseBridgeHandler implements HarmonyClien
         }
     }
 
-    private void updateActivityStatus(@Nullable Activity activity, Activity.@Nullable Status status) {
+    private void updateActivityStatus(@Nullable Activity activity, @Nullable Status status) {
         if (activity == null) {
             logger.debug("Cannot update activity status of {} with activity that is null", getThing().getUID());
             return;
@@ -382,7 +382,9 @@ public class HarmonyHubHandler extends BaseBridgeHandler implements HarmonyClien
 
         ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "Current Activity", "String")
                 .withDescription("Current activity for " + getThing().getLabel())
-                .withStateDescription(new StateDescription(null, null, null, "%s", false, states)).build();
+                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withPattern("%s")
+                        .withReadOnly(false).withOptions(states).build())
+                .build();
 
         factory.addChannelType(channelType);
 
@@ -445,5 +447,4 @@ public class HarmonyHubHandler extends BaseBridgeHandler implements HarmonyClien
     public void removeHubStatusListener(HubStatusListener listener) {
         listeners.remove(listener);
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,10 @@
 package org.openhab.binding.ihc.internal.converters;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.ihc.internal.ws.exeptions.ConversionException;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSIntegerValue;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.Command;
 
 /**
  * OnOffType <-> WSIntegerValue converter.
@@ -34,7 +34,6 @@ public class OnOffTypeWSIntegerValueConverter implements Converter<WSIntegerValu
     @Override
     public WSIntegerValue convertFromOHType(@NonNull OnOffType from, @NonNull WSIntegerValue value,
             @NonNull ConverterAdditionalInfo convertData) throws ConversionException {
-
         int onLevel = Math.min(value.maximumValue, getCommandLevel(value, convertData, OnOffType.ON));
         int newVal = from == OnOffType.ON ? onLevel : value.minimumValue;
 

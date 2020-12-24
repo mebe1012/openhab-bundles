@@ -1,6 +1,7 @@
 # Modbus Binding
 
-This is the binding to access Modbus TCP and serial slaves. RTU, ASCII and BIN variants of Serial Modbus are supported.
+This is the binding to access Modbus TCP and serial slaves.
+RTU, ASCII and BIN variants of Serial Modbus are supported.
 Modbus TCP slaves are usually also called as Modbus TCP servers.
 
 The binding can act as
@@ -10,6 +11,19 @@ The binding can act as
 
 The Modbus binding polls the slave data with an configurable poll period.
 openHAB commands are translated to write requests.
+
+The binding has the following extensions:
+
+<!--list-subs-->
+
+The rest of this page contains details for configuring this binding:
+
+{::options toc_levels="2..4"/}
+
+- TOC
+{:toc}
+
+
 
 ## Main Features
 
@@ -33,12 +47,12 @@ Reader of the documentation should understand the basics of Modbus protocol.
 Good sources for further information:
 
 * [Wikipedia article](https://en.wikipedia.org/wiki/Modbus): good read on modbus basics and addressing.
-* [Simplymodbus.ca](http://www.simplymodbus.ca/): good reference as well as excellent tutorial like explanation of the protocol
+* [Simplymodbus.ca](https://www.simplymodbus.ca/): good reference as well as excellent tutorial like explanation of the protocol
 
 Useful tools
 
-* [binaryconvert.com](http://www.binaryconvert.com/): tool to convert numbers between different binary presentations
-* [rapidscada.net Modbus parser](http://modbus.rapidscada.net/): tool to parse Modbus requests and responses. Useful for debugging purposes when you want to understand the message sent / received.
+* [binaryconvert.com](https://www.binaryconvert.com/): tool to convert numbers between different binary presentations
+* [rapidscada.net Modbus parser](https://modbus.rapidscada.net/): tool to parse Modbus requests and responses. Useful for debugging purposes when you want to understand the message sent / received.
 * [JSFiddle tool](https://jsfiddle.net/rgypuuxq/) to test JavaScript (JS) transformations interactively
 
 ## Supported Things
@@ -72,8 +86,8 @@ See [general documentation about serial port configuration](/docs/administration
 
 In the tables below the thing configuration parameters are grouped by thing type.
 
-Things can be configured using Paper UI, or using a `.things` file.
-The configuration in this documentation explains the `.things` file, although you can find the same parameters from the Paper UI.
+Things can be configured using the UI, or using a `.things` file.
+The configuration in this documentation explains the `.things` file, although you can find the same parameters in the UI.
 
 Note that parameter type is very critical when writing `.things` file yourself, since it affects how the parameter value is encoded in the text file.
 
@@ -114,7 +128,8 @@ Advanced parameters
 **Note:** Advanced parameters must be equal for all `tcp` things sharing the same `host` and `port`.
 
 The advanced parameters have conservative defaults, meaning that they should work for most users.
-In some cases when extreme performance is required (e.g. poll period below 10 ms), one might want to decrease the delay parameters, especially `timeBetweenTransactionsMillis`. Similarly, with some slower devices on might need to increase the values.
+In some cases when extreme performance is required (e.g. poll period below 10 ms), one might want to decrease the delay parameters, especially `timeBetweenTransactionsMillis`.
+Similarly, with some slower devices on might need to increase the values.
 
 ### `serial` Thing
 
@@ -125,7 +140,7 @@ Basic parameters
 | Parameter | Type    | Required | Default if omitted | Description                                                                                                                                                                                               |     |
 | --------- | ------- | -------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
 | port      | text    | ✓        |                    | Serial port to use, for example `"/dev/ttyS0"` or `"COM1"`                                                                                                                                                |     |
-| id        | integer |          | `1`                | Slave id. Also known as station address or unit identifier. See [Wikipedia](https://en.wikipedia.org/wiki/Modbus) and [simplymodbus](http://www.simplymodbus.ca/index.html) articles for more information |     |
+| id        | integer |          | `1`                | Slave id. Also known as station address or unit identifier. See [Wikipedia](https://en.wikipedia.org/wiki/Modbus) and [simplymodbus](https://www.simplymodbus.ca/index.html) articles for more information |     |
 | baud      | integer | ✓        |                    | Baud of the connection. Valid values are: `75`, `110`, `300`, `1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, `115200`.                                                                        |     |
 | stopBits  | text    | ✓        |                    | Stop bits. Valid values are: `"1.0"`, `"1.5"`, `"2.0"`.                                                                                                                                                       |     |
 | parity    | text    | ✓        |                    | Parity. Valid values are: `"none"`, `"even"`, `"odd"`.                                                                                                                                                    |     |
@@ -161,16 +176,19 @@ You must give each of your bridge Things a reference (thing ID) that is unique f
 | Parameter     | Type    | Required | Default if omitted | Description                                                                                                                                                                                    |
 | ------------- | ------- | -------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `start`       | integer |          | `0`                | Address of the first register, coil, or discrete input to poll. Input as zero-based index number.                                                                                              |
-| `length`      | integer | ✓        | (-)                | Number of registers, coils or discrete inputs to read.                                                                                                                                         |
+| `length`      | integer | ✓        | (-)                | Number of registers, coils or discrete inputs to read.  Note that protocol limits max length, depending on type                                                                             |
 | `type`        | text    | ✓        | (-)                | Type of modbus items to poll. This matches directly to Modbus request type or function code (FC). Valid values are: `"coil"` (FC01), `"discrete"` (FC02), `"holding"`(FC03), `"input"` (FC04). |
 | `refresh`     | integer |          | `500`              | Poll interval in milliseconds. Use zero to disable automatic polling.                                                                                                                          |
 | `maxTries`    | integer |          | `3`                | Maximum tries when reading. <br /><br />Number of tries when reading data, if some of the reading fail. For single try, enter 1.                                                               |
 | `cacheMillis` | integer |          | `50`               | Duration for data cache to be valid, in milliseconds. This cache is used only to serve `REFRESH`  commands. Use zero to disable the caching.                                                   |
 
-Note: Polling can be manually triggered by sending `REFRESH` command to item bound to channel of `data` thing.
+Polling can be manually triggered by sending `REFRESH` command to item bound to channel of `data` thing.
 When manually triggering polling, a new poll is executed as soon as possible, and sibling `data` things (i.e. things that share the same `poller` bridge) are updated.
 In case the `poller` had just received a data response or an error occurred, a cached response is used instead.
 See [Refresh command](#refresh-command) section for more details.
+
+Some devices do not allow to query too many registers in a single readout action or a range that spans reserved registers.
+Split your poller into multiple smaller ones to work around this problem.
 
 ### `data` Thing
 
@@ -295,7 +313,7 @@ Main documentation on `autoupdate` in [Items section of openHAB docs](https://ww
 
 Device specific modbus bindings can take part in the discovery of things, and detect devices automatically. The discovery is initiated by the `tcp` and `serial` bridges when they have `enableDiscovery` setting enabled.
 
-Note that the main binding does not recognize any device, so it is pointless to turn this on unless you have the correct binding installed.
+Note that the main binding does not recognize any devices, so it is pointless to turn this on unless you have a suitable add-on binding installed.
 
 ## Details
 
@@ -535,7 +553,7 @@ There are three different format to specify the configuration:
 1. `"SERVICENAME(ARG)"` for calling a transformation service. The transformation receives the extracted number as input. This is useful for example scaling (divide by x) the polled data before it is used in openHAB. See examples for more details.
 1. Any other value is interpreted as static text, in which case the actual content of the polled value is ignored. Transformation result is always the same. The transformation output is converted to best-effort-basis to the states accepted by the item.
 
-Consult [background documentation on items](http://docs.openhab.org/concepts/items.html) to understand accepted data types (state) by each item.
+Consult [background documentation on items](https://www.openhab.org/docs/concepts/items.html) to understand accepted data types (state) by each item.
 
 #### Transform On Write
 
@@ -544,8 +562,8 @@ Consult [background documentation on items](http://docs.openhab.org/concepts/ite
 There are three different format to specify the configuration:
 
 1. String `"default"`, in which case the default transformation is used. The default is to do no conversion to the command.
-2. `"SERVICENAME(ARG)"` for calling a transformation service. The transformation receives the command as input. This is useful for example scaling ("multiply by x") commands before the data is written to Modbus. See examples for more details.
-3. Any other value is interpreted as static text, in which case the actual command is ignored. Transformation result is always the same.
+1. `"SERVICENAME(ARG)"` for calling a transformation service. The transformation receives the command as input. This is useful for example scaling ("multiply by x") commands before the data is written to Modbus. See examples for more details.
+1. Any other value is interpreted as static text, in which case the actual command is ignored. Transformation result is always the same.
 
 #### Transformation Example: Scaling
 
@@ -556,7 +574,7 @@ The data in Modbus slaves is quite commonly encoded as integers, and thus scalin
 
 ```javascript
 // Wrap everything in a function (no global variable pollution)
-// variable "input" contains data passed by openhab
+// variable "input" contains data passed by openHAB
 (function(inputData) {
     // on read: the polled number as string
     // on write: openHAB command as string
@@ -569,7 +587,7 @@ The data in Modbus slaves is quite commonly encoded as integers, and thus scalin
 
 ```javascript
 // Wrap everything in a function (no global variable pollution)
-// variable "input" contains data passed by openhab
+// variable "input" contains data passed by openHAB
 (function(inputData) {
     // on read: the polled number as string
     // on write: openHAB command as string
@@ -587,7 +605,7 @@ In this case, boolean input is considered to be either number `0`/`1`, `ON`/`OFF
 
 ```javascript
 // function to invert Modbus binary states
-// variable "input" contains data passed by OpenHAB binding
+// variable "input" contains data passed by openHAB
 (function(inputData) {
     var out = inputData ;      // allow UNDEF to pass through
     if (inputData == '1' || inputData == 'ON' || inputData == 'OPEN') {
@@ -601,7 +619,7 @@ In this case, boolean input is considered to be either number `0`/`1`, `ON`/`OFF
 
 ## Full Examples
 
-Things can be configured via the Paper UI, or using a `things` file like here.
+Things can be configured in the UI, or using a `things` file like here.
 
 ### Basic Example
 
@@ -951,7 +969,7 @@ It is also possible to use `REFRESH` command to ask the binding to update more f
 
 ```javascript
 import org.eclipse.xtext.xbase.lib.Procedures
-import org.eclipse.smarthome.core.types.RefreshType
+import org.openhab.core.types.RefreshType
 
 val Procedures$Procedure0 refreshData = [ |
     // Refresh SetTemperature. In fact, all data things in the same poller are refreshed
@@ -978,16 +996,33 @@ end
 
 Please be aware that `REFRESH` commands are "throttled" (to be exact, responses are cached) with `poller` parameter `cacheMillis`.
 
+## Troubleshooting
+
+Modbus, while simple at its heart, potentially is a complicated standard to use because there's a lot of freedom (and bugs) when it comes to implementations.
+There are many device or vendor specific quirks and wrinkles you might stumble across. Here's some:
+
+* With Modbus TCP devices, there may be multiple network interfaces available, e.g. Wifi and wired Ethernet. However, with some devices the Modbus data is accessible via only one of the interfaces. You need to check the device manufacturer manual, or simply try out which of the IPs are returning valid modbus data.
+Attention: a device may have an interface with a port open (502 or other) that it responds to Modbus requests on, but that may have no connection to the real bus hardware, resulting in generic Modbus error responses to _every_ request.
+So check ALL interfaces. Usually either the IP on Ethernet will do.
+
+* some devices do not allow to query a range of registers that is too large or spans reserved registers. Do not poll more than 123 registers.
+Devices may respond with an error or no error but invalid register data so this error can easily go undedetected.
+Turn your poller thing into multiple things to cover smaller ranges to work around this problem.
+
+* there's potentially many more or less weird inconsistencies with some devices.
+If you fail to read a register or you only ever get invalid values (such as 00 or FF bytes), try with various poller lengths such as the exact length of a register in question or twice the amount.
+In extreme cases you might even need more than a poller for a single register so you have two or more poller with two or more data things and need to combine these into another item using a rule.
+
 ## Changes From Modbus 1.x Binding
 
-The older Modbus binding is quite different to the new binding.
-Major difference is the thing structure introduced in new openHAB2 binding which allows configuration uisng the PaperUI.
+The openHAB 1 Modbus binding is quite different from this binding.
+The biggest difference is that this binding uses things.
 
 Unfortunately there is no conversion tool to convert old configurations to new thing structure.
 
 Due to the introduction of things, the configuration was bound to be backwards incompatible.
 This offered opportunity to simplify some aspects of configuration.
-The major differences are configuration logic are:
+The major differences in configuration logic are:
 
 ### Absolute Addresses Instead Of Relative
 
@@ -1033,9 +1068,8 @@ The new binding supports 32 and 64 bit values types when writing.
 
 ### How to manually migrate
 
-Here is a step by step example for a migration from a 1.x configuration to a equivalent 2.x configuration. 
+Here is a step by step example for a migration from a 1.x configuration to an equivalent 2.x configuration. 
 It does not cover all features the 1.x configuration offers, but it should serve as an example on how to get it done.
-Please note that although you can do all this stuff also using PaperUI, the file based approach is strongly recommended if you need to migrate more than only a handful of Items.
 
 The 1.x modbus configuration to be updated defined 4 slaves:
 
@@ -1069,7 +1103,7 @@ The 1.x modbus configuration to be updated defined 4 slaves:
     tcp.slave4.updateunchangeditems=false
 ```
 
-As you can see, all the slaves poll the same modbus device (actually a Wago 750-841 controller). 
+As you can see, all the slaves poll the same modbus device (actually a Wago 750-841 controller).
 We now have to create `Things` for this slaves.
 
 The 2.x modbus binding uses a three-level definition. 
@@ -1167,7 +1201,7 @@ Bridge modbus:tcp:wago [ host="192.168.2.9", port=502, id=1 ] {
 }
 ```
 
-Save this in the `things` subdirectory of your openHAB 2 config. 
+Save this in the `things` folder. 
 Watch the file `events.log` as it lists your new added `data` `Things`. 
 Given that there are no config errors, they quickly change from `INITIALIZING` to `ONLINE`. 
 
@@ -1233,7 +1267,7 @@ Enable `DEBUG` or `TRACE` (even more verbose) logging for the loggers named:
 * `org.openhab.io.transport.modbus`
 * `net.wimpi.modbus`
 
-Consult [openHAB2 logging documentation](http://docs.openhab.org/administration/logging.html#defining-what-to-log) for more information.
+Consult [openHAB logging documentation](https://www.openhab.org/docs/administration/logging.html#defining-what-to-log) for more information.
 
 ## For Developers
 

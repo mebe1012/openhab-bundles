@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link PowermaxBinding} class defines common constants, which are
@@ -25,6 +26,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  *
  * @author Laurent Garnier - Initial contribution
  */
+@NonNullByDefault
 public class PowermaxBindingConstants {
 
     public static final String BINDING_ID = "powermax";
@@ -57,11 +59,11 @@ public class PowermaxBindingConstants {
     public static final String LAST_TRIP = "last_trip";
     public static final String BYPASSED = "bypassed";
     public static final String ARMED = "armed";
+    public static final String LOCKED = "locked";
     public static final String LOW_BATTERY = "low_battery";
     public static final String PGM_STATUS = "pgm_status";
     public static final String X10_STATUS = "x10_status";
     public static final String EVENT_LOG = "event_log_%s";
     public static final String UPDATE_EVENT_LOGS = "update_event_logs";
     public static final String DOWNLOAD_SETUP = "download_setup";
-
 }

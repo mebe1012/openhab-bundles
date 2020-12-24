@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.wemo.internal.discovery;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.jupnp.UpnpService;
 import org.jupnp.model.message.header.RootDeviceHeader;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Hans-Jörg Merk - Initial contribution
  *
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.wemo")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.wemo")
 public class WemoDiscoveryService extends AbstractDiscoveryService {
 
     private Logger logger = LoggerFactory.getLogger(WemoDiscoveryService.class);
@@ -74,5 +74,4 @@ public class WemoDiscoveryService extends AbstractDiscoveryService {
         removeOlderResults(getTimestampOfLastScan());
         super.stopScan();
     }
-
 }

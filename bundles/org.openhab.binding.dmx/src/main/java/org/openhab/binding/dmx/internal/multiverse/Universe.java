@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,8 @@ public class Universe {
     private long bufferChanged;
     private int refreshTime = DEFAULT_REFRESH_TIME;
 
-    private final List<DmxChannel> channels = new ArrayList<DmxChannel>();
-    private final List<Integer> applyCurve = new ArrayList<Integer>();
+    private final List<DmxChannel> channels = new ArrayList<>();
+    private final List<Integer> applyCurve = new ArrayList<>();
 
     /**
      * universe constructor

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.icloud.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.ThingStatus.OFFLINE;
-import static org.eclipse.smarthome.core.thing.ThingStatus.ONLINE;
-import static org.eclipse.smarthome.core.thing.ThingStatusDetail.*;
 import static org.openhab.binding.icloud.internal.ICloudBindingConstants.*;
+import static org.openhab.core.thing.ThingStatus.OFFLINE;
+import static org.openhab.core.thing.ThingStatus.ONLINE;
+import static org.openhab.core.thing.ThingStatusDetail.*;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,23 +25,23 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.icloud.internal.ICloudDeviceInformationListener;
 import org.openhab.binding.icloud.internal.configuration.ICloudDeviceThingConfiguration;
 import org.openhab.binding.icloud.internal.json.response.ICloudDeviceInformation;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,6 +127,11 @@ public class ICloudDeviceHandler extends BaseThingHandler implements ICloudDevic
         if (channelId.equals(FIND_MY_PHONE)) {
             if (command == OnOffType.ON) {
                 try {
+                    final String deviceId = this.deviceId;
+                    if (deviceId == null) {
+                        logger.debug("Can't send Find My Device request, because deviceId is null!");
+                        return;
+                    }
                     bridge.findMyDevice(deviceId);
                 } catch (IOException e) {
                     logger.warn("Unable to execute find my device request", e);

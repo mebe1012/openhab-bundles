@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.fsinternetradio.test;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.fsinternetradio.internal.handler.FSInternetRadioHandler;
+import org.openhab.core.thing.Thing;
 
 /**
  * A mock of FSInternetRadioHandler to enable testing.
@@ -22,6 +23,7 @@ import org.openhab.binding.fsinternetradio.internal.handler.FSInternetRadioHandl
  * @author Velin Yordanov - initial contribution
  *
  */
+@NonNullByDefault
 public class MockedRadioHandler extends FSInternetRadioHandler {
 
     public MockedRadioHandler(Thing thing, HttpClient client) {

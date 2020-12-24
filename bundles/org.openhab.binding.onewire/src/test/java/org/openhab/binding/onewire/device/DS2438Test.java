@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,28 +16,29 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.openhab.binding.onewire.internal.OwBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.openhab.binding.onewire.internal.OwException;
 import org.openhab.binding.onewire.internal.device.DS2438;
 import org.openhab.binding.onewire.internal.device.DS2438.LightSensorType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
 
 /**
  * Tests cases for {@link DS2438}.
  *
  * @author Jan N. Klug - Initial contribution
  */
-public class DS2438Test extends DeviceTestParent {
+@NonNullByDefault
+public class DS2438Test extends DeviceTestParent<DS2438> {
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
-        setupMocks(THING_TYPE_MS_TH);
-        deviceTestClazz = DS2438.class;
+        setupMocks(THING_TYPE_MS_TX, DS2438.class);
 
         addChannel(CHANNEL_TEMPERATURE, "Number:Temperature");
         addChannel(CHANNEL_HUMIDITY, "Number:Dimensionless");
@@ -50,166 +51,145 @@ public class DS2438Test extends DeviceTestParent {
     }
 
     @Test
-    public void temperatureChannel() {
-        instantiateDevice();
+    public void temperatureChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(10.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(10.0));
 
-            testDevice.enableChannel(CHANNEL_TEMPERATURE);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_TEMPERATURE);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_TEMPERATURE), eq(new QuantityType<>("10.0 °C")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_TEMPERATURE), eq(new QuantityType<>("10.0 °C")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void humidityChannel() {
-        instantiateDevice();
+    public void humidityChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(10.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(10.0));
 
-            testDevice.enableChannel(CHANNEL_HUMIDITY);
-            testDevice.enableChannel(CHANNEL_ABSOLUTE_HUMIDITY);
-            testDevice.enableChannel(CHANNEL_DEWPOINT);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_HUMIDITY);
+        testDevice.enableChannel(CHANNEL_ABSOLUTE_HUMIDITY);
+        testDevice.enableChannel(CHANNEL_DEWPOINT);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler, times(2)).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_HUMIDITY), eq(new QuantityType<>("10.0 %")));
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_ABSOLUTE_HUMIDITY),
-                    eq(new QuantityType<>("0.9381970824113001000 g/m³")));
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_DEWPOINT),
-                    eq(new QuantityType<>("-20.31395053870025 °C")));
+        inOrder.verify(mockBridgeHandler, times(2)).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_HUMIDITY), eq(new QuantityType<>("10.0 %")));
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_ABSOLUTE_HUMIDITY),
+                eq(new QuantityType<>("0.9381970824113001000 g/m³")));
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_DEWPOINT),
+                eq(new QuantityType<>("-20.31395053870025 °C")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void voltageChannel() {
-        instantiateDevice();
+    public void voltageChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
 
-            testDevice.enableChannel(CHANNEL_VOLTAGE);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_VOLTAGE);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_VOLTAGE), eq(new QuantityType<>("2.0 V")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_VOLTAGE), eq(new QuantityType<>("2.0 V")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void currentChannel() {
-        instantiateDevice();
+    public void currentChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
 
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
 
-            testDevice.enableChannel(CHANNEL_CURRENT);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_CURRENT);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_CURRENT), eq(new QuantityType<>("2.0 mA")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_CURRENT), eq(new QuantityType<>("2.0 mA")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void lightChannel() {
-        instantiateDevice();
+    public void lightChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(0.1));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(0.1));
 
-            testDevice.enableChannel(CHANNEL_LIGHT);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            ((DS2438) testDevice).setLightSensorType(LightSensorType.ELABNET_V1);
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_LIGHT);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.setLightSensorType(LightSensorType.ELABNET_V1);
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_LIGHT), eq(new QuantityType<>("97442 lx")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_LIGHT), eq(new QuantityType<>("97442 lx")));
 
-            ((DS2438) testDevice).setLightSensorType(LightSensorType.ELABNET_V2);
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.setLightSensorType(LightSensorType.ELABNET_V2);
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_LIGHT), eq(new QuantityType<>("134 lx")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_LIGHT), eq(new QuantityType<>("134 lx")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void supplyVoltageChannel() {
-        instantiateDevice();
+    public void supplyVoltageChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
 
-            testDevice.enableChannel(CHANNEL_SUPPLYVOLTAGE);
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.enableChannel(CHANNEL_SUPPLYVOLTAGE);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
-            inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_SUPPLYVOLTAGE), eq(new QuantityType<>("2.0 V")));
+        inOrder.verify(mockBridgeHandler).readDecimalType(eq(testSensorId), any());
+        inOrder.verify(mockThingHandler).postUpdate(eq(CHANNEL_SUPPLYVOLTAGE), eq(new QuantityType<>("2.0 V")));
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void noChannel() {
-        instantiateDevice();
+    public void noChannel() throws OwException {
+        final DS2438 testDevice = instantiateDevice();
+        final InOrder inOrder = Mockito.inOrder(mockThingHandler, mockBridgeHandler);
 
-        try {
-            Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
-            Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
+        Mockito.when(mockBridgeHandler.checkPresence(testSensorId)).thenReturn(OnOffType.ON);
+        Mockito.when(mockBridgeHandler.readDecimalType(eq(testSensorId), any())).thenReturn(new DecimalType(2.0));
 
-            testDevice.configureChannels();
-            inOrder.verify(mockThingHandler).getThing();
-            testDevice.refresh(mockBridgeHandler, true);
+        testDevice.configureChannels();
+        inOrder.verify(mockThingHandler).getThing();
+        testDevice.refresh(mockBridgeHandler, true);
 
-            inOrder.verifyNoMoreInteractions();
-        } catch (OwException e) {
-            Assert.fail("caught unexpected OwException");
-        }
+        inOrder.verifyNoMoreInteractions();
     }
 }

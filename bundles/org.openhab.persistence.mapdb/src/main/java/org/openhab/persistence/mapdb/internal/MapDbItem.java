@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,14 +13,16 @@
 package org.openhab.persistence.mapdb.internal;
 
 import java.text.DateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceItemInfo;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * This is a Java bean used to persist item states with timestamps in the database.
@@ -32,9 +34,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 public class MapDbItem implements HistoricItem, PersistenceItemInfo {
 
     private String name = "";
-
     private State state = UnDefType.NULL;
-
     private Date timestamp = new Date(0);
 
     @Override
@@ -56,8 +56,8 @@ public class MapDbItem implements HistoricItem, PersistenceItemInfo {
     }
 
     @Override
-    public Date getTimestamp() {
-        return timestamp;
+    public ZonedDateTime getTimestamp() {
+        return ZonedDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault());
     }
 
     public void setTimestamp(Date timestamp) {
@@ -71,7 +71,7 @@ public class MapDbItem implements HistoricItem, PersistenceItemInfo {
 
     @Override
     public @Nullable Integer getCount() {
-        return null;
+        return Integer.valueOf(1);
     }
 
     @Override

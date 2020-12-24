@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,15 @@
  */
 package org.openhab.binding.astro.internal.model;
 
+import static org.openhab.core.library.unit.MetricPrefix.MILLI;
+
 import java.util.Calendar;
 
+import javax.measure.quantity.Time;
+
 import org.openhab.binding.astro.internal.util.DateTimeUtils;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 
 /**
  * Holds the season dates of the year and the current name.
@@ -103,6 +109,27 @@ public class Season {
      * Returns the next season.
      */
     public Calendar getNextSeason() {
-        return DateTimeUtils.getNext(spring, summer, autumn, winter);
+        return DateTimeUtils.getNextFromToday(spring, summer, autumn, winter);
+    }
+
+    /**
+     * Returns the next season name.
+     */
+    public SeasonName getNextName() {
+        int ordinal = name.ordinal() + 1;
+        if (ordinal > 3) {
+            ordinal = 0;
+        }
+        return SeasonName.values()[ordinal];
+    }
+
+    /**
+     * Returns the time left for current season
+     */
+    public QuantityType<Time> getTimeLeft() {
+        Calendar now = Calendar.getInstance();
+        Calendar next = getNextSeason();
+        return new QuantityType<>(next.getTimeInMillis() - now.getTimeInMillis(), MILLI(Units.SECOND))
+                .toUnit(Units.DAY);
     }
 }

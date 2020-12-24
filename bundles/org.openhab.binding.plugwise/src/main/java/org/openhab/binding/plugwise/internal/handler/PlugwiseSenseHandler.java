@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,11 +18,6 @@ import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.plugwise.internal.config.PlugwiseSenseConfig;
 import org.openhab.binding.plugwise.internal.protocol.AcknowledgementMessage;
 import org.openhab.binding.plugwise.internal.protocol.Message;
@@ -33,6 +28,11 @@ import org.openhab.binding.plugwise.internal.protocol.SleepSetRequestMessage;
 import org.openhab.binding.plugwise.internal.protocol.field.BoundaryType;
 import org.openhab.binding.plugwise.internal.protocol.field.DeviceType;
 import org.openhab.binding.plugwise.internal.protocol.field.MACAddress;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +130,7 @@ public class PlugwiseSenseHandler extends AbstractSleepingEndDeviceHandler {
 
     private void handleSenseReportRequestMessage(SenseReportRequestMessage message) {
         updateLastSeen();
-        updateState(CHANNEL_HUMIDITY, new QuantityType<>(message.getHumidity().getValue(), SmartHomeUnits.PERCENT));
+        updateState(CHANNEL_HUMIDITY, new QuantityType<>(message.getHumidity().getValue(), Units.PERCENT));
         updateState(CHANNEL_TEMPERATURE, new QuantityType<>(message.getTemperature().getValue(), SIUnits.CELSIUS));
     }
 
@@ -217,5 +217,4 @@ public class PlugwiseSenseHandler extends AbstractSleepingEndDeviceHandler {
 
         super.updateConfiguration(configuration);
     }
-
 }

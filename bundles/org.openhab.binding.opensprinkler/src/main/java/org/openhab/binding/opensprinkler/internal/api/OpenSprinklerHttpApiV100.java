@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.binding.opensprinkler.internal.api;
 
 import static org.openhab.binding.opensprinkler.internal.api.OpenSprinklerApiConstants.*;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -30,14 +31,16 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.binding.opensprinkler.internal.api.exception.CommunicationApiException;
 import org.openhab.binding.opensprinkler.internal.api.exception.GeneralApiException;
 import org.openhab.binding.opensprinkler.internal.config.OpenSprinklerHttpInterfaceConfig;
+import org.openhab.binding.opensprinkler.internal.model.NoCurrentDrawSensorException;
 import org.openhab.binding.opensprinkler.internal.model.StationProgram;
 import org.openhab.binding.opensprinkler.internal.util.Parse;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * The {@link OpenSprinklerHttpApiV100} class is used for communicating with
- * the OpenSprinkler API for firmware versions less than 2.1.0
+ * The {@link OpenSprinklerHttpApiV100} class is used for communicating with the
+ * OpenSprinkler API for firmware versions less than 2.1.0
  *
  * @author Chris Graham - Initial contribution
  * @author Florian Schmidt - Allow https URLs and basic auth
@@ -58,10 +61,11 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
     protected HttpRequestSender http;
 
     /**
-     * Constructor for the OpenSprinkler API class to create a connection to the OpenSprinkler
-     * device for control and obtaining status info.
+     * Constructor for the OpenSprinkler API class to create a connection to the
+     * OpenSprinkler device for control and obtaining status info.
      *
-     * @param hostname Hostname or IP address as a String of the OpenSprinkler device.
+     * @param hostname Hostname or IP address as a String of the OpenSprinkler
+     *            device.
      * @param port The port number the OpenSprinkler API is listening on.
      * @param password Admin password for the OpenSprinkler device.
      * @param basicUsername only needed if basic auth is required
@@ -126,14 +130,14 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
     }
 
     @Override
-    public void openStation(int station) throws Exception {
+    public void openStation(int station, BigDecimal duration) throws CommunicationApiException, GeneralApiException {
         if (station < 0 || station >= numberOfStations) {
             throw new GeneralApiException("This OpenSprinkler device only has " + this.numberOfStations
                     + " but station " + station + " was requested to be opened.");
         }
 
         try {
-            http.sendHttpGet(getBaseUrl() + "sn" + station + "=1", null);
+            http.sendHttpGet(getBaseUrl() + "sn" + station + "=1&t=" + duration, null);
         } catch (Exception exp) {
             throw new CommunicationApiException(
                     "There was a problem in the HTTP communication with the OpenSprinkler API: " + exp.getMessage());
@@ -141,17 +145,13 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
     }
 
     @Override
-    public void closeStation(int station) throws Exception {
+    public void closeStation(int station) throws CommunicationApiException, GeneralApiException {
         if (station < 0 || station >= numberOfStations) {
             throw new GeneralApiException("This OpenSprinkler device only has " + this.numberOfStations
                     + " but station " + station + " was requested to be closed.");
         }
-        try {
-            http.sendHttpGet(getBaseUrl() + "sn" + station + "=0", null);
-        } catch (Exception exp) {
-            throw new CommunicationApiException(
-                    "There was a problem in the HTTP communication with the OpenSprinkler API: " + exp.getMessage());
-        }
+
+        http.sendHttpGet(getBaseUrl() + "sn" + station + "=0", null);
     }
 
     @Override
@@ -183,6 +183,21 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
     }
 
     @Override
+    public int currentDraw() throws CommunicationApiException, NoCurrentDrawSensorException {
+        JcResponse info = statusInfo();
+        if (info.curr == null) {
+            throw new NoCurrentDrawSensorException();
+        }
+        return info.curr;
+    }
+
+    @Override
+    public int waterLevel() throws CommunicationApiException {
+        JoResponse info = getOptions();
+        return info.wl;
+    }
+
+    @Override
     public int getNumberOfStations() throws CommunicationApiException {
         String returnContent;
 
@@ -200,17 +215,10 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
 
     @Override
     public int getFirmwareVersion() throws CommunicationApiException {
-        String returnContent;
 
         try {
-            returnContent = http.sendHttpGet(getBaseUrl() + CMD_OPTIONS_INFO, null);
-        } catch (Exception exp) {
-            throw new CommunicationApiException(
-                    "There was a problem in the HTTP communication with the OpenSprinkler API: " + exp.getMessage());
-        }
-
-        try {
-            this.firmwareVersion = Parse.jsonInt(returnContent, JSON_OPTION_FIRMWARE_VERSION);
+            JoResponse info = getOptions();
+            this.firmwareVersion = info.fwv;
         } catch (Exception exp) {
             this.firmwareVersion = -1;
         }
@@ -259,12 +267,33 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
 
     private static class JcResponse {
         public List<List<Integer>> ps;
+        @SerializedName(value = "sn1", alternate = "rs")
         public int rs;
+        public Integer curr;
+    }
+
+    private JoResponse getOptions() throws CommunicationApiException {
+        String returnContent;
+
+        try {
+            returnContent = http.sendHttpGet(getBaseUrl() + CMD_OPTIONS_INFO, getRequestRequiredOptions());
+        } catch (CommunicationApiException exp) {
+            throw new CommunicationApiException(
+                    "There was a problem in the HTTP communication with the OpenSprinkler API: " + exp.getMessage());
+        }
+
+        JoResponse resp = gson.fromJson(returnContent, JoResponse.class);
+        return resp;
+    }
+
+    private static class JoResponse {
+        public int wl;
+        public int fwv;
     }
 
     /**
-     * This class contains helper methods for communicating HTTP GET
-     * and HTTP POST requests.
+     * This class contains helper methods for communicating HTTP GET and HTTP POST
+     * requests.
      *
      * @author Chris Graham - Initial contribution
      * @author Florian Schmidt - Reduce visibility of Http communication to Api
@@ -280,11 +309,12 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
         }
 
         /**
-         * Given a URL and a set parameters, send a HTTP GET request to the URL location created by the URL and
-         * parameters.
+         * Given a URL and a set parameters, send a HTTP GET request to the URL location
+         * created by the URL and parameters.
          *
          * @param url The URL to send a GET request to.
-         * @param urlParameters List of parameters to use in the URL for the GET request. Null if no parameters.
+         * @param urlParameters List of parameters to use in the URL for the GET
+         *            request. Null if no parameters.
          * @return String contents of the response for the GET request.
          * @throws Exception
          */
@@ -323,11 +353,12 @@ class OpenSprinklerHttpApiV100 implements OpenSprinklerApi {
         }
 
         /**
-         * Given a URL and a set parameters, send a HTTP POST request to the URL location created by the URL and
-         * parameters.
+         * Given a URL and a set parameters, send a HTTP POST request to the URL
+         * location created by the URL and parameters.
          *
          * @param url The URL to send a POST request to.
-         * @param urlParameters List of parameters to use in the URL for the POST request. Null if no parameters.
+         * @param urlParameters List of parameters to use in the URL for the POST
+         *            request. Null if no parameters.
          * @return String contents of the response for the POST request.
          * @throws Exception
          */

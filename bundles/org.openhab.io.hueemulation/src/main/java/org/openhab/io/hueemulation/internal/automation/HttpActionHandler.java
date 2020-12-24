@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,10 +24,10 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,6 @@ public class HttpActionHandler extends BaseModuleHandler<Action> implements Acti
 
     @Override
     public @Nullable Map<String, Object> execute(Map<String, Object> context) {
-
         try {
             Request request = httpClient.newRequest(URI.create(config.url)).method(config.method)
                     .timeout(config.timeout, TimeUnit.SECONDS);

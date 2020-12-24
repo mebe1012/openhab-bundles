@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,14 +13,17 @@
 package org.openhab.binding.velbus.internal;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * The {@link VelbusModuleAddress} represents the address and possible subaddresses of a Velbus module.
  *
  * @author Cedric Boon - Initial contribution
  */
+@NonNullByDefault
 public class VelbusModuleAddress {
     private byte address;
     private byte[] subAddresses;
@@ -47,7 +50,7 @@ public class VelbusModuleAddress {
     }
 
     public byte[] getActiveAddresses() {
-        ArrayList<Byte> activeAddresses = new ArrayList<Byte>();
+        List<Byte> activeAddresses = new ArrayList<>();
         activeAddresses.add(address);
 
         for (int i = 0; i < subAddresses.length; i++) {
@@ -72,7 +75,7 @@ public class VelbusModuleAddress {
     }
 
     public int getChannelNumber(ChannelUID channelUID) {
-        return Integer.parseInt(channelUID.getId().substring(2));
+        return Integer.parseInt(channelUID.getIdWithoutGroup().substring(2));
     }
 
     public int getChannelIndex(ChannelUID channelUID) {
@@ -81,6 +84,10 @@ public class VelbusModuleAddress {
 
     public String getChannelId(VelbusChannelIdentifier velbusChannelIdentifier) {
         return "CH" + getChannelNumber(velbusChannelIdentifier);
+    }
+
+    public int getChannelIndex(VelbusChannelIdentifier velbusChannelIdentifier) {
+        return this.getChannelNumber(velbusChannelIdentifier) - 1;
     }
 
     public int getChannelNumber(VelbusChannelIdentifier velbusChannelIdentifier) {

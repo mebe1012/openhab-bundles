@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,13 @@
 package org.openhab.binding.dsmr.internal.device;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.dsmr.internal.TelegramReaderUtil;
 import org.openhab.binding.dsmr.internal.device.p1telegram.P1TelegramListener;
 import org.openhab.binding.dsmr.internal.device.p1telegram.P1TelegramParser;
@@ -76,7 +76,7 @@ public class SmartyDecrypterTest {
      */
     @Test
     public void testSmartyDecrypter() {
-        AtomicReference<String> telegramResult = new AtomicReference<String>("");
+        AtomicReference<String> telegramResult = new AtomicReference<>("");
         P1TelegramListener telegramListener = telegram -> telegramResult.set(telegram.getRawTelegram());
         SmartyDecrypter decoder = new SmartyDecrypter(new P1TelegramParser(telegramListener),
                 new DSMRTelegramListener(KEY), KEY);

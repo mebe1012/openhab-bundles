@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link VolvoOnCallBindingConstants} class defines common constants, which are
@@ -30,19 +30,19 @@ public class VolvoOnCallBindingConstants {
 
     public static final String BINDING_ID = "volvooncall";
 
-    // Vehicle properties
-    public static final String VIN = "vin";
-
-    // The URL to use to connect to VocAPI with.
-    // TODO : for North America and China syntax changes to vocapi-cn.xxx
-    public static final String SERVICE_URL = "https://vocapi.wirelesscar.net/customerapi/rest/v3.0/";
-
-    // The JSON content type used when talking to VocAPI.
-    public static final String JSON_CONTENT_TYPE = "application/json";
-
     // List of Thing Type UIDs
     public static final ThingTypeUID APIBRIDGE_THING_TYPE = new ThingTypeUID(BINDING_ID, "vocapi");
     public static final ThingTypeUID VEHICLE_THING_TYPE = new ThingTypeUID(BINDING_ID, "vehicle");
+
+    // List of Channel groups
+    public static final String GROUP_DOORS = "doors";
+    public static final String GROUP_WINDOWS = "windows";
+    public static final String GROUP_TYRES = "tyrePressure";
+    public static final String GROUP_BATTERY = "battery";
+    public static final String GROUP_OTHER = "other";
+    public static final String GROUP_POSITION = "position";
+    public static final String GROUP_ODOMETER = "odometer";
+    public static final String GROUP_TANK = "tank";
 
     // List of Channel id's
     public static final String TAILGATE = "tailgate";
@@ -55,6 +55,10 @@ public class VolvoOnCallBindingConstants {
     public static final String REAR_LEFT_WND = "rearLeftWnd";
     public static final String FRONT_RIGHT_WND = "frontRightWnd";
     public static final String FRONT_LEFT_WND = "frontLeftWnd";
+    public static final String REAR_RIGHT_TYRE = "rearRightTyre";
+    public static final String REAR_LEFT_TYRE = "rearLeftTyre";
+    public static final String FRONT_RIGHT_TYRE = "frontRightTyre";
+    public static final String FRONT_LEFT_TYRE = "frontLeftTyre";
     public static final String ODOMETER = "odometer";
     public static final String TRIPMETER1 = "tripmeter1";
     public static final String TRIPMETER2 = "tripmeter2";
@@ -69,8 +73,22 @@ public class VolvoOnCallBindingConstants {
     public static final String HEADING = "heading";
     public static final String CAR_LOCKED = "carLocked";
     public static final String ENGINE_RUNNING = "engineRunning";
-    public static final String WASHER_FLUID = "washerFluidLevel";
+    public static final String BRAKE_FLUID_LEVEL = "brakeFluidLevel";
+    public static final String WASHER_FLUID_LEVEL = "washerFluidLevel";
+    public static final String AVERAGE_SPEED = "averageSpeed";
     public static final String SERVICE_WARNING = "serviceWarningStatus";
+    public static final String BATTERY_LEVEL = "batteryLevel";
+    public static final String BATTERY_DISTANCE_TO_EMPTY = "batteryDistanceToEmpty";
+    public static final String CHARGE_STATUS = "chargeStatus";
+    public static final String TIME_TO_BATTERY_FULLY_CHARGED = "timeToHVBatteryFullyCharged";
+    public static final String CHARGING_END = "chargingEnd";
+    public static final String BULB_FAILURE = "bulbFailure";
+
+    // Car Events
+    public static final String CAR_EVENT = "carEvent";
+    public static final String EVENT_CAR_STOPPED = "CAR_STOPPED";
+    public static final String EVENT_CAR_MOVED = "CAR_MOVED";
+    public static final String EVENT_CAR_STARTED = "CAR_STARTED";
     // Last Trip Channel Id's
     public static final String LAST_TRIP_GROUP = "lasttrip";
     public static final String TRIP_CONSUMPTION = "tripConsumption";
@@ -103,4 +121,7 @@ public class VolvoOnCallBindingConstants {
     // List of all adressable things in OH = SUPPORTED_DEVICE_THING_TYPES_UIDS + the virtual bridge
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Stream
             .of(APIBRIDGE_THING_TYPE, VEHICLE_THING_TYPE).collect(Collectors.toSet());
+
+    // Default value for undefined integers
+    public static final int UNDEFINED = -1;
 }

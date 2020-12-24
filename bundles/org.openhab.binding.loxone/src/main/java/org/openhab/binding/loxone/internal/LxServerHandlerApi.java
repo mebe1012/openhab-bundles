@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,14 +15,14 @@ package org.openhab.binding.loxone.internal;
 import java.io.IOException;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
 import org.openhab.binding.loxone.internal.controls.LxControl;
 import org.openhab.binding.loxone.internal.security.LxWsSecurity;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
 
 import com.google.gson.Gson;
 
@@ -37,7 +37,7 @@ public interface LxServerHandlerApi {
     /**
      * Sends an action to a Loxone Miniserver's control.
      *
-     * @param id        identifier of the control
+     * @param id identifier of the control
      * @param operation identifier of the operation
      * @throws IOException when communication error with Miniserver occurs
      */
@@ -65,7 +65,7 @@ public interface LxServerHandlerApi {
      * Sets channel's state to a new value
      *
      * @param channelId channel ID
-     * @param state     new state value
+     * @param state new state value
      */
     void setChannelState(ChannelUID channelId, State state);
 
@@ -74,7 +74,7 @@ public interface LxServerHandlerApi {
      * interpreted and displayed. It is called when a dynamic state update is received from the Miniserver with a new
      * way of displaying control's state.
      *
-     * @param channelId   channel ID
+     * @param channelId channel ID
      * @param description a new state description
      */
     void setChannelStateDescription(ChannelUID channelId, StateDescription description);

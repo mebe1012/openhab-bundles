@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,15 @@
  */
 package org.openhab.binding.astro.internal.model;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.MILLI;
+import static org.openhab.core.library.unit.MetricPrefix.MILLI;
 
 import java.util.Calendar;
 
 import javax.measure.quantity.Time;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.openhab.binding.astro.internal.util.DateTimeUtils;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 
 /**
  * Range class which holds a start and a end calendar object.
@@ -65,10 +63,10 @@ public class Range {
             return null;
         }
         if (start.after(end)) {
-            return new QuantityType<Time>(0, SmartHomeUnits.MINUTE);
+            return new QuantityType<>(0, Units.MINUTE);
         }
-        return new QuantityType<Time>(end.getTimeInMillis() - start.getTimeInMillis(), MILLI(SmartHomeUnits.SECOND))
-                .toUnit(SmartHomeUnits.MINUTE);
+        return new QuantityType<>(end.getTimeInMillis() - start.getTimeInMillis(), MILLI(Units.SECOND))
+                .toUnit(Units.MINUTE);
     }
 
     /**
@@ -82,11 +80,5 @@ public class Range {
                 : DateTimeUtils.truncateToMidnight(cal).getTimeInMillis();
         long matchEnd = end != null ? end.getTimeInMillis() : DateTimeUtils.endOfDayDate(cal).getTimeInMillis();
         return cal.getTimeInMillis() >= matchStart && cal.getTimeInMillis() < matchEnd;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("start", DateTimeUtils.getDate(start))
-                .append("end", DateTimeUtils.getDate(end)).toString();
     }
 }

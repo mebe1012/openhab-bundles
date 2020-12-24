@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,16 +16,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.pioneeravr.internal.PioneerAvrBindingConstants;
 import org.openhab.binding.pioneeravr.internal.protocol.RequestResponseFactory;
 import org.openhab.binding.pioneeravr.internal.protocol.avr.AvrConnection;
@@ -40,6 +30,17 @@ import org.openhab.binding.pioneeravr.internal.protocol.states.MuteStateValues;
 import org.openhab.binding.pioneeravr.internal.protocol.states.PowerStateValues;
 import org.openhab.binding.pioneeravr.internal.protocol.utils.DisplayInformationConverter;
 import org.openhab.binding.pioneeravr.internal.protocol.utils.VolumeConverter;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +121,7 @@ public abstract class AbstractAvrHandler extends BaseThingHandler
         // When the AVR is Powered ON, query the volume, the mute state and the source input of the zone
         connection.sendVolumeQuery(zone);
         connection.sendMuteQuery(zone);
-        connection.sendSourceInputQuery(zone);
+        connection.sendInputSourceQuery(zone);
         connection.sendListeningModeQuery(zone);
     }
 
@@ -166,16 +167,37 @@ public abstract class AbstractAvrHandler extends BaseThingHandler
             boolean unknownCommand = false;
 
             if (channelUID.getId().contains(PioneerAvrBindingConstants.POWER_CHANNEL)) {
-                commandSent = connection.sendPowerCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                if (command == RefreshType.REFRESH) {
+                    commandSent = connection.sendPowerQuery(getZoneFromChannelUID(channelUID.getId()));
+                } else {
+                    commandSent = connection.sendPowerCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                }
             } else if (channelUID.getId().contains(PioneerAvrBindingConstants.VOLUME_DIMMER_CHANNEL)
                     || channelUID.getId().contains(PioneerAvrBindingConstants.VOLUME_DB_CHANNEL)) {
-                commandSent = connection.sendVolumeCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                if (command == RefreshType.REFRESH) {
+                    commandSent = connection.sendVolumeQuery(getZoneFromChannelUID(channelUID.getId()));
+                } else {
+                    commandSent = connection.sendVolumeCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                }
             } else if (channelUID.getId().contains(PioneerAvrBindingConstants.SET_INPUT_SOURCE_CHANNEL)) {
-                commandSent = connection.sendInputSourceCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                if (command == RefreshType.REFRESH) {
+                    commandSent = connection.sendInputSourceQuery(getZoneFromChannelUID(channelUID.getId()));
+                } else {
+                    commandSent = connection.sendInputSourceCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                }
             } else if (channelUID.getId().contains(PioneerAvrBindingConstants.LISTENING_MODE_CHANNEL)) {
-                commandSent = connection.sendListeningModeCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                if (command == RefreshType.REFRESH) {
+                    commandSent = connection.sendListeningModeQuery(getZoneFromChannelUID(channelUID.getId()));
+                } else {
+                    commandSent = connection.sendListeningModeCommand(command,
+                            getZoneFromChannelUID(channelUID.getId()));
+                }
             } else if (channelUID.getId().contains(PioneerAvrBindingConstants.MUTE_CHANNEL)) {
-                commandSent = connection.sendMuteCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                if (command == RefreshType.REFRESH) {
+                    commandSent = connection.sendMuteQuery(getZoneFromChannelUID(channelUID.getId()));
+                } else {
+                    commandSent = connection.sendMuteCommand(command, getZoneFromChannelUID(channelUID.getId()));
+                }
             } else {
                 unknownCommand = true;
             }
@@ -227,11 +249,11 @@ public abstract class AbstractAvrHandler extends BaseThingHandler
                     break;
 
                 default:
-                    logger.debug("Unkown response type from AVR @{}. Response discarded: {}", event.getData(),
+                    logger.debug("Unknown response type from AVR @{}. Response discarded: {}", event.getData(),
                             event.getConnection());
             }
         } catch (AvrConnectionException e) {
-            logger.debug("Unkown response type from AVR @{}. Response discarded: {}", event.getData(),
+            logger.debug("Unknown response type from AVR @{}. Response discarded: {}", event.getData(),
                     event.getConnection());
         }
     }
@@ -359,5 +381,4 @@ public abstract class AbstractAvrHandler extends BaseThingHandler
         }
         return zone;
     }
-
 }

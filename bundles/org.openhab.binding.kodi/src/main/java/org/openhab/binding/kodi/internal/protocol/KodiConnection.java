@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,12 +25,8 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.kodi.internal.KodiEventListener;
 import org.openhab.binding.kodi.internal.KodiEventListener.KodiPlaylistState;
 import org.openhab.binding.kodi.internal.KodiEventListener.KodiState;
@@ -44,7 +40,10 @@ import org.openhab.binding.kodi.internal.model.KodiSubtitle;
 import org.openhab.binding.kodi.internal.model.KodiSystemProperties;
 import org.openhab.binding.kodi.internal.model.KodiUniqueID;
 import org.openhab.binding.kodi.internal.model.KodiVideoStream;
-import org.openhab.binding.kodi.internal.utils.ByteArrayFileCache;
+import org.openhab.core.cache.ByteArrayFileCache;
+import org.openhab.core.cache.ExpiringCacheMap;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.RawType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +79,6 @@ public class KodiConnection implements KodiClientSocketEventListener {
     private static final String PROPERTY_CURRENTAUDIOSTREAM = "currentaudiostream";
     private static final String PROPERTY_SUBTITLES = "subtitles";
     private static final String PROPERTY_AUDIOSTREAMS = "audiostreams";
-    private static final String PROPERTY_VIDEOSTREAMS = "videostreams";
-    private static final String PROPERTY_STREAMDETAILS = "streamdetails";
     private static final String PROPERTY_CANHIBERNATE = "canhibernate";
     private static final String PROPERTY_CANREBOOT = "canreboot";
     private static final String PROPERTY_CANSHUTDOWN = "canshutdown";
@@ -381,10 +378,10 @@ public class KodiConnection implements KodiClientSocketEventListener {
      * @param favoriteTitle the title of the favorite
      * @return the ({@link KodiFavorite}) with the given title
      */
-    @Nullable
-    public KodiFavorite getFavorite(final String favoriteTitle) {
+    public @Nullable KodiFavorite getFavorite(final String favoriteTitle) {
         for (KodiFavorite favorite : getFavorites()) {
-            if (StringUtils.equalsIgnoreCase(favorite.getTitle(), favoriteTitle)) {
+            String title = favorite.getTitle();
+            if (favoriteTitle.equalsIgnoreCase(title)) {
                 return favorite;
             }
         }
@@ -864,12 +861,23 @@ public class KodiConnection implements KodiClientSocketEventListener {
             // we have to strip ending "/" here because Kodi returns a not valid path and filename
             // "fanart":"image://http%3a%2f%2fthetvdb.com%2fbanners%2ffanart%2foriginal%2f263365-31.jpg/"
             // "thumbnail":"image://http%3a%2f%2fthetvdb.com%2fbanners%2fepisodes%2f263365%2f5640869.jpg/"
-            String encodedURL = URLEncoder.encode(StringUtils.stripEnd(url, "/"), StandardCharsets.UTF_8.name());
+            String encodedURL = URLEncoder.encode(stripEnd(url, '/'), StandardCharsets.UTF_8.name());
             return imageUri.resolve(encodedURL).toString();
         } catch (UnsupportedEncodingException e) {
             logger.debug("exception during encoding {}", url, e);
             return null;
         }
+    }
+
+    private String stripEnd(final String str, final char suffix) {
+        int end = str.length();
+        if (end == 0) {
+            return str;
+        }
+        while (end > 0 && str.charAt(end - 1) == suffix) {
+            end--;
+        }
+        return str.substring(0, end);
     }
 
     private @Nullable RawType downloadImage(String url) {
@@ -883,10 +891,14 @@ public class KodiConnection implements KodiClientSocketEventListener {
 
     private @Nullable RawType downloadImageFromCache(String url) {
         if (IMAGE_CACHE.containsKey(url)) {
-            byte[] bytes = IMAGE_CACHE.get(url);
-            String contentType = HttpUtil.guessContentTypeFromData(bytes);
-            return new RawType(bytes,
-                    contentType == null || contentType.isEmpty() ? RawType.DEFAULT_MIME_TYPE : contentType);
+            try {
+                byte[] bytes = IMAGE_CACHE.get(url);
+                String contentType = HttpUtil.guessContentTypeFromData(bytes);
+                return new RawType(bytes,
+                        contentType == null || contentType.isEmpty() ? RawType.DEFAULT_MIME_TYPE : contentType);
+            } catch (IOException e) {
+                logger.trace("Failed to download the content of URL '{}'", url, e);
+            }
         } else {
             RawType image = downloadImage(url);
             if (image != null) {
@@ -1105,8 +1117,8 @@ public class KodiConnection implements KodiClientSocketEventListener {
                 }
             }
         } else {
-            listener.updateMuted(false);
             listener.updateVolume(100);
+            listener.updateMuted(false);
         }
     }
 
@@ -1115,7 +1127,10 @@ public class KodiConnection implements KodiClientSocketEventListener {
             JsonElement response = socket.callMethod("Profiles.GetCurrentProfile");
 
             try {
-                listener.updateCurrentProfile(gson.fromJson(response, KodiProfile.class).getLabel());
+                final KodiProfile profile = gson.fromJson(response, KodiProfile.class);
+                if (profile != null) {
+                    listener.updateCurrentProfile(profile.getLabel());
+                }
             } catch (JsonSyntaxException e) {
                 logger.debug("Json syntax exception occurred: {}", e.getMessage(), e);
             }
@@ -1174,7 +1189,8 @@ public class KodiConnection implements KodiClientSocketEventListener {
     public int getPVRChannelGroupId(final String channelType, final String pvrChannelGroupName) {
         List<KodiPVRChannelGroup> pvrChannelGroups = getPVRChannelGroups(channelType);
         for (KodiPVRChannelGroup pvrChannelGroup : pvrChannelGroups) {
-            if (StringUtils.equalsIgnoreCase(pvrChannelGroup.getLabel(), pvrChannelGroupName)) {
+            String label = pvrChannelGroup.getLabel();
+            if (pvrChannelGroupName.equalsIgnoreCase(label)) {
                 return pvrChannelGroup.getId();
             }
         }
@@ -1213,7 +1229,8 @@ public class KodiConnection implements KodiClientSocketEventListener {
 
     public int getPVRChannelId(final int pvrChannelGroupId, final String pvrChannelName) {
         for (KodiPVRChannel pvrChannel : getPVRChannels(pvrChannelGroupId)) {
-            if (StringUtils.equalsIgnoreCase(pvrChannel.getLabel(), pvrChannelName)) {
+            String label = pvrChannel.getLabel();
+            if (pvrChannelName.equalsIgnoreCase(label)) {
                 return pvrChannel.getId();
             }
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,24 +12,24 @@
  */
 package org.openhab.binding.wifiled.internal.handler;
 
-import org.eclipse.smarthome.core.library.types.*;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
+import java.io.IOException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.openhab.binding.wifiled.internal.WiFiLEDBindingConstants;
 import org.openhab.binding.wifiled.internal.configuration.WiFiLEDConfig;
 import org.openhab.binding.wifiled.internal.handler.AbstractWiFiLEDDriver.Driver;
 import org.openhab.binding.wifiled.internal.handler.AbstractWiFiLEDDriver.Protocol;
+import org.openhab.core.library.types.*;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The {@link WiFiLEDHandler} is responsible for handling commands, which are
@@ -66,8 +66,11 @@ public class WiFiLEDHandler extends BaseThingHandler {
                 break;
 
             case FADING:
-                int fadeDurationInMs = config.getFadeDurationInMs() == null ? FadingWiFiLEDDriver.DEFAULT_FADE_DURATION_IN_MS : config.getFadeDurationInMs();
-                int fadeSteps = config.getFadeSteps() == null ? FadingWiFiLEDDriver.DEFAULT_FADE_STEPS : config.getFadeSteps();
+                int fadeDurationInMs = config.getFadeDurationInMs() == null
+                        ? FadingWiFiLEDDriver.DEFAULT_FADE_DURATION_IN_MS
+                        : config.getFadeDurationInMs();
+                int fadeSteps = config.getFadeSteps() == null ? FadingWiFiLEDDriver.DEFAULT_FADE_STEPS
+                        : config.getFadeSteps();
                 driver = new FadingWiFiLEDDriver(config.getIp(), port, protocol, fadeDurationInMs, fadeSteps);
                 break;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,21 +20,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.neeo.internal.NeeoBrainApi;
 import org.openhab.binding.neeo.internal.NeeoConstants;
 import org.openhab.binding.neeo.internal.NeeoHandlerCallback;
@@ -44,6 +31,18 @@ import org.openhab.binding.neeo.internal.NeeoUtil;
 import org.openhab.binding.neeo.internal.UidUtils;
 import org.openhab.binding.neeo.internal.models.NeeoAction;
 import org.openhab.binding.neeo.internal.models.NeeoRoom;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.BridgeHandler;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +98,7 @@ public class NeeoRoomHandler extends BaseBridgeHandler {
         }
 
         final String localGroupId = channelUID.getGroupId();
-        final String groupId = localGroupId == null || StringUtils.isEmpty(localGroupId) ? "" : localGroupId;
+        final String groupId = localGroupId == null || localGroupId.isEmpty() ? "" : localGroupId;
         final String channelId = channelIds[0];
         final String channelKey = channelIds.length > 1 ? channelIds[1] : "";
 
@@ -195,7 +194,7 @@ public class NeeoRoomHandler extends BaseBridgeHandler {
         final NeeoRoomConfig config = getConfigAs(NeeoRoomConfig.class);
 
         final String roomKey = config.getRoomKey();
-        if (roomKey == null || StringUtils.isEmpty(roomKey)) {
+        if (roomKey == null || roomKey.isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "Room key (from the parent room bridge) was not found");
             return;

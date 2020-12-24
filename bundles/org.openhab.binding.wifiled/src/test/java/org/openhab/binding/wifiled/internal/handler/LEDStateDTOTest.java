@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,9 @@
 package org.openhab.binding.wifiled.internal.handler;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
-import org.openhab.binding.wifiled.internal.handler.LEDStateDTO;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for LEDStateDTO

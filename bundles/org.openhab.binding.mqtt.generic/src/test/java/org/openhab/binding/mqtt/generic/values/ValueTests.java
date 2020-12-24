@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,28 +13,23 @@
 package org.openhab.binding.mqtt.generic.values;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.TypeParser;
-import org.junit.Test;
-import org.openhab.binding.mqtt.generic.values.ColorValue;
-import org.openhab.binding.mqtt.generic.values.NumberValue;
-import org.openhab.binding.mqtt.generic.values.OnOffValue;
-import org.openhab.binding.mqtt.generic.values.OpenCloseValue;
-import org.openhab.binding.mqtt.generic.values.PercentageValue;
-import org.openhab.binding.mqtt.generic.values.RollershutterValue;
-import org.openhab.binding.mqtt.generic.values.TextValue;
-import org.openhab.binding.mqtt.generic.values.Value;
+import org.junit.jupiter.api.Test;
+import org.openhab.binding.mqtt.generic.mapping.ColorMode;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.TypeParser;
 
 /**
  * Test cases for the value classes. They should throw exceptions if the wrong command type is used
@@ -51,10 +46,10 @@ public class ValueTests {
         return TypeParser.parseCommand(v.getSupportedCommandTypes(), str);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void illegalTextStateUpdate() {
         TextValue v = new TextValue("one,two".split(","));
-        v.update(p(v, "three"));
+        assertThrows(IllegalArgumentException.class, () -> v.update(p(v, "three")));
     }
 
     public void textStateUpdate() {
@@ -63,7 +58,7 @@ public class ValueTests {
     }
 
     public void colorUpdate() {
-        ColorValue v = new ColorValue(true, "fancyON", "fancyOFF", 77);
+        ColorValue v = new ColorValue(ColorMode.RGB, "fancyON", "fancyOFF", 77);
         v.update(p(v, "255, 255, 255"));
 
         v.update(p(v, "OFF"));
@@ -77,34 +72,34 @@ public class ValueTests {
         assertThat(((HSBType) v.getChannelState()).getBrightness().intValue(), is(1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void illegalColorUpdate() {
-        ColorValue v = new ColorValue(true, null, null, 10);
-        v.update(p(v, "255,255,abc"));
+        ColorValue v = new ColorValue(ColorMode.RGB, null, null, 10);
+        assertThrows(IllegalArgumentException.class, () -> v.update(p(v, "255,255,abc")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void illegalNumberCommand() {
-        NumberValue v = new NumberValue(null, null, null);
-        v.update(OnOffType.OFF);
+        NumberValue v = new NumberValue(null, null, null, null);
+        assertThrows(IllegalArgumentException.class, () -> v.update(OnOffType.OFF));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void illegalPercentCommand() {
         PercentageValue v = new PercentageValue(null, null, null, null, null);
-        v.update(new StringType("demo"));
+        assertThrows(IllegalStateException.class, () -> v.update(new StringType("demo")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void illegalOnOffCommand() {
         OnOffValue v = new OnOffValue(null, null);
-        v.update(new DecimalType(101.0));
+        assertThrows(IllegalArgumentException.class, () -> v.update(new DecimalType(101.0)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void illegalPercentUpdate() {
         PercentageValue v = new PercentageValue(null, null, null, null, null);
-        v.update(new DecimalType(101.0));
+        assertThrows(IllegalArgumentException.class, () -> v.update(new DecimalType(101.0)));
     }
 
     @Test
@@ -112,26 +107,28 @@ public class ValueTests {
         OnOffValue v = new OnOffValue("fancyON", "fancyOff");
         // Test with command
         v.update(OnOffType.OFF);
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(OnOffType.OFF));
         v.update(OnOffType.ON);
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(OnOffType.ON));
 
         // Test with string, representing the command
         v.update(new StringType("OFF"));
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(OnOffType.OFF));
         v.update(new StringType("ON"));
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(OnOffType.ON));
 
         // Test with custom string, setup in the constructor
         v.update(new StringType("fancyOff"));
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue("=%s"), is("=fancyOff"));
         assertThat(v.getChannelState(), is(OnOffType.OFF));
         v.update(new StringType("fancyON"));
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
+        assertThat(v.getMQTTpublishValue("=%s"), is("=fancyON"));
         assertThat(v.getChannelState(), is(OnOffType.ON));
     }
 
@@ -140,49 +137,72 @@ public class ValueTests {
         OpenCloseValue v = new OpenCloseValue("fancyON", "fancyOff");
         // Test with command
         v.update(OpenClosedType.CLOSED);
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(OpenClosedType.CLOSED));
         v.update(OpenClosedType.OPEN);
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(OpenClosedType.OPEN));
 
         // Test with string, representing the command
         v.update(new StringType("CLOSED"));
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(OpenClosedType.CLOSED));
         v.update(new StringType("OPEN"));
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(OpenClosedType.OPEN));
 
         // Test with custom string, setup in the constructor
         v.update(new StringType("fancyOff"));
-        assertThat(v.getMQTTpublishValue(), is("fancyOff"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(OpenClosedType.CLOSED));
         v.update(new StringType("fancyON"));
-        assertThat(v.getMQTTpublishValue(), is("fancyON"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(OpenClosedType.OPEN));
     }
 
     @Test
-    public void rollershutterUpdate() {
+    public void rollershutterUpdateWithStrings() {
         RollershutterValue v = new RollershutterValue("fancyON", "fancyOff", "fancyStop");
         // Test with command
         v.update(UpDownType.UP);
-        assertThat(v.getMQTTpublishValue(), is("0"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(PercentType.ZERO));
         v.update(UpDownType.DOWN);
-        assertThat(v.getMQTTpublishValue(), is("100"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(PercentType.HUNDRED));
 
         // Test with custom string
         v.update(new StringType("fancyON"));
-        assertThat(v.getMQTTpublishValue(), is("0"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyON"));
         assertThat(v.getChannelState(), is(PercentType.ZERO));
         v.update(new StringType("fancyOff"));
-        assertThat(v.getMQTTpublishValue(), is("100"));
+        assertThat(v.getMQTTpublishValue(null), is("fancyOff"));
         assertThat(v.getChannelState(), is(PercentType.HUNDRED));
         v.update(new PercentType(27));
-        assertThat(v.getMQTTpublishValue(), is("27"));
+        assertThat(v.getMQTTpublishValue(null), is("27"));
+        assertThat(v.getChannelState(), is(new PercentType(27)));
+    }
+
+    @Test
+    public void rollershutterUpdateWithOutStrings() {
+        RollershutterValue v = new RollershutterValue(null, null, "fancyStop");
+        // Test with command
+        v.update(UpDownType.UP);
+        assertThat(v.getMQTTpublishValue(null), is("0"));
+        assertThat(v.getChannelState(), is(PercentType.ZERO));
+        v.update(UpDownType.DOWN);
+        assertThat(v.getMQTTpublishValue(null), is("100"));
+        assertThat(v.getChannelState(), is(PercentType.HUNDRED));
+
+        // Test with custom string
+        v.update(PercentType.ZERO);
+        assertThat(v.getMQTTpublishValue(null), is("0"));
+        assertThat(v.getChannelState(), is(PercentType.ZERO));
+        v.update(PercentType.HUNDRED);
+        assertThat(v.getMQTTpublishValue(null), is("100"));
+        assertThat(v.getChannelState(), is(PercentType.HUNDRED));
+        v.update(new PercentType(27));
+        assertThat(v.getMQTTpublishValue(null), is("27"));
         assertThat(v.getChannelState(), is(new PercentType(27)));
     }
 
@@ -190,12 +210,12 @@ public class ValueTests {
     public void percentCalc() {
         PercentageValue v = new PercentageValue(new BigDecimal(10.0), new BigDecimal(110.0), new BigDecimal(1.0), null,
                 null);
-        v.update(new DecimalType(110.0));
+        v.update(new DecimalType("110.0"));
         assertThat((PercentType) v.getChannelState(), is(new PercentType(100)));
-        assertThat(v.getMQTTpublishValue(), is("110.0"));
+        assertThat(v.getMQTTpublishValue(null), is("110"));
         v.update(new DecimalType(10.0));
         assertThat((PercentType) v.getChannelState(), is(new PercentType(0)));
-        assertThat(v.getMQTTpublishValue(), is("10.0"));
+        assertThat(v.getMQTTpublishValue(null), is("10"));
 
         v.update(OnOffType.ON);
         assertThat((PercentType) v.getChannelState(), is(new PercentType(100)));
@@ -204,9 +224,20 @@ public class ValueTests {
     }
 
     @Test
+    public void percentMQTTValue() {
+        PercentageValue v = new PercentageValue(null, null, null, null, null);
+        v.update(new DecimalType("10.10000"));
+        assertThat(v.getMQTTpublishValue(null), is("10.1"));
+        for (int i = 0; i <= 100; i++) {
+            v.update(new DecimalType(i));
+            assertThat(v.getMQTTpublishValue(null), is("" + i));
+        }
+    }
+
+    @Test
     public void percentCustomOnOff() {
-        PercentageValue v = new PercentageValue(new BigDecimal(0.0), new BigDecimal(100.0), new BigDecimal(1.0), "on",
-                "off");
+        PercentageValue v = new PercentageValue(new BigDecimal("0.0"), new BigDecimal("100.0"), new BigDecimal("1.0"),
+                "on", "off");
         v.update(new StringType("on"));
         assertThat((PercentType) v.getChannelState(), is(new PercentType(100)));
         v.update(new StringType("off"));
@@ -215,8 +246,8 @@ public class ValueTests {
 
     @Test
     public void decimalCalc() {
-        PercentageValue v = new PercentageValue(new BigDecimal(0.1), new BigDecimal(1.0), new BigDecimal(0.1), null,
-                null);
+        PercentageValue v = new PercentageValue(new BigDecimal("0.1"), new BigDecimal("1.0"), new BigDecimal("0.1"),
+                null, null);
         v.update(new DecimalType(1.0));
         assertThat((PercentType) v.getChannelState(), is(new PercentType(100)));
         v.update(new DecimalType(0.1));
@@ -225,10 +256,64 @@ public class ValueTests {
         assertEquals(((PercentType) v.getChannelState()).floatValue(), 11.11f, 0.01f);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
+    public void increaseDecreaseCalc() {
+        PercentageValue v = new PercentageValue(new BigDecimal("1.0"), new BigDecimal("11.0"), new BigDecimal("0.5"),
+                null, null);
+
+        // Normal operation.
+        v.update(new DecimalType("6.0"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 50.0f, 0.01f);
+        v.update(IncreaseDecreaseType.INCREASE);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 55.0f, 0.01f);
+        v.update(IncreaseDecreaseType.DECREASE);
+        v.update(IncreaseDecreaseType.DECREASE);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 45.0f, 0.01f);
+
+        // Lower limit.
+        v.update(new DecimalType("1.1"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 1.0f, 0.01f);
+        v.update(IncreaseDecreaseType.DECREASE);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 0.0f, 0.01f);
+
+        // Upper limit.
+        v.update(new DecimalType("10.8"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 98.0f, 0.01f);
+        v.update(IncreaseDecreaseType.INCREASE);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 100.0f, 0.01f);
+    }
+
+    @Test
+    public void upDownCalc() {
+        PercentageValue v = new PercentageValue(new BigDecimal("1.0"), new BigDecimal("11.0"), new BigDecimal("0.5"),
+                null, null);
+
+        // Normal operation.
+        v.update(new DecimalType("6.0"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 50.0f, 0.01f);
+        v.update(UpDownType.UP);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 55.0f, 0.01f);
+        v.update(UpDownType.DOWN);
+        v.update(UpDownType.DOWN);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 45.0f, 0.01f);
+
+        // Lower limit.
+        v.update(new DecimalType("1.1"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 1.0f, 0.01f);
+        v.update(UpDownType.DOWN);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 0.0f, 0.01f);
+
+        // Upper limit.
+        v.update(new DecimalType("10.8"));
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 98.0f, 0.01f);
+        v.update(UpDownType.UP);
+        assertEquals(((PercentType) v.getChannelState()).floatValue(), 100.0f, 0.01f);
+    }
+
+    @Test
     public void percentCalcInvalid() {
         PercentageValue v = new PercentageValue(new BigDecimal(10.0), new BigDecimal(110.0), new BigDecimal(1.0), null,
                 null);
-        v.update(new DecimalType(9.0));
+        assertThrows(IllegalArgumentException.class, () -> v.update(new DecimalType(9.0)));
     }
 }

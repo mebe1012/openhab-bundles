@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,9 +22,9 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.type.ThingType;
 import org.openhab.io.neeo.NeeoService;
 import org.openhab.io.neeo.internal.NeeoBrainServlet;
 import org.openhab.io.neeo.internal.NeeoConstants;
@@ -84,12 +84,8 @@ public class NeeoDeviceSerializer implements JsonSerializer<NeeoDevice>, JsonDes
     }
 
     @Override
-    public NeeoDevice deserialize(@Nullable JsonElement elm, @Nullable Type type,
-            @Nullable JsonDeserializationContext jsonContext) throws JsonParseException {
-        Objects.requireNonNull(elm, "elm cannot be null");
-        Objects.requireNonNull(type, "type cannot be null");
-        Objects.requireNonNull(jsonContext, "jsonContext cannot be null");
-
+    public @Nullable NeeoDevice deserialize(JsonElement elm, Type type, JsonDeserializationContext jsonContext)
+            throws JsonParseException {
         if (!(elm instanceof JsonObject)) {
             throw new JsonParseException("Element not an instance of JsonObject: " + elm);
         }

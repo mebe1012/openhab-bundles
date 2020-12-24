@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,12 +18,12 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Wouter Born - Add i18n support
  */
 @NonNullByDefault
-@Component(service = LifxChannelFactory.class, immediate = true)
+@Component(service = LifxChannelFactory.class)
 public class LifxChannelFactoryImpl implements LifxChannelFactory {
 
     private static final String COLOR_ZONE_LABEL_KEY = "channel-type.lifx.colorzone.label";
@@ -107,5 +107,4 @@ public class LifxChannelFactoryImpl implements LifxChannelFactory {
     protected void unsetLocaleProvider(LocaleProvider localeProvider) {
         this.localeProvider = null;
     }
-
 }

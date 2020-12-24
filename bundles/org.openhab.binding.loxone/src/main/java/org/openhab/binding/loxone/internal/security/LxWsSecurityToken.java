@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,13 +44,13 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.id.InstanceUUID;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.loxone.internal.LxServerHandlerApi;
 import org.openhab.binding.loxone.internal.LxWebSocket;
 import org.openhab.binding.loxone.internal.types.LxErrorCode;
 import org.openhab.binding.loxone.internal.types.LxResponse;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.id.InstanceUUID;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -407,7 +407,6 @@ class LxWsSecurityToken extends LxWsSecurity {
         persistToken();
         logger.debug("[{}] Token acquired.", debugId);
         return true;
-
     }
 
     private boolean useToken() {

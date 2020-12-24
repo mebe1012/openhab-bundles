@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Thing;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class BindingServlet extends HttpServlet {
-
     private static final long serialVersionUID = -1453738923337413163L;
 
     private final Logger logger = LoggerFactory.getLogger(BindingServlet.class);
@@ -57,10 +56,8 @@ public class BindingServlet extends HttpServlet {
         servletUrl = "/" + servletUrlWithoutRoot;
         try {
             httpService.registerServlet(servletUrl, this, null, httpService.createDefaultHttpContext());
-        } catch (ServletException e) {
-            logger.warn("Register servlet fails {}", e);
-        } catch (NamespaceException e) {
-            logger.warn("Register servlet fails {}", e);
+        } catch (NamespaceException | ServletException e) {
+            logger.warn("Register servlet fails", e);
         }
     }
 
@@ -89,7 +86,11 @@ public class BindingServlet extends HttpServlet {
         if (resp == null) {
             return;
         }
-        String uri = req.getRequestURI().substring(servletUrl.length());
+        String requestUri = req.getRequestURI();
+        if (requestUri == null) {
+            return;
+        }
+        String uri = requestUri.substring(servletUrl.length());
         String queryString = req.getQueryString();
         if (queryString != null && queryString.length() > 0) {
             uri += "?" + queryString;
@@ -123,7 +124,7 @@ public class BindingServlet extends HttpServlet {
         try {
             resp.getWriter().write(html.toString());
         } catch (IOException e) {
-            logger.warn("return html failed with uri syntax error {}", e);
+            logger.warn("return html failed with uri syntax error", e);
         }
     }
 }

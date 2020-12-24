@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,15 +23,15 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
 import org.openhab.binding.smartmeter.connectors.ConnectorBase;
 import org.openhab.binding.smartmeter.internal.helper.Baudrate;
 import org.openhab.binding.smartmeter.internal.helper.SerialParameter;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.util.HexUtils;
 import org.openmuc.jsml.structures.SmlFile;
 import org.openmuc.jsml.transport.Transport;
 
@@ -169,5 +169,4 @@ public final class SmlSerialConnector extends ConnectorBase<SmlFile> {
     protected boolean applyPeriod() {
         return true;
     }
-
 }

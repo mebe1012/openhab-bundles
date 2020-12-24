@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,15 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import static org.openhab.binding.rfxcom.internal.RFXComBindingConstants.CHANNEL_BATTERY_LEVEL;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.State;
 
 /**
  * A base class for all battery device messages
  *
- * @author Martin van Wingerden - Simplify some code in the RFXCOM binding
+ * @author Martin van Wingerden - Initial contribution
  */
 abstract class RFXComBatteryDeviceMessage<T> extends RFXComDeviceMessageImpl<T> {
     int batteryLevel;
@@ -35,13 +36,13 @@ abstract class RFXComBatteryDeviceMessage<T> extends RFXComDeviceMessageImpl<T> 
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         switch (channelId) {
             case CHANNEL_BATTERY_LEVEL:
                 return convertBatteryLevelToSystemWideLevel(batteryLevel);
 
             default:
-                return super.convertToState(channelId);
+                return super.convertToState(channelId, deviceState);
         }
     }
 

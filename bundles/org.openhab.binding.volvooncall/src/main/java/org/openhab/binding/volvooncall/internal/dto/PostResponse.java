@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,9 @@
  */
 package org.openhab.binding.volvooncall.internal.dto;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -24,7 +25,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
-public class PostResponse {
+public class PostResponse extends VocAnswer {
 
     public static enum Status {
         @SerializedName("Started")
@@ -45,13 +46,11 @@ public class PostResponse {
     }
 
     public @NonNullByDefault({}) Status status;
-    public @Nullable String errorLabel;
-    public @NonNullByDefault({}) String errorDescription;
     public @NonNullByDefault({}) String vehicleId;
     @SerializedName("service")
     public @NonNullByDefault({}) String serviceURL;
     public @NonNullByDefault({}) ServiceType serviceType;
-
+    public @NonNullByDefault({}) ZonedDateTime startTime;
     /*
      * Currently unused in the binding, maybe interesting in the future
      *
@@ -62,7 +61,7 @@ public class PostResponse {
      * }
      *
      * private ZonedDateTime statusTimestamp;
-     * private ZonedDateTime startTime;
+     * 
      * private FailureReason failureReason;
      *
      * private Integer customerServiceId;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,10 @@ package org.openhab.binding.ambientweather.internal.processor;
 import static org.openhab.binding.ambientweather.internal.AmbientWeatherBindingConstants.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.openhab.binding.ambientweather.internal.handler.AmbientWeatherStationHandler;
 import org.openhab.binding.ambientweather.internal.model.EventDataJson;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.Units;
 
 /**
  * The {@link Ws8482Processor} is responsible for updating
@@ -58,8 +58,8 @@ public class Ws8482Processor extends AbstractProcessor {
         // Update the weather data channels
         handler.updateDate(channelGroupId, CH_OBSERVATION_TIME, data.date);
         handler.updateString(channelGroupId, CH_BATTERY_INDICATOR, data.battout);
-        handler.updateQuantity(channelGroupId, CH_TEMPERATURE, data.tempf, ImperialUnits.FAHRENHEIT);
-        handler.updateQuantity(channelGroupId, CH_HUMIDITY, data.humidity, SmartHomeUnits.PERCENT);
+        handler.updateQuantity(channelGroupId, CH_TEMPERATURE, data.tempinf, ImperialUnits.FAHRENHEIT);
+        handler.updateQuantity(channelGroupId, CH_HUMIDITY, data.humidityin, Units.PERCENT);
 
         // Update the remote sensor channels
         remoteSensor.updateChannels(handler, jsonData);

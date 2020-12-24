@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.lgtvserial.internal.protocol.serial.commands;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialCommand;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialCommunicator;
 import org.openhab.binding.lgtvserial.internal.protocol.serial.LGSerialResponse;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * This command handles a raw command to be sent to the device.
@@ -42,5 +42,4 @@ public class RawCommand implements LGSerialCommand {
             comm.write(this, data.toString(), channel);
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.onewire;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.onewire.internal.SensorId;
 
 /**
@@ -22,6 +23,7 @@ import org.openhab.binding.onewire.internal.SensorId;
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class SensorIdTest {
 
     @Test
@@ -72,5 +74,4 @@ public class SensorIdTest {
         assertTrue(sensorId1.equals(sensorId2));
         assertFalse(sensorId1.equals(sensorId3));
     }
-
 }

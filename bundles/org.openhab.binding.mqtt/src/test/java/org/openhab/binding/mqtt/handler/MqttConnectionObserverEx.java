@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,8 @@ import java.util.concurrent.Semaphore;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionObserver;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttConnectionObserver;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
 
 /**
  * We need an extended MqttConnectionObserverEx for testing if the state changes are coming in the right order.

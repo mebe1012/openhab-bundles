@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,18 +19,18 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.tellstick.internal.conf.TellstickBridgeConfiguration;
 import org.openhab.binding.tellstick.internal.handler.DeviceStatusListener;
 import org.openhab.binding.tellstick.internal.handler.TelldusBridgeHandler;
 import org.openhab.binding.tellstick.internal.handler.TelldusDeviceController;
 import org.openhab.binding.tellstick.internal.handler.TelldusDevicesHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tellstick.JNA;
@@ -62,8 +62,8 @@ public class TelldusCoreBridgeHandler extends BaseBridgeHandler
 
     private Logger logger = LoggerFactory.getLogger(TelldusCoreBridgeHandler.class);
     private TelldusDeviceController deviceController = null;
-    private List<TellstickDevice> deviceList = new Vector<TellstickDevice>();
-    private List<TellstickSensor> sensorList = new Vector<TellstickSensor>();
+    private List<TellstickDevice> deviceList = new Vector<>();
+    private List<TellstickSensor> sensorList = new Vector<>();
     private TellstickEventHandler eventHandler;
     private static boolean initialized = false;
     private List<DeviceStatusListener> deviceStatusListeners = new CopyOnWriteArrayList<>();
@@ -169,7 +169,6 @@ public class TelldusCoreBridgeHandler extends BaseBridgeHandler
     private synchronized void setupListeners() {
         eventHandler = new TellstickEventHandler(deviceList);
         eventHandler.addListener(this);
-
     }
 
     public void onConnectionLost() {
@@ -278,5 +277,4 @@ public class TelldusCoreBridgeHandler extends BaseBridgeHandler
     public TelldusDeviceController getController() {
         return this.deviceController;
     }
-
 }

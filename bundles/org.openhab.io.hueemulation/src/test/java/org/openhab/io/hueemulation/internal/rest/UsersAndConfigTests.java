@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,21 +13,20 @@
 package org.openhab.io.hueemulation.internal.rest;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.openhab.io.hueemulation.internal.ConfigStore;
 import org.openhab.io.hueemulation.internal.HueEmulationConfig;
@@ -51,7 +50,7 @@ public class UsersAndConfigTests {
 
     CommonSetup commonSetup;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         commonSetup = new CommonSetup(false);
 
@@ -62,8 +61,8 @@ public class UsersAndConfigTests {
         commonSetup.start(new ResourceConfig().registerInstances(configurationAccess));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    public void tearDown() throws Exception {
         commonSetup.dispose();
     }
 
@@ -124,7 +123,6 @@ public class UsersAndConfigTests {
 
     @Test
     public void UnauthorizedAccessTest() {
-
         // Unauthorized config
         Response response;
         response = commonSetup.client.target(commonSetup.basePath + "/config").request().get();
@@ -139,5 +137,4 @@ public class UsersAndConfigTests {
         assertThat(response.getStatus(), is(403));
         assertThat(response.readEntity(String.class), containsString("error"));
     }
-
 }

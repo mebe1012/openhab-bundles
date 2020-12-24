@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,13 +22,13 @@ import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.concurrent.Future;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.homematic.internal.discovery.eq3udp.Eq3UdpRequest;
 import org.openhab.binding.homematic.internal.discovery.eq3udp.Eq3UdpResponse;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Gerhard Riegler - Initial contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.homematic")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.homematic")
 public class CcuDiscoveryService extends AbstractDiscoveryService {
     private final Logger logger = LoggerFactory.getLogger(CcuDiscoveryService.class);
 

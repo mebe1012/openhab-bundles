@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,60 +13,60 @@
 package org.openhab.binding.onewire.internal;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.binding.onewire.internal.OwBindingConstants.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.binding.onewire.internal.handler.OwserverBridgeHandler;
 import org.openhab.binding.onewire.internal.owserver.OwserverConnection;
 import org.openhab.binding.onewire.internal.owserver.OwserverConnectionState;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
 
 /**
  * Tests cases for {@link OwserverBridgeHandler}.
  *
  * @author Jan N. Klug - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class OwserverBridgeHandlerTest extends JavaTest {
 
     private static final String TEST_HOST = "foo.bar";
     private static final int TEST_PORT = 4711;
     Map<String, Object> bridgeProperties = new HashMap<>();
 
-    @Mock
-    OwserverConnection owserverConnection;
+    private @Mock @NonNullByDefault({}) OwserverConnection owserverConnection;
+    private @Mock @NonNullByDefault({}) ThingHandlerCallback thingHandlerCallback;
 
-    Bridge bridge;
+    private @Nullable OwserverBridgeHandler bridgeHandler;
+    private @Nullable Bridge bridge;
 
-    @Mock
-    ThingHandlerCallback thingHandlerCallback;
-
-    OwserverBridgeHandler bridgeHandler;
-
-    @Before
+    @BeforeEach
     public void setup() {
         bridgeProperties.put(CONFIG_ADDRESS, TEST_HOST);
         bridgeProperties.put(CONFIG_PORT, TEST_PORT);
-
-        initMocks(this);
 
         bridge = BridgeBuilder.create(THING_TYPE_OWSERVER, "owserver").withLabel("owserver")
                 .withConfiguration(new Configuration(bridgeProperties)).build();
@@ -76,18 +76,35 @@ public class OwserverBridgeHandlerTest extends JavaTest {
             return null;
         }).when(thingHandlerCallback).statusUpdated(any(), any());
 
-        bridgeHandler = new OwserverBridgeHandler(bridge, owserverConnection);
+        final Bridge bridge = this.bridge;
+
+        if (bridge == null) {
+            fail("bridge is null");
+            return;
+        }
+
+        final OwserverBridgeHandler bridgeHandler = new OwserverBridgeHandler(bridge, owserverConnection);
         bridgeHandler.getThing().setHandler(bridgeHandler);
         bridgeHandler.setCallback(thingHandlerCallback);
+        this.bridgeHandler = bridgeHandler;
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
-        bridgeHandler.dispose();
+        final OwserverBridgeHandler bridgeHandler = this.bridgeHandler;
+        if (bridgeHandler != null) {
+            bridgeHandler.dispose();
+        }
     }
 
     @Test
     public void testInitializationStartsConnectionWithOptions() {
+        final OwserverBridgeHandler bridgeHandler = this.bridgeHandler;
+        if (bridgeHandler == null) {
+            fail("bridgeHandler is null");
+            return;
+        }
+
         bridgeHandler.initialize();
 
         Mockito.verify(owserverConnection).setHost(TEST_HOST);
@@ -98,6 +115,12 @@ public class OwserverBridgeHandlerTest extends JavaTest {
 
     @Test
     public void testInitializationReportsRefreshableOnSuccessfullConnection() {
+        final OwserverBridgeHandler bridgeHandler = this.bridgeHandler;
+        if (bridgeHandler == null) {
+            fail("bridgeHandler is null");
+            return;
+        }
+
         Mockito.doAnswer(answer -> {
             bridgeHandler.reportConnectionState(OwserverConnectionState.OPENED);
             return null;
@@ -117,6 +140,12 @@ public class OwserverBridgeHandlerTest extends JavaTest {
 
     @Test
     public void testInitializationReportsNotRefreshableOnFailedConnection() {
+        final OwserverBridgeHandler bridgeHandler = this.bridgeHandler;
+        if (bridgeHandler == null) {
+            fail("bridgeHandler is null");
+            return;
+        }
+
         Mockito.doAnswer(answer -> {
             bridgeHandler.reportConnectionState(OwserverConnectionState.FAILED);
             return null;
@@ -133,5 +162,4 @@ public class OwserverBridgeHandlerTest extends JavaTest {
 
         waitForAssert(() -> assertFalse(bridgeHandler.isRefreshable()));
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,13 +24,13 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.vitotronic.internal.VitotronicBindingConfiguration;
 import org.openhab.binding.vitotronic.internal.discovery.VitotronicDiscoveryService;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -68,7 +68,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
     public void updateStatus(ThingStatus status) {
         super.updateStatus(status);
         updateThingHandlersStatus(status);
-
     }
 
     public void updateStatus() {
@@ -77,7 +76,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
         } else {
             updateStatus(ThingStatus.OFFLINE);
         }
-
     }
 
     // Managing Thing Discovery Service
@@ -134,7 +132,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
                 logger.trace("thingHandler for thing: {} not registered", thingID);
             }
         }
-
     }
 
     private void updateThingHandlerStatus(VitotronicThingHandler thingHandler, ThingStatus status) {
@@ -192,7 +189,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
             sendSocketData("list");
             isDiscover = true;
         }
-
     }
 
     public ThingStatus getStatus() {
@@ -360,7 +356,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
                 logger.error("Error in parsing data");
                 logger.trace("Diagnostic: ", e);
             }
-
         }
 
         @Override
@@ -387,7 +382,6 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
                     isChannel = false;
                     break;
             }
-
         }
 
         // Unused function of xmlReader
@@ -422,7 +416,5 @@ public class VitotronicBridgeHandler extends BaseBridgeHandler {
         @Override
         public void endPrefixMapping(String prefix) throws SAXException {
         }
-
     }
-
 }

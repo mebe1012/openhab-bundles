@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.miele.internal.handler;
 
 import static org.openhab.binding.miele.internal.MieleBindingConstants.APPLIANCE_ID;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ import com.google.gson.JsonElement;
  *
  * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - fixed handling of REFRESH commands
+ * @author Martin Lepsy - fixed handling of empty JSON results
  */
 public class HoodHandler extends MieleApplianceHandler<HoodChannelSelector> {
 
@@ -72,7 +73,7 @@ public class HoodHandler extends MieleApplianceHandler<HoodChannelSelector> {
                 }
             }
             // process result
-            if (result != null) {
+            if (isResultProcessable(result)) {
                 logger.debug("Result of operation is {}", result.getAsString());
             }
         } catch (IllegalArgumentException e) {
@@ -81,5 +82,4 @@ public class HoodHandler extends MieleApplianceHandler<HoodChannelSelector> {
                     channelID, command.toString());
         }
     }
-
 }

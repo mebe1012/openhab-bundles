@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,13 +19,12 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.openhab.binding.oceanic.internal.SerialOceanicBindingConfiguration;
 import org.openhab.binding.oceanic.internal.Throttler;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,11 +148,28 @@ public class SerialOceanicThingHandler extends OceanicThingHandler {
             }
         }
 
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                logger.debug("Error while closing the input stream: {}", e.getMessage());
+            }
+        }
+        if (outputStream != null) {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                logger.debug("Error while closing the output stream: {}", e.getMessage());
+            }
+        }
         if (serialPort != null) {
             serialPort.close();
         }
+
+        readerThread = null;
+        inputStream = null;
+        outputStream = null;
+        serialPort = null;
 
         super.dispose();
     }
@@ -224,7 +240,6 @@ public class SerialOceanicThingHandler extends OceanicThingHandler {
             logger.trace("Interrupting the SerialPortReader");
             interrupted = true;
             super.interrupt();
-            IOUtils.closeQuietly(inputStream);
         }
 
         @Override

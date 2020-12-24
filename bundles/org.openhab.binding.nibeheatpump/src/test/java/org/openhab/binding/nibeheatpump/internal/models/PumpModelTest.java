@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,17 @@
  */
 package org.openhab.binding.nibeheatpump.internal.models;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+/**
+ * @author Pauli Anttila - Initial contribution
+ */
 public class PumpModelTest {
 
-    @Before
+    @BeforeEach
     public void Before() {
     }
 
@@ -51,8 +54,8 @@ public class PumpModelTest {
         assertEquals(PumpModel.F470, pumpModel);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void badPumpModelTest() {
-        PumpModel.getPumpModel("XXXX");
+        assertThrows(IllegalArgumentException.class, () -> PumpModel.getPumpModel("XXXX"));
     }
 }

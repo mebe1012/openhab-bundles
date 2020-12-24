@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,24 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.rotel.internal.RotelBindingConstants;
 import org.openhab.binding.rotel.internal.RotelException;
 import org.openhab.binding.rotel.internal.RotelModel;
@@ -59,6 +41,24 @@ import org.openhab.binding.rotel.internal.communication.RotelSerialConnector;
 import org.openhab.binding.rotel.internal.communication.RotelSimuConnector;
 import org.openhab.binding.rotel.internal.communication.RotelSource;
 import org.openhab.binding.rotel.internal.configuration.RotelThingConfiguration;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +86,8 @@ public class RotelHandler extends BaseThingHandler implements RotelMessageEventL
     private RotelStateDescriptionOptionProvider stateDescriptionProvider;
     private SerialPortManager serialPortManager;
 
-    private RotelConnector connector = new RotelSimuConnector(DEFAULT_MODEL, RotelProtocol.HEX,
-            new HashMap<RotelSource, String>());
+    private RotelConnector connector = new RotelSimuConnector(DEFAULT_MODEL, RotelProtocol.HEX, new HashMap<>(),
+            "OH-binding-rotel");
 
     private int minVolume;
     private int maxVolume;
@@ -292,7 +292,9 @@ public class RotelHandler extends BaseThingHandler implements RotelMessageEventL
 
         Map<RotelSource, String> sourcesLabels = new HashMap<>();
 
-        connector = new RotelSimuConnector(rotelModel, rotelProtocol, sourcesLabels);
+        String readerThreadName = "OH-binding-" + getThing().getUID().getAsString();
+
+        connector = new RotelSimuConnector(rotelModel, rotelProtocol, sourcesLabels, readerThreadName);
 
         if (rotelModel.hasVolumeControl()) {
             maxVolume = rotelModel.getVolumeMax();
@@ -377,12 +379,13 @@ public class RotelHandler extends BaseThingHandler implements RotelMessageEventL
             }
 
             if (USE_SIMULATED_DEVICE) {
-                connector = new RotelSimuConnector(rotelModel, rotelProtocol, sourcesLabels);
+                connector = new RotelSimuConnector(rotelModel, rotelProtocol, sourcesLabels, readerThreadName);
             } else if (config.serialPort != null) {
                 connector = new RotelSerialConnector(serialPortManager, config.serialPort, rotelModel, rotelProtocol,
-                        sourcesLabels);
+                        sourcesLabels, readerThreadName);
             } else {
-                connector = new RotelIpConnector(config.host, config.port, rotelModel, rotelProtocol, sourcesLabels);
+                connector = new RotelIpConnector(config.host, config.port, rotelModel, rotelProtocol, sourcesLabels,
+                        readerThreadName);
             }
 
             if (rotelModel.hasSourceControl()) {
@@ -1352,6 +1355,10 @@ public class RotelHandler extends BaseThingHandler implements RotelMessageEventL
                     if (RotelConnector.MSG_VALUE_OFF.equalsIgnoreCase(value)) {
                         frequency = 0.0;
                     } else {
+                        // Suppress a potential ending "k" or "K"
+                        if (value.toUpperCase().endsWith("K")) {
+                            value = value.substring(0, value.length() - 1);
+                        }
                         frequency = Double.parseDouble(value);
                     }
                     updateChannelState(CHANNEL_FREQUENCY);

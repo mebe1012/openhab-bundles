@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,12 +62,11 @@ public abstract class NibeHeatPumpBaseConnector implements NibeHeatPumpConnector
 
     public void sendMsgToListeners(NibeHeatPumpMessage msg) {
         if (msg != null) {
-
             for (NibeHeatPumpEventListener listener : listeners) {
                 try {
                     listener.msgReceived(msg);
                 } catch (Exception e) {
-                    logger.error("Event listener invoking error, exception {}", e);
+                    logger.error("Event listener invoking error", e);
                 }
             }
         }
@@ -78,7 +77,7 @@ public abstract class NibeHeatPumpBaseConnector implements NibeHeatPumpConnector
             try {
                 listener.errorOccurred(error);
             } catch (Exception e) {
-                logger.error("Event listener invoking error, exception {}", e);
+                logger.error("Event listener invoking error", e);
             }
         }
     }

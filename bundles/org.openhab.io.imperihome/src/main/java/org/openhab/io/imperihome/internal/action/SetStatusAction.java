@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,15 +14,16 @@ package org.openhab.io.imperihome.internal.action;
 
 import java.util.Objects;
 
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.io.imperihome.internal.model.device.AbstractDevice;
 
 /**
  * Action setting device status to 1 or 0.
+ * 
  * @author Pepijn de Geus - Initial contribution
  */
 public class SetStatusAction extends Action {
@@ -46,5 +47,4 @@ public class SetStatusAction extends Action {
         ItemCommandEvent event = ItemEventFactory.createCommandEvent(item.getName(), cmdValue, COMMAND_SOURCE);
         eventPublisher.post(event);
     }
-
 }

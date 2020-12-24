@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,9 @@
  */
 package org.openhab.binding.astro.internal.model;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 
 /**
  * Holds the calculated direct, diffuse and total
@@ -64,26 +62,20 @@ public class Radiation {
      * Returns the total radiation.
      */
     public QuantityType<Intensity> getTotal() {
-        return new QuantityType<Intensity>(total, SmartHomeUnits.IRRADIANCE);
+        return new QuantityType<>(total, Units.IRRADIANCE);
     }
 
     /**
      * Returns the direct radiation.
      */
     public QuantityType<Intensity> getDirect() {
-        return new QuantityType<Intensity>(direct, SmartHomeUnits.IRRADIANCE);
+        return new QuantityType<>(direct, Units.IRRADIANCE);
     }
 
     /**
      * Returns the diffuse radiation.
      */
     public QuantityType<Intensity> getDiffuse() {
-        return new QuantityType<Intensity>(diffuse, SmartHomeUnits.IRRADIANCE);
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("direct", direct)
-                .append("diffuse", diffuse).append("total", total).toString();
+        return new QuantityType<>(diffuse, Units.IRRADIANCE);
     }
 }

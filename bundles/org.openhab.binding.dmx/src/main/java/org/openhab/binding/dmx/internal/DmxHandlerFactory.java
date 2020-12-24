@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,12 +14,6 @@ package org.openhab.binding.dmx.internal;
 
 import static org.openhab.binding.dmx.internal.DmxBindingConstants.*;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.dmx.internal.handler.ArtnetBridgeHandler;
 import org.openhab.binding.dmx.internal.handler.ChaserThingHandler;
 import org.openhab.binding.dmx.internal.handler.ColorThingHandler;
@@ -27,6 +21,12 @@ import org.openhab.binding.dmx.internal.handler.DimmerThingHandler;
 import org.openhab.binding.dmx.internal.handler.Lib485BridgeHandler;
 import org.openhab.binding.dmx.internal.handler.SacnBridgeHandler;
 import org.openhab.binding.dmx.internal.handler.TunableWhiteThingHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 
 /**

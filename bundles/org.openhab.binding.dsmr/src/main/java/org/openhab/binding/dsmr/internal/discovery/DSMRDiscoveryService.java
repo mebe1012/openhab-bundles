@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,13 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.dsmr.internal.meter.DSMRMeterDescriptor;
 import org.openhab.binding.dsmr.internal.meter.DSMRMeterType;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public abstract class DSMRDiscoveryService extends AbstractDiscoveryService {
     public boolean meterDiscovered(DSMRMeterDescriptor meterDescriptor, ThingUID dsmrBridgeUID) {
         DSMRMeterType meterType = meterDescriptor.getMeterType();
         ThingTypeUID thingTypeUID = meterType.getThingTypeUID();
-        ThingUID thingUID = new ThingUID(thingTypeUID, meterDescriptor.getChannelId());
+        ThingUID thingUID = new ThingUID(thingTypeUID, dsmrBridgeUID, meterDescriptor.getChannelId());
 
         // Construct the configuration for this meter
         Map<String, Object> properties = new HashMap<>();

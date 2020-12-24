@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.loxone.internal.controls;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,14 +20,14 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Test class for (@link LxControlAlarm} - version for alarm without presence sensors
@@ -47,10 +47,10 @@ public class LxControlAlarmNoPresenceTest extends LxControlTest {
     static final String SENSORS_CHANNEL = " / Sensors";
     static final String QUIT_CHANNEL = " / Acknowledge";
 
-    static private final String numberChannels[] = { NEXT_LEVEL_CHANNEL, NEXT_LEVEL_DELAY_CHANNEL,
+    private static final String numberChannels[] = { NEXT_LEVEL_CHANNEL, NEXT_LEVEL_DELAY_CHANNEL,
             NEXT_LEVEL_DELAY_TOTAL_CHANNEL, LEVEL_CHANNEL, ARMED_DELAY_CHANNEL, ARMED_TOTAL_DELAY_CHANNEL };
 
-    @Before
+    @BeforeEach
     public void setup() {
         setupControl("233d5db0-0333-5865-ffff403fb0c34b9e", "0b734138-037d-034e-ffff403fb0c34b9e",
                 "0fe650c2-0004-d446-ffff504f9410790f", "Burglar Alarm No Presence");

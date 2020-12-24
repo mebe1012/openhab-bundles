@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioFormat;
 
 /**
  * Interface which represents the functionality needed from the VoiceRSS TTS

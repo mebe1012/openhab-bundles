@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,8 @@
  */
 package org.openhab.binding.hue.internal;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link HueBindingConstants} class defines common constants, which are
@@ -25,6 +26,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * @author Samuel Leisering - Added support for sensor API
  * @author Christoph Weitkamp - Added support for sensor API
  */
+@NonNullByDefault
 public class HueBindingConstants {
 
     public static final String BINDING_ID = "hue";
@@ -45,9 +47,14 @@ public class HueBindingConstants {
 
     public static final ThingTypeUID THING_TYPE_DIMMER_SWITCH = new ThingTypeUID(BINDING_ID, "0820");
     public static final ThingTypeUID THING_TYPE_TAP_SWITCH = new ThingTypeUID(BINDING_ID, "0830");
+    public static final ThingTypeUID THING_TYPE_CLIP_GENERIC_STATUS = new ThingTypeUID(BINDING_ID, "0840");
+    public static final ThingTypeUID THING_TYPE_CLIP_GENERIC_FLAG = new ThingTypeUID(BINDING_ID, "0850");
     public static final ThingTypeUID THING_TYPE_PRESENCE_SENSOR = new ThingTypeUID(BINDING_ID, "0107");
+    public static final ThingTypeUID THING_TYPE_GEOFENCE_SENSOR = new ThingTypeUID(BINDING_ID, "geofencesensor");
     public static final ThingTypeUID THING_TYPE_TEMPERATURE_SENSOR = new ThingTypeUID(BINDING_ID, "0302");
     public static final ThingTypeUID THING_TYPE_LIGHT_LEVEL_SENSOR = new ThingTypeUID(BINDING_ID, "0106");
+
+    public static final ThingTypeUID THING_TYPE_GROUP = new ThingTypeUID(BINDING_ID, "group");
 
     // List all channels
     public static final String CHANNEL_COLORTEMPERATURE = "color_temperature";
@@ -59,6 +66,7 @@ public class HueBindingConstants {
     public static final String CHANNEL_DIMMER_SWITCH = "dimmer_switch";
     public static final String CHANNEL_TAP_SWITCH = "tap_switch";
     public static final String CHANNEL_PRESENCE = "presence";
+    public static final String CHANNEL_ENABLED = "enabled";
     public static final String CHANNEL_TEMPERATURE = "temperature";
     public static final String CHANNEL_LAST_UPDATED = "last_updated";
     public static final String CHANNEL_BATTERY_LEVEL = "battery_level";
@@ -67,6 +75,9 @@ public class HueBindingConstants {
     public static final String CHANNEL_LIGHT_LEVEL = "light_level";
     public static final String CHANNEL_DARK = "dark";
     public static final String CHANNEL_DAYLIGHT = "daylight";
+    public static final String CHANNEL_STATUS = "status";
+    public static final String CHANNEL_FLAG = "flag";
+    public static final String CHANNEL_SCENE = "scene";
 
     // List all triggers
     public static final String EVENT_DIMMER_SWITCH = "dimmer_switch_event";
@@ -78,12 +89,13 @@ public class HueBindingConstants {
     public static final String PROTOCOL = "protocol";
     public static final String USER_NAME = "userName";
 
-    // Light config properties
+    // Thing configuration properties
     public static final String LIGHT_ID = "lightId";
     public static final String SENSOR_ID = "sensorId";
     public static final String PRODUCT_NAME = "productName";
     public static final String UNIQUE_ID = "uniqueId";
     public static final String FADETIME = "fadetime";
+    public static final String GROUP_ID = "groupId";
 
     public static final String NORMALIZE_ID_REGEX = "[^a-zA-Z0-9_]";
 }

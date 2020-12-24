@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,25 +12,17 @@
  */
 package org.openhab.binding.unifi.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.ThingStatus.*;
-import static org.eclipse.smarthome.core.thing.ThingStatusDetail.CONFIGURATION_ERROR;
 import static org.openhab.binding.unifi.internal.UniFiBindingConstants.*;
+import static org.openhab.core.thing.ThingStatus.*;
+import static org.openhab.core.thing.ThingStatusDetail.CONFIGURATION_ERROR;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.unifi.internal.UniFiBindingConstants;
 import org.openhab.binding.unifi.internal.UniFiClientThingConfig;
 import org.openhab.binding.unifi.internal.api.UniFiException;
@@ -40,6 +32,16 @@ import org.openhab.binding.unifi.internal.api.model.UniFiDevice;
 import org.openhab.binding.unifi.internal.api.model.UniFiSite;
 import org.openhab.binding.unifi.internal.api.model.UniFiWiredClient;
 import org.openhab.binding.unifi.internal.api.model.UniFiWirelessClient;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +196,8 @@ public class UniFiClientThingHandler extends UniFiBaseThingHandler<UniFiClient, 
             case CHANNEL_LAST_SEEN:
                 // mgb: we don't check clientOnline as lastSeen is also included in the Insights data
                 if (client.getLastSeen() != null) {
-                    state = new DateTimeType(client.getLastSeen());
+                    state = new DateTimeType(
+                            ZonedDateTime.ofInstant(client.getLastSeen().toInstant(), ZoneId.systemDefault()));
                 }
                 break;
 
@@ -296,5 +299,4 @@ public class UniFiClientThingHandler extends UniFiBaseThingHandler<UniFiClient, 
                     command, channelUID);
         }
     }
-
 }

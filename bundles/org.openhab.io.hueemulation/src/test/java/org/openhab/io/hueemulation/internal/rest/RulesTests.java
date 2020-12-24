@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,8 @@
 package org.openhab.io.hueemulation.internal.rest;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -25,22 +26,22 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.ColorItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.State;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.util.RuleBuilder;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.State;
 import org.openhab.io.hueemulation.internal.ConfigStore;
 import org.openhab.io.hueemulation.internal.RuleUtils;
 import org.openhab.io.hueemulation.internal.dto.HueRuleEntry;
@@ -60,6 +61,7 @@ import com.google.gson.reflect.TypeToken;
  */
 @NonNullByDefault
 public class RulesTests {
+
     protected @NonNullByDefault({}) CommonSetup commonSetup;
     protected @NonNullByDefault({}) ConfigStore cs;
     protected @NonNullByDefault({}) ItemRegistry itemRegistry;
@@ -75,7 +77,7 @@ public class RulesTests {
         itemRegistry.add(item);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         commonSetup = new CommonSetup(false);
         this.cs = commonSetup.cs;
@@ -104,8 +106,8 @@ public class RulesTests {
         commonSetup.start(new ResourceConfig().registerInstances(subject));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    public void tearDown() throws Exception {
         RuleUtils.random = new Random();
         commonSetup.dispose();
     }
@@ -276,5 +278,4 @@ public class RulesTests {
         assertThat(entry.actions.get(0).address, is("/lights/switch1/state"));
         assertThat(entry.conditions.get(0).address, is("/lights/switch1/state/on"));
     }
-
 }

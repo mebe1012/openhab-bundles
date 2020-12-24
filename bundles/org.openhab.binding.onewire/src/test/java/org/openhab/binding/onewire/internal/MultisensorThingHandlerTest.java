@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,39 +12,46 @@
  */
 package org.openhab.binding.onewire.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.openhab.binding.onewire.internal.OwBindingConstants.*;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.openhab.binding.onewire.internal.OwException;
-import org.openhab.binding.onewire.internal.OwPageBuffer;
-import org.openhab.binding.onewire.internal.SensorId;
 import org.openhab.binding.onewire.internal.device.OwSensorType;
 import org.openhab.binding.onewire.internal.handler.BasicMultisensorThingHandler;
+import org.openhab.binding.onewire.internal.handler.OwBaseThingHandler;
 import org.openhab.binding.onewire.test.AbstractThingHandlerTest;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 
 /**
- * Tests cases for {@link MultisensorThingHandler}.
+ * Tests cases for {@link BasicMultisensorThingHandler}.
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class MultisensorThingHandlerTest extends AbstractThingHandlerTest {
     private static final String TEST_ID = "00.000000000000";
 
-    @Before
+    @BeforeEach
     public void setup() throws OwException {
-        MockitoAnnotations.initMocks(this);
-
         initializeBridge();
+
+        final Bridge bridge = this.bridge;
+        if (bridge == null) {
+            fail("bridge is null");
+            return;
+        }
 
         thingConfiguration.put(CONFIG_ID, TEST_ID);
 
@@ -52,9 +59,15 @@ public class MultisensorThingHandlerTest extends AbstractThingHandlerTest {
                 .withConfiguration(new Configuration(thingConfiguration)).withProperties(thingProperties)
                 .withBridge(bridge.getUID()).build();
 
+        final Thing thing = this.thing;
+        if (thing == null) {
+            fail("thing is null");
+            return;
+        }
+
         thingHandler = new BasicMultisensorThingHandler(thing, stateProvider) {
             @Override
-            protected Bridge getBridge() {
+            protected @Nullable Bridge getBridge() {
                 return bridge;
             }
         };
@@ -74,6 +87,11 @@ public class MultisensorThingHandlerTest extends AbstractThingHandlerTest {
 
     @Test
     public void testInitializationEndsWithUnknown() {
+        final ThingHandler thingHandler = this.thingHandler;
+        if (thingHandler == null) {
+            fail("thingHandler is null");
+            return;
+        }
         thingHandler.initialize();
 
         waitForAssert(() -> assertEquals(ThingStatus.UNKNOWN, thingHandler.getThing().getStatusInfo().getStatus()));
@@ -81,6 +99,12 @@ public class MultisensorThingHandlerTest extends AbstractThingHandlerTest {
 
     @Test
     public void testRefresh() throws OwException {
+        final OwBaseThingHandler thingHandler = this.thingHandler;
+        final InOrder inOrder = this.inOrder;
+        if (thingHandler == null || inOrder == null) {
+            fail("prerequisite is null");
+            return;
+        }
         thingHandler.initialize();
 
         // needed to determine initialization is finished

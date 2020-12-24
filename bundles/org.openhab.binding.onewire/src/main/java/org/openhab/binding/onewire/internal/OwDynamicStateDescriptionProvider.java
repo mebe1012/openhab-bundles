@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,11 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.type.DynamicStateDescriptionProvider;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
+import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { DynamicStateDescriptionProvider.class,
-        OwDynamicStateDescriptionProvider.class }, immediate = true)
+@Component(service = { DynamicStateDescriptionProvider.class, OwDynamicStateDescriptionProvider.class })
 public class OwDynamicStateDescriptionProvider implements DynamicStateDescriptionProvider {
 
     private final Map<ChannelUID, StateDescription> descriptions = new ConcurrentHashMap<>();

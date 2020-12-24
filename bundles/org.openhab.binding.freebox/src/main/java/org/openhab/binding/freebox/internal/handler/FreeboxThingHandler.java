@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,24 +20,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.freebox.internal.api.FreeboxException;
 import org.openhab.binding.freebox.internal.api.model.FreeboxAirMediaReceiver;
 import org.openhab.binding.freebox.internal.api.model.FreeboxCallEntry;
@@ -48,6 +33,21 @@ import org.openhab.binding.freebox.internal.config.FreeboxAirPlayDeviceConfigura
 import org.openhab.binding.freebox.internal.config.FreeboxNetDeviceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxNetInterfaceConfiguration;
 import org.openhab.binding.freebox.internal.config.FreeboxPhoneConfiguration;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +62,8 @@ public class FreeboxThingHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(FreeboxThingHandler.class);
 
+    private final TimeZoneProvider timeZoneProvider;
+
     private ScheduledFuture<?> phoneJob;
     private ScheduledFuture<?> callsJob;
     private FreeboxHandler bridgeHandler;
@@ -70,8 +72,9 @@ public class FreeboxThingHandler extends BaseThingHandler {
     private String airPlayName;
     private String airPlayPassword;
 
-    public FreeboxThingHandler(Thing thing) {
+    public FreeboxThingHandler(Thing thing, TimeZoneProvider timeZoneProvider) {
         super(thing);
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -260,7 +263,7 @@ public class FreeboxThingHandler extends BaseThingHandler {
             updateGroupChannelStringState(channelGroup, CALLNUMBER, call.getNumber());
             updateGroupChannelDecimalState(channelGroup, CALLDURATION, call.getDuration());
             ZonedDateTime zoned = ZonedDateTime.ofInstant(Instant.ofEpochMilli(call.getTimeStamp().getTimeInMillis()),
-                    TimeZone.getDefault().toZoneId());
+                    timeZoneProvider.getTimeZone());
             updateGroupChannelDateTimeState(channelGroup, CALLTIMESTAMP, zoned);
             updateGroupChannelStringState(channelGroup, CALLNAME, call.getName());
             if (channelGroup.equals(ANY)) {
@@ -346,7 +349,7 @@ public class FreeboxThingHandler extends BaseThingHandler {
 
     public void playMedia(String url) throws FreeboxException {
         if (bridgeHandler != null && url != null) {
-            bridgeHandler.getApiManager().stopMedia(airPlayName, airPlayPassword);
+            stopMedia();
             bridgeHandler.getApiManager().playMedia(url, airPlayName, airPlayPassword);
         }
     }
@@ -364,10 +367,16 @@ public class FreeboxThingHandler extends BaseThingHandler {
         }
     }
 
+    public void stopMedia() throws FreeboxException {
+        if (bridgeHandler != null) {
+            bridgeHandler.getApiManager().stopMedia(airPlayName, airPlayPassword);
+        }
+    }
+
     private void stopMedia(ChannelUID channelUID, Command command) {
         if (command instanceof OnOffType) {
             try {
-                bridgeHandler.getApiManager().stopMedia(airPlayName, airPlayPassword);
+                stopMedia();
             } catch (FreeboxException e) {
                 bridgeHandler.logCommandException(e, channelUID, command);
             }
@@ -412,6 +421,5 @@ public class FreeboxThingHandler extends BaseThingHandler {
             }
             return result;
         }
-
     }
 }

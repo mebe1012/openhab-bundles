@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
+import org.openhab.core.common.ThreadPoolManager;
 import org.pcap4j.core.PcapNetworkInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,5 +188,4 @@ public class PcapNetworkInterfaceService {
             future = scheduler.scheduleWithFixedDelay(pollingRunnable, 0, 2, TimeUnit.SECONDS);
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,20 +28,20 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.mihome.internal.EncryptionHelper;
 import org.openhab.binding.mihome.internal.XiaomiItemUpdateListener;
 import org.openhab.binding.mihome.internal.discovery.XiaomiItemDiscoveryService;
 import org.openhab.binding.mihome.internal.socket.XiaomiBridgeSocket;
 import org.openhab.binding.mihome.internal.socket.XiaomiSocketListener;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ConfigStatusBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +131,8 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             return;
         }
         logger.debug("Init socket on Port: {}", port);
-        socket = new XiaomiBridgeSocket(port);
-        socket.intialize();
+        socket = new XiaomiBridgeSocket(port, getThing().getUID().getId());
+        socket.initialize();
         socket.registerListener(this);
 
         scheduler.schedule(() -> {

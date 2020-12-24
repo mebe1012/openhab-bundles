@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,9 +14,9 @@ package org.openhab.binding.loxone.internal.controls;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.loxone.internal.types.LxUuid;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.Command;
 
 /**
  * A pushbutton type of control on Loxone Miniserver.

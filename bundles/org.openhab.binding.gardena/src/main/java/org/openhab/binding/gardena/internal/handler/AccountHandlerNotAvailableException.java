@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,14 @@
  */
 package org.openhab.binding.gardena.internal.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Exception if the AccountHandler is not available.
  *
  * @author Gerhard Riegler - Initial contribution
  */
+@NonNullByDefault
 public class AccountHandlerNotAvailableException extends Exception {
 
     private static final long serialVersionUID = -1895774551653276530L;
@@ -24,5 +27,4 @@ public class AccountHandlerNotAvailableException extends Exception {
     public AccountHandlerNotAvailableException(String message) {
         super(message);
     }
-
 }

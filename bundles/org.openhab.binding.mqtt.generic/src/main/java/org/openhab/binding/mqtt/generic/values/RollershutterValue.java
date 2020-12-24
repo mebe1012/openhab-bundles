@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,13 +17,12 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.Command;
 
 /**
  * Implements an rollershutter value.
@@ -114,11 +113,22 @@ public class RollershutterValue extends Value {
     }
 
     @Override
-    public String getMQTTpublishValue() {
+    public String getMQTTpublishValue(@Nullable String pattern) {
+        final String upString = this.upString;
+        final String downString = this.downString;
         if (this.nextIsStop) {
             this.nextIsStop = false;
             return stopString;
+        } else if (state instanceof PercentType) {
+            if (state.equals(PercentType.HUNDRED) && downString != null) {
+                return downString;
+            } else if (state.equals(PercentType.ZERO) && upString != null) {
+                return upString;
+            } else {
+                return String.valueOf(((PercentType) state).intValue());
+            }
+        } else {
+            return "UNDEF";
         }
-        return (state == UnDefType.UNDEF) ? "0" : String.valueOf(((PercentType) state).intValue());
     }
 }

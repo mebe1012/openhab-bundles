@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,12 @@ package org.openhab.binding.miio.internal.basic;
 import static org.openhab.binding.miio.internal.MiIoBindingConstants.BINDING_ID;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -25,113 +30,234 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Marcel Verpaalen - Initial contribution
  */
+@NonNullByDefault
 public class MiIoBasicChannel {
 
     @SerializedName("property")
     @Expose
-    private String property;
+    private @Nullable String property;
+    @SerializedName("siid")
+    @Expose
+    private @Nullable Integer siid;
+    @SerializedName("piid")
+    @Expose
+    private @Nullable Integer piid;
     @SerializedName("friendlyName")
     @Expose
-    private String friendlyName;
+    private @Nullable String friendlyName;
     @SerializedName("channel")
     @Expose
-    private String channel;
+    private @Nullable String channel;
     @SerializedName("channelType")
     @Expose
-    private String channelType;
+    private @Nullable String channelType;
     @SerializedName("type")
     @Expose
-    private String type;
+    private @Nullable String type;
+    @SerializedName("unit")
+    @Expose
+    private @Nullable String unit;
+    @SerializedName("stateDescription")
+    @Expose
+    private @Nullable StateDescriptionDTO stateDescription;
     @SerializedName("refresh")
     @Expose
-    private Boolean refresh;
+    private @Nullable Boolean refresh;
+    @SerializedName("customRefreshCommand")
+    @Expose
+    private @Nullable String channelCustomRefreshCommand;
     @SerializedName("transformation")
     @Expose
-    private String transfortmation;
+    private @Nullable String transfortmation;
     @SerializedName("ChannelGroup")
     @Expose
-    private String channelGroup;
+    private @Nullable String channelGroup;
     @SerializedName("actions")
     @Expose
-    private List<MiIoDeviceAction> miIoDeviceActions = new ArrayList<MiIoDeviceAction>();
+    private @Nullable List<MiIoDeviceAction> miIoDeviceActions = new ArrayList<>();
+    @SerializedName("category")
+    @Expose
+    private @Nullable String category;
+    @SerializedName("tags")
+    @Expose
+    private @Nullable LinkedHashSet<String> tags;
+    @SerializedName("readmeComment")
+    @Expose
+    private @Nullable String readmeComment;
 
     public String getProperty() {
-        return property;
+        final String property = this.property;
+        return (property != null) ? property : "";
     }
 
-    public void setProperty(String property) {
+    public void setProperty(@Nullable String property) {
         this.property = property;
     }
 
-    public String getFriendlyName() {
-        return type == null || friendlyName.isEmpty() ? channel : friendlyName;
+    public int getSiid() {
+        final Integer siid = this.siid;
+        if (siid != null) {
+            return siid.intValue();
+        } else {
+            return 0;
+        }
     }
 
-    public void setFriendlyName(String friendlyName) {
+    public void setSiid(@Nullable Integer siid) {
+        this.siid = siid;
+    }
+
+    public int getPiid() {
+        final Integer piid = this.piid;
+        if (piid != null) {
+            return piid.intValue();
+        } else {
+            return 0;
+        }
+    }
+
+    public void setPiid(@Nullable Integer piid) {
+        this.piid = piid;
+    }
+
+    public boolean isMiOt() {
+        if (piid != null && siid != null && (getPiid() != 0 || getSiid() != 0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public String getFriendlyName() {
+        final String fn = friendlyName;
+        return (fn == null || type == null || fn.isEmpty()) ? getChannel() : fn;
+    }
+
+    public void setFriendlyName(@Nullable String friendlyName) {
         this.friendlyName = friendlyName;
     }
 
     public String getChannel() {
-        return channel;
+        final @Nullable String channel = this.channel;
+        return channel != null ? channel : "";
     }
 
-    public void setChannel(String channel) {
+    public void setChannel(@Nullable String channel) {
         this.channel = channel;
     }
 
     public String getChannelType() {
-        return channelType == null || channelType.isEmpty() ? BINDING_ID + ":" + channel
-                : (channelType.startsWith("system") ? channelType : BINDING_ID + ":" + channelType);
+        final @Nullable String ct = channelType;
+        if (ct == null || ct.isEmpty()) {
+            return "";
+        } else {
+            return (ct.startsWith("system") ? ct : BINDING_ID + ":" + ct);
+        }
     }
 
-    public void setChannelType(String channelType) {
+    public void setChannelType(@Nullable String channelType) {
         this.channelType = channelType;
     }
 
     public String getType() {
-        return type == null ? "" : type;
+        final @Nullable String type = this.type;
+        return type != null ? type : "";
     }
 
-    public void setType(String type) {
+    public void setType(@Nullable String type) {
         this.type = type;
     }
 
-    public Boolean getRefresh() {
-        return refresh && !property.isEmpty();
+    public String getUnit() {
+        final @Nullable String unit = this.unit;
+        return unit != null ? unit : "";
     }
 
-    public void setRefresh(Boolean refresh) {
+    public void setUnit(@Nullable String unit) {
+        this.unit = unit;
+    }
+
+    public @Nullable StateDescriptionDTO getStateDescription() {
+        return stateDescription;
+    }
+
+    public void setStateDescription(@Nullable StateDescriptionDTO stateDescription) {
+        this.stateDescription = stateDescription;
+    }
+
+    public Boolean getRefresh() {
+        final @Nullable Boolean rf = refresh;
+        return rf != null && rf.booleanValue() && !getProperty().isEmpty();
+    }
+
+    public void setRefresh(@Nullable Boolean refresh) {
         this.refresh = refresh;
     }
 
-    public String getChannelGroup() {
-        return channelGroup;
+    public String getChannelCustomRefreshCommand() {
+        final @Nullable String channelCustomRefreshCommand = this.channelCustomRefreshCommand;
+        return channelCustomRefreshCommand != null ? channelCustomRefreshCommand : "";
     }
 
-    public void setChannelGroup(String channelGroup) {
+    public void setChannelCustomRefreshCommand(@Nullable String channelCustomRefreshCommand) {
+        this.channelCustomRefreshCommand = channelCustomRefreshCommand;
+    }
+
+    public String getChannelGroup() {
+        final @Nullable String channelGroup = this.channelGroup;
+        return channelGroup != null ? channelGroup : "";
+    }
+
+    public void setChannelGroup(@Nullable String channelGroup) {
         this.channelGroup = channelGroup;
     }
 
     public List<MiIoDeviceAction> getActions() {
-        return miIoDeviceActions;
+        final @Nullable List<MiIoDeviceAction> miIoDeviceActions = this.miIoDeviceActions;
+        return (miIoDeviceActions != null) ? miIoDeviceActions : Collections.emptyList();
     }
 
     public void setActions(List<MiIoDeviceAction> miIoDeviceActions) {
         this.miIoDeviceActions = miIoDeviceActions;
     }
 
-    public String getTransfortmation() {
+    public @Nullable String getTransfortmation() {
         return transfortmation;
     }
 
-    public void setTransfortmation(String transfortmation) {
+    public void setTransfortmation(@Nullable String transfortmation) {
         this.transfortmation = transfortmation;
+    }
+
+    public @Nullable String getCategory() {
+        return category;
+    }
+
+    public void setCategory(@Nullable String category) {
+        this.category = category;
+    }
+
+    public @Nullable LinkedHashSet<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(@Nullable LinkedHashSet<String> tags) {
+        this.tags = tags;
+    }
+
+    public String getReadmeComment() {
+        final String readmeComment = this.readmeComment;
+        return (readmeComment != null) ? readmeComment : "";
+    }
+
+    public void setReadmeComment(@Nullable String readmeComment) {
+        this.readmeComment = readmeComment;
     }
 
     @Override
     public String toString() {
-        return "[ Channel = " + channel + ", friendlyName = " + friendlyName + ", type = " + type + ", channelType = "
-                + getChannelType() + ", ChannelGroup = " + channelGroup + ", channel = " + channel + ", property = "
-                + property + ", refresh = " + refresh + "]";
+        return "[ Channel = " + getChannel() + ", friendlyName = " + getFriendlyName() + ", type = " + getType()
+                + ", channelType = " + getChannelType() + ", ChannelGroup = " + getChannelGroup() + ", channel = "
+                + getChannel() + ", property = " + getProperty() + ", refresh = " + getRefresh() + "]";
     }
 }

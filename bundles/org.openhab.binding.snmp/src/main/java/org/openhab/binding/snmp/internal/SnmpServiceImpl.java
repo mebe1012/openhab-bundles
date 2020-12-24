@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,8 +19,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.binding.snmp.internal.config.SnmpServiceConfiguration;
+import org.openhab.core.config.core.Configuration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -100,18 +100,21 @@ public class SnmpServiceImpl implements SnmpService {
     }
 
     private void shutdownSnmp() throws IOException {
+        DefaultUdpTransportMapping transport = this.transport;
         if (transport != null) {
             transport.close();
-            transport = null;
+            this.transport = null;
         }
+        Snmp snmp = this.snmp;
         if (snmp != null) {
             snmp.close();
-            snmp = null;
+            this.snmp = null;
         }
     }
 
     @Override
     public void addCommandResponder(CommandResponder listener) {
+        Snmp snmp = this.snmp;
         if (snmp != null) {
             snmp.addCommandResponder(listener);
         }
@@ -120,6 +123,7 @@ public class SnmpServiceImpl implements SnmpService {
 
     @Override
     public void removeCommandResponder(CommandResponder listener) {
+        Snmp snmp = this.snmp;
         if (snmp != null) {
             snmp.removeCommandResponder(listener);
         }
@@ -129,6 +133,7 @@ public class SnmpServiceImpl implements SnmpService {
     @Override
     public void send(PDU pdu, Target target, @Nullable Object userHandle, ResponseListener listener)
             throws IOException {
+        Snmp snmp = this.snmp;
         if (snmp != null) {
             snmp.send(pdu, target, userHandle, listener);
             logger.trace("send {} to {}", pdu, target);

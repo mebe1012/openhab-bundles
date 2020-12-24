@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,25 +12,26 @@
  */
 package org.openhab.binding.tado.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.openhab.binding.tado.internal.api.client.HomeApi;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.BaseThingHandler;
 
 /**
  * Common base class for home-based thing-handler.
  *
  * @author Dennis Frommknecht - Initial contribution
  */
-abstract public class BaseHomeThingHandler extends BaseThingHandler {
+public abstract class BaseHomeThingHandler extends BaseThingHandler {
 
     public BaseHomeThingHandler(Thing thing) {
         super(thing);
     }
 
     public Long getHomeId() {
-        return getHomeHandler().getHomeId();
+        TadoHomeHandler handler = getHomeHandler();
+        return handler != null ? handler.getHomeId() : new Long(0);
     }
 
     protected TadoHomeHandler getHomeHandler() {
@@ -39,7 +40,8 @@ abstract public class BaseHomeThingHandler extends BaseThingHandler {
     }
 
     protected HomeApi getApi() {
-        return getHomeHandler().getApi();
+        TadoHomeHandler handler = getHomeHandler();
+        return handler != null ? handler.getApi() : null;
     }
 
     protected void onSuccessfulOperation() {

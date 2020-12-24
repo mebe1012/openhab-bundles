@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,8 @@
 package org.openhab.binding.lutron.internal.radiora;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.lutron.internal.LutronBindingConstants;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link RadioRAConstants} class defines common constants for RadioRA classic devices
@@ -32,5 +32,4 @@ public class RadioRAConstants {
             "ra-switch");
     public static final ThingTypeUID THING_TYPE_PHANTOM = new ThingTypeUID(LutronBindingConstants.BINDING_ID,
             "ra-phantomButton");
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,8 @@ package org.openhab.binding.systeminfo.internal.model;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
 
 /**
  * {@link SysteminfoInterface} defines the methods needed to provide this binding with the required system information.
@@ -437,5 +437,4 @@ public interface SysteminfoInterface {
      * @throws DeviceNotFoundException - thrown if process with this PID can not be found
      */
     public @Nullable DecimalType getProcessThreads(int pid) throws DeviceNotFoundException;
-
 }

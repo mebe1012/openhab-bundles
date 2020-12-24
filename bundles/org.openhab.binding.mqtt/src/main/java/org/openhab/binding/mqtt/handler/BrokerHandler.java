@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,23 +17,24 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.net.ssl.TrustManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.util.HexUtils;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.io.transport.mqtt.MqttWillAndTestament;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
 import org.openhab.binding.mqtt.internal.ssl.Pin;
 import org.openhab.binding.mqtt.internal.ssl.PinMessageDigest;
 import org.openhab.binding.mqtt.internal.ssl.PinTrustManager;
 import org.openhab.binding.mqtt.internal.ssl.PinType;
 import org.openhab.binding.mqtt.internal.ssl.PinnedCallback;
-import org.openhab.binding.mqtt.internal.ssl.PinningSSLContextProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
+import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,6 +123,11 @@ public class BrokerHandler extends AbstractBrokerHandler implements PinnedCallba
         super.dispose();
     }
 
+    @Override
+    public boolean discoveryEnabled() {
+        return config.enableDiscovery;
+    }
+
     /**
      * Reads the thing configuration related to public key or certificate pinning, creates an appropriate a
      * {@link PinningSSLContextProvider} and assigns it to the {@link MqttBrokerConnection} instance.
@@ -135,7 +141,7 @@ public class BrokerHandler extends AbstractBrokerHandler implements PinnedCallba
             PinnedCallback callback) throws IllegalArgumentException {
         final PinTrustManager trustManager = new PinTrustManager();
 
-        connection.setSSLContextProvider(new PinningSSLContextProvider(trustManager));
+        connection.setTrustManagers(new TrustManager[] { trustManager });
         trustManager.setCallback(callback);
 
         if (config.certificatepin) {
@@ -216,8 +222,6 @@ public class BrokerHandler extends AbstractBrokerHandler implements PinnedCallba
         if (config.timeoutInMs != null) {
             connection.setTimeoutExecutor(scheduler, TIMEOUT_DEFAULT);
         }
-
-        connection.setRetain(config.retainMessages);
 
         return connection;
     }

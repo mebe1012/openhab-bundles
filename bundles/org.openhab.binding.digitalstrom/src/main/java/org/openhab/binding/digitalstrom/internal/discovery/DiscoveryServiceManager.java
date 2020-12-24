@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.openhab.binding.digitalstrom.internal.DigitalSTROMBindingConstants;
 import org.openhab.binding.digitalstrom.internal.handler.BridgeHandler;
 import org.openhab.binding.digitalstrom.internal.handler.CircuitHandler;
@@ -37,8 +34,14 @@ import org.openhab.binding.digitalstrom.internal.lib.structure.devices.devicepar
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.constants.ChangeableDeviceConfigEnum;
 import org.openhab.binding.digitalstrom.internal.lib.structure.scene.InternalScene;
 import org.openhab.binding.digitalstrom.internal.providers.DsDeviceThingTypeProvider;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DiscoveryServiceManager} manages the different scene and device discovery services and informs them about
@@ -50,7 +53,9 @@ import org.osgi.framework.ServiceRegistration;
 public class DiscoveryServiceManager
         implements SceneStatusListener, DeviceStatusListener, TemperatureControlStatusListener {
 
-    private final HashMap<String, AbstractDiscoveryService> discoveryServices;
+    private final Logger logger = LoggerFactory.getLogger(DiscoveryServiceManager.class);
+
+    private final Map<String, AbstractDiscoveryService> discoveryServices;
     private final Map<String, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
     private final String bridgeUID;
 
@@ -63,7 +68,7 @@ public class DiscoveryServiceManager
      */
     public DiscoveryServiceManager(BridgeHandler bridgeHandler) {
         bridgeUID = bridgeHandler.getThing().getUID().getAsString();
-        discoveryServices = new HashMap<String, AbstractDiscoveryService>(SceneHandler.SUPPORTED_THING_TYPES.size()
+        discoveryServices = new HashMap<>(SceneHandler.SUPPORTED_THING_TYPES.size()
                 + DeviceHandler.SUPPORTED_THING_TYPES.size() + CircuitHandler.SUPPORTED_THING_TYPES.size()
                 + ZoneTemperatureControlHandler.SUPPORTED_THING_TYPES.size());
         for (ThingTypeUID type : SceneHandler.SUPPORTED_THING_TYPES) {
@@ -127,20 +132,17 @@ public class DiscoveryServiceManager
         if (discoveryServices != null) {
             for (AbstractDiscoveryService service : discoveryServices.values()) {
                 if (service instanceof SceneDiscoveryService) {
-                    this.discoveryServiceRegs.put(bridgeUID + ((SceneDiscoveryService) service).getID(),
-                            bundleContext.registerService(DiscoveryService.class.getName(), service,
-                                    new Hashtable<String, Object>()));
+                    this.discoveryServiceRegs.put(bridgeUID + ((SceneDiscoveryService) service).getID(), bundleContext
+                            .registerService(DiscoveryService.class.getName(), service, new Hashtable<>()));
                 }
                 if (service instanceof DeviceDiscoveryService) {
-                    this.discoveryServiceRegs.put(bridgeUID + ((DeviceDiscoveryService) service).getID(),
-                            bundleContext.registerService(DiscoveryService.class.getName(), service,
-                                    new Hashtable<String, Object>()));
+                    this.discoveryServiceRegs.put(bridgeUID + ((DeviceDiscoveryService) service).getID(), bundleContext
+                            .registerService(DiscoveryService.class.getName(), service, new Hashtable<>()));
                 }
                 if (service instanceof ZoneTemperatureControlDiscoveryService) {
-                    this.discoveryServiceRegs.put(
-                            bridgeUID + ((ZoneTemperatureControlDiscoveryService) service).getID(),
-                            bundleContext.registerService(DiscoveryService.class.getName(), service,
-                                    new Hashtable<String, Object>()));
+                    this.discoveryServiceRegs
+                            .put(bridgeUID + ((ZoneTemperatureControlDiscoveryService) service).getID(), bundleContext
+                                    .registerService(DiscoveryService.class.getName(), service, new Hashtable<>()));
                 }
             }
         }
@@ -196,20 +198,25 @@ public class DiscoveryServiceManager
 
     @Override
     public void onDeviceAdded(GeneralDeviceInformation device) {
-        if (device instanceof Device) {
-            String id = ((Device) device).getHWinfo().substring(0, 2);
-            if (((Device) device).isSensorDevice()) {
-                id = ((Device) device).getHWinfo();
+        try {
+            if (device instanceof Device) {
+                String id = ((Device) device).getHWinfo().substring(0, 2);
+                if (((Device) device).isSensorDevice()) {
+                    id = ((Device) device).getHWinfo();
+                }
+                if (discoveryServices.get(id) != null) {
+                    ((DeviceDiscoveryService) discoveryServices.get(id)).onDeviceAdded(device);
+                }
             }
-            if (discoveryServices.get(id) != null) {
-                ((DeviceDiscoveryService) discoveryServices.get(id)).onDeviceAdded(device);
+            if (device instanceof Circuit) {
+                if (discoveryServices.get(DsDeviceThingTypeProvider.SupportedThingTypes.circuit.toString()) != null) {
+                    ((DeviceDiscoveryService) discoveryServices
+                            .get(DsDeviceThingTypeProvider.SupportedThingTypes.circuit.toString()))
+                                    .onDeviceAdded(device);
+                }
             }
-        }
-        if (device instanceof Circuit) {
-            if (discoveryServices.get(DsDeviceThingTypeProvider.SupportedThingTypes.circuit.toString()) != null) {
-                ((DeviceDiscoveryService) discoveryServices
-                        .get(DsDeviceThingTypeProvider.SupportedThingTypes.circuit.toString())).onDeviceAdded(device);
-            }
+        } catch (RuntimeException ex) {
+            logger.warn("Unable to add devices {}", device, ex);
         }
     }
 
@@ -252,12 +259,10 @@ public class DiscoveryServiceManager
     @Override
     public void onTargetTemperatureChanged(Float newValue) {
         // nothing to do
-
     }
 
     @Override
     public void onControlValueChanged(Integer newValue) {
         // nothing to do
-
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,16 +19,16 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.homematic.internal.converter.ConverterException;
 import org.openhab.binding.homematic.internal.converter.ConverterTypeException;
 import org.openhab.binding.homematic.internal.converter.StateInvertInfo;
 import org.openhab.binding.homematic.internal.converter.TypeConverter;
 import org.openhab.binding.homematic.internal.model.HmDatapoint;
 import org.openhab.binding.homematic.internal.model.HmDatapointInfo;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public abstract class AbstractTypeConverter<T extends State> implements TypeConv
     /**
      * Defines all devices where the state datapoint must be inverted.
      */
-    private static final List<StateInvertInfo> stateInvertDevices = new ArrayList<StateInvertInfo>(3);
+    private static final List<StateInvertInfo> stateInvertDevices = new ArrayList<>(3);
 
     static {
         stateInvertDevices.add(new StateInvertInfo(DEVICE_TYPE_SHUTTER_CONTACT));
@@ -191,5 +191,4 @@ public abstract class AbstractTypeConverter<T extends State> implements TypeConv
         INFO,
         DEBUG
     }
-
 }

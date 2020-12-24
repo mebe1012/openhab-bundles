@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,32 +12,32 @@
  */
 package org.openhab.binding.hue.internal.handler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.hue.internal.HueBindingConstants.*;
 
 import java.util.Collections;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.binding.hue.internal.FullConfig;
 import org.openhab.binding.hue.internal.FullLight;
 import org.openhab.binding.hue.internal.State.ColorMode;
 import org.openhab.binding.hue.internal.StateUpdate;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.types.Command;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -65,31 +65,31 @@ public class HueLightHandlerTest {
 
     private Gson gson;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gson = new Gson();
     }
 
     @Test
-    public void assertCommandForOsramPar16_50ForColorTemperatureChannelOn() {
+    public void assertCommandForOsramPar1650ForColorTemperatureChannelOn() {
         String expectedReply = "{\"on\" : true, \"bri\" : 254}";
         assertSendCommandForColorTempForPar16(OnOffType.ON, new HueLightState(OSRAM_MODEL_TYPE), expectedReply);
     }
 
     @Test
-    public void assertCommandForOsramPar16_50ForColorTemperatureChannelOff() {
+    public void assertCommandForOsramPar1650ForColorTemperatureChannelOff() {
         String expectedReply = "{\"on\" : false, \"transitiontime\" : 0}";
         assertSendCommandForColorTempForPar16(OnOffType.OFF, new HueLightState(OSRAM_MODEL_TYPE), expectedReply);
     }
 
     @Test
-    public void assertCommandForOsramPar16_50ForBrightnessChannelOn() {
+    public void assertCommandForOsramPar1650ForBrightnessChannelOn() {
         String expectedReply = "{\"on\" : true, \"bri\" : 254}";
         assertSendCommandForBrightnessForPar16(OnOffType.ON, new HueLightState(OSRAM_MODEL_TYPE), expectedReply);
     }
 
     @Test
-    public void assertCommandForOsramPar16_50ForBrightnessChannelOff() {
+    public void assertCommandForOsramPar1650ForBrightnessChannelOff() {
         String expectedReply = "{\"on\" : false, \"transitiontime\" : 0}";
         assertSendCommandForBrightnessForPar16(OnOffType.OFF, new HueLightState(OSRAM_MODEL_TYPE), expectedReply);
     }
@@ -371,6 +371,8 @@ public class HueLightHandlerTest {
         HueClient mockClient = mock(HueClient.class);
         when(mockClient.getLightById(any())).thenReturn(light);
 
+        long fadeTime = 400;
+
         HueLightHandler hueLightHandler = new HueLightHandler(mockThing) {
             @Override
             protected synchronized HueClient getHueClient() {
@@ -390,7 +392,8 @@ public class HueLightHandlerTest {
         hueLightHandler.handleCommand(new ChannelUID(new ThingUID("hue::test"), channel), command);
 
         ArgumentCaptor<StateUpdate> captorStateUpdate = ArgumentCaptor.forClass(StateUpdate.class);
-        verify(mockClient).updateLightState(any(FullLight.class), captorStateUpdate.capture());
+        verify(mockClient).updateLightState(any(LightStatusListener.class), any(FullLight.class),
+                captorStateUpdate.capture(), eq(fadeTime));
         assertJson(expectedReply, captorStateUpdate.getValue().toJson());
     }
 
@@ -400,5 +403,4 @@ public class HueLightHandlerTest {
         JsonElement jsonActual = parser.parse(actual);
         assertEquals(jsonExpected, jsonActual);
     }
-
 }

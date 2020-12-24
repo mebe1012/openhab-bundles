@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,10 +20,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.openhab.binding.homematic.type.HomematicThingTypeExcluder;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -35,9 +35,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Gerhard Riegler - Initial contribution
  * @author Michael Reitler - Added HomematicThingTypeExcluder
  */
-@Component(service = { HomematicChannelTypeProvider.class, ChannelTypeProvider.class }, immediate = true)
+@Component(service = { HomematicChannelTypeProvider.class, ChannelTypeProvider.class })
 public class HomematicChannelTypeProviderImpl implements HomematicChannelTypeProvider {
-    private final Map<ChannelTypeUID, ChannelType> channelTypesByUID = new HashMap<ChannelTypeUID, ChannelType>();
+    private final Map<ChannelTypeUID, ChannelType> channelTypesByUID = new HashMap<>();
     protected List<HomematicThingTypeExcluder> homematicThingTypeExcluders = new CopyOnWriteArrayList<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -88,5 +88,4 @@ public class HomematicChannelTypeProviderImpl implements HomematicChannelTypePro
     public void addChannelType(ChannelType channelType) {
         channelTypesByUID.put(channelType.getUID(), channelType);
     }
-
 }

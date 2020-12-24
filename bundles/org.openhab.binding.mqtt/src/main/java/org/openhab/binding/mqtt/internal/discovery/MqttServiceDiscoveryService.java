@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.io.transport.mqtt.MqttServiceObserver;
 import org.openhab.binding.mqtt.MqttBindingConstants;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.io.transport.mqtt.MqttServiceObserver;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.systemmqttbroker")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.systemmqttbroker")
 public class MqttServiceDiscoveryService extends AbstractDiscoveryService implements MqttServiceObserver {
     private final Logger logger = LoggerFactory.getLogger(MqttServiceDiscoveryService.class);
     MqttService mqttService;

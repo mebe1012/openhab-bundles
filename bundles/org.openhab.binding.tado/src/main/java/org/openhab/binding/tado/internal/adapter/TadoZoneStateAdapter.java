@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,18 +15,10 @@ package org.openhab.binding.tado.internal.adapter;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.tado.internal.TadoBindingConstants.HvacMode;
 import org.openhab.binding.tado.internal.TadoBindingConstants.OperationMode;
 import org.openhab.binding.tado.internal.TadoBindingConstants.TemperatureUnit;
+import org.openhab.binding.tado.internal.api.model.AcPowerDataPoint;
 import org.openhab.binding.tado.internal.api.model.ActivityDataPoints;
 import org.openhab.binding.tado.internal.api.model.CoolingZoneSetting;
 import org.openhab.binding.tado.internal.api.model.GenericZoneSetting;
@@ -41,11 +33,22 @@ import org.openhab.binding.tado.internal.api.model.TemperatureDataPoint;
 import org.openhab.binding.tado.internal.api.model.TemperatureObject;
 import org.openhab.binding.tado.internal.api.model.TimerTerminationCondition;
 import org.openhab.binding.tado.internal.api.model.ZoneState;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Adapter from API-level zone state to the binding's item-based zone state.
  *
  * @author Dennis Frommknecht - Initial contribution
+ * @author Andrew Fiddian-Green - Added Low Battery Alarm, A/C Power and Open Window channels
+ * 
  */
 public class TadoZoneStateAdapter {
     private ZoneState zoneState;
@@ -71,6 +74,18 @@ public class TadoZoneStateAdapter {
         ActivityDataPoints dataPoints = zoneState.getActivityDataPoints();
         return dataPoints.getHeatingPower() != null ? toDecimalType(dataPoints.getHeatingPower().getPercentage())
                 : DecimalType.ZERO;
+    }
+
+    public OnOffType getAcPower() {
+        ActivityDataPoints dataPoints = zoneState.getActivityDataPoints();
+        AcPowerDataPoint acPower = dataPoints.getAcPower();
+        if (acPower != null) {
+            String acPowerValue = acPower.getValue();
+            if (acPowerValue != null) {
+                return OnOffType.from(acPowerValue);
+            }
+        }
+        return null;
     }
 
     public StringType getMode() {
@@ -210,5 +225,13 @@ public class TadoZoneStateAdapter {
         return temperatureUnit == TemperatureUnit.FAHRENHEIT
                 ? new QuantityType<>(temperature.getFahrenheit(), ImperialUnits.FAHRENHEIT)
                 : new QuantityType<>(temperature.getCelsius(), SIUnits.CELSIUS);
+    }
+
+    public State getOpenWindowDetected() {
+        Boolean openWindowDetected = zoneState.isOpenWindowDetected();
+        if (openWindowDetected != null) {
+            return OnOffType.from(openWindowDetected);
+        }
+        return OnOffType.OFF;
     }
 }

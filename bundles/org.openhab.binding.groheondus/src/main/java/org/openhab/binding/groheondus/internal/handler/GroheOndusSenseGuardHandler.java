@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,26 +23,27 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.grohe.ondus.api.OndusService;
-import org.grohe.ondus.api.model.ApplianceCommand;
+import org.grohe.ondus.api.model.BaseApplianceCommand;
 import org.grohe.ondus.api.model.BaseApplianceData;
-import org.grohe.ondus.api.model.SenseGuardAppliance;
-import org.grohe.ondus.api.model.SenseGuardApplianceData;
-import org.grohe.ondus.api.model.SenseGuardApplianceData.Data;
-import org.grohe.ondus.api.model.SenseGuardApplianceData.Measurement;
+import org.grohe.ondus.api.model.guard.Appliance;
+import org.grohe.ondus.api.model.guard.ApplianceCommand;
+import org.grohe.ondus.api.model.guard.ApplianceData;
+import org.grohe.ondus.api.model.guard.ApplianceData.Data;
+import org.grohe.ondus.api.model.guard.ApplianceData.Measurement;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Florian Schmidt and Arne Wohlert - Initial contribution
  */
 @NonNullByDefault
-public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<SenseGuardAppliance, Data> {
+public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Appliance, Data> {
     private static final int MIN_API_TIMEFRAME_DAYS = 1;
     private static final int MAX_API_TIMEFRAME_DAYS = 90;
     private static final int DEFAULT_TIMEFRAME_DAYS = 1;
@@ -58,11 +59,11 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
     private final Logger logger = LoggerFactory.getLogger(GroheOndusSenseGuardHandler.class);
 
     public GroheOndusSenseGuardHandler(Thing thing) {
-        super(thing, SenseGuardAppliance.TYPE);
+        super(thing, Appliance.TYPE);
     }
 
     @Override
-    protected int getPollingInterval(SenseGuardAppliance appliance) {
+    protected int getPollingInterval(Appliance appliance) {
         if (config.pollingInterval > 0) {
             return config.pollingInterval;
         }
@@ -70,7 +71,7 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
     }
 
     @Override
-    protected void updateChannel(ChannelUID channelUID, SenseGuardAppliance appliance, Data dataPoint) {
+    protected void updateChannel(ChannelUID channelUID, Appliance appliance, Data dataPoint) {
         String channelId = channelUID.getIdWithoutGroup();
         State newState;
         switch (channelId) {
@@ -78,7 +79,7 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
                 newState = new StringType(appliance.getName());
                 break;
             case CHANNEL_PRESSURE:
-                newState = new QuantityType<>(getLastMeasurement(dataPoint).getPressure(), SmartHomeUnits.BAR);
+                newState = new QuantityType<>(getLastMeasurement(dataPoint).getPressure(), Units.BAR);
                 break;
             case CHANNEL_TEMPERATURE_GUARD:
                 newState = new QuantityType<>(getLastMeasurement(dataPoint).getTemperatureGuard(), SIUnits.CELSIUS);
@@ -109,14 +110,14 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
     }
 
     @Nullable
-    private OnOffType getValveOpenType(SenseGuardAppliance appliance) {
+    private OnOffType getValveOpenType(Appliance appliance) {
         OndusService service = getOndusService();
         if (service == null) {
             return null;
         }
-        Optional<ApplianceCommand> commandOptional;
+        Optional<BaseApplianceCommand> commandOptional;
         try {
-            commandOptional = service.getApplianceCommand(appliance);
+            commandOptional = service.applianceCommand(appliance);
         } catch (IOException e) {
             logger.debug("Could not get appliance command", e);
             return null;
@@ -124,18 +125,23 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
         if (!commandOptional.isPresent()) {
             return null;
         }
-        return commandOptional.get().getCommand().getValveOpen() ? OnOffType.ON : OnOffType.OFF;
+        if (commandOptional.get().getType() != Appliance.TYPE) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Thing is not a GROHE SENSE Guard device.");
+            return null;
+        }
+        return ((ApplianceCommand) commandOptional.get()).getCommand().getValveOpen() ? OnOffType.ON : OnOffType.OFF;
     }
 
     @Override
-    protected Data getLastDataPoint(SenseGuardAppliance appliance) {
+    protected Data getLastDataPoint(Appliance appliance) {
         if (getOndusService() == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE,
                     "No initialized OndusService available from bridge.");
             return new Data();
         }
 
-        SenseGuardApplianceData applianceData = getApplianceData(appliance);
+        ApplianceData applianceData = getApplianceData(appliance);
         if (applianceData == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Could not load data from API.");
             return new Data();
@@ -143,7 +149,7 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
         return applianceData.getData();
     }
 
-    private @Nullable SenseGuardApplianceData getApplianceData(SenseGuardAppliance appliance) {
+    private @Nullable ApplianceData getApplianceData(Appliance appliance) {
         Instant from = fromTime();
         Instant to = Instant.now();
 
@@ -152,13 +158,13 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
             return null;
         }
         try {
-            BaseApplianceData applianceData = service.getApplianceData(appliance, from, to).orElse(null);
-            if (applianceData.getType() != SenseGuardAppliance.TYPE) {
+            BaseApplianceData applianceData = service.applianceData(appliance, from, to).orElse(null);
+            if (applianceData.getType() != Appliance.TYPE) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                         "Thing is not a GROHE SENSE Guard device.");
                 return null;
             }
-            return (SenseGuardApplianceData) applianceData;
+            return (ApplianceData) applianceData;
         } catch (IOException e) {
             logger.debug("Could not load appliance data", e);
         }
@@ -205,7 +211,7 @@ public class GroheOndusSenseGuardHandler<T, M> extends GroheOndusBaseHandler<Sen
         if (service == null) {
             return;
         }
-        SenseGuardAppliance appliance = getAppliance(service);
+        Appliance appliance = getAppliance(service);
         if (appliance == null) {
             return;
         }

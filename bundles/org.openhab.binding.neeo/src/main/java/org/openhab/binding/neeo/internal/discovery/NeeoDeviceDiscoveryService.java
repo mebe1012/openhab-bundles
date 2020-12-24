@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,14 +17,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.neeo.internal.NeeoBrainApi;
 import org.openhab.binding.neeo.internal.NeeoConstants;
 import org.openhab.binding.neeo.internal.NeeoRoomConfig;
@@ -32,6 +25,12 @@ import org.openhab.binding.neeo.internal.UidUtils;
 import org.openhab.binding.neeo.internal.handler.NeeoRoomHandler;
 import org.openhab.binding.neeo.internal.models.NeeoDevice;
 import org.openhab.binding.neeo.internal.models.NeeoRoom;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +72,7 @@ public class NeeoDeviceDiscoveryService extends AbstractDiscoveryService {
         final ThingUID roomUid = roomBridge.getUID();
 
         final String brainId = roomHandler.getNeeoBrainId();
-        if (brainId == null || StringUtils.isEmpty(brainId)) {
+        if (brainId == null || brainId.isEmpty()) {
             logger.debug("Unknown brain ID for roomHandler: {}", roomHandler);
             return;
         }
@@ -86,7 +85,7 @@ public class NeeoDeviceDiscoveryService extends AbstractDiscoveryService {
 
         final NeeoRoomConfig config = roomBridge.getConfiguration().as(NeeoRoomConfig.class);
         final String roomKey = config.getRoomKey();
-        if (roomKey == null || StringUtils.isEmpty(roomKey)) {
+        if (roomKey == null || roomKey.isEmpty()) {
             logger.debug("RoomKey wasn't configured for {} - skipping", brainId);
             return;
         }
@@ -103,7 +102,7 @@ public class NeeoDeviceDiscoveryService extends AbstractDiscoveryService {
             logger.debug("Room {} found, scanning {} devices in it", room.getName(), devices.length);
             for (NeeoDevice device : devices) {
                 final String deviceKey = device.getKey();
-                if (deviceKey == null || StringUtils.isEmpty(deviceKey)) {
+                if (deviceKey == null || deviceKey.isEmpty()) {
                     logger.debug("Device key wasn't found for device: {}", device);
                     continue;
                 }
@@ -115,7 +114,7 @@ public class NeeoDeviceDiscoveryService extends AbstractDiscoveryService {
 
                 logger.debug("Device #{} found - {}", deviceKey, device.getName());
 
-                final ThingUID thingUID = new ThingUID(NeeoConstants.THING_TYPE_DEVICE, roomUid, device.getKey());
+                final ThingUID thingUID = new ThingUID(NeeoConstants.THING_TYPE_DEVICE, roomUid, deviceKey);
 
                 final DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
                         .withProperty(NeeoConstants.CONFIG_DEVICEKEY, deviceKey).withBridge(roomUid)

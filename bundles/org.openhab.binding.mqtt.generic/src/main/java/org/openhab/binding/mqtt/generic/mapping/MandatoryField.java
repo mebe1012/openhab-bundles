@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 /**
  * Annotate an attribute class field to mark it as required. If a required topic value cannot be received
  * within a given timeframe, the entire attribute classes
- * {@link AbstractMqttAttributeClass#subscribeAndReceive(org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection, java.util.concurrent.ScheduledExecutorService, String, org.openhab.binding.mqtt.generic.internal.mapping.AbstractMqttAttributeClass.AttributeChanged, int)}
+ * {@link AbstractMqttAttributeClass#subscribeAndReceive(org.openhab.core.io.transport.mqtt.MqttBrokerConnection, java.util.concurrent.ScheduledExecutorService, String, org.openhab.binding.mqtt.generic.internal.mapping.AbstractMqttAttributeClass.AttributeChanged, int)}
  * call will fail.
  *
  * <p>

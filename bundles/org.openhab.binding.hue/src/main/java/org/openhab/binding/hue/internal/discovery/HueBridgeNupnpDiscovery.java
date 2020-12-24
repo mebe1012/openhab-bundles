@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.hue.internal.discovery;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 import static org.openhab.binding.hue.internal.HueBindingConstants.*;
+import static org.openhab.core.thing.Thing.PROPERTY_SERIAL_NUMBER;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,17 +21,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +50,14 @@ import com.google.gson.reflect.TypeToken;
  * @author Andre Fuechsel - make {@link #startScan()} asynchronous
  */
 @NonNullByDefault
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.hue")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.hue")
 public class HueBridgeNupnpDiscovery extends AbstractDiscoveryService {
 
     private static final String MODEL_NAME_PHILIPS_HUE = "<modelName>Philips hue";
 
     protected static final String BRIDGE_INDICATOR = "fffe";
 
-    private static final String DISCOVERY_URL = "https://www.meethue.com/api/nupnp";
+    private static final String DISCOVERY_URL = "https://discovery.meethue.com/";
 
     protected static final String LABEL_PATTERN = "Philips hue (IP)";
 
@@ -87,6 +88,7 @@ public class HueBridgeNupnpDiscovery extends AbstractDiscoveryService {
             if (isReachableAndValidHueBridge(bridge)) {
                 String host = bridge.getInternalIpAddress();
                 String serialNumber = bridge.getId().substring(0, 6) + bridge.getId().substring(10);
+                serialNumber = serialNumber.toLowerCase();
                 ThingUID uid = new ThingUID(THING_TYPE_BRIDGE, serialNumber);
                 DiscoveryResult result = DiscoveryResultBuilder.create(uid)
                         .withProperties(buildProperties(host, serialNumber))
@@ -162,8 +164,10 @@ public class HueBridgeNupnpDiscovery extends AbstractDiscoveryService {
         try {
             Gson gson = new Gson();
             String json = doGetRequest(DISCOVERY_URL);
-            return gson.fromJson(json, new TypeToken<List<BridgeJsonParameters>>() {
-            }.getType());
+            List<BridgeJsonParameters> bridgeParameters = gson.fromJson(json,
+                    new TypeToken<List<BridgeJsonParameters>>() {
+                    }.getType());
+            return Objects.requireNonNull(bridgeParameters);
         } catch (IOException e) {
             logger.debug("Philips Hue NUPnP service not reachable. Can't discover bridges");
         } catch (JsonParseException je) {
@@ -182,5 +186,4 @@ public class HueBridgeNupnpDiscovery extends AbstractDiscoveryService {
     protected String doGetRequest(String url) throws IOException {
         return HttpUtil.executeUrl("GET", url, REQUEST_TIMEOUT);
     }
-
 }

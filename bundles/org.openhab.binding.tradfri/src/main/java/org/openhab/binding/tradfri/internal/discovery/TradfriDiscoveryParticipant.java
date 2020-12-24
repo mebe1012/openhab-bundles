@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,9 @@
  */
 package org.openhab.binding.tradfri.internal.discovery;
 
-import static org.eclipse.smarthome.core.thing.Thing.*;
 import static org.openhab.binding.tradfri.internal.TradfriBindingConstants.*;
+import static org.openhab.core.thing.Thing.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,11 +25,11 @@ import javax.jmdns.ServiceInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(service = MDNSDiscoveryParticipant.class, immediate = true)
+@Component(service = MDNSDiscoveryParticipant.class)
 @NonNullByDefault
 public class TradfriDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
@@ -54,11 +53,11 @@ public class TradfriDiscoveryParticipant implements MDNSDiscoveryParticipant {
      * gw:001122334455, gw-001122334455, gw:00-11-22-33-44-55, gw-001122334455ServiceName
      *
      */
-    private final Pattern GATEWAY_NAME_REGEX_PATTERN = Pattern.compile("(gw[:-]{1}([a-f0-9]{2}[-]?){6}){1}");
+    private static final Pattern GATEWAY_NAME_REGEX_PATTERN = Pattern.compile("(gw[:-]{1}([a-f0-9]{2}[-]?){6}){1}");
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
-        return Collections.singleton(GATEWAY_TYPE_UID);
+        return SUPPORTED_BRIDGE_TYPES_UIDS;
     }
 
     @Override

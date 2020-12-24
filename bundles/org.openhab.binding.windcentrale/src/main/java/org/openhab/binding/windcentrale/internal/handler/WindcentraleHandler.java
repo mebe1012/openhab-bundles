@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.windcentrale.internal.handler;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.KILO;
 import static org.openhab.binding.windcentrale.internal.WindcentraleBindingConstants.*;
+import static org.openhab.core.library.unit.MetricPrefix.KILO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -22,27 +22,28 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.windcentrale.internal.config.MillConfig;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
 /**
  * The {@link WindcentraleHandler} is responsible for handling commands, which are
@@ -92,7 +93,7 @@ public class WindcentraleHandler extends BaseThingHandler {
     public void initialize() {
         logger.debug("Initializing Windcentrale handler '{}'", getThing().getUID());
 
-        MillConfig config = getConfig().as(MillConfig.class);
+        final MillConfig config = getConfig().as(MillConfig.class);
 
         millConfig = config;
         millUrl = String.format(URL_FORMAT, config.millId);
@@ -116,43 +117,47 @@ public class WindcentraleHandler extends BaseThingHandler {
     }
 
     private synchronized void updateData() {
-        logger.debug("Update windmill data '{}'", getThing().getUID());
-
-        MillConfig config = millConfig;
-        String getMillData = windcentraleCache.getValue();
-
-        if (config == null || getMillData == null) {
-            return;
-        }
-
         try {
-            JsonObject millData = (JsonObject) parser.parse(getMillData);
-            logger.trace("Retrieved updated mill data: {}", millData);
+            logger.debug("Update windmill data '{}'", getThing().getUID());
+
+            final MillConfig config = millConfig;
+            final String rawMillData = windcentraleCache.getValue();
+
+            if (config == null || rawMillData == null) {
+                return;
+            }
+            logger.trace("Retrieved updated mill data: {}", rawMillData);
+            final JsonElement jsonElement = parser.parse(rawMillData);
+
+            if (!(jsonElement instanceof JsonObject)) {
+                throw new JsonParseException("Could not parse windmill json data");
+            }
+            final JsonObject millData = (JsonObject) jsonElement;
 
             updateState(CHANNEL_WIND_SPEED, new DecimalType(millData.get(CHANNEL_WIND_SPEED).getAsString()));
             updateState(CHANNEL_WIND_DIRECTION, new StringType(millData.get(CHANNEL_WIND_DIRECTION).getAsString()));
             updateState(CHANNEL_POWER_TOTAL,
-                    new QuantityType<>(millData.get(CHANNEL_POWER_TOTAL).getAsBigDecimal(), KILO(SmartHomeUnits.WATT)));
+                    new QuantityType<>(millData.get(CHANNEL_POWER_TOTAL).getAsBigDecimal(), KILO(Units.WATT)));
             updateState(CHANNEL_POWER_PER_WD,
                     new QuantityType<>(
                             millData.get(CHANNEL_POWER_PER_WD).getAsBigDecimal().multiply(new BigDecimal(config.wd)),
-                            SmartHomeUnits.WATT));
+                            Units.WATT));
             updateState(CHANNEL_POWER_RELATIVE,
-                    new QuantityType<>(millData.get(CHANNEL_POWER_RELATIVE).getAsBigDecimal(), SmartHomeUnits.PERCENT));
+                    new QuantityType<>(millData.get(CHANNEL_POWER_RELATIVE).getAsBigDecimal(), Units.PERCENT));
             updateState(CHANNEL_ENERGY,
-                    new QuantityType<>(millData.get(CHANNEL_ENERGY).getAsBigDecimal(), SmartHomeUnits.KILOWATT_HOUR));
-            updateState(CHANNEL_ENERGY_FC, new QuantityType<>(millData.get(CHANNEL_ENERGY_FC).getAsBigDecimal(),
-                    SmartHomeUnits.KILOWATT_HOUR));
+                    new QuantityType<>(millData.get(CHANNEL_ENERGY).getAsBigDecimal(), Units.KILOWATT_HOUR));
+            updateState(CHANNEL_ENERGY_FC,
+                    new QuantityType<>(millData.get(CHANNEL_ENERGY_FC).getAsBigDecimal(), Units.KILOWATT_HOUR));
             updateState(CHANNEL_RUNTIME,
-                    new QuantityType<>(millData.get(HOURS_RUN_THIS_YEAR).getAsBigDecimal(), SmartHomeUnits.HOUR));
+                    new QuantityType<>(millData.get(HOURS_RUN_THIS_YEAR).getAsBigDecimal(), Units.HOUR));
             updateState(CHANNEL_RUNTIME_PER,
-                    new QuantityType<>(millData.get(CHANNEL_RUNTIME_PER).getAsBigDecimal(), SmartHomeUnits.PERCENT));
+                    new QuantityType<>(millData.get(CHANNEL_RUNTIME_PER).getAsBigDecimal(), Units.PERCENT));
             updateState(CHANNEL_LAST_UPDATE, new DateTimeType(millData.get(CHANNEL_LAST_UPDATE).getAsString()));
 
             if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
                 updateStatus(ThingStatus.ONLINE);
             }
-        } catch (JsonSyntaxException e) {
+        } catch (final RuntimeException e) {
             logger.debug("Failed to process windmill data", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
                     "Failed to process mill data");

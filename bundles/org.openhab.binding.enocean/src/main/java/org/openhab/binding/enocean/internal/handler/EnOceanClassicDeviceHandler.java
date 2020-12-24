@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,22 +22,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.enocean.internal.config.EnOceanActuatorConfig;
 import org.openhab.binding.enocean.internal.config.EnOceanChannelRockerSwitchConfigBase.SwitchMode;
 import org.openhab.binding.enocean.internal.config.EnOceanChannelRockerSwitchListenerConfig;
@@ -45,7 +29,23 @@ import org.openhab.binding.enocean.internal.config.EnOceanChannelVirtualRockerSw
 import org.openhab.binding.enocean.internal.eep.EEP;
 import org.openhab.binding.enocean.internal.eep.EEPFactory;
 import org.openhab.binding.enocean.internal.eep.EEPType;
-import org.openhab.binding.enocean.internal.messages.ESP3Packet;
+import org.openhab.binding.enocean.internal.messages.BasePacket;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.CommonTriggerEvents;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.util.HexUtils;
 
 /**
  *
@@ -56,7 +56,7 @@ import org.openhab.binding.enocean.internal.messages.ESP3Packet;
 public class EnOceanClassicDeviceHandler extends EnOceanBaseActuatorHandler {
 
     // List of thing types which support sending of eep messages
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(
             Arrays.asList(THING_TYPE_CLASSICDEVICE));
 
     private StringType lastTriggerEvent = StringType.valueOf(CommonTriggerEvents.DIR1_PRESSED);
@@ -126,7 +126,6 @@ public class EnOceanClassicDeviceHandler extends EnOceanBaseActuatorHandler {
                 getBridgeHandler().addPacketListener(this, Long.parseLong(config.enoceanId, 16));
                 return true;
             } catch (NumberFormatException e) {
-
             }
 
             return false;
@@ -208,7 +207,6 @@ public class EnOceanClassicDeviceHandler extends EnOceanBaseActuatorHandler {
 
     @Override
     public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
-
         // We must have a valid sendingEEPType and sender id to send commands
         if (sendingEEPType == null || senderId == null || command == RefreshType.REFRESH) {
             return;
@@ -237,7 +235,7 @@ public class EnOceanClassicDeviceHandler extends EnOceanBaseActuatorHandler {
             EEP eep = EEPFactory.createEEP(sendingEEPType);
             if (eep.setSenderId(senderId).setDestinationId(destinationId).convertFromCommand(channelId, channelTypeId,
                     result, id -> this.getCurrentState(id), channel.getConfiguration()).hasData()) {
-                ESP3Packet press = eep.setSuppressRepeating(getConfiguration().suppressRepeating).getERP1Message();
+                BasePacket press = eep.setSuppressRepeating(getConfiguration().suppressRepeating).getERP1Message();
 
                 getBridgeHandler().sendMessage(press, null);
 
@@ -245,7 +243,7 @@ public class EnOceanClassicDeviceHandler extends EnOceanBaseActuatorHandler {
                     releaseFuture = scheduler.schedule(() -> {
                         if (eep.convertFromCommand(channelId, channelTypeId, convertToReleasedCommand(lastTriggerEvent),
                                 id -> this.getCurrentState(id), channel.getConfiguration()).hasData()) {
-                            ESP3Packet release = eep.getERP1Message();
+                            BasePacket release = eep.getERP1Message();
                             getBridgeHandler().sendMessage(release, null);
                         }
                     }, channelConfig.duration, TimeUnit.MILLISECONDS);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,14 @@
  */
 package org.openhab.binding.regoheatpump.internal.handler;
 
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.regoheatpump.internal.RegoHeatPumpBindingConstants;
 import org.openhab.binding.regoheatpump.internal.protocol.RegoConnection;
 import org.openhab.binding.regoheatpump.internal.protocol.SerialRegoConnection;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 
 /**
  * The {@link SerialHusdataHandler} is responsible for handling commands, which are
@@ -24,13 +28,28 @@ import org.openhab.binding.regoheatpump.internal.protocol.SerialRegoConnection;
  * @author Boris Krivonog - Initial contribution
  */
 public class SerialHusdataHandler extends HusdataHandler {
-    public SerialHusdataHandler(Thing thing) {
+    private final SerialPortManager serialPortManager;
+    private SerialPortIdentifier serialPortIdentifier;
+
+    public SerialHusdataHandler(Thing thing, SerialPortManager serialPortManager) {
         super(thing);
+        this.serialPortManager = serialPortManager;
+    }
+
+    @Override
+    public void initialize() {
+        String portName = (String) getConfig().get(RegoHeatPumpBindingConstants.PORT_NAME);
+        serialPortIdentifier = serialPortManager.getIdentifier(portName);
+        if (serialPortIdentifier == null) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Serial port does not exist: " + portName);
+        } else {
+            super.initialize();
+        }
     }
 
     @Override
     protected RegoConnection createConnection() {
-        String portName = (String) getConfig().get(RegoHeatPumpBindingConstants.PORT_NAME);
-        return new SerialRegoConnection(portName, 19200);
+        return new SerialRegoConnection(serialPortIdentifier, 19200);
     }
 }

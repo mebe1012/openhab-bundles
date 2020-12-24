@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.binding.avmfritz.internal.discovery;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_VENDOR;
-import static org.openhab.binding.avmfritz.internal.BindingConstants.*;
+import static org.openhab.binding.avmfritz.internal.AVMFritzBindingConstants.*;
+import static org.openhab.core.thing.Thing.PROPERTY_VENDOR;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -22,14 +22,14 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.jupnp.model.meta.DeviceDetails;
 import org.jupnp.model.meta.ModelDetails;
 import org.jupnp.model.meta.RemoteDevice;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added support for groups
  * @author Christoph Weitkamp - Use "discovery.avmfritz:background=false" to disable discovery service
  */
-@Component(immediate = true, configurationPid = "discovery.avmfritz")
+@Component(configurationPid = "discovery.avmfritz")
 @NonNullByDefault
 public class AVMFritzUpnpDiscoveryParticipant implements UpnpDiscoveryParticipant {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,7 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.storage.Storage;
+import org.openhab.core.storage.Storage;
 import org.openhab.io.hueemulation.internal.dto.HueUserAuthWithSecrets;
 
 /**
@@ -60,5 +60,4 @@ public class DummyUsersStorage implements Storage<HueUserAuthWithSecrets> {
     public Collection<@Nullable HueUserAuthWithSecrets> getValues() {
         return users.values();
     }
-
 }

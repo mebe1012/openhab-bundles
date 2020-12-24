@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.openhab.binding.digitalstrom.internal.lib.config.Config;
 import org.openhab.binding.digitalstrom.internal.lib.manager.ConnectionManager;
 import org.openhab.binding.digitalstrom.internal.lib.sensorjobexecutor.sensorjob.SensorJob;
 import org.openhab.binding.digitalstrom.internal.lib.serverconnection.DsAPI;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.Device;
 import org.openhab.binding.digitalstrom.internal.lib.structure.devices.deviceparameters.impl.DSID;
+import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public abstract class AbstractSensorJobExecutor {
     protected Config config;
     private final ConnectionManager connectionManager;
 
-    private final List<CircuitScheduler> circuitSchedulerList = new LinkedList<CircuitScheduler>();
+    private final List<CircuitScheduler> circuitSchedulerList = new LinkedList<>();
 
     private class ExecutorRunnable implements Runnable {
         private final CircuitScheduler circuit;
@@ -68,13 +68,21 @@ public abstract class AbstractSensorJobExecutor {
 
         @Override
         public void run() {
+            // pollingSchedulers is not final and might be set to null by another thread. See #8214
+            Map<DSID, ScheduledFuture<?>> pollingSchedulers = AbstractSensorJobExecutor.this.pollingSchedulers;
+
             SensorJob sensorJob = circuit.getNextSensorJob();
+            DSID meter = circuit.getMeterDSID();
+
             if (sensorJob != null) {
                 sensorJob.execute(dSAPI, connectionManager.getSessionToken());
             }
-            if (circuit.noMoreJobs()) {
-                logger.debug("no more jobs... stop circuit schedduler with id = {}", circuit.getMeterDSID());
-                pollingSchedulers.get(circuit.getMeterDSID()).cancel(true);
+            if (circuit.noMoreJobs() && pollingSchedulers != null) {
+                logger.debug("no more jobs... stop circuit schedduler with id = {}", meter);
+                ScheduledFuture<?> scheduler = pollingSchedulers.get(meter);
+                if (scheduler != null) {
+                    scheduler.cancel(true);
+                }
             }
         }
     }
@@ -109,7 +117,7 @@ public abstract class AbstractSensorJobExecutor {
     public synchronized void startExecutor() {
         logger.debug("start all circuit schedulers.");
         if (pollingSchedulers == null) {
-            pollingSchedulers = new HashMap<DSID, ScheduledFuture<?>>();
+            pollingSchedulers = new HashMap<>();
         }
         if (circuitSchedulerList != null && !circuitSchedulerList.isEmpty()) {
             for (CircuitScheduler circuit : circuitSchedulerList) {

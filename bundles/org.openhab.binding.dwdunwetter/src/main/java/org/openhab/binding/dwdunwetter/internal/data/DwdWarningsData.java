@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,22 +26,20 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.measure.quantity.Length;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
 
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +110,7 @@ public class DwdWarningsData {
      */
     public boolean refresh() {
         String rawData = dataAccessCached.getValue();
-        if (StringUtils.isEmpty(rawData)) {
+        if (rawData == null || rawData.isEmpty()) {
             logger.debug("No Data from Endpoint");
             return false;
         }
@@ -200,9 +198,11 @@ public class DwdWarningsData {
                 }
             }
         } catch (XMLStreamException e) {
-            logger.debug("Exception while parsing the XML Response", e);
+            logger.warn("Exception occurred while parsing the XML response: {}", e.getMessage());
+            logger.debug("Exception trace", e);
             return false;
         }
+
         Collections.sort(cityData, new SeverityComparator());
         return true;
     }
@@ -268,7 +268,7 @@ public class DwdWarningsData {
         if (data == null) {
             return UnDefType.NULL;
         }
-        return new QuantityType<Length>(data.getAltitude(), ImperialUnits.FOOT);
+        return new QuantityType<>(data.getAltitude(), ImperialUnits.FOOT);
     }
 
     public State getCeiling(int number) {
@@ -276,7 +276,7 @@ public class DwdWarningsData {
         if (data == null) {
             return UnDefType.NULL;
         }
-        return new QuantityType<Length>(data.getCeiling(), ImperialUnits.FOOT);
+        return new QuantityType<>(data.getCeiling(), ImperialUnits.FOOT);
     }
 
     public State getInstruction(int number) {
@@ -305,8 +305,7 @@ public class DwdWarningsData {
      * Only for Tests
      */
     protected void setDataAccess(DwdWarningDataAccess dataAccess) {
-        dataAccessCached = new ExpiringCache<String>(Duration.ofMinutes(MIN_REFRESH_WAIT_MINUTES),
+        dataAccessCached = new ExpiringCache<>(Duration.ofMinutes(MIN_REFRESH_WAIT_MINUTES),
                 () -> dataAccess.getDataFromEndpoint(""));
     }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,13 +16,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.TooManyListenersException;
 
-import org.eclipse.smarthome.io.transport.serial.PortInUseException;
-import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.core.io.transport.serial.PortInUseException;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +44,13 @@ public class PowermaxSerialConnector extends PowermaxConnector implements Serial
      * Constructor
      *
      * @param serialPortManager the serial port manager
-     * @param serialPortName    the serial port name
-     * @param baudRate          the baud rate to be used
+     * @param serialPortName the serial port name
+     * @param baudRate the baud rate to be used
+     * @param readerThreadName the name of thread to be created
      */
-    public PowermaxSerialConnector(SerialPortManager serialPortManager, String serialPortName, int baudRate) {
+    public PowermaxSerialConnector(SerialPortManager serialPortManager, String serialPortName, int baudRate,
+            String readerThreadName) {
+        super(readerThreadName);
         this.serialPortManager = serialPortManager;
         this.serialPortName = serialPortName;
         this.baudRate = baudRate;
@@ -87,7 +90,7 @@ public class PowermaxSerialConnector extends PowermaxConnector implements Serial
                     logger.debug("Too Many Listeners Exception: {}", e.getMessage(), e);
                 }
 
-                setReaderThread(new PowermaxReaderThread(this));
+                setReaderThread(new PowermaxReaderThread(this, readerThreadName));
                 getReaderThread().start();
 
                 setConnected(true);
@@ -118,7 +121,7 @@ public class PowermaxSerialConnector extends PowermaxConnector implements Serial
             serialPort.removeEventListener();
         }
 
-        super.cleanup();
+        super.cleanup(true);
 
         if (serialPort != null) {
             serialPort.close();
@@ -139,5 +142,4 @@ public class PowermaxSerialConnector extends PowermaxConnector implements Serial
         } catch (InterruptedException e) {
         }
     }
-
 }

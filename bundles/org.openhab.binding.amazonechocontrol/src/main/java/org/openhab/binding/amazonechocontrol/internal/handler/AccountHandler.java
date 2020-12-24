@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,35 +18,32 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.amazonechocontrol.internal.AccountHandlerConfig;
 import org.openhab.binding.amazonechocontrol.internal.AccountServlet;
 import org.openhab.binding.amazonechocontrol.internal.Connection;
 import org.openhab.binding.amazonechocontrol.internal.ConnectionException;
 import org.openhab.binding.amazonechocontrol.internal.HttpException;
 import org.openhab.binding.amazonechocontrol.internal.IWebSocketCommandHandler;
 import org.openhab.binding.amazonechocontrol.internal.WebSocketConnection;
-import org.openhab.binding.amazonechocontrol.internal.jsons.JsonActivities.Activity;
+import org.openhab.binding.amazonechocontrol.internal.channelhandler.ChannelHandler;
+import org.openhab.binding.amazonechocontrol.internal.channelhandler.ChannelHandlerSendMessage;
+import org.openhab.binding.amazonechocontrol.internal.channelhandler.IAmazonThingHandler;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonActivities.Activity.SourceDeviceId;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonAscendingAlarm.AscendingAlarmModel;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonBluetoothStates;
@@ -64,12 +61,28 @@ import org.openhab.binding.amazonechocontrol.internal.jsons.JsonNotificationResp
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonNotificationSound;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonPlaylists;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonPushCommand;
+import org.openhab.binding.amazonechocontrol.internal.jsons.JsonSmartHomeDevices.SmartHomeDevice;
 import org.openhab.binding.amazonechocontrol.internal.jsons.JsonWakeWords.WakeWord;
+import org.openhab.binding.amazonechocontrol.internal.jsons.SmartHomeBaseDevice;
+import org.openhab.binding.amazonechocontrol.internal.smarthome.SmartHomeDeviceStateGroupUpdateCalculator;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -78,36 +91,49 @@ import com.google.gson.JsonSyntaxException;
  * @author Michael Geramb - Initial Contribution
  */
 @NonNullByDefault
-public class AccountHandler extends BaseBridgeHandler implements IWebSocketCommandHandler {
-
+public class AccountHandler extends BaseBridgeHandler implements IWebSocketCommandHandler, IAmazonThingHandler {
     private final Logger logger = LoggerFactory.getLogger(AccountHandler.class);
-    private Storage<String> stateStorage;
+    private final Storage<String> stateStorage;
     private @Nullable Connection connection;
     private @Nullable WebSocketConnection webSocketConnection;
-    private final Set<EchoHandler> echoHandlers = new HashSet<>();
-    private final Set<FlashBriefingProfileHandler> flashBriefingProfileHandlers = new HashSet<>();
+
+    private final Set<EchoHandler> echoHandlers = new CopyOnWriteArraySet<>();
+    private final Set<SmartHomeDeviceHandler> smartHomeDeviceHandlers = new CopyOnWriteArraySet<>();
+    private final Set<FlashBriefingProfileHandler> flashBriefingProfileHandlers = new CopyOnWriteArraySet<>();
+
     private final Object synchronizeConnection = new Object();
     private Map<String, Device> jsonSerialNumberDeviceMapping = new HashMap<>();
+    private Map<String, SmartHomeBaseDevice> jsonIdSmartHomeDeviceMapping = new HashMap<>();
+
     private @Nullable ScheduledFuture<?> checkDataJob;
     private @Nullable ScheduledFuture<?> checkLoginJob;
+    private @Nullable ScheduledFuture<?> updateSmartHomeStateJob;
     private @Nullable ScheduledFuture<?> refreshAfterCommandJob;
-    private @Nullable ScheduledFuture<?> foceCheckDataJob;
+    private @Nullable ScheduledFuture<?> refreshSmartHomeAfterCommandJob;
+    private final Object synchronizeSmartHomeJobScheduler = new Object();
+    private @Nullable ScheduledFuture<?> forceCheckDataJob;
     private String currentFlashBriefingJson = "";
     private final HttpService httpService;
     private @Nullable AccountServlet accountServlet;
     private final Gson gson;
-    int checkDataCounter;
+    private int checkDataCounter;
+    private final LinkedBlockingQueue<String> requestedDeviceUpdates = new LinkedBlockingQueue<>();
+    private @Nullable SmartHomeDeviceStateGroupUpdateCalculator smartHomeDeviceStateGroupUpdateCalculator;
+    private List<ChannelHandler> channelHandlers = new ArrayList<>();
+
+    private AccountHandlerConfig handlerConfig = new AccountHandlerConfig();
 
     public AccountHandler(Bridge bridge, HttpService httpService, Storage<String> stateStorage, Gson gson) {
         super(bridge);
         this.gson = gson;
         this.httpService = httpService;
         this.stateStorage = stateStorage;
+        channelHandlers.add(new ChannelHandlerSendMessage(this, this.gson));
     }
 
     @Override
     public void initialize() {
-        logger.debug("amazon account bridge starting...");
+        handlerConfig = getConfig().as(AccountHandlerConfig.class);
 
         synchronized (synchronizeConnection) {
             Connection connection = this.connection;
@@ -115,8 +141,13 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                 this.connection = new Connection(null, gson);
             }
         }
-        if (this.accountServlet == null) {
-            this.accountServlet = new AccountServlet(httpService, this.getThing().getUID().getId(), this, gson);
+
+        if (accountServlet == null) {
+            try {
+                accountServlet = new AccountServlet(httpService, this.getThing().getUID().getId(), this, gson);
+            } catch (IllegalStateException e) {
+                logger.warn("Failed to create account servlet", e);
+            }
         }
 
         updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING, "Wait for login");
@@ -124,42 +155,86 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
         checkLoginJob = scheduler.scheduleWithFixedDelay(this::checkLogin, 0, 60, TimeUnit.SECONDS);
         checkDataJob = scheduler.scheduleWithFixedDelay(this::checkData, 4, 60, TimeUnit.SECONDS);
 
-        logger.debug("amazon account bridge handler started.");
+        int pollingIntervalAlexa = handlerConfig.pollingIntervalSmartHomeAlexa;
+        if (pollingIntervalAlexa < 10) {
+            pollingIntervalAlexa = 10;
+        }
+        int pollingIntervalSkills = handlerConfig.pollingIntervalSmartSkills;
+        if (pollingIntervalSkills < 60) {
+            pollingIntervalSkills = 60;
+        }
+        smartHomeDeviceStateGroupUpdateCalculator = new SmartHomeDeviceStateGroupUpdateCalculator(pollingIntervalAlexa,
+                pollingIntervalSkills);
+        updateSmartHomeStateJob = scheduler.scheduleWithFixedDelay(() -> updateSmartHomeState(null), 20, 10,
+                TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void updateChannelState(String channelId, State state) {
+        updateState(channelId, state);
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.trace("Command '{}' received for channel '{}'", command, channelUID);
-        if (command instanceof RefreshType) {
-            refreshData();
+        try {
+            logger.trace("Command '{}' received for channel '{}'", command, channelUID);
+            Connection connection = this.connection;
+            if (connection == null) {
+                return;
+            }
+
+            String channelId = channelUID.getId();
+            for (ChannelHandler channelHandler : channelHandlers) {
+                if (channelHandler.tryHandleCommand(new Device(), connection, channelId, command)) {
+                    return;
+                }
+            }
+            if (command instanceof RefreshType) {
+                refreshData();
+            }
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            logger.info("handleCommand fails", e);
+        }
+    }
+
+    @Override
+    public void startAnnouncement(Device device, String speak, String bodyText, @Nullable String title,
+            @Nullable Integer volume) throws IOException, URISyntaxException {
+        EchoHandler echoHandler = findEchoHandlerBySerialNumber(device.serialNumber);
+        if (echoHandler != null) {
+            echoHandler.startAnnouncement(device, speak, bodyText, title, volume);
         }
     }
 
     public List<FlashBriefingProfileHandler> getFlashBriefingProfileHandlers() {
-        return new ArrayList<>(this.flashBriefingProfileHandlers);
+        return new ArrayList<>(flashBriefingProfileHandlers);
     }
 
     public List<Device> getLastKnownDevices() {
         return new ArrayList<>(jsonSerialNumberDeviceMapping.values());
     }
 
+    public List<SmartHomeBaseDevice> getLastKnownSmartHomeDevices() {
+        return new ArrayList<>(jsonIdSmartHomeDeviceMapping.values());
+    }
+
     public void addEchoHandler(EchoHandler echoHandler) {
-        synchronized (echoHandlers) {
-            if (!echoHandlers.add(echoHandler)) {
-                return;
-            }
+        if (echoHandlers.add(echoHandler)) {
+
+            forceCheckData();
         }
-        forceCheckData();
+    }
+
+    public void addSmartHomeDeviceHandler(SmartHomeDeviceHandler smartHomeDeviceHandler) {
+        if (smartHomeDeviceHandlers.add(smartHomeDeviceHandler)) {
+            forceCheckData();
+        }
     }
 
     public void forceCheckData() {
-        if (foceCheckDataJob == null) {
-            foceCheckDataJob = scheduler.schedule(this::forceCheckDataHandler, 1000, TimeUnit.MILLISECONDS);
+        if (forceCheckDataJob == null) {
+            forceCheckDataJob = scheduler.schedule(this::checkData, 1000, TimeUnit.MILLISECONDS);
         }
-    }
-
-    void forceCheckDataHandler() {
-        this.checkData();
     }
 
     public @Nullable Thing findThingBySerialNumber(@Nullable String deviceSerialNumber) {
@@ -171,20 +246,16 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
     }
 
     public @Nullable EchoHandler findEchoHandlerBySerialNumber(@Nullable String deviceSerialNumber) {
-        synchronized (echoHandlers) {
-            for (EchoHandler echoHandler : echoHandlers) {
-                if (StringUtils.equals(echoHandler.findSerialNumber(), deviceSerialNumber)) {
-                    return echoHandler;
-                }
+        for (EchoHandler echoHandler : echoHandlers) {
+            if (deviceSerialNumber != null && deviceSerialNumber.equals(echoHandler.findSerialNumber())) {
+                return echoHandler;
             }
         }
         return null;
     }
 
     public void addFlashBriefingProfileHandler(FlashBriefingProfileHandler flashBriefingProfileHandler) {
-        synchronized (flashBriefingProfileHandlers) {
-            flashBriefingProfileHandlers.add(flashBriefingProfileHandler);
-        }
+        flashBriefingProfileHandlers.add(flashBriefingProfileHandler);
         Connection connection = this.connection;
         if (connection != null && connection.getIsLoggedIn()) {
             if (currentFlashBriefingJson.isEmpty()) {
@@ -214,15 +285,15 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
     public void childHandlerDisposed(ThingHandler childHandler, Thing childThing) {
         // check for echo handler
         if (childHandler instanceof EchoHandler) {
-            synchronized (echoHandlers) {
-                echoHandlers.remove(childHandler);
-            }
+            echoHandlers.remove(childHandler);
         }
         // check for flash briefing profile handler
         if (childHandler instanceof FlashBriefingProfileHandler) {
-            synchronized (flashBriefingProfileHandlers) {
-                flashBriefingProfileHandlers.remove(childHandler);
-            }
+            flashBriefingProfileHandlers.remove(childHandler);
+        }
+        // check for flash briefing profile handler
+        if (childHandler instanceof SmartHomeDeviceHandler) {
+            smartHomeDeviceHandlers.remove(childHandler);
         }
         super.childHandlerDisposed(childHandler, childThing);
     }
@@ -240,29 +311,35 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
 
     private void cleanup() {
         logger.debug("cleanup {}", getThing().getUID().getAsString());
-        @Nullable
+        ScheduledFuture<?> updateSmartHomeStateJob = this.updateSmartHomeStateJob;
+        if (updateSmartHomeStateJob != null) {
+            updateSmartHomeStateJob.cancel(true);
+            this.updateSmartHomeStateJob = null;
+        }
         ScheduledFuture<?> refreshJob = this.checkDataJob;
         if (refreshJob != null) {
             refreshJob.cancel(true);
             this.checkDataJob = null;
         }
-        @Nullable
         ScheduledFuture<?> refreshLogin = this.checkLoginJob;
         if (refreshLogin != null) {
             refreshLogin.cancel(true);
             this.checkLoginJob = null;
         }
-        @Nullable
-        ScheduledFuture<?> foceCheckDataJob = this.foceCheckDataJob;
+        ScheduledFuture<?> foceCheckDataJob = this.forceCheckDataJob;
         if (foceCheckDataJob != null) {
             foceCheckDataJob.cancel(true);
-            this.foceCheckDataJob = null;
+            this.forceCheckDataJob = null;
         }
-        @Nullable
-        ScheduledFuture<?> refreshDataDelayed = this.refreshAfterCommandJob;
-        if (refreshDataDelayed != null) {
-            refreshDataDelayed.cancel(true);
+        ScheduledFuture<?> refreshAfterCommandJob = this.refreshAfterCommandJob;
+        if (refreshAfterCommandJob != null) {
+            refreshAfterCommandJob.cancel(true);
             this.refreshAfterCommandJob = null;
+        }
+        ScheduledFuture<?> refreshSmartHomeAfterCommandJob = this.refreshSmartHomeAfterCommandJob;
+        if (refreshSmartHomeAfterCommandJob != null) {
+            refreshSmartHomeAfterCommandJob.cancel(true);
+            this.refreshSmartHomeAfterCommandJob = null;
         }
         Connection connection = this.connection;
         if (connection != null) {
@@ -289,7 +366,6 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                             setConnection(currentConnection);
                         }
                     } else {
-
                         // read session data from property
                         String sessionStore = this.stateStorage.get("sessionStorage");
 
@@ -316,9 +392,8 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                     updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getLocalizedMessage());
                 }
             }
-
         } catch (Exception e) { // this handler can be removed later, if we know that nothing else can fail.
-            logger.error("check login fails with unexpected error {}", e);
+            logger.error("check login fails with unexpected error", e);
         }
     }
 
@@ -335,6 +410,7 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
         closeWebSocketConnection();
         if (connection != null) {
             updateDeviceList();
+            updateSmartHomeDeviceList(false);
             updateFlashBriefingHandlers();
             updateStatus(ThingStatus.ONLINE);
             scheduleUpdate();
@@ -350,7 +426,7 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
         }
     }
 
-    boolean checkWebSocketConnection() {
+    private boolean checkWebSocketConnection() {
         WebSocketConnection webSocketConnection = this.webSocketConnection;
         if (webSocketConnection == null || webSocketConnection.isClosed()) {
             Connection connection = this.connection;
@@ -359,7 +435,7 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                     this.webSocketConnection = new WebSocketConnection(connection.getAmazonSite(),
                             connection.getSessionCookies(), this);
                 } catch (IOException e) {
-                    logger.warn("Web socket connection starting failed: {}", e);
+                    logger.warn("Web socket connection starting failed", e);
                 }
             }
             return false;
@@ -373,9 +449,9 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                 Connection connection = this.connection;
                 if (connection != null && connection.getIsLoggedIn()) {
                     checkDataCounter++;
-                    if (checkDataCounter > 60 || foceCheckDataJob != null) {
+                    if (checkDataCounter > 60 || forceCheckDataJob != null) {
                         checkDataCounter = 0;
-                        foceCheckDataJob = null;
+                        forceCheckDataJob = null;
                     }
                     if (!checkWebSocketConnection() || checkDataCounter == 0) {
                         refreshData();
@@ -383,9 +459,9 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                 }
                 logger.debug("checkData {} finished", getThing().getUID().getAsString());
             } catch (HttpException | JsonSyntaxException | ConnectionException e) {
-                logger.debug("checkData fails {}", e);
+                logger.debug("checkData fails", e);
             } catch (Exception e) { // this handler can be removed later, if we know that nothing else can fail.
-                logger.error("checkData fails with unexpected error {}", e);
+                logger.error("checkData fails with unexpected error", e);
             }
         }
     }
@@ -402,16 +478,14 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
         ZonedDateTime timeStamp = ZonedDateTime.now();
         try {
             notifications = currentConnection.notifications();
-        } catch (IOException | URISyntaxException e) {
-            logger.debug("refreshNotifications failed {}", e);
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            logger.debug("refreshNotifications failed", e);
             return;
         }
         ZonedDateTime timeStampNow = ZonedDateTime.now();
 
-        for (EchoHandler child : echoHandlers) {
-            child.updateNotifications(timeStamp, timeStampNow, pushPayload, notifications);
-        }
-
+        echoHandlers.forEach(
+                echoHandler -> echoHandler.updateNotifications(timeStamp, timeStampNow, pushPayload, notifications));
     }
 
     private void refreshData() {
@@ -433,6 +507,7 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
 
                 // get all devices registered in the account
                 updateDeviceList();
+                updateSmartHomeDeviceList(false);
                 updateFlashBriefingHandlers();
 
                 DeviceNotificationState[] deviceNotificationStates = null;
@@ -454,15 +529,14 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                         try {
                             musicProviders = currentConnection.getMusicProviders();
                         } catch (HttpException | JsonSyntaxException | ConnectionException e) {
-                            logger.debug("Update music provider failed {}", e);
+                            logger.debug("Update music provider failed", e);
                         }
                     }
                 }
                 // forward device information to echo handler
                 for (EchoHandler child : echoHandlers) {
-                    Device device = findDeviceJson(child);
+                    Device device = findDeviceJson(child.findSerialNumber());
 
-                    @Nullable
                     JsonNotificationSound[] notificationSounds = null;
                     JsonPlaylists playlists = null;
                     if (device != null && currentConnection.getIsLoggedIn()) {
@@ -470,13 +544,13 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                         try {
                             notificationSounds = currentConnection.getNotificationSounds(device);
                         } catch (IOException | HttpException | JsonSyntaxException | ConnectionException e) {
-                            logger.debug("Update notification sounds failed {}", e);
+                            logger.debug("Update notification sounds failed", e);
                         }
                         // update playlists
                         try {
                             playlists = currentConnection.getPlaylists(device);
                         } catch (IOException | HttpException | JsonSyntaxException | ConnectionException e) {
-                            logger.debug("Update playlist failed {}", e);
+                            logger.debug("Update playlist failed", e);
                         }
                     }
 
@@ -487,21 +561,18 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                     DeviceNotificationState deviceNotificationState = null;
                     AscendingAlarmModel ascendingAlarmModel = null;
                     if (device != null) {
-                        if (ascendingAlarmModels != null) {
-                            for (AscendingAlarmModel current : ascendingAlarmModels) {
-                                if (StringUtils.equals(current.deviceSerialNumber, device.serialNumber)) {
-                                    ascendingAlarmModel = current;
-                                    break;
-                                }
+                        final String serialNumber = device.serialNumber;
+                        if (serialNumber != null) {
+                            if (ascendingAlarmModels != null) {
+                                ascendingAlarmModel = Arrays.stream(ascendingAlarmModels).filter(Objects::nonNull)
+                                        .filter(current -> serialNumber.equals(current.deviceSerialNumber)).findFirst()
+                                        .orElse(null);
                             }
-                        }
-
-                        if (deviceNotificationStates != null) {
-                            for (DeviceNotificationState current : deviceNotificationStates) {
-                                if (StringUtils.equals(current.deviceSerialNumber, device.serialNumber)) {
-                                    deviceNotificationState = current;
-                                    break;
-                                }
+                            if (deviceNotificationStates != null) {
+                                deviceNotificationState = Arrays.stream(deviceNotificationStates)
+                                        .filter(Objects::nonNull)
+                                        .filter(current -> serialNumber.equals(current.deviceSerialNumber)).findFirst()
+                                        .orElse(null);
                             }
                         }
                     }
@@ -517,46 +588,31 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
 
                 logger.debug("refresh data {} finished", getThing().getUID().getAsString());
             } catch (HttpException | JsonSyntaxException | ConnectionException e) {
-                logger.debug("refresh data fails {}", e);
+                logger.debug("refresh data fails", e);
             } catch (Exception e) { // this handler can be removed later, if we know that nothing else can fail.
-                logger.error("refresh data fails with unexpected error {}", e);
+                logger.error("refresh data fails with unexpected error", e);
             }
         }
-    }
-
-    public @Nullable Device findDeviceJson(EchoHandler echoHandler) {
-        String serialNumber = echoHandler.findSerialNumber();
-        return findDeviceJson(serialNumber);
     }
 
     public @Nullable Device findDeviceJson(@Nullable String serialNumber) {
-        Device result = null;
-        if (StringUtils.isNotEmpty(serialNumber)) {
-            Map<String, Device> jsonSerialNumberDeviceMapping = this.jsonSerialNumberDeviceMapping;
-            result = jsonSerialNumberDeviceMapping.get(serialNumber);
+        if (serialNumber == null || serialNumber.isEmpty()) {
+            return null;
         }
-        return result;
+        return this.jsonSerialNumberDeviceMapping.get(serialNumber);
     }
 
     public @Nullable Device findDeviceJsonBySerialOrName(@Nullable String serialOrName) {
-        if (StringUtils.isNotEmpty(serialOrName)) {
-            Map<String, Device> currentJsonSerialNumberDeviceMapping = this.jsonSerialNumberDeviceMapping;
-            for (Device device : currentJsonSerialNumberDeviceMapping.values()) {
-                if (StringUtils.equalsIgnoreCase(device.serialNumber, serialOrName)) {
-                    return device;
-                }
-            }
-            for (Device device : currentJsonSerialNumberDeviceMapping.values()) {
-                if (StringUtils.equalsIgnoreCase(device.accountName, serialOrName)) {
-                    return device;
-                }
-            }
+        if (serialOrName == null || serialOrName.isEmpty()) {
+            return null;
         }
-        return null;
+
+        return this.jsonSerialNumberDeviceMapping.values().stream().filter(
+                d -> serialOrName.equalsIgnoreCase(d.serialNumber) || serialOrName.equalsIgnoreCase(d.accountName))
+                .findFirst().orElse(null);
     }
 
     public List<Device> updateDeviceList() {
-
         Connection currentConnection = connection;
         if (currentConnection == null) {
             return new ArrayList<>();
@@ -567,51 +623,45 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
             if (currentConnection.getIsLoggedIn()) {
                 devices = currentConnection.getDeviceList();
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException | InterruptedException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getLocalizedMessage());
         }
         if (devices != null) {
-            Map<String, Device> newJsonSerialDeviceMapping = new HashMap<>();
-            for (Device device : devices) {
-                String serialNumber = device.serialNumber;
-                if (serialNumber != null) {
-                    newJsonSerialDeviceMapping.put(serialNumber, device);
-                }
-
-            }
-            jsonSerialNumberDeviceMapping = newJsonSerialDeviceMapping;
+            // create new device map
+            jsonSerialNumberDeviceMapping = devices.stream().filter(device -> device.serialNumber != null)
+                    .collect(Collectors.toMap(d -> Objects.requireNonNull(d.serialNumber), d -> d));
         }
-        WakeWord[] wakeWords = currentConnection.getWakeWords();
 
-        synchronized (echoHandlers) {
-            for (EchoHandler child : echoHandlers) {
-                String serialNumber = child.findSerialNumber();
-                String deviceWakeWord = null;
-                for (WakeWord wakeWord : wakeWords) {
-                    if (wakeWord != null) {
-                        if (StringUtils.equals(wakeWord.deviceSerialNumber, serialNumber)) {
-                            deviceWakeWord = wakeWord.wakeWord;
-                            break;
-                        }
+        WakeWord[] wakeWords = currentConnection.getWakeWords();
+        // update handlers
+        for (EchoHandler echoHandler : echoHandlers) {
+            String serialNumber = echoHandler.findSerialNumber();
+            String deviceWakeWord = null;
+            for (WakeWord wakeWord : wakeWords) {
+                if (wakeWord != null) {
+                    if (serialNumber.equals(wakeWord.deviceSerialNumber)) {
+                        deviceWakeWord = wakeWord.wakeWord;
+                        break;
                     }
                 }
-                child.setDeviceAndUpdateThingState(this, findDeviceJson(child), deviceWakeWord);
             }
+            echoHandler.setDeviceAndUpdateThingState(this, findDeviceJson(serialNumber), deviceWakeWord);
         }
+
         if (devices != null) {
             return devices;
         }
-        return new ArrayList<>();
+        return List.of();
     }
 
     public void setEnabledFlashBriefingsJson(String flashBriefingJson) {
         Connection currentConnection = connection;
         JsonFeed[] feeds = gson.fromJson(flashBriefingJson, JsonFeed[].class);
-        if (currentConnection != null) {
+        if (currentConnection != null && feeds != null) {
             try {
                 currentConnection.setEnabledFlashBriefings(feeds);
-            } catch (IOException | URISyntaxException e) {
-                logger.warn("Set flashbriefing profile failed {}", e);
+            } catch (IOException | URISyntaxException | InterruptedException e) {
+                logger.warn("Set flashbriefing profile failed", e);
             }
         }
         updateFlashBriefingHandlers();
@@ -630,19 +680,17 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
     }
 
     private String updateFlashBriefingHandlers(Connection currentConnection) {
-        synchronized (flashBriefingProfileHandlers) {
-            if (!flashBriefingProfileHandlers.isEmpty() || currentFlashBriefingJson.isEmpty()) {
-                updateFlashBriefingProfiles(currentConnection);
-            }
-            boolean flashBriefingProfileFound = false;
-            for (FlashBriefingProfileHandler child : flashBriefingProfileHandlers) {
-                flashBriefingProfileFound |= child.initialize(this, currentFlashBriefingJson);
-            }
-            if (flashBriefingProfileFound) {
-                return "";
-            }
-            return this.currentFlashBriefingJson;
+        if (!flashBriefingProfileHandlers.isEmpty() || currentFlashBriefingJson.isEmpty()) {
+            updateFlashBriefingProfiles(currentConnection);
         }
+        boolean flashBriefingProfileFound = false;
+        for (FlashBriefingProfileHandler child : flashBriefingProfileHandlers) {
+            flashBriefingProfileFound |= child.initialize(this, currentFlashBriefingJson);
+        }
+        if (flashBriefingProfileFound) {
+            return "";
+        }
+        return this.currentFlashBriefingJson;
     }
 
     public @Nullable Connection findConnection() {
@@ -672,10 +720,10 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                 forSerializer[i] = copy;
             }
             this.currentFlashBriefingJson = gson.toJson(forSerializer);
-        } catch (HttpException | JsonSyntaxException | IOException | URISyntaxException | ConnectionException e) {
-            logger.warn("get flash briefing profiles fails {}", e);
+        } catch (HttpException | JsonSyntaxException | IOException | URISyntaxException | ConnectionException
+                | InterruptedException e) {
+            logger.warn("get flash briefing profiles fails", e);
         }
-
     }
 
     @Override
@@ -684,22 +732,20 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
             handleWebsocketCommand(pushCommand);
         } catch (Exception e) {
             // should never happen, but if the exception is going out of this function, the binding stop working.
-            logger.warn("handling of websockets fails: {}", e);
+            logger.warn("handling of websockets fails", e);
         }
     }
 
     void handleWebsocketCommand(JsonPushCommand pushCommand) {
         String command = pushCommand.command;
         if (command != null) {
+            ScheduledFuture<?> refreshDataDelayed = this.refreshAfterCommandJob;
             switch (command) {
                 case "PUSH_ACTIVITY":
                     handlePushActivity(pushCommand.payload);
-                    return;
+                    break;
                 case "PUSH_DOPPLER_CONNECTION_CHANGE":
                 case "PUSH_BLUETOOTH_STATE_CHANGE":
-                    // refresh data 200ms after last command
-                    @Nullable
-                    ScheduledFuture<?> refreshDataDelayed = this.refreshAfterCommandJob;
                     if (refreshDataDelayed != null) {
                         refreshDataDelayed.cancel(false);
                     }
@@ -713,11 +759,9 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
                     break;
                 default:
                     String payload = pushCommand.payload;
-                    if (payload != null && StringUtils.isNotEmpty(payload) && payload.startsWith("{")
-                            && payload.endsWith("}")) {
-                        JsonCommandPayloadPushDevice devicePayload = gson.fromJson(payload,
-                                JsonCommandPayloadPushDevice.class);
-                        @Nullable
+                    if (payload != null && payload.startsWith("{") && payload.endsWith("}")) {
+                        JsonCommandPayloadPushDevice devicePayload = Objects
+                                .requireNonNull(gson.fromJson(payload, JsonCommandPayloadPushDevice.class));
                         DopplerId dopplerId = devicePayload.dopplerId;
                         if (dopplerId != null) {
                             handlePushDeviceCommand(dopplerId, command, payload);
@@ -729,7 +773,6 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
     }
 
     private void handlePushDeviceCommand(DopplerId dopplerId, String command, String payload) {
-        @Nullable
         EchoHandler echoHandler = findEchoHandlerBySerialNumber(dopplerId.deviceSerialNumber);
         if (echoHandler != null) {
             echoHandler.handlePushCommand(command, payload);
@@ -737,7 +780,11 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
     }
 
     private void handlePushActivity(@Nullable String payload) {
-        JsonCommandPayloadPushActivity pushActivity = gson.fromJson(payload, JsonCommandPayloadPushActivity.class);
+        if (payload == null) {
+            return;
+        }
+        JsonCommandPayloadPushActivity pushActivity = Objects
+                .requireNonNull(gson.fromJson(payload, JsonCommandPayloadPushActivity.class));
 
         Key key = pushActivity.key;
         if (key == null) {
@@ -748,34 +795,170 @@ public class AccountHandler extends BaseBridgeHandler implements IWebSocketComma
         if (connection == null || !connection.getIsLoggedIn()) {
             return;
         }
-        Activity[] activities = connection.getActivities(10, pushActivity.timestamp);
-        Activity currentActivity = null;
-        String search = key.registeredUserId + "#" + key.entryId;
-        for (Activity activity : activities) {
-            if (StringUtils.equals(activity.id, search)) {
-                currentActivity = activity;
-                break;
-            }
-        }
-        if (currentActivity == null) {
-            return;
-        }
 
-        @Nullable
-        SourceDeviceId @Nullable [] sourceDeviceIds = currentActivity.sourceDeviceIds;
-        if (sourceDeviceIds != null) {
-            for (SourceDeviceId sourceDeviceId : sourceDeviceIds) {
-                if (sourceDeviceId != null) {
-                    EchoHandler echoHandler = findEchoHandlerBySerialNumber(sourceDeviceId.serialNumber);
-                    if (echoHandler != null) {
-                        echoHandler.handlePushActivity(currentActivity);
+        String search = key.registeredUserId + "#" + key.entryId;
+        Arrays.stream(connection.getActivities(10, pushActivity.timestamp))
+                .filter(activity -> activity != null && search.equals(activity.id)).findFirst()
+                .ifPresent(currentActivity -> {
+                    SourceDeviceId[] sourceDeviceIds = currentActivity.sourceDeviceIds;
+                    if (sourceDeviceIds != null) {
+                        Arrays.stream(sourceDeviceIds).filter(Objects::nonNull)
+                                .map(sourceDeviceId -> findEchoHandlerBySerialNumber(sourceDeviceId.serialNumber))
+                                .filter(Objects::nonNull).forEach(echoHandler -> Objects.requireNonNull(echoHandler)
+                                        .handlePushActivity(currentActivity));
                     }
-                }
-            }
-        }
+                });
     }
 
     void refreshAfterCommand() {
         refreshData();
+    }
+
+    private @Nullable SmartHomeBaseDevice findSmartDeviceHomeJson(SmartHomeDeviceHandler handler) {
+        String id = handler.getId();
+        if (!id.isEmpty()) {
+            return jsonIdSmartHomeDeviceMapping.get(id);
+        }
+        return null;
+    }
+
+    public int getSmartHomeDevicesDiscoveryMode() {
+        return handlerConfig.discoverSmartHome;
+    }
+
+    public List<SmartHomeBaseDevice> updateSmartHomeDeviceList(boolean forceUpdate) {
+        Connection currentConnection = connection;
+        if (currentConnection == null) {
+            return Collections.emptyList();
+        }
+
+        if (!forceUpdate && smartHomeDeviceHandlers.isEmpty() && getSmartHomeDevicesDiscoveryMode() == 0) {
+            return Collections.emptyList();
+        }
+
+        List<SmartHomeBaseDevice> smartHomeDevices = null;
+        try {
+            if (currentConnection.getIsLoggedIn()) {
+                smartHomeDevices = currentConnection.getSmarthomeDeviceList();
+            }
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getLocalizedMessage());
+        }
+        if (smartHomeDevices != null) {
+            // create new id map
+            Map<String, SmartHomeBaseDevice> newJsonIdSmartHomeDeviceMapping = new HashMap<>();
+            for (Object smartHomeDevice : smartHomeDevices) {
+                if (smartHomeDevice instanceof SmartHomeBaseDevice) {
+                    SmartHomeBaseDevice smartHomeBaseDevice = (SmartHomeBaseDevice) smartHomeDevice;
+                    String id = smartHomeBaseDevice.findId();
+                    if (id != null) {
+                        newJsonIdSmartHomeDeviceMapping.put(id, smartHomeBaseDevice);
+                    }
+                }
+            }
+            jsonIdSmartHomeDeviceMapping = newJsonIdSmartHomeDeviceMapping;
+        }
+        // update handlers
+        smartHomeDeviceHandlers
+                .forEach(child -> child.setDeviceAndUpdateThingState(this, findSmartDeviceHomeJson(child)));
+
+        if (smartHomeDevices != null) {
+            return smartHomeDevices;
+        }
+
+        return Collections.emptyList();
+    }
+
+    public void forceDelayedSmartHomeStateUpdate(@Nullable String deviceId) {
+        if (deviceId == null) {
+            return;
+        }
+        synchronized (synchronizeSmartHomeJobScheduler) {
+            requestedDeviceUpdates.add(deviceId);
+            ScheduledFuture<?> refreshSmartHomeAfterCommandJob = this.refreshSmartHomeAfterCommandJob;
+            if (refreshSmartHomeAfterCommandJob != null) {
+                refreshSmartHomeAfterCommandJob.cancel(false);
+            }
+            this.refreshSmartHomeAfterCommandJob = scheduler.schedule(this::updateSmartHomeStateJob, 500,
+                    TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void updateSmartHomeStateJob() {
+        Set<String> deviceUpdates = new HashSet<>();
+
+        synchronized (synchronizeSmartHomeJobScheduler) {
+            Connection connection = this.connection;
+            if (connection == null || !connection.getIsLoggedIn()) {
+                this.refreshSmartHomeAfterCommandJob = scheduler.schedule(this::updateSmartHomeStateJob, 1000,
+                        TimeUnit.MILLISECONDS);
+                return;
+            }
+            requestedDeviceUpdates.drainTo(deviceUpdates);
+            this.refreshSmartHomeAfterCommandJob = null;
+        }
+
+        deviceUpdates.forEach(this::updateSmartHomeState);
+    }
+
+    private synchronized void updateSmartHomeState(@Nullable String deviceFilterId) {
+        try {
+            logger.debug("updateSmartHomeState started with deviceFilterId={}", deviceFilterId);
+            Connection connection = this.connection;
+            if (connection == null || !connection.getIsLoggedIn()) {
+                return;
+            }
+            List<SmartHomeBaseDevice> allDevices = getLastKnownSmartHomeDevices();
+            Set<String> applianceIds = new HashSet<>();
+            if (deviceFilterId != null) {
+                applianceIds.add(deviceFilterId);
+            } else {
+                SmartHomeDeviceStateGroupUpdateCalculator smartHomeDeviceStateGroupUpdateCalculator = this.smartHomeDeviceStateGroupUpdateCalculator;
+                if (smartHomeDeviceStateGroupUpdateCalculator == null) {
+                    return;
+                }
+                if (smartHomeDeviceHandlers.isEmpty()) {
+                    return;
+                }
+                List<SmartHomeDevice> devicesToUpdate = new ArrayList<>();
+                for (SmartHomeDeviceHandler device : smartHomeDeviceHandlers) {
+                    String id = device.getId();
+                    SmartHomeBaseDevice baseDevice = jsonIdSmartHomeDeviceMapping.get(id);
+                    SmartHomeDeviceHandler.getSupportedSmartHomeDevices(baseDevice, allDevices)
+                            .forEach(devicesToUpdate::add);
+                }
+                smartHomeDeviceStateGroupUpdateCalculator.removeDevicesWithNoUpdate(devicesToUpdate);
+                devicesToUpdate.stream().map(shd -> shd.applianceId).forEach(applianceId -> {
+                    if (applianceId != null) {
+                        applianceIds.add(applianceId);
+                    }
+                });
+                if (applianceIds.isEmpty()) {
+                    return;
+                }
+
+            }
+            Map<String, JsonArray> applianceIdToCapabilityStates = connection
+                    .getSmartHomeDeviceStatesJson(applianceIds);
+
+            for (SmartHomeDeviceHandler smartHomeDeviceHandler : smartHomeDeviceHandlers) {
+                String id = smartHomeDeviceHandler.getId();
+                if (requestedDeviceUpdates.contains(id)) {
+                    logger.debug("Device update {} suspended", id);
+                    continue;
+                }
+                if (deviceFilterId == null || id.equals(deviceFilterId)) {
+                    smartHomeDeviceHandler.updateChannelStates(allDevices, applianceIdToCapabilityStates);
+                } else {
+                    logger.trace("Id {} not matching filter {}", id, deviceFilterId);
+                }
+            }
+
+            logger.debug("updateSmartHomeState finished");
+        } catch (HttpException | JsonSyntaxException | ConnectionException e) {
+            logger.debug("updateSmartHomeState fails", e);
+        } catch (Exception e) { // this handler can be removed later, if we know that nothing else can fail.
+            logger.warn("updateSmartHomeState fails with unexpected error", e);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.tplinksmarthome.internal.model;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * Data class for reading the retrieved state of a Smart Home light bulb.
@@ -70,5 +70,4 @@ public class LightState extends ErrorResponse {
                 + ignoreDefault + ", mode:" + mode + ", on_off:" + onOff + ", saturation:" + saturation
                 + super.toString();
     }
-
 }

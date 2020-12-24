@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,14 +21,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.nikohomecontrol.internal.NikoHomeControlBindingConstants;
 import org.openhab.binding.nikohomecontrol.internal.protocol.NikoHomeControlDiscover;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mark Herwege - Initial Contribution
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.nikohomecontrol")
+@Component(service = DiscoveryService.class, configurationPid = "discovery.nikohomecontrol")
 @NonNullByDefault
 public class NikoHomeControlBridgeDiscoveryService extends AbstractDiscoveryService {
 

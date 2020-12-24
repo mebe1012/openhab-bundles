@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,30 +12,24 @@
  */
 package org.openhab.binding.plugwise.internal.handler;
 
-import static org.eclipse.smarthome.core.thing.ThingStatus.*;
 import static org.openhab.binding.plugwise.internal.PlugwiseBindingConstants.CONFIG_PROPERTY_MAC_ADDRESS;
 import static org.openhab.binding.plugwise.internal.protocol.field.DeviceType.STICK;
+import static org.openhab.core.thing.ThingStatus.*;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.plugwise.internal.PlugwiseCommunicationHandler;
 import org.openhab.binding.plugwise.internal.PlugwiseDeviceTask;
 import org.openhab.binding.plugwise.internal.PlugwiseInitializationException;
 import org.openhab.binding.plugwise.internal.PlugwiseMessagePriority;
+import org.openhab.binding.plugwise.internal.PlugwiseThingDiscoveryService;
 import org.openhab.binding.plugwise.internal.PlugwiseUtils;
 import org.openhab.binding.plugwise.internal.config.PlugwiseStickConfig;
 import org.openhab.binding.plugwise.internal.listener.PlugwiseMessageListener;
@@ -49,6 +43,15 @@ import org.openhab.binding.plugwise.internal.protocol.NetworkStatusRequestMessag
 import org.openhab.binding.plugwise.internal.protocol.NetworkStatusResponseMessage;
 import org.openhab.binding.plugwise.internal.protocol.field.DeviceType;
 import org.openhab.binding.plugwise.internal.protocol.field.MACAddress;
+import org.openhab.core.io.transport.serial.SerialPortManager;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,18 +87,18 @@ public class PlugwiseStickHandler extends BaseBridgeHandler implements PlugwiseM
     };
 
     private final Logger logger = LoggerFactory.getLogger(PlugwiseStickHandler.class);
-    private final PlugwiseCommunicationHandler communicationHandler = new PlugwiseCommunicationHandler();
-    private final SerialPortManager serialPortManager;
+    private final PlugwiseCommunicationHandler communicationHandler;
     private final List<PlugwiseStickStatusListener> statusListeners = new CopyOnWriteArrayList<>();
 
-    private @NonNullByDefault({}) PlugwiseStickConfig configuration;
+    private PlugwiseStickConfig configuration = new PlugwiseStickConfig();
 
     private @Nullable MACAddress circlePlusMAC;
     private @Nullable MACAddress stickMAC;
 
     public PlugwiseStickHandler(Bridge bridge, SerialPortManager serialPortManager) {
         super(bridge);
-        this.serialPortManager = serialPortManager;
+        communicationHandler = new PlugwiseCommunicationHandler(bridge.getUID(), () -> configuration,
+                serialPortManager);
     }
 
     public void addMessageListener(PlugwiseMessageListener listener) {
@@ -120,6 +123,11 @@ public class PlugwiseStickHandler extends BaseBridgeHandler implements PlugwiseM
 
     public @Nullable MACAddress getCirclePlusMAC() {
         return circlePlusMAC;
+    }
+
+    @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return List.of(PlugwiseThingDiscoveryService.class);
     }
 
     public @Nullable MACAddress getStickMAC() {
@@ -190,8 +198,6 @@ public class PlugwiseStickHandler extends BaseBridgeHandler implements PlugwiseM
     @Override
     public void initialize() {
         configuration = getConfigAs(PlugwiseStickConfig.class);
-        communicationHandler.setConfiguration(configuration);
-        communicationHandler.setSerialPortManager(serialPortManager);
         communicationHandler.addMessageListener(this);
 
         try {
@@ -267,5 +273,4 @@ public class PlugwiseStickHandler extends BaseBridgeHandler implements PlugwiseM
             task.stop();
         }
     }
-
 }

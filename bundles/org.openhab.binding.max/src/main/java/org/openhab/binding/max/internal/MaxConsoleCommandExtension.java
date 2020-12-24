@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,14 +19,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.max.internal.handler.MaxCubeBridgeHandler;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -36,15 +39,17 @@ import org.osgi.service.component.annotations.Reference;
  * @author Marcel Verpaalen - Initial contribution
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class MaxConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_BACKUP = "backup";
     private static final String SUBCMD_REBOOT = "reboot";
+    private final ThingRegistry thingRegistry;
 
-    private ThingRegistry thingRegistry;
-
-    public MaxConsoleCommandExtension() {
+    @Activate
+    public MaxConsoleCommandExtension(@Reference ThingRegistry thingRegistry) {
         super("max", "Additional EQ3 MAX! commands.");
+        this.thingRegistry = thingRegistry;
     }
 
     @Override
@@ -84,17 +89,17 @@ public class MaxConsoleCommandExtension extends AbstractConsoleCommandExtension 
             if (handler != null) {
                 handler.cubeReboot();
             } else {
-                console.println(String.format("Could not find cube %s", args[1]));
+                console.println(String.format("Could not find MAX! cube %s", args[1]));
                 printMaxDevices(console, SUPPORTED_BRIDGE_THING_TYPES_UIDS);
             }
         } else {
-            console.println("Specify cube to reboot.");
+            console.println("Specify MAX! cube to reboot.");
             printMaxDevices(console, SUPPORTED_BRIDGE_THING_TYPES_UIDS);
         }
     }
 
     private List<Thing> findDevices(Set<ThingTypeUID> deviceTypes) {
-        List<Thing> devs = new ArrayList<Thing>();
+        List<Thing> devs = new ArrayList<>();
         for (Thing thing : thingRegistry.getAll()) {
             if (deviceTypes.contains(thing.getThingTypeUID())) {
                 devs.add(thing);
@@ -103,7 +108,7 @@ public class MaxConsoleCommandExtension extends AbstractConsoleCommandExtension 
         return devs;
     }
 
-    private MaxCubeBridgeHandler getHandler(String thingId) {
+    private @Nullable MaxCubeBridgeHandler getHandler(String thingId) {
         MaxCubeBridgeHandler handler = null;
         try {
             ThingUID bridgeUID = new ThingUID(thingId);
@@ -128,16 +133,7 @@ public class MaxConsoleCommandExtension extends AbstractConsoleCommandExtension 
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_BACKUP, "Backup cube data"),
-                buildCommandUsage(SUBCMD_REBOOT + " <thingUID>", "Reset cube") });
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
+        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_BACKUP, "Backup MAX! cube data"),
+                buildCommandUsage(SUBCMD_REBOOT + " <thingUID>", "Reset MAX! cube") });
     }
 }

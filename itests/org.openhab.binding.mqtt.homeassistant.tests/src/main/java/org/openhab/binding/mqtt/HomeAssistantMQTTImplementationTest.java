@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,12 @@
 package org.openhab.binding.mqtt;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,19 +32,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.core.util.UIDUtils;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionObserver;
-import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.openhab.binding.mqtt.generic.AvailabilityTracker;
 import org.openhab.binding.mqtt.generic.ChannelStateUpdateListener;
 import org.openhab.binding.mqtt.generic.MqttChannelTypeProvider;
 import org.openhab.binding.mqtt.generic.TransformationServiceProvider;
@@ -55,6 +48,16 @@ import org.openhab.binding.mqtt.homeassistant.internal.ComponentSwitch;
 import org.openhab.binding.mqtt.homeassistant.internal.DiscoverComponents;
 import org.openhab.binding.mqtt.homeassistant.internal.DiscoverComponents.ComponentDiscovered;
 import org.openhab.binding.mqtt.homeassistant.internal.HaID;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttConnectionObserver;
+import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.UIDUtils;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -65,103 +68,103 @@ import com.google.gson.GsonBuilder;
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public class HomeAssistantMQTTImplementationTest extends JavaOSGiTest {
-    private MqttService mqttService;
-    private MqttBrokerConnection embeddedConnection;
-    private MqttBrokerConnection connection;
+    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
+    private @NonNullByDefault({}) MqttService mqttService;
+    private @NonNullByDefault({}) MqttBrokerConnection embeddedConnection;
+    private @NonNullByDefault({}) MqttBrokerConnection connection;
     private int registeredTopics = 100;
-    private Throwable failure = null;
+    private @Nullable Throwable failure;
 
-    @Mock
-    ChannelStateUpdateListener channelStateUpdateListener;
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
-    @Mock
-    TransformationServiceProvider transformationServiceProvider;
+    private @Mock @NonNullByDefault({}) ChannelStateUpdateListener channelStateUpdateListener;
+    private @Mock @NonNullByDefault({}) AvailabilityTracker availabilityTracker;
+    private @Mock @NonNullByDefault({}) TransformationServiceProvider transformationServiceProvider;
 
     /**
      * Create an observer that fails the test as soon as the broker client connection changes its connection state
      * to something else then CONNECTED.
      */
-    private MqttConnectionObserver failIfChange = (state, error) -> assertThat(state,
+    private final MqttConnectionObserver failIfChange = (state, error) -> assertThat(state,
             is(MqttConnectionState.CONNECTED));
-    private String testObjectTopic;
+    private final String testObjectTopic = "homeassistant/switch/node/"
+            + ThingChannelConstants.testHomeAssistantThing.getId();
 
-    @Before
-    public void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    @BeforeEach
+    public void beforeEach() throws Exception {
         registerVolatileStorageService();
-        initMocks(this);
+        mocksCloseable = openMocks(this);
+        configurationAdmin = getService(ConfigurationAdmin.class);
         mqttService = getService(MqttService.class);
 
         // Wait for the EmbeddedBrokerService internal connection to be connected
-        embeddedConnection = new EmbeddedBrokerTools().waitForConnection(mqttService);
-        embeddedConnection.setRetain(true);
-        embeddedConnection.setQos(1);
+        embeddedConnection = new EmbeddedBrokerTools(configurationAdmin, mqttService).waitForConnection();
 
         connection = new MqttBrokerConnection(embeddedConnection.getHost(), embeddedConnection.getPort(),
                 embeddedConnection.isSecure(), "ha_mqtt");
-        connection.setQos(1);
-        connection.setRetain(true);
-        connection.setPersistencePath(Paths.get("subconn"));
-        connection.start().get(1000, TimeUnit.MILLISECONDS);
+        connection.start().get(2, TimeUnit.SECONDS);
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
         // If the connection state changes in between -> fail
         connection.addConnectionObserver(failIfChange);
 
         // Create topic string and config for one example HA component (a Switch)
-        testObjectTopic = "homeassistant/switch/node/" + ThingChannelConstants.testHomeAssistantThing.getId();
-        final String config = "{'name':'testname','state_topic':'" + testObjectTopic + "/state','command_topic':'" + testObjectTopic + "/set'}";
+        final String config = "{'name':'testname','state_topic':'" + testObjectTopic + "/state','command_topic':'"
+                + testObjectTopic + "/set'}";
 
         // Publish component configurations and component states to MQTT
         List<CompletableFuture<Boolean>> futures = new ArrayList<>();
-        futures.add(embeddedConnection.publish(testObjectTopic + "/config", config.getBytes()));
-        futures.add(embeddedConnection.publish(testObjectTopic + "/state", "true".getBytes()));
+        futures.add(embeddedConnection.publish(testObjectTopic + "/config", config.getBytes(), 0, true));
+        futures.add(embeddedConnection.publish(testObjectTopic + "/state", "ON".getBytes(), 0, true));
 
         registeredTopics = futures.size();
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(1000, TimeUnit.MILLISECONDS);
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(2, TimeUnit.SECONDS);
 
         failure = null;
 
         doReturn(null).when(transformationServiceProvider).getTransformationService(any());
     }
 
-    @After
-    public void tearDown() throws InterruptedException, ExecutionException, TimeoutException {
+    @AfterEach
+    public void afterEach() throws Exception {
         if (connection != null) {
             connection.removeConnectionObserver(failIfChange);
-            connection.stop().get(1000, TimeUnit.MILLISECONDS);
+            connection.stop().get(2, TimeUnit.SECONDS);
         }
+
+        mocksCloseable.close();
     }
 
     @Test
     public void reconnectTest() throws InterruptedException, ExecutionException, TimeoutException {
         connection.removeConnectionObserver(failIfChange);
-        connection.stop().get(2000, TimeUnit.MILLISECONDS);
+        connection.stop().get(2, TimeUnit.SECONDS);
         connection = new MqttBrokerConnection(embeddedConnection.getHost(), embeddedConnection.getPort(),
                 embeddedConnection.isSecure(), "ha_mqtt");
-        connection.start().get(2000, TimeUnit.MILLISECONDS);
+        connection.start().get(2, TimeUnit.SECONDS);
     }
 
     @Test
     public void retrieveAllTopics() throws InterruptedException, ExecutionException, TimeoutException {
         CountDownLatch c = new CountDownLatch(registeredTopics);
         connection.subscribe("homeassistant/+/+/" + ThingChannelConstants.testHomeAssistantThing.getId() + "/#",
-                (topic, payload) -> c.countDown()).get(1000, TimeUnit.MILLISECONDS);
-        assertTrue("Connection " + connection.getClientId() + " not retrieving all topics",
-                c.await(1000, TimeUnit.MILLISECONDS));
+                (topic, payload) -> c.countDown()).get(2, TimeUnit.SECONDS);
+        assertTrue(c.await(2, TimeUnit.SECONDS),
+                "Connection " + connection.getClientId() + " not retrieving all topics");
     }
 
     @Test
     public void parseHATree() throws InterruptedException, ExecutionException, TimeoutException {
         MqttChannelTypeProvider channelTypeProvider = mock(MqttChannelTypeProvider.class);
 
-        final Map<String, AbstractComponent<?>> haComponents = new HashMap<String, AbstractComponent<?>>();
+        final Map<String, AbstractComponent<?>> haComponents = new HashMap<>();
         Gson gson = new GsonBuilder().registerTypeAdapterFactory(new ChannelConfigurationTypeAdapterFactory()).create();
 
         ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(4);
-        DiscoverComponents discover = spy(
-                new DiscoverComponents(ThingChannelConstants.testHomeAssistantThing, scheduler,
-                        channelStateUpdateListener, gson, transformationServiceProvider));
+        DiscoverComponents discover = spy(new DiscoverComponents(ThingChannelConstants.testHomeAssistantThing,
+                scheduler, channelStateUpdateListener, availabilityTracker, gson, transformationServiceProvider));
 
         // The DiscoverComponents object calls ComponentDiscovered callbacks.
         // In the following implementation we add the found component to the `haComponents` map
@@ -174,17 +177,17 @@ public class HomeAssistantMQTTImplementationTest extends JavaOSGiTest {
             latch.countDown();
         };
 
-        // Start the discovery for 100ms. Forced timeout after 300ms.
+        // Start the discovery for 2000ms. Forced timeout after 4000ms.
         HaID haID = new HaID(testObjectTopic + "/config");
-        CompletableFuture<Void> future = discover.startDiscovery(connection, 500, Collections.singleton(haID), cd)
+        CompletableFuture<Void> future = discover.startDiscovery(connection, 2000, Collections.singleton(haID), cd)
                 .thenRun(() -> {
                 }).exceptionally(e -> {
                     failure = e;
                     return null;
                 });
 
-        assertTrue(latch.await(1000, TimeUnit.MILLISECONDS));
-        future.get(800, TimeUnit.MILLISECONDS);
+        assertTrue(latch.await(4, TimeUnit.SECONDS));
+        future.get(2, TimeUnit.SECONDS);
 
         // No failure expected and one discovered result
         assertNull(failure);
@@ -204,12 +207,12 @@ public class HomeAssistantMQTTImplementationTest extends JavaOSGiTest {
 
         haComponents.values().stream().map(e -> e.start(connection, scheduler, 100))
                 .reduce(CompletableFuture.completedFuture(null), (a, v) -> a.thenCompose(b -> v)).exceptionally(e -> {
-            failure = e;
-            return null;
-        }).get();
+                    failure = e;
+                    return null;
+                }).get();
 
         // We should have received the retained value, while subscribing to the channels MQTT state topic.
-        verify(channelStateUpdateListener, timeout(1000).times(1)).updateChannelState(any(), any());
+        verify(channelStateUpdateListener, timeout(4000).times(1)).updateChannelState(any(), any());
 
         // Value should be ON now.
         value = haComponents.get(channelGroupId).channelTypes().get(ComponentSwitch.switchChannelID).getState()

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,9 +25,9 @@ import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.util.HexUtils;
 import org.openhab.binding.rotel.internal.RotelException;
 import org.openhab.binding.rotel.internal.RotelModel;
+import org.openhab.core.util.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,6 +186,7 @@ public abstract class RotelConnector {
     /** true if the connection is established, false if not */
     private boolean connected;
 
+    protected String readerThreadName;
     private @Nullable Thread readerThread;
 
     private List<RotelMessageEventListener> listeners = new ArrayList<>();
@@ -221,13 +222,15 @@ public abstract class RotelConnector {
      * @param model the Rotel model in use
      * @param protocol the protocol to be used
      * @param simu whether the communication is simulated or real
+     * @param readerThreadName the name of thread to be created
      */
     public RotelConnector(RotelModel model, RotelProtocol protocol, Map<RotelSource, String> sourcesLabels,
-            boolean simu) {
+            boolean simu, String readerThreadName) {
         this.model = model;
         this.protocol = protocol;
         this.sourcesLabels = sourcesLabels;
         this.simu = simu;
+        this.readerThreadName = readerThreadName;
     }
 
     /**
@@ -981,7 +984,7 @@ public abstract class RotelConnector {
             } else {
                 for (RotelSource src : sourcesLabels.keySet()) {
                     String label = sourcesLabels.get(src);
-                    if (value.startsWith(label)) {
+                    if (label != null && value.startsWith(label)) {
                         if (source == null || sourcesLabels.get(source).length() < label.length()) {
                             source = src;
                         }

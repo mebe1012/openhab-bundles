@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,13 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mihome.internal.socket.XiaomiDiscoverySocket;
 import org.openhab.binding.mihome.internal.socket.XiaomiSocketListener;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +39,15 @@ import com.google.gson.JsonObject;
  * @author Patrick Boos - Initial contribution
  * @author Kuba Wolanin - logger fixes
  */
-@Component(service = DiscoveryService.class, immediate = true, configurationPid = "discovery.mihome")
+@NonNullByDefault
+@Component(service = DiscoveryService.class, configurationPid = "discovery.mihome")
 public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService implements XiaomiSocketListener {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_BRIDGE);
     private static final int DISCOVERY_TIMEOUT_SEC = 30;
 
     private final Logger logger = LoggerFactory.getLogger(XiaomiBridgeDiscoveryService.class);
-    private XiaomiDiscoverySocket socket;
+    private final XiaomiDiscoverySocket socket = new XiaomiDiscoverySocket("discovery");
 
     public XiaomiBridgeDiscoveryService() {
         super(SUPPORTED_THING_TYPES, DISCOVERY_TIMEOUT_SEC, false);
@@ -53,8 +55,7 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
 
     @Override
     protected void startScan() {
-        socket = (socket == null) ? new XiaomiDiscoverySocket() : socket;
-        socket.intialize();
+        socket.initialize();
         logger.debug("Start scan for bridges");
         socket.registerListener(this);
         discoverGateways();
@@ -65,17 +66,13 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
         super.stopScan();
         logger.debug("Stop scan");
         removeOlderResults(getTimestampOfLastScan());
-        if (socket != null) {
-            socket.unregisterListener(this);
-        }
+        socket.unregisterListener(this);
     }
 
     @Override
     public void deactivate() {
         super.deactivate();
-        if (socket != null) {
-            socket.unregisterListener(this);
-        }
+        socket.unregisterListener(this);
     }
 
     @Override
@@ -100,6 +97,12 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
         String serialNumber = jobject.get("sid").getAsString();
         String ipAddress = jobject.get("ip").getAsString();
         int port = jobject.get("port").getAsInt();
+
+        // It is reported that the gateway is sometimes providing the serial number without the leading 0
+        // This is a workaround for a bug in the gateway
+        if (serialNumber.length() == 11) {
+            serialNumber = "0" + serialNumber;
+        }
 
         properties.put(SERIAL_NUMBER, serialNumber);
         properties.put(HOST, ipAddress);

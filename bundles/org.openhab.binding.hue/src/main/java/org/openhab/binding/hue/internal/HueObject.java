@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,7 @@ import java.util.Map;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Basic light information.
+ * Basic hue object information.
  *
  * @author Q42 - Initial contribution
  * @author Denis Dudnik - moved Jue library source code inside the smarthome Hue binding

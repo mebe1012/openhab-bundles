@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,14 +16,14 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.tplinksmarthome.internal.Commands;
 import org.openhab.binding.tplinksmarthome.internal.Connection;
 import org.openhab.binding.tplinksmarthome.internal.TPLinkSmartHomeConfiguration;
 import org.openhab.binding.tplinksmarthome.internal.model.ErrorResponse;
 import org.openhab.binding.tplinksmarthome.internal.model.HasErrorResponse;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * Abstract class as base for Smart Home device implementations.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.io.hueemulation.internal.dto.HueDataStore;
 import org.openhab.io.hueemulation.internal.dto.HueGroupEntry;
 import org.openhab.io.hueemulation.internal.dto.HueLightEntry;
@@ -360,7 +360,6 @@ public class RuleUtils {
 
         trigger = triggers.stream().filter(p -> p.getId().equals("timertrigger")).findFirst();
         if (trigger.isPresent()) {
-
             TimerConfig c = trigger.get().getConfiguration().as(TimerConfig.class);
             if (c.repeat == null) {
                 return String.format(c.randomizeTime.isEmpty() ? "PT%s" : "PT%sA%s", c.time, c.randomizeTime);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,65 +13,63 @@
 package org.openhab.binding.mqtt.generic.internal.handler;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.binding.mqtt.generic.internal.handler.ThingChannelConstants.*;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.binding.mqtt.generic.ChannelConfig;
 import org.openhab.binding.mqtt.generic.ChannelConfigBuilder;
 import org.openhab.binding.mqtt.generic.ChannelState;
 import org.openhab.binding.mqtt.generic.MqttChannelStateDescriptionProvider;
 import org.openhab.binding.mqtt.generic.ThingHandlerHelper;
 import org.openhab.binding.mqtt.generic.TransformationServiceProvider;
-import org.openhab.binding.mqtt.generic.internal.handler.GenericMQTTThingHandler;
 import org.openhab.binding.mqtt.generic.values.OnOffValue;
 import org.openhab.binding.mqtt.generic.values.TextValue;
 import org.openhab.binding.mqtt.generic.values.ValueFactory;
 import org.openhab.binding.mqtt.handler.AbstractBrokerHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandlerCallback;
+import org.openhab.core.types.RefreshType;
 
 /**
  * Tests cases for {@link GenericMQTTThingHandler}.
  *
  * @author David Graeff - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class GenericThingHandlerTests {
-    @Mock
-    private ThingHandlerCallback callback;
 
-    @Mock
-    private Thing thing;
-
-    @Mock
-    private AbstractBrokerHandler bridgeHandler;
-
-    @Mock
-    private MqttBrokerConnection connection;
+    private @Mock ThingHandlerCallback callback;
+    private @Mock Thing thing;
+    private @Mock AbstractBrokerHandler bridgeHandler;
+    private @Mock MqttBrokerConnection connection;
 
     private GenericMQTTThingHandler thingHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ThingStatusInfo thingStatus = new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null);
 
-        MockitoAnnotations.initMocks(this);
         // Mock the thing: We need the thingUID and the bridgeUID
         when(thing.getUID()).thenReturn(testGenericThing);
         when(thing.getChannels()).thenReturn(thingChannelList);
@@ -81,12 +79,11 @@ public class GenericThingHandlerTests {
         // Return the mocked connection object if the bridge handler is asked for it
         when(bridgeHandler.getConnectionAsync()).thenReturn(CompletableFuture.completedFuture(connection));
 
-        CompletableFuture<Void> voidFutureComplete = new CompletableFuture<Void>();
+        CompletableFuture<Void> voidFutureComplete = new CompletableFuture<>();
         voidFutureComplete.complete(null);
         doReturn(voidFutureComplete).when(connection).unsubscribeAll();
         doReturn(CompletableFuture.completedFuture(true)).when(connection).subscribe(any(), any());
         doReturn(CompletableFuture.completedFuture(true)).when(connection).unsubscribe(any(), any());
-        doReturn(CompletableFuture.completedFuture(true)).when(connection).publish(any(), any());
         doReturn(CompletableFuture.completedFuture(true)).when(connection).publish(any(), any(), anyInt(),
                 anyBoolean());
 
@@ -101,11 +98,12 @@ public class GenericThingHandlerTests {
         doReturn(thingStatus).when(thingHandler).getBridgeStatus();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void initializeWithUnknownThingUID() {
         ChannelConfig config = textConfiguration().as(ChannelConfig.class);
-        thingHandler.createChannelState(config, new ChannelUID(testGenericThing, "test"),
-                ValueFactory.createValueState(config, unknownChannel.getId()));
+        assertThrows(IllegalArgumentException.class,
+                () -> thingHandler.createChannelState(config, new ChannelUID(testGenericThing, "test"),
+                        ValueFactory.createValueState(config, unknownChannel.getId())));
     }
 
     @Test
@@ -188,7 +186,8 @@ public class GenericThingHandlerTests {
         // Test process message
         channelConfig.processMessage("test/state", payload);
 
-        verify(callback).statusUpdated(eq(thing), argThat(arg -> arg.getStatus().equals(ThingStatus.ONLINE)));
+        verify(callback, atLeastOnce()).statusUpdated(eq(thing),
+                argThat(arg -> arg.getStatus().equals(ThingStatus.ONLINE)));
 
         verify(callback).stateUpdated(eq(textChannelUID), argThat(arg -> "UPDATE".equals(arg.toString())));
         assertThat(textValue.getChannelState().toString(), is("UPDATE"));

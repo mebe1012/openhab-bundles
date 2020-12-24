@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,19 +16,18 @@ import java.io.IOException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.openhab.binding.weatherunderground.internal.WeatherUndergroundBindingConstants;
 import org.openhab.binding.weatherunderground.internal.json.WeatherUndergroundJsonData;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +53,7 @@ public class WeatherUndergroundBridgeHandler extends BaseBridgeHandler {
     @Nullable
     private ScheduledFuture<?> controlApiKeyJob;
 
-    @Nullable
-    private String apikey;
+    private String apikey = "";
 
     public WeatherUndergroundBridgeHandler(Bridge bridge) {
         super(bridge);
@@ -68,12 +66,13 @@ public class WeatherUndergroundBridgeHandler extends BaseBridgeHandler {
         Configuration config = getThing().getConfiguration();
 
         // Check if an api key has been provided during the bridge creation
-        if (StringUtils.trimToNull((String) config.get(WeatherUndergroundBindingConstants.APIKEY)) == null) {
+        Object configApiKey = config.get(WeatherUndergroundBindingConstants.APIKEY);
+        if (configApiKey == null || !(configApiKey instanceof String) || ((String) configApiKey).trim().isEmpty()) {
             logger.debug("Setting thing '{}' to OFFLINE: Parameter 'apikey' must be configured.", getThing().getUID());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
                     "@text/offline.conf-error-missing-apikey");
         } else {
-            apikey = (String) config.get(WeatherUndergroundBindingConstants.APIKEY);
+            apikey = ((String) configApiKey).trim();
             updateStatus(ThingStatus.UNKNOWN);
             startControlApiKeyJob();
         }
@@ -95,7 +94,7 @@ public class WeatherUndergroundBridgeHandler extends BaseBridgeHandler {
 
                     // Check if the provided api key is valid for use with the weatherunderground service
                     try {
-                        String urlStr = URL.replace("%APIKEY%", StringUtils.trimToEmpty(getApikey()));
+                        String urlStr = URL.replace("%APIKEY%", getApikey());
                         // Run the HTTP request and get the JSON response from Weather Underground
                         String response = null;
                         try {
@@ -168,7 +167,7 @@ public class WeatherUndergroundBridgeHandler extends BaseBridgeHandler {
         // not needed
     }
 
-    public @Nullable String getApikey() {
+    public String getApikey() {
         return apikey;
     }
 }

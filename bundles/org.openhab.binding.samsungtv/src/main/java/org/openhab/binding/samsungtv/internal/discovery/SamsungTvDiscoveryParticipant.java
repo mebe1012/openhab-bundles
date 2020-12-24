@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,12 +22,12 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.jupnp.model.meta.RemoteDevice;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Arjan Mels - Changed to upnp.UpnpDiscoveryParticipant
  */
 @NonNullByDefault
-@Component(immediate = true)
+@Component
 public class SamsungTvDiscoveryParticipant implements UpnpDiscoveryParticipant {
     private final Logger logger = LoggerFactory.getLogger(SamsungTvDiscoveryParticipant.class);
 
@@ -57,7 +57,7 @@ public class SamsungTvDiscoveryParticipant implements UpnpDiscoveryParticipant {
             properties.put(HOST_NAME, device.getIdentity().getDescriptorURL().getHost());
 
             DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties)
-                    .withLabel(getLabel(device)).build();
+                    .withRepresentationProperty(HOST_NAME).withLabel(getLabel(device)).build();
 
             logger.debug("Created a DiscoveryResult for device '{}' with UDN '{}' and properties: {}",
                     device.getDetails().getModelDetails().getModelName(),

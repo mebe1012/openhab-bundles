@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,15 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.jupnp.model.meta.RemoteDevice;
 import org.openhab.binding.squeezebox.internal.utils.HttpUtils;
 import org.openhab.binding.squeezebox.internal.utils.SqueezeBoxCommunicationException;
 import org.openhab.binding.squeezebox.internal.utils.SqueezeBoxNotAuthorizedException;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Hilbush - Add support for LMS authentication
  *
  */
-@Component(immediate = true)
+@Component
 public class SqueezeBoxServerDiscoveryParticipant implements UpnpDiscoveryParticipant {
     private final Logger logger = LoggerFactory.getLogger(SqueezeBoxServerDiscoveryParticipant.class);
 
@@ -82,12 +82,13 @@ public class SqueezeBoxServerDiscoveryParticipant implements UpnpDiscoveryPartic
 
             String label = device.getDetails().getFriendlyName();
 
-            properties.put("ipAddress", host);
+            String representationPropertyName = "ipAddress";
+            properties.put(representationPropertyName, host);
             properties.put("webport", new Integer(webPort));
             properties.put("cliPort", new Integer(cliPort));
 
-            DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties).withLabel(label)
-                    .build();
+            DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties)
+                    .withRepresentationProperty(representationPropertyName).withLabel(label).build();
 
             logger.debug("Created a DiscoveryResult for device '{}' with UDN '{}'",
                     device.getDetails().getFriendlyName(), device.getIdentity().getUdn().getIdentifierString());
@@ -109,5 +110,4 @@ public class SqueezeBoxServerDiscoveryParticipant implements UpnpDiscoveryPartic
         }
         return null;
     }
-
 }

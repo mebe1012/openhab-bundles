@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationException;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +57,10 @@ public class JavaScriptEngineManager {
      */
     protected CompiledScript getScript(final String filename) throws TransformationException {
         synchronized (compiledScriptMap) {
-            if (compiledScriptMap.containsKey(filename)) {
+            CompiledScript compiledScript = compiledScriptMap.get(filename);
+            if (compiledScript != null) {
                 logger.debug("Loading JavaScript {} from cache.", filename);
-                return compiledScriptMap.get(filename);
+                return compiledScript;
             } else {
                 final String path = TransformationScriptWatcher.TRANSFORM_FOLDER + File.separator + filename;
                 logger.debug("Loading script {} from storage ", path);

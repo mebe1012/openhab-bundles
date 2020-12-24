@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,16 +25,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.tado.internal.TadoBindingConstants;
 import org.openhab.binding.tado.internal.api.ApiException;
 import org.openhab.binding.tado.internal.api.model.MobileDevice;
 import org.openhab.binding.tado.internal.api.model.Zone;
 import org.openhab.binding.tado.internal.handler.TadoHomeHandler;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class TadoDiscoveryService extends AbstractDiscoveryService {
 
     private ScheduledFuture<?> discoveryFuture;
 
-    public final static Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Collections
+    public static final Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Collections
             .unmodifiableSet(Stream.of(THING_TYPE_ZONE, THING_TYPE_MOBILE_DEVICE).collect(Collectors.toSet()));
 
     private TadoHomeHandler homeHandler;

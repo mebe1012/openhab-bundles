@@ -32,6 +32,7 @@ By default the pairing mode disables itself after 1 minute (can be configured).
 
 It is important to note that you are exposing *Items* not *Things* or *Channels*.
 Only Color, Dimmer, Rollershutter, Switch and Group type *Items* are supported.
+Group type items require the "Huelight" tag to be exposed as devices instead of Groups.
 
 This service can emulate 3 different devices:
 
@@ -104,7 +105,7 @@ Permanent V1 bridge emulation (no obvious reason to enable that):
 org.openhab.hueemulation:permanentV1bridge=false
 ```
 
-The hue emulation service will announce its existence via UPNP on every
+The hue emulation service will announce its existence via UPnP on every
 of the openHAB configured primary addresses (IPv4 and IPv6).
 
 Usually you do not want to set this option, but change the primary address configuration of openHAB.
@@ -113,7 +114,7 @@ This option allows you to override what addresses are used for the announcement.
 You can have multiple comma separated entries.
 
 ```
-org.openhab.hueemulation:discoveryIps=192.168.1.100,::FFFF:A9DB:0D85
+org.openhab.hueemulation:discoveryIp=192.168.1.100,::FFFF:A9DB:0D85
 ```
 
 The hue emulation service supports three types of emulated bulbs.
@@ -166,6 +167,15 @@ You must either
   ```
 * or let openHAB run on port 80 (the entire java process requires elevated privileges).
 
+* For Amazon Echo the pairing process may fail due to a 302 response from openHAB, this can be resolved by using a reverse proxy to change the request url from `/api` to `/api/`, for example nginx with the following configuration:
+```
+  server {
+    listen 80;
+    location /api {
+      proxy_pass http://localhost:8080/api/;
+    }
+  }
+  ```
 Please open port 80 tcp and port 1900 udp in your firewall installation.
 
 You can test if the hue emulation does its job by enabling pairing mode including the option "Amazon Echo device discovery fix".

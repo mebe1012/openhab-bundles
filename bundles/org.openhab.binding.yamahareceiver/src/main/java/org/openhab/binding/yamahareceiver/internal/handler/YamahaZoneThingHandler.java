@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,27 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.yamahareceiver.internal.ChannelsTypeProviderAvailableInputs;
 import org.openhab.binding.yamahareceiver.internal.ChannelsTypeProviderPreset;
 import org.openhab.binding.yamahareceiver.internal.YamahaReceiverBindingConstants.Feature;
@@ -77,6 +56,27 @@ import org.openhab.binding.yamahareceiver.internal.state.PresetInfoState;
 import org.openhab.binding.yamahareceiver.internal.state.PresetInfoStateListener;
 import org.openhab.binding.yamahareceiver.internal.state.ZoneControlState;
 import org.openhab.binding.yamahareceiver.internal.state.ZoneControlStateListener;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,23 +169,8 @@ public class YamahaZoneThingHandler extends BaseThingHandler
         zoneConfig = getConfigAs(YamahaZoneConfig.class);
         logger.trace("Initialize {} with zone '{}'", getThing().getLabel(), zoneConfig.getZoneValue());
 
-        if (zoneConfig.getZone() == null) {
-            String msg = String.format("Zone not set or invalid zone name used: '%s'. It needs to be on of: '%s'",
-                    zoneConfig.getZoneValue(), Arrays.toString(Zone.values()));
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, msg);
-            logger.warn("{}", msg);
-            return;
-        }
-
-        YamahaBridgeHandler bridgeHandler = getBridgeHandler();
-        if (bridgeHandler != null) {
-            bridgeStatusChanged(bridgeHandler.getThing().getStatusInfo());
-        }
-    }
-
-    @Override
-    public void dispose() {
-
+        Bridge bridge = getBridge();
+        initializeThing(bridge != null ? bridge.getStatus() : null);
     }
 
     protected YamahaBridgeHandler getBridgeHandler() {
@@ -206,23 +191,40 @@ public class YamahaZoneThingHandler extends BaseThingHandler
 
     @Override
     public void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo) {
-        if (bridgeStatusInfo.getStatus() == ThingStatus.ONLINE) {
-            if (zoneControl == null) {
-                YamahaBridgeHandler brHandler = getBridgeHandler();
+        initializeThing(bridgeStatusInfo.getStatus());
+    }
 
-                zoneControl = getProtocolFactory().ZoneControl(getConnection(), zoneConfig, this,
-                        brHandler::getInputConverter, getDeviceInformationState());
-                zoneAvailableInputs = getProtocolFactory().ZoneAvailableInputs(getConnection(), zoneConfig, this,
-                        brHandler::getInputConverter, getDeviceInformationState());
+    private void initializeThing(ThingStatus bridgeStatus) {
+        YamahaBridgeHandler bridgeHandler = getBridgeHandler();
+        if (bridgeHandler != null && bridgeStatus != null) {
+            if (bridgeStatus == ThingStatus.ONLINE) {
+                if (zoneConfig == null || zoneConfig.getZone() == null) {
+                    String msg = String.format(
+                            "Zone not set or invalid zone name used: '%s'. It needs to be on of: '%s'",
+                            zoneConfig.getZoneValue(), Arrays.toString(Zone.values()));
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, msg);
+                    logger.info("{}", msg);
+                } else {
+                    if (zoneControl == null) {
+                        YamahaBridgeHandler brHandler = getBridgeHandler();
 
-                updateZoneInformation();
+                        zoneControl = getProtocolFactory().ZoneControl(getConnection(), zoneConfig, this,
+                                brHandler::getInputConverter, getDeviceInformationState());
+                        zoneAvailableInputs = getProtocolFactory().ZoneAvailableInputs(getConnection(), zoneConfig,
+                                this, brHandler::getInputConverter, getDeviceInformationState());
+
+                        updateZoneInformation();
+                    }
+
+                    updateStatus(ThingStatus.ONLINE);
+                }
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
+                zoneControl = null;
+                zoneAvailableInputs = null;
             }
-
-            updateStatus(ThingStatus.ONLINE);
         } else {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE);
-            zoneControl = null;
-            zoneAvailableInputs = null;
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED);
         }
     }
 
@@ -722,9 +724,11 @@ public class YamahaZoneThingHandler extends BaseThingHandler
             try {
                 stateUpdatable.update();
             } catch (IOException e) {
+                logger.debug("State update error. Changing thing to offline", e);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, e.getMessage());
             } catch (ReceivedMessageParseException e) {
-                updateProperty(PROPERTY_LAST_PARSE_ERROR, e.getMessage());
+                String message = e.getMessage();
+                updateProperty(PROPERTY_LAST_PARSE_ERROR, message != null ? message : "");
                 // Some AVRs send unexpected responses. We log parser exceptions therefore.
                 logger.debug("Parse error!", e);
             }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,23 +16,23 @@ import static org.openhab.binding.seneye.internal.SeneyeBindingConstants.*;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.seneye.internal.CommunicationException;
 import org.openhab.binding.seneye.internal.InvalidConfigurationException;
 import org.openhab.binding.seneye.internal.ReadingsUpdate;
 import org.openhab.binding.seneye.internal.SeneyeConfigurationParameters;
 import org.openhab.binding.seneye.internal.SeneyeDeviceReading;
 import org.openhab.binding.seneye.internal.SeneyeService;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public final class SeneyeHandler extends BaseThingHandler implements ReadingsUpd
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (seneyeService == null || seneyeService.isInitialized() == false) {
+        if (seneyeService == null || !seneyeService.isInitialized()) {
             return;
         }
 
@@ -69,20 +69,26 @@ public final class SeneyeHandler extends BaseThingHandler implements ReadingsUpd
     @Override
     public void newState(SeneyeDeviceReading readings) {
         if (readings != null) {
-            updateState(CHANNEL_TEMPERATURE, new DecimalType(readings.temperature.curr));
-            updateState(CHANNEL_NH3, new DecimalType(readings.nh3.curr));
-            updateState(CHANNEL_NH4, new DecimalType(readings.nh4.curr));
-            updateState(CHANNEL_O2, new DecimalType(readings.o2.curr));
-            updateState(CHANNEL_PAR, new DecimalType(readings.par.curr));
-            updateState(CHANNEL_PH, new DecimalType(readings.ph.curr));
-            updateState(CHANNEL_LUX, new DecimalType(readings.lux.curr));
-            updateState(CHANNEL_KELVIN, new DecimalType(readings.kelvin.curr));
-            updateState(CHANNEL_LASTREADING, new DateTimeType(readings.status.getLast_experimentDate()));
-            updateState(CHANNEL_SLIDEEXPIRES, new DateTimeType(readings.status.getSlide_expiresDate()));
-            updateState(CHANNEL_WRONGSLIDE, new StringType(readings.status.getWrong_slideString()));
-            updateState(CHANNEL_SLIDESERIAL, new StringType(readings.status.getSlide_serialString()));
-            updateState(CHANNEL_OUTOFWATER, new StringType(readings.status.getOut_of_waterString()));
-            updateState(CHANNEL_DISCONNECTED, new StringType(readings.status.getDisconnectedString()));
+            logger.debug("Updating readings for sensor type {}", seneyeService.seneyeType);
+            switch (seneyeService.seneyeType) {
+                case 3:
+                    updateState(CHANNEL_NH4, new DecimalType(readings.nh4.curr));
+                    updateState(CHANNEL_PAR, new DecimalType(readings.par.curr));
+                    updateState(CHANNEL_LUX, new DecimalType(readings.lux.curr));
+                    updateState(CHANNEL_KELVIN, new DecimalType(readings.kelvin.curr));
+                case 2:
+                    updateState(CHANNEL_O2, new DecimalType(readings.o2.curr));
+                case 1:
+                    updateState(CHANNEL_TEMPERATURE, new DecimalType(readings.temperature.curr));
+                    updateState(CHANNEL_NH3, new DecimalType(readings.nh3.curr));
+                    updateState(CHANNEL_PH, new DecimalType(readings.ph.curr));
+                    updateState(CHANNEL_LASTREADING, new DateTimeType(readings.status.getLast_experimentDate()));
+                    updateState(CHANNEL_SLIDEEXPIRES, new DateTimeType(readings.status.getSlide_expiresDate()));
+                    updateState(CHANNEL_WRONGSLIDE, new StringType(readings.status.getWrong_slideString()));
+                    updateState(CHANNEL_SLIDESERIAL, new StringType(readings.status.getSlide_serialString()));
+                    updateState(CHANNEL_OUTOFWATER, new StringType(readings.status.getOut_of_waterString()));
+                    updateState(CHANNEL_DISCONNECTED, new StringType(readings.status.getDisconnectedString()));
+            }
         }
     }
 
@@ -119,7 +125,7 @@ public final class SeneyeHandler extends BaseThingHandler implements ReadingsUpd
             return; // critical error
         }
 
-        super.initialize();
+        updateStatus(ThingStatus.ONLINE);
 
         // contact Seneye API
         scheduler.submit(() -> {
@@ -145,7 +151,7 @@ public final class SeneyeHandler extends BaseThingHandler implements ReadingsUpd
         }
 
         // ok, initialization succeeded
-        cachedSeneyeDeviceReading = new ExpiringCache<SeneyeDeviceReading>(TimeUnit.SECONDS.toMillis(10), () -> {
+        cachedSeneyeDeviceReading = new ExpiringCache<>(TimeUnit.SECONDS.toMillis(10), () -> {
             return seneyeService.getDeviceReadings();
         });
 

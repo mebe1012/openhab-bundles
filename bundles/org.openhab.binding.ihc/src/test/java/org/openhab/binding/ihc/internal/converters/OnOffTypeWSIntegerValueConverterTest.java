@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,19 +12,19 @@
  */
 package org.openhab.binding.ihc.internal.converters;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.Type;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.binding.ihc.internal.ws.exeptions.ConversionException;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSIntegerValue;
 import org.openhab.binding.ihc.internal.ws.resourcevalues.WSResourceValue;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.Type;
 
 /**
  * Test for IHC / ELKO binding
@@ -69,15 +69,15 @@ public class OnOffTypeWSIntegerValueConverterTest {
         assertEquals(OnOffType.ON, type);
     }
 
-    @Test(expected = ConversionException.class)
-    public void testOnLevelledError() throws ConversionException {
+    @Test
+    public void testOnLevelledError() {
         WSIntegerValue val = new WSIntegerValue(12345, 0, -100, 100);
 
         Map<Command, Object> commandLevels = new HashMap<>();
         commandLevels.put(OnOffType.ON, "70");
 
-        val = convertFromOHType(val, OnOffType.ON,
-                new ConverterAdditionalInfo(null, false, Collections.unmodifiableMap(commandLevels)));
+        assertThrows(ConversionException.class, () -> convertFromOHType(val, OnOffType.ON,
+                new ConverterAdditionalInfo(null, false, Collections.unmodifiableMap(commandLevels))));
     }
 
     @Test

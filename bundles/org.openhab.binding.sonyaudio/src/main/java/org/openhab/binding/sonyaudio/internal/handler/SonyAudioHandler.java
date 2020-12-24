@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,24 +26,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.sonyaudio.internal.SonyAudioBindingConstants;
 import org.openhab.binding.sonyaudio.internal.SonyAudioEventListener;
 import org.openhab.binding.sonyaudio.internal.protocol.SonyAudioConnection;
+import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,8 +233,11 @@ abstract class SonyAudioHandler extends BaseThingHandler implements SonyAudioEve
                 case CHANNEL_RADIO_SEEK_STATION:
                     handleRadioSeekStationCommand(command, channelUID);
                     break;
+                case CHANNEL_NIGHTMODE:
+                    handleNightMode(command, channelUID);
+                    break;
                 default:
-                    logger.error("Channel {} not supported!", id);
+                    logger.error("Command {}, {} not supported by {}!", id, command, channelUID);
             }
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
@@ -252,6 +255,20 @@ abstract class SonyAudioHandler extends BaseThingHandler implements SonyAudioEve
         if (command instanceof StringType) {
             logger.debug("handleSoundSettings set {}", command);
             connection.setSoundSettings("soundField", ((StringType) command).toString());
+        }
+    }
+
+    public void handleNightMode(Command command, ChannelUID channelUID) throws IOException {
+        if (command instanceof RefreshType) {
+            logger.debug("handleNightMode RefreshType");
+            Map<String, String> result = soundSettingsCache.getValue();
+            if (result != null) {
+                updateState(channelUID, new StringType(result.get("nightMode")));
+            }
+        }
+        if (command instanceof OnOffType) {
+            logger.debug("handleNightMode set {}", command);
+            connection.setSoundSettings("nightMode", ((OnOffType) command) == OnOffType.ON ? "on" : "off");
         }
     }
 
@@ -394,7 +411,7 @@ abstract class SonyAudioHandler extends BaseThingHandler implements SonyAudioEve
         }
     }
 
-    abstract public String setInputCommand(Command command);
+    public abstract String setInputCommand(Command command);
 
     @Override
     public void initialize() {
@@ -498,7 +515,7 @@ abstract class SonyAudioHandler extends BaseThingHandler implements SonyAudioEve
         }
     }
 
-    abstract public StringType inputSource(String input);
+    public abstract StringType inputSource(String input);
 
     @Override
     public void updateCurrentRadioStation(int radioStation) {

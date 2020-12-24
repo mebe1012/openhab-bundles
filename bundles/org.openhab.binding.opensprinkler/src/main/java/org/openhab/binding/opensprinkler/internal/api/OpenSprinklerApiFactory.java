@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,10 @@ package org.openhab.binding.opensprinkler.internal.api;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.opensprinkler.internal.api.exception.CommunicationApiException;
 import org.openhab.binding.opensprinkler.internal.api.exception.GeneralApiException;
 import org.openhab.binding.opensprinkler.internal.config.OpenSprinklerHttpInterfaceConfig;
+import org.openhab.core.io.net.http.HttpClientFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -80,15 +80,5 @@ public class OpenSprinklerApiFactory {
 
             return lowestSupportedApi;
         }
-    }
-
-    /**
-     * Factory method returns an OpenSprnkler PI GPIO class for control.
-     *
-     * @param numberOfStations The number of stations to control on the OpenSprinkler PI device.
-     * @return OpenSprinkler GPIO class for control of the device.
-     */
-    public OpenSprinklerApi getGpioApi(int numberOfStations) {
-        return new OpenSprinklerGpioApi(numberOfStations);
     }
 }

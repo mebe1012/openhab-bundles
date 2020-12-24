@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,26 +21,27 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.ClientBuilder;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.items.events.ItemStateChangedEvent;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.events.ChannelTriggeredEvent;
-import org.eclipse.smarthome.core.thing.events.ThingEventFactory;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.events.ChannelTriggeredEvent;
+import org.openhab.core.thing.events.ThingEventFactory;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.openhab.io.neeo.internal.NeeoApi;
 import org.openhab.io.neeo.internal.NeeoConstants;
 import org.openhab.io.neeo.internal.NeeoDeviceKeys;
@@ -90,7 +91,7 @@ public class NeeoBrainService extends DefaultServletService {
     private final ServiceContext context;
 
     /** The HTTP request */
-    private final HttpRequest request = new HttpRequest();
+    private final HttpRequest request;
 
     /** The scheduler to use to schedule recipe execution */
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -114,7 +115,7 @@ public class NeeoBrainService extends DefaultServletService {
      * @param api the non-null api
      * @param context the non-null context
      */
-    public NeeoBrainService(NeeoApi api, ServiceContext context) {
+    public NeeoBrainService(NeeoApi api, ServiceContext context, ClientBuilder clientBuilder) {
         Objects.requireNonNull(api, "api cannot be null");
         Objects.requireNonNull(context, "context cannot be null");
 
@@ -125,6 +126,7 @@ public class NeeoBrainService extends DefaultServletService {
         scheduler.execute(() -> {
             resendState();
         });
+        request = new HttpRequest(clientBuilder);
     }
 
     /**
@@ -232,7 +234,6 @@ public class NeeoBrainService extends DefaultServletService {
                 logger.debug("Unknown/unhandled brain service route (GET): {}", StringUtils.join(paths, '/'));
             }
         }
-
     }
 
     /**
@@ -443,7 +444,6 @@ public class NeeoBrainService extends DefaultServletService {
                 logger.trace("Apply Event: {} --- {} --- {} = {}", event, itemName, isBound, keys);
                 return isBound;
             }
-
         };
     }
 

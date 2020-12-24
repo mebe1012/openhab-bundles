@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,15 +19,16 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComLighting2Messag
 
 import java.math.BigDecimal;
 
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedChannelException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueException;
+import org.openhab.binding.rfxcom.internal.handler.DeviceState;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 
 /**
  * RFXCOM data class for lighting2 message.
@@ -35,7 +36,6 @@ import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnsupportedValueExce
  * @author Pauli Anttila - Initial contribution
  */
 public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighting2Message.SubType> {
-
     public enum SubType implements ByteEnumWrapper {
         AC(0),
         HOME_EASY_EU(1),
@@ -123,7 +123,6 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
 
     @Override
     public byte[] decodeMessage() {
-
         byte[] data = new byte[12];
 
         data[0] = 0x0B;
@@ -151,8 +150,7 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
     /**
      * Convert a 0-15 scale value to a percent type.
      *
-     * @param pt
-     *               percent type to convert
+     * @param pt percent type to convert
      * @return converted value 0-15
      */
     public static int getDimLevelFromPercentType(PercentType pt) {
@@ -163,8 +161,7 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
     /**
      * Convert a 0-15 scale value to a percent type.
      *
-     * @param value
-     *                  percent type to convert
+     * @param value percent type to convert
      * @return converted value 0-15
      */
     public static PercentType getPercentTypeFromDimLevel(int value) {
@@ -175,8 +172,7 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
     }
 
     @Override
-    public State convertToState(String channelId) throws RFXComUnsupportedChannelException {
-
+    public State convertToState(String channelId, DeviceState deviceState) throws RFXComUnsupportedChannelException {
         switch (channelId) {
             case CHANNEL_DIMMING_LEVEL:
                 return RFXComLighting2Message.getPercentTypeFromDimLevel(dimmingLevel);
@@ -214,7 +210,7 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
                 }
 
             default:
-                return super.convertToState(channelId);
+                return super.convertToState(channelId, deviceState);
         }
     }
 
@@ -225,7 +221,6 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
 
     @Override
     public void setDeviceId(String deviceId) throws RFXComException {
-
         String[] ids = deviceId.split("\\" + ID_DELIMITER);
         if (ids.length != 2) {
             throw new RFXComException("Invalid device id '" + deviceId + "'");
@@ -243,7 +238,6 @@ public class RFXComLighting2Message extends RFXComDeviceMessageImpl<RFXComLighti
 
     @Override
     public void convertFromState(String channelId, Type type) throws RFXComUnsupportedChannelException {
-
         switch (channelId) {
             case CHANNEL_COMMAND:
                 if (type instanceof OnOffType) {

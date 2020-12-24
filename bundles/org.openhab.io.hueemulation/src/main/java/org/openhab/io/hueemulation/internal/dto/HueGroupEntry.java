@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.GroupItem;
+import org.openhab.core.items.GroupItem;
 import org.openhab.io.hueemulation.internal.ConfigStore;
 import org.openhab.io.hueemulation.internal.DeviceType;
 
@@ -96,7 +96,6 @@ public class HueGroupEntry {
 
         @Override
         public JsonElement serialize(HueGroupEntry product, Type type, JsonSerializationContext context) {
-
             GroupItem item = product.groupItem;
             if (item != null) {
                 product.lights = item.getMembers().stream().map(gitem -> cs.mapItemUIDtoHueID(gitem))

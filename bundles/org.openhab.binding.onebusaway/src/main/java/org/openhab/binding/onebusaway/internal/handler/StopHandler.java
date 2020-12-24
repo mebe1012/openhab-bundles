@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,15 +32,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.onebusaway.internal.config.StopConfiguration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseBridgeHandler;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,17 +119,16 @@ public class StopHandler extends BaseBridgeHandler {
         if (listener == null) {
             throw new IllegalArgumentException("It makes no sense to register a null listener!");
         }
-        boolean added = routeDataListeners.add(listener);
-        if (added) {
-            String routeId = listener.getRouteId();
-            List<ObaStopArrivalResponse.ArrivalAndDeparture> copiedRouteData;
-            synchronized (routeData) {
-                copiedRouteData = new ArrayList<>(routeData.get(routeId));
-            }
-            Collections.sort(copiedRouteData);
-            listener.onNewRouteData(routeDataLastUpdateMs, copiedRouteData);
+        routeDataListeners.add(listener);
+        String routeId = listener.getRouteId();
+        List<ObaStopArrivalResponse.ArrivalAndDeparture> copiedRouteData;
+        synchronized (routeData) {
+            copiedRouteData = new ArrayList<>(routeData.getOrDefault(routeId, List.of()));
         }
-        return added;
+        Collections.sort(copiedRouteData);
+        listener.onNewRouteData(routeDataLastUpdateMs, copiedRouteData);
+
+        return true;
     }
 
     /**
@@ -212,7 +211,8 @@ public class StopHandler extends BaseBridgeHandler {
                     routeData.put(d.routeId, Arrays.asList(d));
                 }
                 for (String key : routeData.keySet()) {
-                    List<ObaStopArrivalResponse.ArrivalAndDeparture> copy = new ArrayList<>(routeData.get(key));
+                    List<ObaStopArrivalResponse.ArrivalAndDeparture> copy = new ArrayList<>(
+                            routeData.getOrDefault(key, List.of()));
                     Collections.sort(copy);
                     copiedRouteData.put(key, copy);
                 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,11 +16,11 @@ import java.util.EventListener;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.RawType;
 import org.openhab.binding.kodi.internal.model.KodiAudioStream;
 import org.openhab.binding.kodi.internal.model.KodiSubtitle;
 import org.openhab.binding.kodi.internal.model.KodiSystemProperties;
 import org.openhab.binding.kodi.internal.protocol.KodiConnection;
+import org.openhab.core.library.types.RawType;
 
 /**
  * Interface which has to be implemented by a class in order to get status

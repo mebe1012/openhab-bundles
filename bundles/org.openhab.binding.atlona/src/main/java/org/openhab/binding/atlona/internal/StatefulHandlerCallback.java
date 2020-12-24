@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,9 +18,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.types.State;
 
 /**
  * Defines an implementation of {@link AtlonaHandlerCallback} that will remember the last state
@@ -77,7 +77,6 @@ public class StatefulHandlerCallback implements AtlonaHandlerCallback {
         }
         // If we got this far - call the underlying one
         wrappedCallback.statusChanged(status, detail, msg);
-
     }
 
     /**
@@ -108,7 +107,6 @@ public class StatefulHandlerCallback implements AtlonaHandlerCallback {
         // Something changed - save the new state and call the underlying wrapped
         this.state.put(channelId, state);
         wrappedCallback.stateChanged(channelId, state);
-
     }
 
     /**
@@ -133,7 +131,6 @@ public class StatefulHandlerCallback implements AtlonaHandlerCallback {
     @Override
     public void setProperty(String propertyName, String propertyValue) {
         wrappedCallback.setProperty(propertyName, propertyValue);
-
     }
 
     /**
