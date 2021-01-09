@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * The {@link KeyCode} presents all available key codes of Philips TV.

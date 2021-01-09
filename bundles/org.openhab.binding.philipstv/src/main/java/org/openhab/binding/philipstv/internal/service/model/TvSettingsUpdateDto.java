@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.philipstv.internal.service.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The {@link TvSettingsUpdateDto} class defines the Data Transfer Object

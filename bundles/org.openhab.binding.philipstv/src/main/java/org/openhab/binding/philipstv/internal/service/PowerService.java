@@ -12,6 +12,17 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_POWERSTATE_PATH;
+
+import java.io.IOException;
+import java.util.function.Predicate;
+
 import org.apache.http.ParseException;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.WakeOnLanUtil;
@@ -26,17 +37,6 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.function.Predicate;
-
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_POWERSTATE_PATH;
 
 /**
  * The {@link PowerService} is responsible for handling power states commands, which are sent to the

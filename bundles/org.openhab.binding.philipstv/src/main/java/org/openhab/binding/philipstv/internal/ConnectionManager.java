@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.philipstv.internal;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -27,8 +27,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The {@link ConnectionManager} is responsible for handling https GETs and POSTs to the Philips
@@ -105,8 +106,8 @@ public class ConnectionManager {
         String uri = httpHost.toURI() + path;
         logger.debug(TARGET_URI_MSG, uri);
         HttpGet httpGet = new HttpGet(uri);
-        try (CloseableHttpClient client = httpClient; CloseableHttpResponse response = client.execute(httpHost,
-                httpGet)) {
+        try (CloseableHttpClient client = httpClient;
+                CloseableHttpResponse response = client.execute(httpHost, httpGet)) {
             if ((response != null) && (response.getStatusLine().getStatusCode() == 401)) {
                 throw new HttpResponseException(401, "The given username/password combination is invalid.");
             }

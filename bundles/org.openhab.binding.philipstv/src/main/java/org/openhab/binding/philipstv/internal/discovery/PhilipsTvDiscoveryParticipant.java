@@ -12,6 +12,16 @@
  */
 package org.openhab.binding.philipstv.internal.discovery;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.DEFAULT_PORT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PORT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.model.meta.DeviceDetails;
@@ -25,16 +35,6 @@ import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.DEFAULT_PORT;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PORT;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
 
 /**
  * The {@link PhilipsTvDiscoveryParticipant} is responsible for discovering Philips TV devices through UPnP.

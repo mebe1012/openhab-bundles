@@ -12,8 +12,9 @@
  */
 package org.openhab.binding.philipstv.internal.service.model.keycode;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.openhab.binding.philipstv.internal.service.KeyCode;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The {@link KeyCodeDto} class defines the Data Transfer Object

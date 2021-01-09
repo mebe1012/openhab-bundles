@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.philipstv.internal.service.model.ambilight;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 
 /**
  * The {@link AmbilightPowerDto} class defines the Data Transfer Object

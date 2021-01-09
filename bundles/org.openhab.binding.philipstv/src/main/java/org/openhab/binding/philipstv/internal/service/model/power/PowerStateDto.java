@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.philipstv.internal.service.model.power;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The {@link PowerStateDto} class defines the Data Transfer Object

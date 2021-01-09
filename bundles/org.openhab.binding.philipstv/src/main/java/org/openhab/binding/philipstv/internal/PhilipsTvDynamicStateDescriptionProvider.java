@@ -12,6 +12,11 @@
  */
 package org.openhab.binding.philipstv.internal;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -24,18 +29,13 @@ import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * Dynamic provider of state options while leaving other state description fields as original.
  *
  * @author Benjamin Meyer - Initial contribution
  */
-@Component(service = { DynamicStateDescriptionProvider.class, PhilipsTvDynamicStateDescriptionProvider.class },
-           immediate = true)
+@Component(service = { DynamicStateDescriptionProvider.class,
+        PhilipsTvDynamicStateDescriptionProvider.class }, immediate = true)
 @NonNullByDefault
 public class PhilipsTvDynamicStateDescriptionProvider implements DynamicStateDescriptionProvider {
     private final Map<ChannelUID, List<@NonNull StateOption>> channelOptionsMap = new ConcurrentHashMap<>();

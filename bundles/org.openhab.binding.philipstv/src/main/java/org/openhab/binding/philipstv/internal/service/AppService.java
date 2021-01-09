@@ -12,6 +12,24 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_APP_LIST_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_CURRENT_APP_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.LAUNCH_APP_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.http.ParseException;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
@@ -31,24 +49,6 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_APP_LIST_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_CURRENT_APP_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.LAUNCH_APP_PATH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 /**
  * The {@link AppService} is responsible for handling key code commands, which emulate a button

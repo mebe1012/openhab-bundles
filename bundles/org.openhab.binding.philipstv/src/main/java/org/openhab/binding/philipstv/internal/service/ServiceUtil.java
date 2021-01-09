@@ -12,7 +12,10 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+
+import java.util.Collections;
+
 import org.openhab.binding.philipstv.internal.service.model.DataDto;
 import org.openhab.binding.philipstv.internal.service.model.NodesDto;
 import org.openhab.binding.philipstv.internal.service.model.TvSettingsCurrentDto;
@@ -20,9 +23,7 @@ import org.openhab.binding.philipstv.internal.service.model.TvSettingsUpdateDto;
 import org.openhab.binding.philipstv.internal.service.model.ValueDto;
 import org.openhab.binding.philipstv.internal.service.model.ValuesDto;
 
-import java.util.Collections;
-
-import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Util class for common used methods from philips tv services

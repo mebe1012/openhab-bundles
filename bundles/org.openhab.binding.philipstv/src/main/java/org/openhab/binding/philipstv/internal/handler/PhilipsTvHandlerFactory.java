@@ -12,6 +12,11 @@
  */
 package org.openhab.binding.philipstv.internal.handler;
 
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
+
+import java.util.Collections;
+import java.util.Set;
+
 import org.openhab.binding.philipstv.internal.PhilipsTvDynamicStateDescriptionProvider;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.thing.Thing;
@@ -21,11 +26,6 @@ import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.Collections;
-import java.util.Set;
-
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
 
 /**
  * The {@link PhilipsTvHandlerFactory} is responsible for creating things and thing

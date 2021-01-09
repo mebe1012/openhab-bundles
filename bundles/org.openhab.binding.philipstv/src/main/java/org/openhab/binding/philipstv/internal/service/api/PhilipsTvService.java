@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.philipstv.internal.service.api;
 
+import java.net.NoRouteToHostException;
+
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.openhab.core.types.Command;
-
-import java.net.NoRouteToHostException;
 
 /**
  * Interface for Philips TV services.
