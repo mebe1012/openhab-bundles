@@ -105,8 +105,8 @@ public class ConnectionManager {
         String uri = httpHost.toURI() + path;
         logger.debug(TARGET_URI_MSG, uri);
         HttpGet httpGet = new HttpGet(uri);
-        try (CloseableHttpClient client = httpClient;
-             CloseableHttpResponse response = client.execute(httpHost, httpGet)) {
+        try (CloseableHttpClient client = httpClient; CloseableHttpResponse response = client.execute(httpHost,
+                httpGet)) {
             if ((response != null) && (response.getStatusLine().getStatusCode() == 401)) {
                 throw new HttpResponseException(401, "The given username/password combination is invalid.");
             }

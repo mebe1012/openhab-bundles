@@ -25,24 +25,37 @@ import org.apache.http.util.EntityUtils;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.ConnectionManagerUtil;
 import org.openhab.binding.philipstv.internal.config.PhilipsTvConfiguration;
-import org.openhab.binding.philipstv.internal.pairing.model.*;
+import org.openhab.binding.philipstv.internal.pairing.model.AuthDto;
+import org.openhab.binding.philipstv.internal.pairing.model.DeviceDto;
+import org.openhab.binding.philipstv.internal.pairing.model.FinishPairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.PairingDto;
+import org.openhab.binding.philipstv.internal.pairing.model.RequestCodeDto;
 import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Formatter;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.BASE_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PASSWORD;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.USERNAME;
 
 /**
  * The {@link PhilipsTvPairing} is responsible for the initial pairing process with the Philips TV.

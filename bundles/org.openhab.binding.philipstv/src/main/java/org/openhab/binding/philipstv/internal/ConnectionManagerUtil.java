@@ -31,12 +31,16 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
+
 import java.net.NoRouteToHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CONNECT_TIMEOUT_MILLISECONDS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAX_REQUEST_RETRIES;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SOCKET_TIMEOUT_MILLISECONDS;
 
 /**
  * The {@link ConnectionManagerUtil} is offering methods for connection specific processes.
@@ -64,13 +68,15 @@ public final class ConnectionManagerUtil {
                 .register(HTTPS, sslsf).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        connManager.setMaxTotal(1);
+        connManager.setDefaultMaxPerRoute(1);
 
         HttpRequestRetryHandler requestRetryHandler = (exception, executionCount, context) -> {
             if (exception instanceof NoRouteToHostException) {
                 return false;
             }
-            if ((exception instanceof HttpHostConnectException)
-                    && exception.getMessage().contains("Connection refused")) {
+            if ((exception instanceof HttpHostConnectException) && exception.getMessage().contains(
+                    "Connection refused")) {
                 return false;
             }
             return executionCount < MAX_REQUEST_RETRIES;

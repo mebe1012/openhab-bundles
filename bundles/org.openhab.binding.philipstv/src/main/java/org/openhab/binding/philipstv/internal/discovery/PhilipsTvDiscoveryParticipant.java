@@ -31,7 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.DEFAULT_PORT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.PORT;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.THING_TYPE_PHILIPS_TV;
 
 /**
  * The {@link PhilipsTvDiscoveryParticipant} is responsible for discovering Philips TV devices through UPnP.

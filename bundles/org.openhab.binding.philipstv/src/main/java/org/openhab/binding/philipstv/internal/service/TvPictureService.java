@@ -27,7 +27,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_BRIGHTNESS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_CONTRAST;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SHARPNESS;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CURRENT_SETTINGS_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.UPDATE_SETTINGS_PATH;
 
 /**
  * Service for handling commands regarding the TV picture settings

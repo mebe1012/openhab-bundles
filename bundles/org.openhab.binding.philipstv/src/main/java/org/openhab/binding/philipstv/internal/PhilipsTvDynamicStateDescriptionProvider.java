@@ -34,8 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Benjamin Meyer - Initial contribution
  */
-@Component(service = {DynamicStateDescriptionProvider.class,
-        PhilipsTvDynamicStateDescriptionProvider.class}, immediate = true)
+@Component(service = { DynamicStateDescriptionProvider.class, PhilipsTvDynamicStateDescriptionProvider.class },
+           immediate = true)
 @NonNullByDefault
 public class PhilipsTvDynamicStateDescriptionProvider implements DynamicStateDescriptionProvider {
     private final Map<ChannelUID, List<@NonNull StateOption>> channelOptionsMap = new ConcurrentHashMap<>();

@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.LAUNCH_APP_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 /**
  * Service for toggling the Google Assistant on the Philips TV

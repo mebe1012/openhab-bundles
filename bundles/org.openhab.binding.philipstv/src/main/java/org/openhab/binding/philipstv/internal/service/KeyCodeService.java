@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.KEY_CODE_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 /**
  * The {@link KeyCodeService} is responsible for handling key code commands, which emulate a button

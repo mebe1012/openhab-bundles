@@ -16,7 +16,12 @@ import org.apache.http.ParseException;
 import org.openhab.binding.philipstv.internal.ConnectionManager;
 import org.openhab.binding.philipstv.internal.handler.PhilipsTvHandler;
 import org.openhab.binding.philipstv.internal.service.api.PhilipsTvService;
-import org.openhab.binding.philipstv.internal.service.model.application.*;
+import org.openhab.binding.philipstv.internal.service.model.application.ApplicationsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.AvailableAppsDto;
+import org.openhab.binding.philipstv.internal.service.model.application.ComponentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.CurrentAppDto;
+import org.openhab.binding.philipstv.internal.service.model.application.IntentDto;
+import org.openhab.binding.philipstv.internal.service.model.application.LaunchAppDto;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.ThingStatus;
@@ -36,7 +41,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_ICON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_APP_NAME;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_APP_LIST_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_CURRENT_APP_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.LAUNCH_APP_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.SLASH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 /**
  * The {@link AppService} is responsible for handling key code commands, which emulate a button

@@ -35,7 +35,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.GET_AVAILABLE_TV_CHANNEL_LIST_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_CHANNEL_PATH;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
 
 /**
  * Service for handling commands regarding setting or retrieving the TV channel

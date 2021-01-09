@@ -13,7 +13,12 @@
 package org.openhab.binding.philipstv.internal.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.openhab.binding.philipstv.internal.service.model.*;
+import org.openhab.binding.philipstv.internal.service.model.DataDto;
+import org.openhab.binding.philipstv.internal.service.model.NodesDto;
+import org.openhab.binding.philipstv.internal.service.model.TvSettingsCurrentDto;
+import org.openhab.binding.philipstv.internal.service.model.TvSettingsUpdateDto;
+import org.openhab.binding.philipstv.internal.service.model.ValueDto;
+import org.openhab.binding.philipstv.internal.service.model.ValuesDto;
 
 import java.util.Collections;
 

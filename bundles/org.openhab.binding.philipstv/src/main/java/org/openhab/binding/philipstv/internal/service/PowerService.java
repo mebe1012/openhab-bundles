@@ -31,7 +31,12 @@ import java.io.IOException;
 import java.util.function.Predicate;
 
 import static org.openhab.binding.philipstv.internal.ConnectionManager.OBJECT_MAPPER;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.*;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.POWER_ON;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.STANDBY;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_NOT_LISTENING_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_OFFLINE_MSG;
+import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.TV_POWERSTATE_PATH;
 
 /**
  * The {@link PowerService} is responsible for handling power states commands, which are sent to the
