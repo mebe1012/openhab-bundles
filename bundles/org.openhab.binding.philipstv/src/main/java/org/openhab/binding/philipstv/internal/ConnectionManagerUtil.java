@@ -68,8 +68,6 @@ public final class ConnectionManagerUtil {
                 .register(HTTPS, sslsf).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        connManager.setMaxTotal(1);
-        connManager.setDefaultMaxPerRoute(1);
 
         HttpRequestRetryHandler requestRetryHandler = (exception, executionCount, context) -> {
             if (exception instanceof NoRouteToHostException) {
