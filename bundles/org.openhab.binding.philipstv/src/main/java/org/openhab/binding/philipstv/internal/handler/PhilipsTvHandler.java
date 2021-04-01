@@ -33,7 +33,6 @@ import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.C
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_SHARPNESS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_TV_CHANNEL;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.CHANNEL_VOLUME;
-import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.EMPTY;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HOST;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.HTTPS;
 import static org.openhab.binding.philipstv.internal.PhilipsTvBindingConstants.MAC_ADDRESS;
