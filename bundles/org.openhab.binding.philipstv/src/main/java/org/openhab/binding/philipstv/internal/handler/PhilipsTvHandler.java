@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 import org.apache.http.HttpHost;
@@ -112,6 +113,8 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     private ScheduledFuture<?> refreshScheduler;
 
     private final Predicate<ScheduledFuture<?>> isRefreshSchedulerRunning = r -> (r != null) && !r.isCancelled();
+
+    private final ReentrantLock lock = new ReentrantLock();
 
     /* Philips TV services */
     private Map<String, PhilipsTvService> channelServices;
@@ -363,23 +366,34 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
     }
 
     private void refreshTvProperties() {
-        if (getThing().getStatus() == ThingStatus.OFFLINE || !config.useUpnpDiscovery) {
-            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
-            if (getThing().getStatus() == ThingStatus.OFFLINE) {
-                return;
+        try {
+            boolean isLockAcquired = lock.tryLock(1, TimeUnit.SECONDS);
+            if (isLockAcquired) {
+                try {
+                    if (getThing().getStatus() == ThingStatus.OFFLINE || !config.useUpnpDiscovery) {
+                        channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
+                        if (getThing().getStatus() == ThingStatus.OFFLINE) {
+                            return;
+                        }
+                    }
+
+                    if (isLinked(CHANNEL_VOLUME) || isLinked(CHANNEL_MUTE)) {
+                        channelServices.get(CHANNEL_VOLUME).handleCommand(CHANNEL_VOLUME, RefreshType.REFRESH);
+                    }
+
+                    if (isLinked(CHANNEL_APP_NAME)) {
+                        channelServices.get(CHANNEL_APP_NAME).handleCommand(CHANNEL_APP_NAME, RefreshType.REFRESH);
+                    }
+
+                    if (isLinked(CHANNEL_TV_CHANNEL)) {
+                        channelServices.get(CHANNEL_TV_CHANNEL).handleCommand(CHANNEL_TV_CHANNEL, RefreshType.REFRESH);
+                    }
+                } finally {
+                    lock.unlock();
+                }
             }
-        }
-
-        if (isLinked(CHANNEL_VOLUME) || isLinked(CHANNEL_MUTE)) {
-            channelServices.get(CHANNEL_VOLUME).handleCommand(CHANNEL_VOLUME, RefreshType.REFRESH);
-        }
-
-        if (isLinked(CHANNEL_APP_NAME)) {
-            channelServices.get(CHANNEL_APP_NAME).handleCommand(CHANNEL_APP_NAME, RefreshType.REFRESH);
-        }
-
-        if (isLinked(CHANNEL_TV_CHANNEL)) {
-            channelServices.get(CHANNEL_TV_CHANNEL).handleCommand(CHANNEL_TV_CHANNEL, RefreshType.REFRESH);
+        } catch (InterruptedException e) {
+            logger.warn("Exception occurred during refreshing the tv properties: {}", e.getMessage());
         }
     }
 
@@ -403,7 +417,7 @@ public class PhilipsTvHandler extends BaseThingHandler implements DiscoveryListe
              */
             upnpThingUID = result.getThingUID();
             logger.debug("thingDiscovered, thingUID={}, discoveredUID={}", getThing().getUID(), upnpThingUID);
-            postUpdateThing(ThingStatus.ONLINE, ThingStatusDetail.NONE, EMPTY);
+            channelServices.get(CHANNEL_POWER).handleCommand(CHANNEL_POWER, RefreshType.REFRESH);
         }
     }
 
