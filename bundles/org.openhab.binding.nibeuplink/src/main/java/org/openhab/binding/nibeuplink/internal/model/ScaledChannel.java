@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,11 +44,11 @@ public class ScaledChannel extends Channel {
     /**
      * constructor for channels with write access enabled + unit
      *
-     * @param id                   identifier of the channel
-     * @param name                 human readable name
-     * @param channelGroup         group of the channel
-     * @param factor               scaling factor
-     * @param writeApiUrl          API URL for channel updates
+     * @param id identifier of the channel
+     * @param name human readable name
+     * @param channelGroup group of the channel
+     * @param factor scaling factor
+     * @param writeApiUrl API URL for channel updates
      * @param validationExpression expression to validate values before sent to the API
      */
     ScaledChannel(String id, String name, ChannelGroup channelGroup, ScaleFactor factor, @Nullable String writeApiUrl,
@@ -60,10 +60,10 @@ public class ScaledChannel extends Channel {
     /**
      * constructor for channels without write access
      *
-     * @param id           identifier of the channel
-     * @param name         human readable name
+     * @param id identifier of the channel
+     * @param name human readable name
      * @param channelGroup group of the channel
-     * @param factor       scaling factor
+     * @param factor scaling factor
      */
     ScaledChannel(String id, String name, ChannelGroup channelGroup, ScaleFactor factor) {
         this(id, name, channelGroup, factor, null, null);

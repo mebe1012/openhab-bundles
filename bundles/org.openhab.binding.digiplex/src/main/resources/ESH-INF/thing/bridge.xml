@@ -8,9 +8,9 @@
 		<label>Digiplex PRT3 module</label>
 		<description>Digiplex PRT3 module with Serial Interface</description>
 		<channels>
-			<channel typeId="messages_sent" id="messages_sent" />
-			<channel typeId="responses_received" id="responses_received" />
-			<channel typeId="events_received" id="events_received" />
+			<channel typeId="messages_sent" id="messages_sent"/>
+			<channel typeId="responses_received" id="responses_received"/>
+			<channel typeId="events_received" id="events_received"/>
 		</channels>
 
 		<config-description>

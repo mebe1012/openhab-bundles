@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -222,7 +222,6 @@ public class ModbusDataHandlerTest extends JavaTest {
         public ItemBuilder newItemBuilder(String itemType, String itemName) {
             throw new IllegalStateException();
         }
-
     }
 
     private static final Map<String, Class<? extends Item>> CHANNEL_TO_ITEM_CLASS = new HashMap<>();
@@ -318,7 +317,6 @@ public class ModbusDataHandlerTest extends JavaTest {
             thing.setStatusInfo((ThingStatusInfo) invocation.getArgument(1));
             return null;
         }).when(thingCallback).statusUpdated(ArgumentMatchers.same(thing), ArgumentMatchers.any());
-
     }
 
     @SuppressWarnings("null")
@@ -493,7 +491,6 @@ public class ModbusDataHandlerTest extends JavaTest {
         ModbusDataThingHandler dataHandler = createDataHandler("data1", pollerThing,
                 builder -> builder.withConfiguration(dataConfig), context);
         assertThat(dataHandler.getThing().getStatus(), is(equalTo(expectedStatus)));
-
     }
 
     @Test
@@ -1140,7 +1137,6 @@ public class ModbusDataHandlerTest extends JavaTest {
             assertThat(status.getStatus(), is(equalTo(ThingStatus.OFFLINE)));
             assertThat(status.getStatusDetail(), is(equalTo(ThingStatusDetail.CONFIGURATION_ERROR)));
         });
-
     }
 
     @Test
@@ -1348,6 +1344,5 @@ public class ModbusDataHandlerTest extends JavaTest {
         dataConfig.put("writeValueType", "int16");
         dataConfig.put("writeTransform", "JS(myJsonTransform.js)");
         testInitGeneric(null, dataConfig, status -> assertThat(status.getStatus(), is(equalTo(ThingStatus.ONLINE))));
-
     }
 }

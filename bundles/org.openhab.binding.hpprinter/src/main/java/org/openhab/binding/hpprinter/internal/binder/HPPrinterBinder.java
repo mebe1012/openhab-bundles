@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.hpprinter.internal.binder;
+
+import static org.openhab.binding.hpprinter.internal.HPPrinterBindingConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +36,13 @@ import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.openhab.binding.hpprinter.internal.HPPrinterConfiguration;
 import org.openhab.binding.hpprinter.internal.api.HPServerResult;
+import org.openhab.binding.hpprinter.internal.api.HPServerResult.RequestStatus;
 import org.openhab.binding.hpprinter.internal.api.HPStatus;
 import org.openhab.binding.hpprinter.internal.api.HPType;
 import org.openhab.binding.hpprinter.internal.api.HPUsage;
 import org.openhab.binding.hpprinter.internal.api.HPWebServerClient;
-import org.openhab.binding.hpprinter.internal.api.HPServerResult.RequestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.openhab.binding.hpprinter.internal.HPPrinterBindingConstants.*;
 
 /**
  * The {@link HPPrinterBinder} connects the binding to the Web Server Client
@@ -71,11 +71,11 @@ public class HPPrinterBinder {
     /**
      * Creates a new HP Printer Binder object
      * 
-     * @param handler    {HPPrinterBinderEvent} The Event handler for the binder.
+     * @param handler {HPPrinterBinderEvent} The Event handler for the binder.
      * @param httpClient {HttpClient} The HttpClient object to use to perform HTTP
-     *                   requests.
-     * @param scheduler  {ScheduledExecutorService} The scheduler service object.
-     * @param config     {HPPrinterConfiguration} The configuration object.
+     *            requests.
+     * @param scheduler {ScheduledExecutorService} The scheduler service object.
+     * @param config {HPPrinterConfiguration} The configuration object.
      */
     public HPPrinterBinder(HPPrinterBinderEvent handler, @Nullable HttpClient httpClient,
             ScheduledExecutorService scheduler, @Nullable HPPrinterConfiguration config) {
@@ -110,74 +110,80 @@ public class HPPrinterBinder {
             }
 
             switch (data.getType()) {
-            case SINGLECOLOR:
-                if (data.hasCumulativeMarking()) {
-                    channels.add(ChannelBuilder
-                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_COLOR_MARKING), "Number")
-                            .withLabel("Colour Marking Used").withDescription("The amount of Colour Marking used")
-                            .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
-                }
-
-                channels.add(ChannelBuilder.create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_COLOR_LEVEL), "Number")
-                        .withLabel("Color Level").withDescription("Shows the amount of Colour Ink/Toner remaining")
-                        .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
-
-                channels.add(ChannelBuilder
-                        .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_COLORPAGES), "Number")
-                        .withLabel("Total Colour Pages").withDescription("The amount of colour pages printed")
-                        .withType(new ChannelTypeUID("hpprinter:totals")).build());
-
-                channels.add(ChannelBuilder
-                        .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_MONOPAGES), "Number")
-                        .withLabel("Total Monochrome Pages").withDescription("The amount of monochrome pages printed")
-                        .withType(new ChannelTypeUID("hpprinter:totals")).build());
-
-                break;
-
-            case MULTICOLOR:
-                if (data.hasCumulativeMarking()) {
-                    channels.add(ChannelBuilder
-                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_CYAN_MARKING), "Number")
-                            .withLabel("Cyan Marking Used").withDescription("The amount of Cyan Marking used")
-                            .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
+                case SINGLECOLOR:
+                    if (data.hasCumulativeMarking()) {
+                        channels.add(ChannelBuilder
+                                .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_COLOR_MARKING), "Number")
+                                .withLabel("Colour Marking Used").withDescription("The amount of Colour Marking used")
+                                .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
+                    }
 
                     channels.add(ChannelBuilder
-                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_MAGENTA_MARKING), "Number")
-                            .withLabel("Magenta Marking Used").withDescription("The amount of Magenta Marking used")
-                            .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
+                            .create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_COLOR_LEVEL), "Number")
+                            .withLabel("Color Level").withDescription("Shows the amount of Colour Ink/Toner remaining")
+                            .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
 
                     channels.add(ChannelBuilder
-                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_YELLOW_MARKING), "Number")
-                            .withLabel("Yellow Marking Used").withDescription("The amount of Yellow Marking used")
-                            .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
-                }
+                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_COLORPAGES), "Number")
+                            .withLabel("Total Colour Pages").withDescription("The amount of colour pages printed")
+                            .withType(new ChannelTypeUID("hpprinter:totals")).build());
 
-                channels.add(ChannelBuilder.create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_CYAN_LEVEL), "Number")
-                        .withLabel("Cyan Level").withDescription("Shows the amount of Cyan Ink/Toner remaining")
-                        .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
+                    channels.add(ChannelBuilder
+                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_MONOPAGES), "Number")
+                            .withLabel("Total Monochrome Pages")
+                            .withDescription("The amount of monochrome pages printed")
+                            .withType(new ChannelTypeUID("hpprinter:totals")).build());
 
-                channels.add(ChannelBuilder
-                        .create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_MAGENTA_LEVEL), "Number")
-                        .withLabel("Magenta Level").withDescription("Shows the amount of Magenta Ink/Toner remaining")
-                        .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
+                    break;
 
-                channels.add(ChannelBuilder.create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_YELLOW_LEVEL), "Number")
-                        .withLabel("Yellow Level").withDescription("Shows the amount of Yellow Ink/Toner remaining")
-                        .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
+                case MULTICOLOR:
+                    if (data.hasCumulativeMarking()) {
+                        channels.add(ChannelBuilder
+                                .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_CYAN_MARKING), "Number")
+                                .withLabel("Cyan Marking Used").withDescription("The amount of Cyan Marking used")
+                                .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
 
-                channels.add(ChannelBuilder
-                        .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_COLORPAGES), "Number")
-                        .withLabel("Total Colour Pages").withDescription("The amount of colour pages printed")
-                        .withType(new ChannelTypeUID("hpprinter:totals")).build());
+                        channels.add(ChannelBuilder
+                                .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_MAGENTA_MARKING), "Number")
+                                .withLabel("Magenta Marking Used").withDescription("The amount of Magenta Marking used")
+                                .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
 
-                channels.add(ChannelBuilder
-                        .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_MONOPAGES), "Number")
-                        .withLabel("Total Monochrome Pages").withDescription("The amount of monochrome pages printed")
-                        .withType(new ChannelTypeUID("hpprinter:totals")).build());
+                        channels.add(ChannelBuilder
+                                .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_YELLOW_MARKING), "Number")
+                                .withLabel("Yellow Marking Used").withDescription("The amount of Yellow Marking used")
+                                .withType(new ChannelTypeUID("hpprinter:cumlMarkingUsed")).build());
+                    }
 
-                break;
+                    channels.add(ChannelBuilder
+                            .create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_CYAN_LEVEL), "Number")
+                            .withLabel("Cyan Level").withDescription("Shows the amount of Cyan Ink/Toner remaining")
+                            .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
 
-            default:
+                    channels.add(
+                            ChannelBuilder.create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_MAGENTA_LEVEL), "Number")
+                                    .withLabel("Magenta Level")
+                                    .withDescription("Shows the amount of Magenta Ink/Toner remaining")
+                                    .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
+
+                    channels.add(ChannelBuilder
+                            .create(new ChannelUID(thingUid, CGROUP_INK, CHANNEL_YELLOW_LEVEL), "Number")
+                            .withLabel("Yellow Level").withDescription("Shows the amount of Yellow Ink/Toner remaining")
+                            .withType(new ChannelTypeUID("hpprinter:inkLevel")).build());
+
+                    channels.add(ChannelBuilder
+                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_COLORPAGES), "Number")
+                            .withLabel("Total Colour Pages").withDescription("The amount of colour pages printed")
+                            .withType(new ChannelTypeUID("hpprinter:totals")).build());
+
+                    channels.add(ChannelBuilder
+                            .create(new ChannelUID(thingUid, CGROUP_USAGE, CHANNEL_TOTAL_MONOPAGES), "Number")
+                            .withLabel("Total Monochrome Pages")
+                            .withDescription("The amount of monochrome pages printed")
+                            .withType(new ChannelTypeUID("hpprinter:totals")).build());
+
+                    break;
+
+                default:
             }
 
             if (data.hasJamEvents()) {
@@ -248,7 +254,6 @@ public class HPPrinterBinder {
         offlineScheduler = scheduler.scheduleWithFixedDelay(() -> {
             checkOnline();
         }, 0, offlineCheckInterval, TimeUnit.SECONDS);
-
     }
 
     private void stopBackgroundSchedules() {
@@ -360,5 +365,4 @@ public class HPPrinterBinder {
             goneOnline();
         }
     }
-
 }

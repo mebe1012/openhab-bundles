@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,8 +25,8 @@ import java.util.Map;
  */
 public class HeosMediaObject {
 
-    private static final String[] SUPPORTED_MEDIA_ITEM_STRINGS = { TYPE, STATION, SONG, ALBUM, ARTIST, IMAGE_URL, QID, MID,
-            ALBUM_ID };
+    private static final String[] SUPPORTED_MEDIA_ITEM_STRINGS = { TYPE, STATION, SONG, ALBUM, ARTIST, IMAGE_URL, QID,
+            MID, ALBUM_ID };
 
     private Map<String, String> mediaInfo;
 

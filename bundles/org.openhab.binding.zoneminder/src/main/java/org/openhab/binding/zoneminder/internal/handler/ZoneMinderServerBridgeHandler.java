@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -879,7 +879,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             logger.error("{}: closeConnection(): Error closing connection - {}", getLogIdentifier(),
                     exception.getMessage());
         }
-
     }
 
     protected State getServerCpuLoadState() {
@@ -1005,7 +1004,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         thing.getBridgeUID(), thing.getUID(), thingHandler);
             }
         }
-
     }
 
     /**
@@ -1033,7 +1031,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             }
         } catch (Exception ex) {
         }
-
     }
 
     public ArrayList<IZoneMinderMonitorData> getMonitors() {

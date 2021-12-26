@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="netatmo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<thing:thing-descriptions bindingId="netatmo"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
@@ -7,14 +8,14 @@
 		<item-type>DateTime</item-type>
 		<label>Last Status Store</label>
 		<description>Last Status Store</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="location">
 		<item-type>Location</item-type>
 		<label>Location</label>
 		<description>Location of the device</description>
-		<state readOnly="true" pattern="%2$s°N,%3$s°W, %1$s m" />
+		<state readOnly="true" pattern="%2$s°N,%3$s°W, %1$s m"/>
 	</channel-type>
 
 	<channel-type id="temperature">
@@ -22,7 +23,7 @@
 		<label>Temperature</label>
 		<description>Current temperature</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="minTemp" advanced="true">
@@ -30,7 +31,7 @@
 		<label>Min Temp</label>
 		<description>Minimum Temperature on current day</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="maxTemp" advanced="true">
@@ -38,7 +39,7 @@
 		<label>Max Temp</label>
 		<description>Maximum Temperature on current day</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="temperatureTrend" advanced="true">
@@ -60,7 +61,7 @@
 		<label>Setpoint</label>
 		<description>Thermostat temperature setpoint</description>
 		<category>Temperature</category>
-		<state pattern="%.1f %unit%" readOnly="false" />
+		<state pattern="%.1f %unit%" readOnly="false"/>
 	</channel-type>
 
 	<channel-type id="setpointMode">
@@ -83,83 +84,83 @@
 		<item-type>Switch</item-type>
 		<label>Heating status</label>
 		<description>Indicates whether the furnace is heating or not</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="ThermOrientation" advanced="true">
 		<item-type>Number</item-type>
 		<label>Orientation</label>
 		<description>Physical orientation of the thermostat module</description>
-		<state readOnly="true" pattern="%d" />
+		<state readOnly="true" pattern="%d"/>
 	</channel-type>
 
 	<channel-type id="timeUtc" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Measurement Time</label>
 		<description>Timestamp when data was measured</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="lastPlugSeen" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Last Plug Seen</label>
 		<description>Last Plug Seen</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="dateMinTemp" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Date Min Temp</label>
 		<description>Date when minimum temperature was reached on current day</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="dateMaxTemp" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Date Max Temp</label>
 		<description>Date when maximum temperature was reached on current day</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="lastBilan" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Available Bilan</label>
 		<description>Month of the last available thermostat bilan</description>
-		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY" />
+		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY"/>
 	</channel-type>
 
 	<channel-type id="connectedBoiler" advanced="true">
 		<item-type>Switch</item-type>
 		<label>Plug Connected Boiler</label>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="lastMessage" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Last Message</label>
 		<description>Last Message emitted by the module</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="setpointEndTime" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Setpoint end</label>
 		<description>Thermostat goes back to schedule after that timestamp.</description>
-		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY %1$tH:%1$tM" />
+		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY %1$tH:%1$tM"/>
 	</channel-type>
 
 	<channel-type id="lastThermSeen" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Last Therm Seen</label>
 		<description>Last Them Seen</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="co2">
 		<item-type>Number:Dimensionless</item-type>
 		<label>CO2</label>
 		<description>Air Quality</description>
-		<state readOnly="true" pattern="%d %unit%" />
+		<state readOnly="true" pattern="%d %unit%"/>
 	</channel-type>
 
 	<channel-type id="noise">
@@ -167,7 +168,7 @@
 		<label>Noise</label>
 		<description>Current Noise Level</description>
 		<category>Noise</category>
-		<state readOnly="true" pattern="%d %unit%" />
+		<state readOnly="true" pattern="%d %unit%"/>
 	</channel-type>
 
 	<channel-type id="healthindex">
@@ -190,7 +191,7 @@
 		<label>Pressure</label>
 		<description>Current pressure</description>
 		<category>Pressure</category>
-		<state readOnly="true" pattern="%.3f %unit%" />
+		<state readOnly="true" pattern="%.3f %unit%"/>
 	</channel-type>
 
 	<channel-type id="pressureTrend" advanced="true">
@@ -211,15 +212,15 @@
 		<item-type>String</item-type>
 		<label>Planning</label>
 		<description>Heat planning currently used</description>
-		<state pattern="%s" />
-	</channel-type>	
+		<state pattern="%s"/>
+	</channel-type>
 
 	<channel-type id="absolutePressure" advanced="true">
 		<item-type>Number:Pressure</item-type>
 		<label>Abs Pressure</label>
 		<description>Absolute pressure</description>
 		<category>Pressure</category>
-		<state readOnly="true" pattern="%.3f %unit%" />
+		<state readOnly="true" pattern="%.3f %unit%"/>
 	</channel-type>
 
 	<channel-type id="humidity">
@@ -227,7 +228,7 @@
 		<label>Humidity</label>
 		<description>Current humidity</description>
 		<category>Humidity</category>
-		<state readOnly="true" min="0" max="100" pattern="%d %unit%" />
+		<state readOnly="true" min="0" max="100" pattern="%d %unit%"/>
 	</channel-type>
 
 	<channel-type id="humidex">
@@ -235,7 +236,7 @@
 		<label>Humidex</label>
 		<description>Computed Humidex index</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.0f" />
+		<state readOnly="true" pattern="%.0f"/>
 	</channel-type>
 
 	<channel-type id="heatIndex">
@@ -243,7 +244,7 @@
 		<label>Heat Index</label>
 		<description>Computed Heat Index</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.0f %unit%" />
+		<state readOnly="true" pattern="%.0f %unit%"/>
 	</channel-type>
 
 	<channel-type id="dewPoint" advanced="true">
@@ -251,14 +252,14 @@
 		<label>Dewpoint</label>
 		<description>Computed Dewpoint Temperature</description>
 		<category>Temperature</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="dewPointDepression" advanced="true">
 		<item-type>Number:Temperature</item-type>
 		<label>Dewpoint Depression</label>
 		<description>Computed Dewpoint Depression</description>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="rain">
@@ -266,7 +267,7 @@
 		<label>Rain</label>
 		<description>Quantity of water</description>
 		<category>Rain</category>
-		<state readOnly="true" pattern="%.2f %unit%" />
+		<state readOnly="true" pattern="%.2f %unit%"/>
 	</channel-type>
 
 	<channel-type id="rain1" advanced="true">
@@ -274,7 +275,7 @@
 		<label>Rain 1h</label>
 		<description>Quantity of water on last hour</description>
 		<category>Rain</category>
-		<state readOnly="true" pattern="%.2f %unit%" />
+		<state readOnly="true" pattern="%.2f %unit%"/>
 	</channel-type>
 
 	<channel-type id="rain24" advanced="true">
@@ -282,7 +283,7 @@
 		<label>Rain 24h</label>
 		<description>Quantity of water on last day</description>
 		<category>Rain</category>
-		<state readOnly="true" pattern="%.2f %unit%" />
+		<state readOnly="true" pattern="%.2f %unit%"/>
 	</channel-type>
 
 	<channel-type id="WindAngle">
@@ -290,7 +291,7 @@
 		<label>Wind Angle</label>
 		<description>Current 5 minutes average wind direction</description>
 		<category>Wind</category>
-		<state min="0" max="360" step="1" readOnly="true" pattern="%d %unit%" />
+		<state min="0" max="360" step="1" readOnly="true" pattern="%d %unit%"/>
 	</channel-type>
 
 	<channel-type id="WindStrength">
@@ -298,7 +299,7 @@
 		<label>Wind Strength</label>
 		<description>Current 5 minutes average wind speed</description>
 		<category>Wind</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="MaxWindStrength" advanced="true">
@@ -306,14 +307,14 @@
 		<label>Max Wind Strength</label>
 		<description>Maximum wind strength recorded</description>
 		<category>Wind</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="DateMaxWindStrength" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Date Max Wind Strength</label>
 		<description>Timestamp when MaxWindStrength was recorded.</description>
-		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY %1$tH:%1$tM" />
+		<state readOnly="true" pattern="%1$td.%1$tm.%1$tY %1$tH:%1$tM"/>
 	</channel-type>
 
 	<channel-type id="GustAngle">
@@ -321,7 +322,7 @@
 		<label>Gust Angle</label>
 		<description>Direction of the last 5 minutes highest gust wind</description>
 		<category>Wind</category>
-		<state min="0" max="360" step="1" readOnly="true" pattern="%d %unit%" />
+		<state min="0" max="360" step="1" readOnly="true" pattern="%d %unit%"/>
 	</channel-type>
 
 	<channel-type id="GustStrength">
@@ -329,7 +330,7 @@
 		<label>Gust Strength</label>
 		<description>Speed of the last 5 minutes highest gust wind</description>
 		<category>Wind</category>
-		<state readOnly="true" pattern="%.1f %unit%" />
+		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="homeEvent">

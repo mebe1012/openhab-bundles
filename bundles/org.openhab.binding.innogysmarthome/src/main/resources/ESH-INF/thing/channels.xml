@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="innogysmarthome" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<thing:thing-descriptions bindingId="innogysmarthome"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
@@ -61,7 +62,7 @@
 		<label>Window reduction active</label>
 		<description>Thermostat temperature reduced, if window is open.</description>
 		<category>Temperature</category>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<!-- TemperatureSensor -->
@@ -78,7 +79,7 @@
 		<label>Frost Warning</label>
 		<description>Warns, if temperature drop below a threshold (configured in innogy app)</description>
 		<category>Temperature</category>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<!-- HumiditySensor -->
@@ -95,7 +96,7 @@
 		<label>Mold Warning</label>
 		<description>Active, if humidity is over a threshold (configured in innogy app)</description>
 		<category>Humidity</category>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<!-- WindowDoorSensor Channel -->

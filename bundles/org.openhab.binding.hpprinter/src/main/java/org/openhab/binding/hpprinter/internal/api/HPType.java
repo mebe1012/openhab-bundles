@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,10 +43,13 @@ public class HPType {
     private boolean cumuMarking = false;
 
     public enum PrinterType {
-        UNKNOWN, MONOCHROME, SINGLECOLOR, MULTICOLOR
+        UNKNOWN,
+        MONOCHROME,
+        SINGLECOLOR,
+        MULTICOLOR
     }
 
-    public HPType() { 
+    public HPType() {
     }
 
     public HPType(InputSource source) throws ParserConfigurationException, SAXException, IOException {
@@ -68,24 +71,24 @@ public class HPType {
                 continue;
             }
 
-            if (currInk.getElementsByTagName("dd2:CumulativeMarkingAgentUsed").getLength() > 0) 
-            cumuMarking = true;
+            if (currInk.getElementsByTagName("dd2:CumulativeMarkingAgentUsed").getLength() > 0)
+                cumuMarking = true;
 
             switch (inkName.toLowerCase()) {
-            case "cyan":
-            case "magenta":
-            case "yellow":
-                printerType = PrinterType.MULTICOLOR; // Is multicolor if it has this ink
-                break;
+                case "cyan":
+                case "magenta":
+                case "yellow":
+                    printerType = PrinterType.MULTICOLOR; // Is multicolor if it has this ink
+                    break;
 
-            case "cyanmagentayellow":
-                printerType = PrinterType.SINGLECOLOR; // Is singlecolor if it has this ink
-                break;
+                case "cyanmagentayellow":
+                    printerType = PrinterType.SINGLECOLOR; // Is singlecolor if it has this ink
+                    break;
 
-            case "black":
-                if (printerType == PrinterType.UNKNOWN)
-                    printerType = PrinterType.MONOCHROME; // Is Monochrome
-                break;
+                case "black":
+                    if (printerType == PrinterType.UNKNOWN)
+                        printerType = PrinterType.MONOCHROME; // Is Monochrome
+                    break;
             }
         }
 

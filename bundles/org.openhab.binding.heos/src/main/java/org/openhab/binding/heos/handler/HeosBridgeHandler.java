@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.binding.heos.handler;
 
 import static org.openhab.binding.heos.HeosBindingConstants.*;
-//import static org.openhab.binding.heos.internal.resources.HeosConstants.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +123,8 @@ public class HeosBridgeHandler extends BaseBridgeHandler implements HeosEventLis
                 updateStatus(ThingStatus.ONLINE);
             } else {
                 logger.debug("Can't log in. Username or password not set.");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Can't log in. Username or password not set.");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                        "Can't log in. Username or password not set.");
             }
         }, 5, TimeUnit.SECONDS);
     }

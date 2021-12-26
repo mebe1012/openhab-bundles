@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,5 +83,4 @@ public final class F750Channels extends BaseChannels {
             .addChannel(new Channel("41026", "EB100-Adjusted BS1 Air flow", ChannelGroup.AIRSUPPLY));
     public static final Channel CH_47260 = INSTANCE
             .addChannel(new Channel("47260", "Current Fan speed", ChannelGroup.AIRSUPPLY, "/Manage/1.2", "[01234]"));
-
 }

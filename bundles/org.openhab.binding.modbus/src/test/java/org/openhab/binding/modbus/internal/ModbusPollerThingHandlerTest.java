@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -232,7 +232,6 @@ public class ModbusPollerThingHandlerTest {
 
             @Override
             public void describeTo(Description description) {
-
             }
         };
     }
@@ -294,7 +293,6 @@ public class ModbusPollerThingHandlerTest {
             protected boolean matchesSafely(PollTask item) {
                 callbackRef.set(item.getCallback());
                 return checkPollTask(item, ModbusReadFunctionCode.READ_COILS);
-
             }
         }), eq(150l), eq(0L));
         verifyNoMoreInteractions(modbusManager);
@@ -315,12 +313,10 @@ public class ModbusPollerThingHandlerTest {
             protected boolean matchesSafely(PollTask item) {
                 assertThat(item.getCallback(), is(sameInstance(callbackRef.get())));
                 return checkPollTask(item, ModbusReadFunctionCode.READ_COILS);
-
             }
         }));
 
         verifyNoMoreInteractions(modbusManager);
-
     }
 
     @SuppressWarnings("null")
@@ -346,7 +342,6 @@ public class ModbusPollerThingHandlerTest {
         assertThat(poller.getStatusInfo().getStatusDetail(), is(equalTo(ThingStatusDetail.BRIDGE_OFFLINE)));
 
         verifyNoMoreInteractions(modbusManager);
-
     }
 
     @SuppressWarnings("null")
@@ -827,6 +822,5 @@ public class ModbusPollerThingHandlerTest {
         verify(modbusManager, never()).submitOneTimePoll(any());
         thingHandler.refresh();
         verify(modbusManager).submitOneTimePoll(any());
-
     }
 }

@@ -15,7 +15,7 @@
 			<channel-group typeId="usageInfo" id="usage"></channel-group>
 		</channel-groups>
 
-		<config-description-ref uri="thing-type:hpprinter:config" />
+		<config-description-ref uri="thing-type:hpprinter:config"/>
 
 	</thing-type>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,6 +25,8 @@ import org.eclipse.smarthome.core.types.State;
 @NonNullByDefault
 public interface HPPrinterBinderEvent {
     void binderStatus(ThingStatus status);
+
     void binderChannel(String group, String channel, State state);
+
     void binderAddChannels(List<Channel> channels);
 }

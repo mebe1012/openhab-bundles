@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -411,5 +411,4 @@ public class CapabilityState extends EntityState {
     public void setTwoWayMeterPowerConsumptionSensorPowerInWattState(double state) {
         setPropertyValueAsDouble(STATE_NAME_TWO_WAY_METER_POWER_CONSUMPTION_SENSOR_POWER_IN_WATT, state);
     }
-
 }

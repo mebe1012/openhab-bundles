@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,11 +30,11 @@ public class QuantityChannel extends ScaledChannel {
     /**
      * constructor for channels with explicit scaling
      *
-     * @param id           identifier of the channel
-     * @param name         human readable name
+     * @param id identifier of the channel
+     * @param name human readable name
      * @param channelGroup group of the channel
-     * @param factor       scaling factor
-     * @param unit         UoM unit
+     * @param factor scaling factor
+     * @param unit UoM unit
      */
     QuantityChannel(String id, String name, ChannelGroup channelGroup, ScaleFactor factor, Unit<?> unit) {
         super(id, name, channelGroup, factor, null, null);
@@ -44,10 +44,10 @@ public class QuantityChannel extends ScaledChannel {
     /**
      * constructor for channels with defaulted scaling to 1
      *
-     * @param id           identifier of the channel
-     * @param name         human readable name
+     * @param id identifier of the channel
+     * @param name human readable name
      * @param channelGroup group of the channel
-     * @param unit         UoM unit
+     * @param unit UoM unit
      */
     QuantityChannel(String id, String name, ChannelGroup channelGroup, Unit<?> unit) {
         this(id, name, channelGroup, ScaleFactor.ONE, unit);
@@ -56,5 +56,4 @@ public class QuantityChannel extends ScaledChannel {
     public Unit<?> getUnit() {
         return unit;
     }
-
 }

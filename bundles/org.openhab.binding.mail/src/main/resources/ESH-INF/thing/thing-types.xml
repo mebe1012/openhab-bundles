@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing:thing-descriptions bindingId="mail"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:thing="http://openhab.org/schemas/thing-description/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:thing="http://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="http://openhab.org/schemas/thing-description/v1.0.0 http://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<thing-type id="smtp">
@@ -114,7 +113,7 @@
 		<item-type>Number</item-type>
 		<label>Mail count</label>
 		<description>Number of mails in folder</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 		<config-description>
 			<parameter name="folder" type="text" required="true">
 				<label>Folder name</label>

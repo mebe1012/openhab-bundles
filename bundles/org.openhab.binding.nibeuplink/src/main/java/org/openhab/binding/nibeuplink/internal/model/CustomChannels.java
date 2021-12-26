@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,5 +48,4 @@ public final class CustomChannels extends AbstractChannels {
     public static final CustomChannel CH_CH06 = INSTANCE.addChannel(new CustomChannel("CH06", "Custom Channel #06"));
     public static final CustomChannel CH_CH07 = INSTANCE.addChannel(new CustomChannel("CH07", "Custom Channel #07"));
     public static final CustomChannel CH_CH08 = INSTANCE.addChannel(new CustomChannel("CH08", "Custom Channel #08"));
-
 }

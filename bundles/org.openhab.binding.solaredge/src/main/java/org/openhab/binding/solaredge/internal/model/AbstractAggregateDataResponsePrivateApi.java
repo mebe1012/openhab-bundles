@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -69,8 +69,8 @@ public abstract class AbstractAggregateDataResponsePrivateApi implements DataRes
      * converts the value to QuantityType. If no unit can be determined UnDefType.UNDEF will be used
      *
      * @param targetMap result will be put into this map
-     * @param channel   channel to assign the value
-     * @param value     the value to convert
+     * @param channel channel to assign the value
+     * @param value the value to convert
      */
     protected final void assignValue(Map<Channel, State> targetMap, Channel channel, Value value) {
         State result = UnDefType.UNDEF;
@@ -92,8 +92,8 @@ public abstract class AbstractAggregateDataResponsePrivateApi implements DataRes
      * converts the value to QuantityType
      *
      * @param targetMap result will be put into this map
-     * @param channel   channel to assign the value
-     * @param value     the value to convert
+     * @param channel channel to assign the value
+     * @param value the value to convert
      */
     protected final void assignPercentage(Map<Channel, State> targetMap, Channel channel, ValueAndPercent value) {
         State result = UnDefType.UNDEF;
@@ -105,5 +105,4 @@ public abstract class AbstractAggregateDataResponsePrivateApi implements DataRes
         }
         targetMap.put(channel, result);
     }
-
 }

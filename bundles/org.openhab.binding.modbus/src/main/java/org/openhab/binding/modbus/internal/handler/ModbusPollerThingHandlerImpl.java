@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -448,5 +448,4 @@ public class ModbusPollerThingHandlerImpl extends BaseBridgeHandler implements M
             managerRef.get().submitOneTimePoll(pollTask);
         }
     }
-
 }
